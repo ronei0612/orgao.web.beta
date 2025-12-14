@@ -1,0 +1,467 @@
+﻿:root {
+	--brilho-amarelo: #ffeb3b;
+	--brilho-azul: #0d6efd;
+}
+
+.linha-vermelha {
+	height: 3px;
+	background-color: red;
+	width: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 9999; /* Certifique-se de que está acima de todos os outros elementos */
+}
+
+.botao {
+	border: none;
+	color: white;
+	/*padding: 10px 20px;*/
+	width: 77px;
+	height: 44px;
+	text-align: center;
+	font-weight: bold;
+	/*text-decoration: none;*/
+	display: inline-block;
+	font-size: 18px;
+	margin: 8px 8px;
+	/*cursor: default;*/
+	border-radius: 8px;
+	box-shadow: 0px 4px 0px 0px #626567;
+	background-color: #cecece;
+	transition: background-color 0.1s, box-shadow 0.1s;
+}
+
+	.botao.pressionado {
+		/*box-shadow: 0px 2px 0px 0px #696969;*/
+		box-shadow: 0 0 10px 3px var(--brilho-azul);
+		transform: translateY(4px);
+	}
+
+	.botao.parar {
+		background-color: #922B21;
+		box-shadow: 0px 4px 0px 0px #7B241C;
+	}
+
+		.botao.parar.ativado {
+			background-color: #7B241C;
+			box-shadow: 0px 4px 0px 0px #641E16;
+			transform: translateY(4px);
+		}
+
+	.botao.amarelo {
+		background-color: #F1C40F;
+		box-shadow: 0px 4px 0px 0px #B7950B;
+	}
+
+		.botao.amarelo.pressionado {
+			background-color: #B7950B;
+			box-shadow: 0px 2px 0px 0px #7D6608;
+			transform: translateY(4px);
+		}
+
+	.botao.azul {
+		background-color: #3498DB;
+		box-shadow: 0px 4px 0px 0px #2874A6;
+	}
+
+		.botao.azul.pressionado {
+			background-color: #2874A6;
+			box-shadow: 0px 2px 0px 0px #1B4F72;
+			transform: translateY(4px);
+		}
+
+	.botao.rosa {
+		background-color: #D15591;
+		box-shadow: 0px 4px 0px 0px #A92D69;
+	}
+
+		.botao.rosa.pressionado {
+			background-color: #A92D69;
+			box-shadow: 0px 2px 0px 0px #8B0F4B;
+			transform: translateY(4px);
+		}
+
+	.botao.rosaClaro {
+		background-color: #e093bb;
+		box-shadow: 0px 4px 0px 0px #D15591;
+	}
+
+		.botao.rosaClaro.pressionado {
+			background-color: #e27cb1;
+			box-shadow: 0px 2px 0px 0px #A92D69;
+			transform: translateY(4px);
+		}
+
+	.botao.roxo {
+		background-color: #8E44AD;
+		box-shadow: 0px 4px 0px 0px #6C3483;
+	}
+
+		.botao.roxo.pressionado {
+			background-color: #6C3483;
+			box-shadow: 0px 2px 0px 0px #4A235A;
+			transform: translateY(4px);
+		}
+
+	.botao.roxoClaro {
+		background-color: #BB8FCE;
+		box-shadow: 0px 4px 0px 0px #8E44AD;
+	}
+
+		.botao.roxoClaro.pressionado {
+			background-color: #A569BD;
+			box-shadow: 0px 2px 0px 0px #7D3C98;
+			transform: translateY(4px);
+		}
+
+	.botao.vermelho {
+		background-color: #E74C3C;
+		box-shadow: 0px 4px 0px 0px #B03A2E;
+	}
+
+		.botao.vermelho.pressionado {
+			background-color: #B03A2E;
+			box-shadow: 0px 2px 0px 0px #78281F;
+			transform: translateY(4px);
+		}
+
+	.botao.marrom {
+		background-color: #F39C12;
+		box-shadow: 0px 4px 0px 0px #B9770E;
+	}
+
+		.botao.marrom.pressionado {
+			background-color: #B9770E;
+			box-shadow: 0px 2px 0px 0px #7E5109;
+			transform: translateY(4px);
+		}
+
+	.botao.marromClaro {
+		background-color: #F8C471;
+		box-shadow: 0px 4px 0px 0px #F39C12;
+	}
+
+		.botao.marromClaro.pressionado {
+			background-color: #F5B041;
+			box-shadow: 0px 2px 0px 0px #D68910;
+			transform: translateY(4px);
+		}
+
+	.botao.cinza {
+		background-color: #BDC3C7;
+		box-shadow: 0px 4px 0px 0px #909497;
+	}
+
+		.botao.cinza.pressionado {
+			background-color: #909497;
+			box-shadow: 0px 2px 0px 0px #626567;
+			transform: translateY(4px);
+		}
+
+	.botao.instrumentoSelecionado {
+		border-bottom: 2px solid #626567;
+		box-shadow: 0 0 10px 3px var(--brilho-amarelo);
+		transform: translateY(4px);
+	}
+
+.botao.dedo.selecionado {
+	border-bottom: 2px solid #626567;
+	box-shadow: 0 0 10px 3px var(--brilho-azul);
+	transform: translateY(4px);
+}
+
+.botao.mao.selecionado {
+	border-bottom: 2px solid #626567;
+	box-shadow: 0 0 10px 3px var(--brilho-azul);
+	transform: translateY(4px);
+}
+
+.botao.duasmaos.selecionado {
+	border-bottom: 2px solid #626567;
+	box-shadow: 0 0 10px 3px var(--brilho-azul);
+	transform: translateY(4px);
+}
+
+	.botao.amarelo.selecionadoDrum {
+		border-bottom: 2px solid #8CAE9E;
+		box-shadow: 0 0 10px 3px #4A7963;
+		transform: translateY(4px);
+	}
+
+	.botao.mao.selecionadoDrum {
+		border-bottom: 2px solid #8CAE9E;
+		box-shadow: 0 0 10px 3px #4A7963;
+		transform: translateY(4px);
+	}
+
+	.botao.duasmaos.selecionadoDrum {
+		border-bottom: 2px solid #8CAE9E;
+		box-shadow: 0 0 10px 3px #4A7963;
+		transform: translateY(4px);
+	}
+
+	.botao.dedo.selecionadoDrum {
+		background-color: #8CAE9E;
+		box-shadow: 0px 2px 0px 0px #4A7963;
+		transform: translateY(4px);
+	}
+
+	.botao.amarelo.parar {
+		background-color: #77B862;
+		box-shadow: 0px 4px 0px 0px #4A7963;
+	}
+
+		.botao.amarelo.parar.ativado {
+			background-color: #4A7963;
+			box-shadow: 0px 4px 0px 0px #157347;
+			transform: translateY(4px);
+		}
+
+#textoAcordeMenor {
+	color: grey;
+}
+
+#textoBateria {
+	color: grey;
+}
+
+#tomSelect {
+	width: 66px;
+	font-size: 18px;
+	font-weight: bold;
+	/*text-align-last: center;*/
+}
+
+.form-check-input {
+	width: 2.5em;
+	height: 1.2em;
+}
+
+#container {
+	font-size: 18px;
+	font-weight: bold;
+}
+
+#textoCifras {
+	font-weight: normal;
+}
+
+.orgao-background {
+	background-image: url('../orgao-background.webp');
+	background-position: center; /* Center the image */
+	background-repeat: no-repeat; /* Do not repeat the image */
+	background-size: cover; /* Resize the background image to cover the entire container */
+}
+
+	.orgao-background:before {
+		content: "";
+		display: block;
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		left: 0;
+		top: 0;
+		z-index: -1;
+		background-color: rgba(255, 255, 255, 0.9);
+	}
+
+.orgao-background-dark {
+	background-image: url('../orgao-background.webp');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+	.orgao-background-dark:before {
+		content: "";
+		display: block;
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		left: 0;
+		top: 0;
+		z-index: -1;
+		background-color: rgba(1, 1, 1, 0.8);
+	}
+
+.centralizado-no-container {
+	width: 300px;
+	margin: auto;
+	text-align: center;
+}
+
+input[type="range"] {
+	width: 100%;
+	margin-top: 10px;
+}
+
+.rangeVerde::-webkit-slider-thumb {
+	background: #198754;
+}
+
+.rangeVerde::-moz-range-thumb {
+	background: #198754;
+}
+
+.rangeVerde::-ms-thumb {
+	background: #198754;
+}
+
+input[type=range][orient=vertical] {
+	appearance: slider-vertical;
+	width: 8px;
+	height: 230px;
+	padding: 0 5px;
+}
+
+.container {
+	display: flex;
+	max-width: 840px;
+}
+
+.box {
+	/*width: 400px;*/
+	width: 100%;
+	/*height: 400px;*/
+	/*margin: 1px;*/
+}
+
+:fullscreen, ::backdrop {
+	background-image: url('../orgao-background.webp');
+	background-position: center; /* Center the image */
+	background-repeat: no-repeat; /* Do not repeat the image */
+	background-size: cover; /* Resize the background image to cover the entire container */
+}
+
+.textoVertical {
+	writing-mode: vertical-rl;
+	/*transform: rotate(180deg);*/
+}
+
+.light {
+	width: 77px;
+	height: 44px;
+	/*position: relative;*/
+	/*background-color: #0d6efd;*/
+	background-color: #198754;
+	border-radius: 8px;
+	position: absolute;
+	top: 12px;
+	left: 9px;
+	z-index: -1;
+	box-shadow: 0 0 15px 3px #198754;
+	animation: blink 666.6666666666667ms infinite;
+}
+
+.naoSelecionarTexto {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+@keyframes blink {
+	50% {
+		opacity: 0;
+	}
+}
+
+.loading-spinner {
+	width: 30px;
+	height: 30px;
+	border: 2px solid indigo;
+	border-radius: 50%;
+	border-top-color: #0001;
+	display: inline-block;
+	animation: loadingspinner .7s linear infinite;
+}
+
+@keyframes loadingspinner {
+	0% {
+		transform: rotate(0deg)
+	}
+
+	100% {
+		transform: rotate(360deg)
+	}
+}
+.st0 {
+	fill: none;
+	stroke: #000000;
+	stroke-width: 2;
+	stroke-linejoin: round;
+	stroke-miterlimit: 10;
+}
+
+.st1 {
+	fill: none;
+	stroke: #ffffff;
+	stroke-width: 2;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-miterlimit: 10;
+}
+
+#textoCifrasFrame {
+	height: calc(100vh - var(--element-height));
+}
+
+#textoCifras {
+	height: calc(100vh - var(--element-height));
+}
+
+#liturgiaDiariaFrame {
+	height: calc(100vh - var(--element-height));
+}
+
+.w3-modal {
+	padding-top: 25px;
+}
+/*
+	Novo blink, precisa ser implementado
+	<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blinking Light</title>
+    <style>
+        .light {
+            width: 14px;
+            height: 14px;
+            background-color: orange;
+            border-radius: 50%;
+            position: absolute;
+            top: 45%;
+			left: 45%;
+        }
+    </style>
+</head>
+<body>
+    <div class="light" id="lightCompasso"></div>
+
+    <script>
+    var beat = 1;
+      var beats = 8;
+      var lightElem = document.getElementById("lightCompasso");
+
+      function blink() {
+        if (beat == beats) {
+          beat = 1;
+          lightElem.style.backgroundColor = "orange";
+        }
+        else {
+          if (beat % 2 == 0)
+              lightElem.style.backgroundColor = "#0d6efd";
+          else
+            lightElem.style.backgroundColor = "transparent";
+          beat++;
+        }
+      }
+
+      setInterval(blink, 500);
+    </script>
+</body>
+</html>
+
+*/

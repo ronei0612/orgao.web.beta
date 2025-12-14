@@ -1,0 +1,80 @@
+
+:root {
+    --cor-principal: #333;
+    --cor-marrom: #9c7b3e;
+    --fonte-padrao: Arial, sans-serif;
+    --fonte-titulo: "Merriweather", serif;
+    --tamanho-fonte-padrao: 13pt;
+}
+
+body {
+    background-color: #FEFCEF;
+    color: var(--cor-principal);
+    font-family: var(--fonte-padrao);
+}
+
+.default {
+    font-weight: 400;
+    text-decoration: none;
+    vertical-align: baseline;
+    font-style: normal;
+}
+
+.brown {
+    color: var(--cor-marrom);
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.breakline {
+    font-size: var(--tamanho-fonte-padrao);
+    height: 12pt;
+}
+
+p {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1.15;
+    orphans: 2;
+    widows: 2;
+    text-align: left;
+    margin: 0;
+    font-size: var(--tamanho-fonte-padrao);
+}
+
+h1, h2 {
+    font-family: var(--fonte-titulo);
+    line-height: 1.15;
+    page-break-after: avoid;
+    orphans: 2;
+    widows: 2;
+    text-align: center;
+    padding-top: 10pt;
+    padding-bottom: 0;
+}
+
+h1 {
+    font-size: 33pt;
+    font-weight: 700;
+}
+
+h2 {
+    color: var(--cor-marrom);
+    font-size: 24pt;
+    font-weight: 700;
+}
+
+h3 {
+    color: var(--cor-marrom);
+    font-weight: 700;
+    font-size: 16pt;
+    padding-bottom: 0pt;
+    font-family: var(--fonte-padrao);
+    line-height: 1.15;
+    page-break-after: avoid;
+    orphans: 2;
+    widows: 2;
+    text-align: left;
+}

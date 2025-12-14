@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editar Cifras.json</title>
+    <link href="./assets/lib/css/Bootstrap/4.6.2/bootstrap.min.css" rel="stylesheet">
+    <link href="./assets/lib/css/Bootstrap/bootstrap-icons/1.8.1/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/styles.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+
+    <style>
+        .cifras-card {
+            background-color: #23272b;
+            color: #f8f9fa;
+            border-color: #343a40;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        textarea.form-control {
+            font-size: 12pt;
+            font-family: Consolas, 'Courier New', Courier, monospace;
+        }
+
+        .btn-action {
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="container py-4" id="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-center flex-grow-1 mb-0">Editar Cifras.json</h1>
+        </div>
+
+        <div class="mb-4 d-flex align-items-stretch">
+            <select id="cifra-select" class="form-control flex-grow-1 mr-2"></select>
+            <button id="add-btn" class="btn btn-add btn-action ml-2"><i class="bi bi-plus-square"></i></button>
+            <button id="delete-btn" class="btn btn-danger btn-action ml-2 d-none"><i class="bi bi-trash"></i></button>
+        </div>
+
+        <div id="cifra-edit-card" class="card cifras-card shadow-sm d-none">
+            <div class="card-header">
+                <h5 id="card-title">Nova Cifra</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <input type="hidden" id="edit-id" value="">
+                    <div class="col-md-7 form-group">
+                        <label class="form-label">Título</label>
+                        <input type="text" class="form-control" id="edit-titulo">
+                    </div>
+                    <div class="col-md-5 form-group">
+                        <label class="form-label">Artista</label>
+                        <input type="text" class="form-control" id="edit-artista">
+                    </div>
+                    <div class="col-12 mt-2 form-group">
+                        <label class="form-label">Cifra</label>
+                        <textarea class="form-control" rows="10" id="edit-cifra"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <div class="d-inline-flex gap-2">
+                <button id="save-btn" class="btn btn-warning btn-action d-none"><i class="bi bi-save"></i> Salvar Edição</button>
+                <button id="import-btn" class="btn btn-info btn-action"><i class="bi bi-upload"></i> Importar JSON</button>
+                <button id="download-btn" class="btn btn-primary btn-action"><i class="bi bi-download"></i> Baixar JSON</button>
+                <button id="clear-btn" class="btn btn-danger btn-action"><i class="bi bi-trash"></i> Excluir tudo</button>
+            </div>
+        </div>
+
+        <input type="file" id="import-file-input" accept="application/json" style="display: none;">
+
+        <div id="import-cards-container" class="mt-4"></div>
+    </div>
+
+    <script src="./assets/lib/js/Jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="./assets/lib/js/Bootstrap/4.6.2/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script src="./assets/js/CifrasEditor.js"></script>
+</body>
+</html>

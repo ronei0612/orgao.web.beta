@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tela Cheia e Tela Ligada (Mínimo)</title>
+</head>
+<body>
+
+    <h1 id="status">Clique em qualquer lugar da tela.</h1>
+    <input type="text" id="text-input" placeholder="Escreva algo aqui">
+
+    <script>
+        let wakeLock = null;
+        const rootElement = document.documentElement;
+        const statusElement = document.getElementById('status');
+        const textInput = document.getElementById('text-input');
+
+        /**
+         * 1. Solicita o modo Tela Cheia (Fullscreen API) no elemento raiz.
+         */
+        function goFullScreen() {
+            try {
+                // Tenta usar a versão padrão
+                if (rootElement.requestFullscreen) {
+                    rootElement.requestFullscreen();
+                }
+                // Tenta usar o prefixo webkit (Safari/Chrome antigos)
+                else if (rootElement.webkitRequestFullscreen) {
+                    rootElement.webkitRequestFullscreen();
+                }
+            } catch (e) {
+                console.error("Falha ao entrar em Tela Cheia:", e);
+            }
+        }
+
+        /**
+         * 2. Solicita o bloqueio de despertar (Wake Lock API) para manter a tela ativa.
+         */
+        async function keepScreenAwake() {
+            if ('wakeLock' in navigator) {
+                try {
+                    // Solicita o bloqueio de despertar para a tela
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    statusElement.textContent = 'Tela Cheia ATIVA e Tela Ligada.';
+
+                    // Adiciona um listener simples para logar quando for liberado
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock liberado pelo sistema.');
+                    });
+
+                } catch (err) {
+                    // Falhou ou não suportado (ex: iOS/Safari tem suporte limitado)
+                    statusElement.textContent += ' (Erro: Wake Lock não funcionou/suportado).';
+                    console.error(`Falha ao ativar Wake Lock: ${err.name}, ${err.message}`);
+                }
+            } else {
+                statusElement.textContent += ' (Aviso: Wake Lock API não suportada).';
+                console.warn('Wake Lock API não suportada neste navegador.');
+            }
+        }
+
+        /**
+         * 3. Função principal acionada pelo primeiro clique.
+         */
+        function activateFeatures(event) {
+            // Se o clique for no input, permite continuar editando.
+            // A tela cheia pode 'esconder' a barra de navegação no mobile.
+            if (event.target === textInput) {
+                // Se for o input, não há necessidade de remover o listener agora.
+            }
+
+            goFullScreen();
+            keepScreenAwake();
+
+            // Remove o listener para que não tente ativar novamente a cada clique.
+            document.body.removeEventListener('click', activateFeatures);
+        }
+
+        // Adiciona o listener de evento ao corpo do documento.
+        document.body.addEventListener('click', activateFeatures);
+
+        // Listener para reativar o clique se o usuário sair da tela cheia manualmente.
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                if (wakeLock !== null) {
+                    wakeLock.release().then(() => wakeLock = null); // Libera o wake lock
+                }
+                statusElement.textContent = 'Clique em qualquer lugar da tela.';
+                // Adiciona o listener de volta para permitir reativação.
+                document.body.addEventListener('click', activateFeatures);
+            }
+        });
+
+    </script>
+</body>
+</html>
