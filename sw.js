@@ -1,50 +1,94 @@
-// Define um nome e uma versão para o cache.
-// Mudar a versão (ex: v2) no futuro forçará a atualização de todos os arquivos.
-const CACHE_NAME = 'orgao-web-cache-v1';
+const version = '5.8.9';
+const CACHE_NAME = 'cifra-app-cache-' + version;
 
-// Lista de todos os arquivos que seu site precisa para funcionar offline.
-// Eu analisei seu index.html e listei todos os recursos essenciais.
 const urlsToCache = [
-    // Arquivos principais
     './',
     './index.html',
+    './cifras.json',
+    './styles.json',
+    './styles-melody.json',
+    './assets/css/styles.css',
+    './assets/css/frames-styles.css',
+    './assets/css/bateria.css',
+    './assets/lib/css/Bootstrap/bootstrap-icons/1.8.1/bootstrap-icons.css',
+    './assets/lib/css/Bootstrap/bootstrap-icons/1.8.1/fonts/bootstrap-icons.woff2',
+    './assets/lib/css/Bootstrap/4.6.2/bootstrap.min.css',
+    './assets/js/App.js',
+    './assets/js/CifraPlayer.js',
+    './assets/js/AudioContextManager.js',
+    './assets/js/LocalStorageManager.js',
+    './assets/js/MusicTheory.js',
+    './assets/js/UIController.js',
+    './assets/js/DraggableController.js',
+    './assets/js/DrumMachine.js',
+    './assets/js/BateriaUI.js',
+    './assets/js/MelodyMachine.js',
+    './assets/js/MelodyUI.js',
+    './assets/js/CifrasEditor.js',
+    './assets/lib/js/Jquery/3.5.1/jquery.min.js',
+    './assets/lib/js/Bootstrap/4.6.2/bootstrap.min.js',
 
-    // Páginas dos iframes
     './santamissa.html',
     './oracoes.html',
 
     // Dependências externas (CDNs) - CRÍTICO para o modo offline!
-    'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.css',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css',
-    'https://code.jquery.com/jquery-3.3.1.slim.min.js',
-    'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css'
 ];
 
 // Evento de Instalação: Salva todos os arquivos listados no cache.
 self.addEventListener('install', event => {
+    self.skipWaiting(); // Sugestão: Pula a fase waiting e tenta ativar imediatamente
+
     event.waitUntil(
-        caches.open(CACHE_NAME)
+        caches.open(CACHE_NAME) // Use a variável CACHE_NAME
             .then(cache => {
-                console.log('Cache aberto. Adicionando arquivos essenciais para modo offline.');
+                console.log('[SW] Cache aberto. Adicionando arquivos essenciais para modo offline.');
                 return cache.addAll(urlsToCache);
+            })
+            .catch(error => {
+                // É importante saber se o addAll falhou, especialmente por causa de CDNs
+                console.error('[SW] Falha ao cachear ativos. Isso pode ser um problema de CDN.', error);
             })
     );
 });
 
+// Evento de Ativação: Limpeza de Caches Antigos
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('[SW] Cache antigo encontrado. Deletando:', cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    return self.clients.claim(); // Sugestão: Assegura que o SW ativado controle os clientes imediatamente
+});
+
 // Evento de Fetch: Intercepta todas as requisições da página.
 self.addEventListener('fetch', event => {
+    // Apenas intercepta requisições GET
+    if (event.request.method !== 'GET') return;
+
     event.respondWith(
-        // 1. Tenta encontrar o recurso no cache.
         caches.match(event.request)
             .then(response => {
-                // Se encontrou no cache, retorna o arquivo salvo. A página carrega instantaneamente.
+                // Se encontrou no cache, retorna.
                 if (response) {
                     return response;
                 }
-                // Se não encontrou, vai para a internet buscar o recurso.
-                return fetch(event.request);
-            }
-            )
+
+                // Se não encontrou, vai para a internet buscar.
+                return fetch(event.request).catch(error => {
+                    // Sugestão: Trata a falha de rede (usuário offline tentando um recurso não cacheado)
+                    console.warn('[SW] Falha ao buscar recurso na rede:', event.request.url, error);
+                    // Opcional: Aqui você pode retornar uma página de fallback, se necessário.
+                    // Ex: return caches.match('/offline.html');
+                });
+            })
     );
 });
