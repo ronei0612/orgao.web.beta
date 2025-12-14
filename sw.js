@@ -25,6 +25,7 @@ const urlsToCache = [
     './assets/js/MelodyMachine.js',
     './assets/js/MelodyUI.js',
     './assets/js/CifrasEditor.js',
+    './assets/js/logIntercepted.js',
     './assets/lib/js/Jquery/3.5.1/jquery.min.js',
     './assets/lib/js/Bootstrap/4.6.2/bootstrap.min.js',
 
