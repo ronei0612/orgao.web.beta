@@ -204,6 +204,7 @@ class UIController {
 
     exibirElementosMelody() {
         this.elements.melodyWrapper.classList.remove('d-none');
+        this.elements.melodyStyleSelect.classList.remove('d-none');
     }
 
     esconderBotoesPlay() {

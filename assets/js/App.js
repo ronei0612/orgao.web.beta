@@ -9,7 +9,7 @@ class App {
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
         this.versionConfig = {
-            version: '5.8.7',
+            version: '5.8.9',
             htmlMessage: `
                 <p>Novo botão para trocar de Órgão para Bateria.</p>
 
@@ -28,9 +28,11 @@ class App {
         this.musicaEscolhida = false;
         this.selectItemAntes = null;
         this.LOCAL_STORAGE_SAVES_KEY = 'saves';
+        this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY = 'saves_instrument';
         this.API_BASE_URL = 'https://apinode-h4wt.onrender.com';
         this.STYLES_LOCAL_KEY = 'drumStylesData';
         this.VERSION_LOCAL_KEY = 'versao_app';
+        this.LOG_STORAGE_KEY = 'debug_logs_v1';
     }
 
     async init() {
@@ -62,13 +64,13 @@ class App {
         await this.melodyUI.init();
 
         //if (this.BASE_URL.includes('http')) {
-            //document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
-            //document.getElementById('styleButtons').classList.remove('d-none');
-            //document.getElementById('drumEditor').classList.remove('d-none');
-            //document.getElementById('melodyTracks').classList.remove('d-none');
-            //document.getElementById('stepsMelody').classList.remove('d-none');
-            //document.getElementById('melodySaveControl').classList.remove('d-none');
-            //document.getElementById('save-melody').classList.remove('d-none');
+        //    document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
+        //    document.getElementById('styleButtons').classList.remove('d-none');
+        //    document.getElementById('drumEditor').classList.remove('d-none');
+        //    document.getElementById('melodyTracks').classList.remove('d-none');
+        //    document.getElementById('stepsMelody').classList.remove('d-none');
+        //    document.getElementById('melodySaveControl').classList.remove('d-none');
+        //    document.getElementById('save-melody').classList.remove('d-none');
         //}
     }
 
@@ -91,7 +93,7 @@ class App {
         this.elements.clearButton.addEventListener('click', () => this.handleClearSearchClick());
         this.elements.liturgiaDiariaLink.addEventListener('click', () => this.exibirFrame('liturgiaDiariaFrame'));
         this.elements.oracoesLink.addEventListener('click', () => this.exibirFrame('oracoesFrame'));
-        this.elements.aboutLink.addEventListener('click', () => this.uiController.customAlert(`Projeto de Ronei Costa Soares. version: ${this.versionConfig.version}`, 'Versão'));
+        this.elements.aboutLink.addEventListener('click', () => this.exibirSobre());
         this.elements.downloadSavesLink.addEventListener('click', this.downloadSaves.bind(this));
         this.elements.uploadSavesLink.addEventListener('click', this.uploadSaves.bind(this));
         this.elements.restoreLink.addEventListener('click', this.restore.bind(this));
@@ -184,6 +186,38 @@ class App {
                 $(this).val(null).trigger('change');
             }
         });
+    }
+
+    async exibirSobre() {
+        const logs = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || '[]');
+
+        const logsHtml = logs.length > 0
+            ? logs.reverse().join('<br><hr style="margin:2px 0;">')
+            : '<em>Nenhum log registrado ainda.</em>';
+
+        const htmlMessage = `
+        <p><strong>Versão:</strong> ${this.versionConfig.version}</p>
+        <p>Projeto de Ronei Costa Soares.</p>
+        <div class="mt-3">
+            <button class="btn btn-sm btn-danger mb-2" onclick="localStorage.removeItem('${LOG_STORAGE_KEY}'); this.nextElementSibling.innerHTML='Logs limpos!';">
+                <i class="bi bi-trash"></i> Limpar Logs
+            </button>
+            <div style="
+                max-height: 300px; 
+                overflow-y: auto; 
+                background: #f8f9fa; 
+                border: 1px solid #dee2e6; 
+                padding: 10px; 
+                font-family: monospace; 
+                font-size: 11px; 
+                text-align: left;
+                color: #333;">
+                ${logsHtml}
+            </div>
+        </div>
+    `;
+
+        await this.uiController.customAlert(htmlMessage, 'Sobre / Logs de Debug');
     }
 
     showVersionAlert() {
@@ -346,6 +380,14 @@ class App {
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
         this.cifraPlayer.preencherSelectCifras('C');
+        this.exibirInstrument(this.cifraPlayer.instrumento);
+    }
+
+    exibirBotaoInstrumento(selectItem) {
+        const instrumento = this.localStorageManager.getTextJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, selectItem);
+        if (instrumento) {
+            this.escolherInstrumento(instrumento);
+        }
     }
 
     async handleDeleteSaveClick() {
@@ -354,6 +396,7 @@ class App {
             const confirmed = await this.uiController.customConfirm(`Deseja excluir "${saveName}"?`, 'Deletar!');
             if (confirmed) {
                 this.localStorageManager.deleteJson(this.LOCAL_STORAGE_SAVES_KEY, saveName);
+                this.localStorageManager.deleteJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, saveName);
                 this.uiController.resetInterface();
                 this.uiController.exibirListaSaves();
                 this.selectEscolhido('acordes__');
@@ -417,19 +460,43 @@ class App {
         }
     }
 
-    handleOrgaoInstrumentClick() {
-        if (this.cifraPlayer.instrumento === 'orgao') {
-            this.cifraPlayer.instrumento = 'epiano';
-            this.cifraPlayer.attack = 0;
-            this.uiController.exibirElementosBateria();
-            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
+    escolherInstrumento(instrument) {
+        if (instrument === 'orgao') {
+            this.cifraPlayer.instrumento = 'orgao';
+            this.cifraPlayer.attack = 0.2;
+            this.elements.rhythmButtonsControl.classList.add('d-none');
+            this.cifraPlayer.atualizarVolumeStringsParaOrgao();
         }
         else {
-            this.cifraPlayer.instrumento = 'orgao';
+            this.cifraPlayer.instrumento = 'epiano';
+            this.cifraPlayer.attack = 0;
+            this.elements.rhythmButtonsControl.classList.remove('d-none');
+            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
+        }
+    }
+
+    exibirInstrument(instrument) {
+        if (instrument === 'orgao') {
             this.cifraPlayer.attack = 0.2;
             this.uiController.esconderElementosBateria();
             this.cifraPlayer.atualizarVolumeStringsParaOrgao();
         }
+        else {
+            this.cifraPlayer.attack = 0;
+            this.uiController.exibirElementosBateria();
+            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
+        }
+    }
+
+    handleOrgaoInstrumentClick() {
+        if (this.cifraPlayer.instrumento === 'orgao') {
+            this.cifraPlayer.instrumento = 'epiano';
+        }
+        else {
+            this.cifraPlayer.instrumento = 'orgao';
+        }
+
+        this.exibirInstrument(this.cifraPlayer.instrumento);
     }
 
     verifyLetraOuCifra(texto) {
@@ -464,6 +531,8 @@ class App {
             if (confirmed) {
                 var saveContent = this.elements.iframeCifra.contentDocument.body.innerText;
                 this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, this.selectItemAntes, saveContent);
+                debugger;
+                this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, this.selectItemAntes, this.cifraPlayer.instrumento);
             }
             this.cifraPlayer.tomOriginal = null;
         }
@@ -478,6 +547,8 @@ class App {
         if (selectItem && selectItem !== 'acordes__') {
             const texto = this.localStorageManager.getTextJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem);
             this.showLetraCifra(texto);
+
+            this.exibirBotaoInstrumento(selectItem);
         }
         else {
             this.uiController.resetInterface();
@@ -910,6 +981,8 @@ class App {
         var saveContent = this.elements.editTextarea.value;
         this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, saveContent);
         this.elements.savesSelect.value = newSaveName;
+
+        this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, newSaveName, this.cifraPlayer.instrumento);
 
         this.uiController.exibirIframeCifra();
         this.uiController.exibirListaSaves(newSaveName);
