@@ -506,9 +506,8 @@ class UIController {
 
     ativarNotesButton() {
         if (this.elements.notesButton.classList.contains('notaSolo')) {
-            var icon = this.elements.notesButton.querySelector('i');
-            icon.classList.remove('bi-music-note');
-            icon.classList.add('bi-music-note-beamed');
+            this.elements.musicNoteIcon.classList.add('d-none');
+            this.elements.musicNoteBeamedIcon.classList.remove('d-none');
             this.elements.notesButton.classList.remove('notaSolo');
         }
         this.elements.notesButton.classList.add('pressed');
@@ -516,9 +515,8 @@ class UIController {
 
     desativarNotesButton() {
         if (this.elements.notesButton.classList.contains('notaSolo')) {
-            var icon = this.elements.notesButton.querySelector('i');
-            icon.classList.remove('bi-music-note');
-            icon.classList.add('bi-music-note-beamed');
+            this.elements.musicNoteIcon.classList.add('d-none');
+            this.elements.musicNoteBeamedIcon.classList.remove('d-none');
             this.elements.notesButton.classList.remove('notaSolo');
         }
         this.elements.notesButton.classList.remove('pressed');
