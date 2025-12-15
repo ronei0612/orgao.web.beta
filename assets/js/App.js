@@ -28,7 +28,6 @@ class App {
         this.musicaEscolhida = false;
         this.selectItemAntes = null;
         this.LOCAL_STORAGE_SAVES_KEY = 'saves';
-        this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY = 'saves_instrument';
         this.API_BASE_URL = 'https://apinode-h4wt.onrender.com';
         this.STYLES_LOCAL_KEY = 'drumStylesData';
         this.VERSION_LOCAL_KEY = 'versao_app';
@@ -386,7 +385,7 @@ class App {
     }
 
     exibirBotaoInstrumento(selectItem) {
-        const instrumento = this.localStorageManager.getTextJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, selectItem);
+        const instrumento = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem).instrument;
         if (instrumento) {
             this.escolherInstrumento(instrumento);
         }
@@ -1056,8 +1055,6 @@ class App {
 
         this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, metaData);
         this.elements.savesSelect.value = newSaveName;
-
-        this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, newSaveName, this.cifraPlayer.instrumento);
 
         this.uiController.exibirIframeCifra();
         this.uiController.exibirListaSaves(newSaveName);
