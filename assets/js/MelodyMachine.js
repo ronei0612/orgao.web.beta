@@ -3,6 +3,8 @@ class MelodyMachine {
         this.baseUrl = baseUrl;
         this.musicTheory = musicTheory;
         this.cifraPlayer = cifraPlayer;
+        this.attackTime = 0.02;
+        this.releaseTime = 0.1;
 
         this.instruments = [
             { note: 0, name: 'orgao', octave: '' },
@@ -79,15 +81,17 @@ class MelodyMachine {
         }
     }
 
+    // --- MODIFICADO: playSound agora tem um Attack suave ---
     playSound(buffer, time, volume = 1) {
         if (!buffer) return null;
 
-        // Usa o contexto compartilhado
         const source = this.audioContext.createBufferSource();
         const gainNode = this.audioContext.createGain();
 
         source.buffer = buffer;
-        gainNode.gain.value = volume;
+
+        gainNode.gain.setValueAtTime(0.001, time);
+        gainNode.gain.exponentialRampToValueAtTime(volume, time + this.attackTime);
 
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
@@ -108,9 +112,10 @@ class MelodyMachine {
             try {
                 gainNode.gain.cancelScheduledValues(time);
                 gainNode.gain.setValueAtTime(gainNode.gain.value, time);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
-                source.stop(time + 0.06);
-            } catch (e) { }
+                gainNode.gain.exponentialRampToValueAtTime(0.001, time + this.releaseTime);
+
+                source.stop(time + this.releaseTime + 0.01);
+            } catch { }
             this.currentSource = null;
         }
     }
@@ -186,9 +191,9 @@ class MelodyMachine {
             const steps = Array.from(trackEl.querySelectorAll('.step'));
 
             return {
-                noteIndex: parseInt(button.dataset.noteIndex), // O índice (0, 1, 2...)
-                octave: button.dataset.octave,                 // 'baixo'
-                name: button.dataset.name,                     // 'orgao'
+                noteIndex: parseInt(button.dataset.noteIndex),
+                octave: button.dataset.octave,
+                name: button.dataset.name,
                 button,
                 steps
             };
@@ -199,13 +204,8 @@ class MelodyMachine {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
-
         this.isPlaying = true;
-
-        // 2. Sincronia: Define que a próxima nota deve tocar "AGORA" (com margem de 0.05s)
-        // Isso alinha o arpejo com o clique do seu mouse/dedo no acorde
-        this.nextNoteTime = this.audioContext.currentTime;// + 0.1;
-
+        this.nextNoteTime = this.audioContext.currentTime;
         this.refreshTrackCache();
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.timerInterval = setInterval(() => this.scheduler(), this.lookahead);
