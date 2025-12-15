@@ -138,17 +138,17 @@ class CifraPlayer {
 
         const VOLUME_CONFIG = {
             'grave': {
-                'orgao': 1.0,
+                'orgao': 0,
                 'strings': 0.9,
                 'epiano': 1.0
             },
             'baixo': {
-                'orgao': 1.0,
+                'orgao': 0,
                 'strings': 0.8,
                 'epiano': 1.0
             },
             'agudo': {
-                'orgao': 0.6,
+                'orgao': 0,
                 'strings': 1.0,
                 'epiano': 1.0
             }
