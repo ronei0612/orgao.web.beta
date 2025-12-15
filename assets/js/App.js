@@ -9,7 +9,7 @@ class App {
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
         this.versionConfig = {
-            version: '5.8.9',
+            version: '5.9.1',
             htmlMessage: `
                 <p>Novo botão para trocar de Órgão para Bateria.</p>
 
@@ -166,7 +166,7 @@ class App {
 
             if (searchTerm) {
                 var $optionPesquisaWeb = $('<li class="select2-results__option pesquisar-na-web" role="treeitem" aria-selected="false"></li>');
-                $optionPesquisaWeb.html('<i class="bi bi-search"></i> Pesquisar na Web');
+                $optionPesquisaWeb.html('🔍 Pesquisar na Web');
 
                 $('.select2-results__options').prepend($optionPesquisaWeb);
 
@@ -738,10 +738,13 @@ class App {
             if (action === 'acorde') {
                 this.cifraPlayer.parado = false;
 
-                // 2. Reinicia o Melody no Step 1
-                if (this.melodyUI) {
+                if (this.cifraPlayer.instrumento === 'orgao') {
                     this.melodyUI.play();
                     this.melodyMachine.currentStep = 1;
+                }
+                else {
+                    if (this.bateriaUI)
+                        this.bateriaUI.play();
                 }
 
                 this.cifraPlayer.tocarAcorde(button.value);

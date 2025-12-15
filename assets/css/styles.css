@@ -472,6 +472,13 @@ img.button-control {
     cursor: pointer;
 }
 
+img.icon-svg {
+    width: 1.1em;
+    height: 1.1em;
+    vertical-align: -0.2em;
+    display: inline-block;
+}
+
 #avancarButton:active,
 #retrocederButton:active {
     transform: scale(0.95);

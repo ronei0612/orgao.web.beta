@@ -23,7 +23,9 @@
 
                 <div class="input-group" id="tomContainer">
                     <div class="input-group-prepend">
-                        <button class="btn btn-dark-cyan" id="decreaseTom"><i class="bi bi-dash-lg"></i></button>
+                        <button class="btn btn-dark-cyan" id="decreaseTom">
+                            <img class="icon-svg" src="./assets/icons/dash-lg.svg">
+                        </button>
                     </div>
                     <select class="form-control" id="tomSelect">
                         <option value="C" selected>C</option>
@@ -40,7 +42,9 @@
                         <option value="B">B</option>
                     </select>
                     <div class="input-group-append">
-                        <button class="btn btn-dark-cyan" id="increaseTom"><i class="bi bi-plus-lg"></i></button>
+                        <button class="btn btn-dark-cyan" id="increaseTom">
+                            <img class="icon-svg" src="./assets/icons/plus-lg.svg">
+                        </button>
                     </div>
                 </div>
 
@@ -51,7 +55,9 @@
                     </div>
                     <input type="text" id="bpm-input" value="90" class="form-control text-center px-1" aria-label="BPM">
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="increment-bpm"><i class="bi bi-plus"></i></button>
+                        <button class="btn btn-outline-secondary" type="button" id="increment-bpm">
+                            <img class="icon-svg" src="./assets/icons/plus.svg">
+                        </button>
                         <button class="btn btn-outline-secondary" type="button" id="increment-bpm-10">+10</button>
                     </div>
                 </div>
@@ -68,20 +74,20 @@
                     <input type="text" class="form-control d-none" id="itemNameInput" placeholder="Nome da Música...">
 
                     <button class="btn btn-primary btn-control-custom rounded-right d-none" id="saveButton">
-                        <i class="bi bi-check"></i>
+                        <img class="icon-svg" src="./assets/icons/check.svg">
                     </button>
                     <button class="btn btn-danger btn-control-custom rounded-right d-none" id="cancelButton">
                         ×
                     </button>
 
                     <button class="btn btn-control-custom btn-add rounded-right" id="addButton">
-                        <i class="bi bi-plus-square"></i>
+                        <img class="icon-svg" src="./assets/icons/plus-square.svg">
                     </button>
                     <button class="btn btn-control-custom btn-success rounded-0 fade d-none" id="editSavesSelect">
-                        <i class="bi bi-pencil"></i>
+                        <img class="icon-svg" src="./assets/icons/pencil.svg">
                     </button>
                     <button class="btn btn-danger rounded-right-custom fade d-none" id="deleteSavesSelect">
-                        <i class="bi bi-trash"></i>
+                        <img class="icon-svg" src="./assets/icons/trash.svg">
                     </button>
                 </div>
             </div>
@@ -206,13 +212,20 @@
                 <button class="btn btn-link btn-sm d-none" id="retrocederButton">
                     <img src="./assets/icons/v2/voltar.svg" class="button-control" />
                 </button>
-                <button class="btn-custom btn-icons pulse mx-2" data-action="play" id="playButton"><i class="bi bi-play-fill"></i></button>
-                <button class="btn-custom btn-icons pulse mx-2 d-none" data-action="stop" id="stopButton"><i class="bi bi-stop-fill"></i></button>
+                <button class="btn-custom btn-icons pulse mx-2" data-action="play" id="playButton">
+                    <img class="icon-svg" src="./assets/icons/play-fill.svg">
+                </button>
+                <button class="btn-custom btn-icons pulse mx-2 d-none" data-action="stop" id="stopButton">
+                    <img class="icon-svg" src="./assets/icons/stop-fill.svg">
+                </button>
                 <button class="btn btn-link btn-sm d-none" id="avancarButton">
                     <img src="./assets/icons/v2/avancar.svg" class="button-control" />
                 </button>
 
-                <button class="btn-custom btn-icons mx-2" data-action="notes" id="notesButton"><i class="bi bi-music-note-beamed"></i></button>
+                <button class="btn-custom btn-icons mx-2" data-action="notes" id="notesButton">
+                    <!--<img class="icon-svg" src="./assets/icons/music-note-beamed.svg">-->
+                    <i class="bi bi-music-note-beamed"></i>
+                </button>
             </div>
         </div>
 
@@ -287,11 +300,11 @@
                     <div class="input-group">
                         <input class="form-control" placeholder="Pesquisar no CifraClub..." aria-label="Pesquisar" aria-describedby="basic-addon1" id="searchInput">
                         <button class="btn btn-danger btn-sm rounded-0" type="button" tabindex="-1" id="clearButton">
-                            <i class="bi bi-x-circle"></i>
+                            <img class="icon-svg" src="./assets/icons/x-circle.svg">
                         </button>
                         <button class="btn btn-primary rounded-right-custom" type="button" id="searchButton">
                             <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                            <i class="bi bi-search" id="searchIcon"></i>
+                            <img class="icon-svg" src="./assets/icons/search.svg" id="searchIcon">
                         </button>
                     </div>
                     <textarea class="form-control mt-3 d-none" id="cifraDisplay" readonly></textarea>
@@ -302,7 +315,7 @@
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeButton">× Fechar</button>
                     <div>
                         <button type="button" class="btn btn-primary" id="tocarButton">
-                            <i class="bi bi-check"></i> Tocar
+                            <img class="icon-svg" src="./assets/icons/check.svg"> Tocar
                         </button>
                     </div>
                 </div>
