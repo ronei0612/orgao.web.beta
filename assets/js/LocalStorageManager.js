@@ -11,6 +11,12 @@ class LocalStorageManager {
         }
     }
 
+    getSaveJson(name, item) {
+        const saves = this.getSavesJson(name);
+        const conteudo = saves[item];
+        return conteudo ?? null;
+    }
+
     saveJson(name, item, conteudo) {
         const saves = this.getSavesJson(name);
         saves[item] = conteudo;
@@ -33,7 +39,7 @@ class LocalStorageManager {
             const content = saves[oldName];
             delete saves[oldName];
             saves[newName] = content;
-            this.save('saves', JSON.stringify(saves));
+            this.save(name, JSON.stringify(saves));
             return true;
         } else {
             console.warn(`editarNomeSaveLocalStorage: Save com o nome "${oldName}" não encontrado.`);

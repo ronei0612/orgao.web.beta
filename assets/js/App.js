@@ -396,7 +396,6 @@ class App {
             const confirmed = await this.uiController.customConfirm(`Deseja excluir "${saveName}"?`, 'Deletar!');
             if (confirmed) {
                 this.localStorageManager.deleteJson(this.LOCAL_STORAGE_SAVES_KEY, saveName);
-                this.localStorageManager.deleteJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, saveName);
                 this.uiController.resetInterface();
                 this.uiController.exibirListaSaves();
                 this.selectEscolhido('acordes__');
@@ -499,9 +498,15 @@ class App {
         this.exibirInstrument(this.cifraPlayer.instrumento);
     }
 
-    verifyLetraOuCifra(texto) {
+    verifyLetraOuCifra(texto, saveData) {
         if (texto.includes('<pre class="cifra">')) {
-            const tom = this.cifraPlayer.descobrirTom(texto);
+            let tom = 'C';
+            if (saveData && saveData.tom && saveData.tom !== '') {
+                tom = saveData.tom;
+            }
+            else {
+                tom = this.cifraPlayer.descobrirTom(texto);
+            }
             const musicaCifrada = this.cifraPlayer.destacarCifras(texto, tom);
             this.cifraPlayer.preencherSelectCifras(tom);
             this.uiController.exibirBotoesCifras();
@@ -514,11 +519,24 @@ class App {
             this.cifraPlayer.preencherSelectAcordes('C');
             this.cifraPlayer.preencherIframeCifra(texto);
         }
+
+        if (saveData && saveData.instrument) {
+            this.cifraPlayer.instrumento = saveData.instrument;
+            this.exibirInstrument(saveData.instrument);
+            this.elements.bpmInput.value = saveData.bpm;
+
+            if (saveData.instrument === 'orgao') {
+                this.elements.melodyStyleSelect.value = saveData.style;
+            }
+            else {
+                this.elements.drumStyleSelect.value = saveData.style;
+            }
+        }
     }
 
-    showLetraCifra(texto) {
-        var textoMusica = this.cifraPlayer.destacarCifras(texto, null);
-        this.verifyLetraOuCifra(textoMusica);
+    showLetraCifra(saveData) {
+        var textoMusica = this.cifraPlayer.destacarCifras(saveData.chords, null);
+        this.verifyLetraOuCifra(textoMusica, saveData);
 
         this.uiController.exibirBotoesTom();
         this.uiController.exibirIframeCifra();
@@ -527,12 +545,18 @@ class App {
 
     async verificarTrocouTom() {
         if (this.cifraPlayer.tomOriginal && this.cifraPlayer.tomOriginal !== this.cifraPlayer.tomAtual) {
-            const confirmed = await this.uiController.customConfirm(`Você trocou de tom de ${this.cifraPlayer.tomOriginal} para ${this.cifraPlayer.tomAtual}. Substituir novo tom?`);
+            const tom = this.cifraPlayer.tomAtual;
+            const confirmed = await this.uiController.customConfirm(`Você trocou de tom de ${this.cifraPlayer.tomOriginal} para ${tom}. Substituir novo tom?`);
             if (confirmed) {
-                var saveContent = this.elements.iframeCifra.contentDocument.body.innerText;
-                this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, this.selectItemAntes, saveContent);
-                debugger;
-                this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, this.selectItemAntes, this.cifraPlayer.instrumento);
+                const metaData = {
+                    chords: this.elements.iframeCifra.contentDocument.body.innerText,
+                    tom: tom,
+                    instrument: this.cifraPlayer.instrumento,
+                    style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
+                    bpm: this.elements.bpmInput.value
+                };
+
+                this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, this.selectItemAntes, metaData);
             }
             this.cifraPlayer.tomOriginal = null;
         }
@@ -545,8 +569,8 @@ class App {
         this.selectItemAntes = selectItem;
 
         if (selectItem && selectItem !== 'acordes__') {
-            const texto = this.localStorageManager.getTextJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem);
-            this.showLetraCifra(texto);
+            const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem);
+            this.showLetraCifra(saveData);
 
             this.exibirBotaoInstrumento(selectItem);
         }
@@ -968,10 +992,10 @@ class App {
             newSaveName = "Música " + count;
         }
 
-        let saves = this.localStorageManager.getSavesJson(this.LOCAL_STORAGE_SAVES_KEY);
+        const saves = this.localStorageManager.getSavesJson(this.LOCAL_STORAGE_SAVES_KEY);
 
         newSaveName = newSaveName.trim();
-        let temSaveName = Object.keys(saves).some(saveName => saveName.toLowerCase() === newSaveName.toLowerCase());
+        const temSaveName = Object.keys(saves).some(saveName => saveName.toLowerCase() === newSaveName.toLowerCase());
 
         if (temSaveName && newSaveName.toLowerCase() !== this.elements.savesSelect.value.toLowerCase()) {
             await this.uiController.customAlert(`Já existe "${newSaveName}". Escolha outro nome`, 'Salvar Música');
@@ -979,11 +1003,18 @@ class App {
         }
 
         if (oldSaveName && oldSaveName !== newSaveName) {
-            this.localStorageManager.editarNome(this.LOCAL_STORAGE_SAVES_KEY,oldSaveName, newSaveName);
+            this.localStorageManager.editarNome(this.LOCAL_STORAGE_SAVES_KEY, oldSaveName, newSaveName);
         }
 
-        var saveContent = this.elements.editTextarea.value;
-        this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, saveContent);
+        const metaData = {
+            chords: this.elements.editTextarea.value,
+            tom: this.elements.tomSelect.value,
+            instrument: this.cifraPlayer.instrumento,
+            style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
+            bpm: this.elements.bpmInput.value
+        };
+
+        this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, metaData);
         this.elements.savesSelect.value = newSaveName;
 
         this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_INSTRUMENT_KEY, newSaveName, this.cifraPlayer.instrumento);
