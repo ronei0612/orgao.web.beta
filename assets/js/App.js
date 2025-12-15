@@ -41,6 +41,8 @@ class App {
         this.loadCifrasLocal();
         this.warmupApi();
         this.setupDarkMode();
+        this.migrateLocalStorageSaves();
+
         this.uiController.exibirListaSaves();
         this.uiController.injetarEstilosNoIframeCifra();
 
@@ -550,7 +552,7 @@ class App {
             if (confirmed) {
                 const metaData = {
                     chords: this.elements.iframeCifra.contentDocument.body.innerText,
-                    tom: tom,
+                    key: tom,
                     instrument: this.cifraPlayer.instrumento,
                     style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
                     bpm: this.elements.bpmInput.value
@@ -985,6 +987,44 @@ class App {
         }
     }
 
+    migrateLocalStorageSaves() {
+        try {
+            const rawData = localStorage.getItem(this.LOCAL_STORAGE_SAVES_KEY);
+
+            if (!rawData) return;
+
+            if (rawData.includes('chords')) {
+                return;
+            }
+
+            let saves = {};
+            try {
+                saves = JSON.parse(rawData);
+            } catch (e) {
+                console.error("Erro ao analisar JSON do localStorage:", e);
+                return;
+            }
+
+            Object.keys(saves).forEach(key => {
+                let valorAtual = saves[key];
+
+                saves[key] = {
+                    chords: valorAtual,
+                    key: 'C',
+                    instrument: 'orgao',
+                    style: '',
+                    bpm: 90
+                };
+            });
+
+            localStorage.setItem(this.LOCAL_STORAGE_SAVES_KEY, JSON.stringify(saves));
+            console.log('Sistema: LocalStorage "saves" foi migrado para o novo formato de objetos.');
+
+        } catch (error) {
+            console.error('Erro crítico na migração de saves:', error);
+        }
+    }
+
     async salvarSave(newSaveName, oldSaveName) {
         if (!newSaveName) {
             const musicasDefault = this.elements.savesSelect.querySelectorAll('option[value^="Música "]');
@@ -1008,7 +1048,7 @@ class App {
 
         const metaData = {
             chords: this.elements.editTextarea.value,
-            tom: this.elements.tomSelect.value,
+            key: this.elements.tomSelect.value,
             instrument: this.cifraPlayer.instrumento,
             style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
             bpm: this.elements.bpmInput.value
