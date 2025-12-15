@@ -9,7 +9,7 @@ class App {
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
         this.versionConfig = {
-            version: '5.9.2',
+            version: '5.9.3',
             htmlMessage: `
                 <p>Novo botão para trocar de Órgão para Bateria.</p>
 
