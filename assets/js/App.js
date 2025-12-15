@@ -721,14 +721,15 @@ class App {
 
         if (action === 'notes') {
             var icon = this.elements.notesButton.querySelector('i');
-            if (!this.held && icon.classList.contains('bi-music-note')) {
-                icon.classList.remove('bi-music-note');
-                icon.classList.add('bi-music-note-beamed');
+            if (!this.held && this.elements.musicNoteBeamedIcon.classList.contains('d-none')) {
+                this.elements.musicNoteIcon.classList.add('d-none');
+                this.elements.musicNoteBeamedIcon.classList.remove('d-none');
                 this.elements.notesButton.classList.remove('notaSolo');
             }
             else if (this.elements.notesButton.classList.contains('pressed')) {
-                icon.classList.remove('bi-music-note-beamed');
-                icon.classList.add('bi-music-note');
+                this.elements.musicNoteIcon.classList.remove('d-none');
+                this.elements.musicNoteBeamedIcon.classList.add('d-none');
+
                 this.elements.notesButton.classList.remove('pressed');
                 this.elements.notesButton.classList.add('notaSolo');
             } else if (!this.elements.notesButton.classList.contains('notaSolo')) {
@@ -1124,7 +1125,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pasteRhythmButton: document.getElementById('paste-rhythm'),
         bateriaWrapper: document.getElementById('bateriaWrapper'),
         melodyWrapper: document.getElementById('melodyWrapper'),
-        rhythmButtonsControl: document.getElementById('rhythm-buttons')
+        rhythmButtonsControl: document.getElementById('rhythm-buttons'),
+        musicNoteIcon: document.getElementById('music-note'),
+        musicNoteBeamedIcon: document.getElementById('music-note-beamed')
     };
 
     const app = new App(elements);
