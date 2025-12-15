@@ -835,7 +835,7 @@ class App {
             document.body.appendChild(input);
         }
 
-        input.value = ''; // Permite selecionar o mesmo arquivo novamente
+        input.value = '';
 
         input.onchange = async (event) => {
             const file = event.target.files[0];
@@ -847,21 +847,42 @@ class App {
                     const importedData = JSON.parse(e.target.result);
 
                     if (typeof importedData !== 'object') {
-                        await this.customAlert('Arquivo inválido: Não é um objeto ou array.', 'Erro!');
+                        await this.uiController.customAlert('Arquivo inválido: Não é um objeto ou array.', 'Erro!');
                         return;
                     }
 
                     let newSaves = {};
 
+                    const padronizarItem = (conteudo) => {
+                        return {
+                            chords: conteudo,
+                            tom: 'C',
+                            instrument: 'orgao',
+                            style: '',
+                            bpm: 90
+                        };
+                    };
+
                     if (Array.isArray(importedData)) {
-                        importedData.forEach(cifra => {
-                            if (cifra.titulo && cifra.cifra) {
-                                const chave = cifra.artista ? `${cifra.titulo} - ${cifra.artista}` : cifra.titulo;
-                                newSaves[chave] = cifra.cifra;
+                        importedData.forEach(item => {
+                            if (item.titulo && item.cifra) {
+                                const chave = item.artista ? `${item.titulo} - ${item.artista}` : item.titulo;
+                                const dadosPadronizados = padronizarItem(item.cifra);
+
+                                if (dadosPadronizados) {
+                                    newSaves[chave] = dadosPadronizados;
+                                }
                             }
                         });
-                    } else {
-                        newSaves = importedData;
+                    }
+                    // CENÁRIO B: Importando Objeto direto (dump do localStorage)
+                    else {
+                        Object.keys(importedData).forEach(key => {
+                            const dadosPadronizados = padronizarItem(importedData[key]);
+                            if (dadosPadronizados) {
+                                newSaves[key] = dadosPadronizados;
+                            }
+                        });
                     }
 
                     if (Object.keys(newSaves).length === 0) {
@@ -878,6 +899,7 @@ class App {
                     $('#optionsModal').modal('hide');
                     await this.uiController.customAlert('Importado com sucesso', 'Sucesso!');
                 } catch (err) {
+                    console.error(err);
                     await this.uiController.customAlert(`Erro ao processar o arquivo: ${err.message}`, 'Erro!');
                 }
             };
