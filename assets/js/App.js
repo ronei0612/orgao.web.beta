@@ -460,21 +460,6 @@ class App {
         }
     }
 
-    escolherInstrumento(instrument) {
-        if (instrument === 'orgao') {
-            this.cifraPlayer.instrumento = 'orgao';
-            this.cifraPlayer.attack = 0.2;
-            this.elements.rhythmButtonsControl.classList.add('d-none');
-            this.cifraPlayer.atualizarVolumeStringsParaOrgao();
-        }
-        else {
-            this.cifraPlayer.instrumento = 'epiano';
-            this.cifraPlayer.attack = 0;
-            this.elements.rhythmButtonsControl.classList.remove('d-none');
-            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
-        }
-    }
-
     exibirInstrument(instrument) {
         if (instrument === 'orgao') {
             this.cifraPlayer.attack = 0.2;
@@ -572,8 +557,7 @@ class App {
         if (selectItem && selectItem !== 'acordes__') {
             const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem);
             this.showLetraCifra(saveData);
-
-            this.exibirBotaoInstrumento(selectItem);
+            this.escolherStyle(saveData.style);
         }
         else {
             this.uiController.resetInterface();
