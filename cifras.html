@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Detector de Acordes Vocal</title>
+    <title>Detector Vocal & Harmônico</title>
     <style>
         :root {
             --bg-color: #121212;
             --text-color: #ffffff;
-            --accent-color: #00d4ff; /* Ciano */
-            --chord-color: #ffcc00; /* Amarelo Ouro */
-            --btn-start: #1db954;
-            --btn-stop: #ff4d4d;
+            --accent-color: #00e676; /* Verde Matrix */
+            --chord-color: #ffab00; /* Laranja/Ouro */
+            --btn-start: #2979ff;
+            --btn-stop: #ff1744;
         }
 
         body {
@@ -30,142 +30,152 @@
         }
 
         .container {
-            text-align: center;
             width: 100%;
             max-width: 400px;
             padding: 20px;
+            text-align: center;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
-        /* Área do Acorde (Destaque) */
-        .chord-section {
+        /* --- ÁREA DO ACORDE --- */
+        .chord-box {
             background: #1e1e1e;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 12px;
             border: 1px solid #333;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .chord-label {
-            font-size: 0.9rem;
-            color: #888;
-            text-transform: uppercase;
+        .chord-title {
+            font-size: 0.8rem;
+            color: #666;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        .chord-display {
-            font-size: 4rem;
+        .chord-result {
+            font-size: 3.5rem;
             font-weight: 800;
             color: var(--chord-color);
-            min-height: 80px;
-            text-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
+            text-shadow: 0 0 15px rgba(255, 171, 0, 0.2);
+            min-height: 70px;
         }
 
-        .notes-history {
-            font-size: 1rem;
-            color: #aaa;
-            min-height: 24px;
+        .chord-history {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #888;
+            min-height: 20px;
+            margin-top: 5px;
+        }
+
+        /* --- ÁREA DA NOTA --- */
+        .note-wrapper {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .note-main {
+            font-size: 4rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            width: 80px;
+            text-align: right;
+        }
+
+        .hz-detail {
+            font-size: 1.2rem;
+            color: #555;
+            width: 80px;
+            text-align: left;
             font-family: monospace;
         }
 
-        /* Área da Nota Atual (Menor agora) */
-        .current-note-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: var(--accent-color);
-        }
-
-        .note-mini {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-
-        .freq-mini {
-            font-size: 1rem;
-            color: #666;
-            width: 60px;
-            text-align: left;
-        }
-
-        /* Indicador Visual */
-        .tuner-bar {
-            width: 60%;
-            height: 4px;
+        /* --- AFINADOR VISUAL --- */
+        .tuner-container {
+            width: 80%;
+            height: 6px;
             background: #333;
-            border-radius: 2px;
+            border-radius: 3px;
             position: relative;
-            margin: 10px auto;
+            margin: 20px auto;
         }
 
-        .tuner-marker {
-            width: 2px;
-            height: 10px;
-            background: #fff;
+        .tuner-center {
             position: absolute;
             left: 50%;
-            top: -3px;
-            transform: translateX(-50%);
+            top: -4px;
+            bottom: -4px;
+            width: 2px;
+            background: #fff;
         }
 
-        .tuner-dot {
-            width: 12px;
-            height: 12px;
+        .tuner-ball {
+            width: 14px;
+            height: 14px;
             background: var(--accent-color);
             border-radius: 50%;
             position: absolute;
             top: -4px;
             left: 50%;
             transform: translateX(-50%);
-            transition: left 0.1s;
+            transition: left 0.1s ease-out, background-color 0.2s;
         }
 
-        /* Botão */
-        .mic-button {
+        /* --- CONTROLES --- */
+        .mic-btn {
             width: 70px;
             height: 70px;
             border-radius: 50%;
+            background: var(--btn-start);
             border: none;
-            background-color: var(--btn-start);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
             cursor: pointer;
-            margin: 10px auto;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 10px auto;
             transition: transform 0.1s;
         }
 
-            .mic-button:active {
+            .mic-btn:active {
                 transform: scale(0.95);
             }
 
-            .mic-button.listening {
-                background-color: var(--btn-stop);
-                animation: pulse 1.5s infinite;
+            .mic-btn.active {
+                background: var(--btn-stop);
+                animation: pulse 2s infinite;
             }
 
         .mic-icon {
-            width: 28px;
-            height: 28px;
+            width: 30px;
+            height: 30px;
             fill: white;
+        }
+
+        .status {
+            margin-top: 10px;
+            color: #555;
+            font-size: 0.9rem;
         }
 
         @keyframes pulse {
             0% {
-                box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7);
+                box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.4);
             }
 
             70% {
-                box-shadow: 0 0 0 15px rgba(255, 77, 77, 0);
+                box-shadow: 0 0 0 15px rgba(255, 23, 68, 0);
             }
 
             100% {
-                box-shadow: 0 0 0 0 rgba(255, 77, 77, 0);
+                box-shadow: 0 0 0 0 rgba(255, 23, 68, 0);
             }
         }
     </style>
@@ -173,171 +183,280 @@
 <body>
 
     <div class="container">
-        <!-- Seção do Acorde Sugerido -->
-        <div class="chord-section">
-            <div class="chord-label">Acorde Sugerido</div>
-            <div class="chord-display" id="chord">...</div>
-            <div class="notes-history" id="history">Cante para começar</div>
+
+        <!-- Seção de Harmonia -->
+        <div class="chord-box">
+            <div class="chord-title">Provável Acorde</div>
+            <div class="chord-result" id="chordDisplay">...</div>
+            <div class="chord-history" id="historyDisplay">Histórico: -</div>
         </div>
 
-        <!-- Seção da Nota Atual -->
-        <div class="current-note-wrapper">
-            <div class="note-mini" id="note">--</div>
-            <div class="freq-mini" id="freq">0Hz</div>
+        <!-- Seção de Melodia -->
+        <div class="note-wrapper">
+            <div class="note-main" id="noteDisplay">--</div>
+            <div class="hz-detail" id="freqDisplay">0 Hz</div>
         </div>
 
-        <div class="tuner-bar">
-            <div class="tuner-marker"></div>
-            <div class="tuner-dot" id="indicator"></div>
+        <!-- Afinador -->
+        <div class="tuner-container">
+            <div class="tuner-center"></div>
+            <div class="tuner-ball" id="tunerIndicator"></div>
         </div>
 
-        <button class="mic-button" id="micBtn">
-            <svg class="mic-icon" viewBox="0 0 24 24">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-            </svg>
+        <button class="mic-btn" id="micBtn">
+            <svg class="mic-icon" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" /><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" /></svg>
         </button>
+        <div class="status" id="statusText">Toque para ouvir</div>
+
     </div>
 
     <script>
-        // TEORIA MUSICAL E SETUP
-        const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        // --- CONFIGURAÇÕES DE FILTRO (Ajuste fino) ---
+        const CONF = {
+            noiseThreshold: 0.03, // Aumentei para filtrar mais ruído de fundo (Gate)
+            minFreq: 85,          // Filtra sons muito graves (baixo de E2)
+            maxFreq: 1050,        // Filtra sons muito agudos (acima de C6)
+            stableFrames: 4,      // Quantas vezes a nota precisa repetir para aparecer na tela (Anti-Jitter)
+            historySize: 6,       // Quantas notas lembrar para formar o acorde
+            chordResetTime: 3000  // Tempo em ms para limpar o acorde se parar de cantar
+        };
 
-        // Definição simples de acordes (Intervalos a partir da tônica)
-        // Maior: 0 (Tônica), 4 (Terça Maior), 7 (Quinta Justa)
-        // Menor: 0 (Tônica), 3 (Terça Menor), 7 (Quinta Justa)
+        const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
+        // Variáveis de Estado
         let audioContext = null;
         let analyser = null;
-        let isListening = false;
+        let isRunning = false;
+        let animationFrame = null;
 
-        // Configurações
-        const NOISE_THRESHOLD = 0.03;
-        const HISTORY_SIZE = 5; // Quantas notas passadas lembrar
-        const CLEAR_TIMER_MS = 3000; // Tempo para limpar o acorde se parar de cantar
-
-        // Estado
-        let detectedNotesHistory = []; // Armazena índices [0, 4, 7...]
-        let lastDetectedNoteIndex = -1;
-        let noteStabilizerCount = 0;
-        let clearChordTimeout = null;
+        // Buffers para processamento
+        let stabilityBuffer = []; // Buffer curto para estabilizar a nota visualmente
+        let chordHistory = [];    // Buffer longo para detectar harmonia
+        let silenceTimer = null;
 
         // Elementos DOM
-        const chordElem = document.getElementById("chord");
-        const historyElem = document.getElementById("history");
-        const noteElem = document.getElementById("note");
-        const freqElem = document.getElementById("freq");
-        const indicatorElem = document.getElementById("indicator");
-        const btnElem = document.getElementById("micBtn");
+        const el = {
+            note: document.getElementById('noteDisplay'),
+            freq: document.getElementById('freqDisplay'),
+            chord: document.getElementById('chordDisplay'),
+            history: document.getElementById('historyDisplay'),
+            indicator: document.getElementById('tunerIndicator'),
+            btn: document.getElementById('micBtn'),
+            status: document.getElementById('statusText')
+        };
 
-        btnElem.addEventListener("click", toggleMic);
+        el.btn.addEventListener('click', toggleAudio);
 
-        async function toggleMic() {
-            if (isListening) stopListening();
-            else await startListening();
+        async function toggleAudio() {
+            if (isRunning) stopAudio();
+            else await startAudio();
         }
 
-        async function startListening() {
+        async function startAudio() {
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+
+                // Configura microfone com cancelamento de eco nativo do navegador
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: false // Importante para música
+                    }
+                });
+
                 const source = audioContext.createMediaStreamSource(stream);
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 2048;
                 source.connect(analyser);
 
-                isListening = true;
-                btnElem.classList.add("listening");
-                updateLoop();
+                isRunning = true;
+                el.btn.classList.add('active');
+                el.status.innerText = "Capturando voz...";
+                processAudio();
             } catch (err) {
-                alert("Erro ao acessar microfone.");
+                console.error(err);
+                alert("Erro: Permissão de microfone negada ou site sem HTTPS.");
             }
         }
 
-        function stopListening() {
-            isListening = false;
-            btnElem.classList.remove("listening");
-            resetState();
+        function stopAudio() {
+            isRunning = false;
+            el.btn.classList.remove('active');
+            el.status.innerText = "Pausado";
+            el.note.innerText = "--";
+            el.chord.innerText = "...";
+            el.freq.innerText = "0 Hz";
+            el.indicator.style.left = "50%";
+
             if (audioContext) audioContext.close();
+            cancelAnimationFrame(animationFrame);
+            stabilityBuffer = [];
+            chordHistory = [];
         }
 
-        function resetState() {
-            noteElem.innerText = "--";
-            chordElem.innerText = "...";
-            historyElem.innerText = "Parado";
-            freqElem.innerText = "0Hz";
-            detectedNotesHistory = [];
-            indicatorElem.style.left = "50%";
+        // --- LOOP DE PROCESSAMENTO ---
+        function processAudio() {
+            if (!isRunning) return;
+
+            const buffer = new Float32Array(analyser.fftSize);
+            analyser.getFloatTimeDomainData(buffer);
+
+            // 1. Algoritmo de Autocorrelação (Pitch Detection)
+            const pitch = autoCorrelate(buffer, audioContext.sampleRate);
+
+            // 2. Validação da Frequência (Filtros)
+            if (pitch !== -1 && pitch > CONF.minFreq && pitch < CONF.maxFreq) {
+
+                // Cancela o timer de "limpar acorde" pois estamos ouvindo algo
+                clearTimeout(silenceTimer);
+
+                const noteData = getNoteFromPitch(pitch);
+
+                // 3. Estabilização Visual (Buffer de suavização)
+                // Só mostramos a nota se ela se repetir por X frames (evita piscar notas erradas)
+                stabilityBuffer.push(noteData.index);
+                if (stabilityBuffer.length > CONF.stableFrames) stabilityBuffer.shift();
+
+                // Verifica se todas as notas no buffer são iguais
+                const isStable = stabilityBuffer.every(val => val === stabilityBuffer[0]);
+
+                if (isStable && stabilityBuffer.length === CONF.stableFrames) {
+                    updateVisuals(noteData, pitch);
+                    processChordLogic(noteData.index);
+                }
+
+            } else {
+                // Se silêncio detectado
+                handleSilence();
+            }
+
+            animationFrame = requestAnimationFrame(processAudio);
         }
 
-        // --- LÓGICA DE DETECÇÃO DE ACORDES ---
-        function analyzeChord(notesBuffer) {
-            if (notesBuffer.length < 2) return "..."; // Precisa de pelo menos 2 notas distintas
+        // --- LÓGICA DE ACORDES (Music Theory) ---
+        function processChordLogic(noteIndex) {
+            // Só adiciona ao histórico se for uma nota diferente da última capturada (evita repetição rápida)
+            const lastNote = chordHistory[chordHistory.length - 1];
+
+            if (lastNote !== noteIndex) {
+                chordHistory.push(noteIndex);
+                if (chordHistory.length > CONF.historySize) chordHistory.shift();
+
+                // Atualiza texto do histórico
+                el.history.innerText = chordHistory.map(i => NOTES[i]).join(" - ");
+
+                // Tenta identificar o acorde
+                const chord = detectChord(chordHistory);
+                if (chord) {
+                    el.chord.innerText = chord;
+                    el.chord.style.transform = "scale(1.1)"; // Pequeno pop visual
+                    setTimeout(() => el.chord.style.transform = "scale(1)", 150);
+                }
+            }
+        }
+
+        function detectChord(history) {
+            if (history.length < 2) return null;
 
             let bestScore = 0;
-            let bestChordName = "";
+            let bestChord = "";
 
-            // Testa para cada uma das 12 notas se ela é a Tônica de um acorde provável
+            // Testa todos os 12 tons como Tônica
             for (let root = 0; root < 12; root++) {
+                // Definição dos Acordes (Intervalos)
+                // Maior: 0, 4, 7 | Menor: 0, 3, 7 | Diminuto: 0, 3, 6
+                const types = [
+                    { name: "", intervals: [0, 4, 7] },       // Maior
+                    { name: "m", intervals: [0, 3, 7] },      // Menor
+                    { name: "dim", intervals: [0, 3, 6] }     // Diminuto
+                ];
 
-                // 1. Testa Acorde MAIOR (Tônica + 4 + 7)
-                let majorNotes = [root, (root + 4) % 12, (root + 7) % 12];
-                let majorScore = calculateScore(notesBuffer, majorNotes);
+                types.forEach(type => {
+                    // Cria o conjunto de notas do acorde hipotético
+                    const targetNotes = type.intervals.map(i => (root + i) % 12);
 
-                if (majorScore > bestScore) {
-                    bestScore = majorScore;
-                    bestChordName = notes[root]; // Ex: C
-                }
+                    // Verifica quantas notas do nosso histórico encaixam nesse acorde
+                    // Usamos Set para contar notas únicas (C, E, C, G vale como 3 match, não 4)
+                    const uniqueHistory = [...new Set(history)];
+                    let matchCount = 0;
 
-                // 2. Testa Acorde MENOR (Tônica + 3 + 7)
-                let minorNotes = [root, (root + 3) % 12, (root + 7) % 12];
-                let minorScore = calculateScore(notesBuffer, minorNotes);
+                    uniqueHistory.forEach(n => {
+                        if (targetNotes.includes(n)) matchCount++;
+                    });
 
-                if (minorScore > bestScore) {
-                    bestScore = minorScore;
-                    bestChordName = notes[root] + "m"; // Ex: Cm
-                }
+                    // Sistema de pontuação:
+                    // Se o histórico tem 3 notas e as 3 estão no acorde = Score perfeito
+                    if (matchCount > bestScore) {
+                        bestScore = matchCount;
+                        bestChord = NOTES[root] + type.name;
+                    }
+                });
             }
 
-            // Exibir apenas se tiver confiança mínima (score arbitrário baseado no tamanho do buffer)
-            if (bestScore >= 2) {
-                return bestChordName;
+            // Só retorna se tivermos pelo menos 2 notas de evidência
+            return bestScore >= 2 ? bestChord : "...";
+        }
+
+        // --- FUNÇÕES AUXILIARES ---
+
+        function handleSilence() {
+            // Se já não tiver um timer rodando, inicia um para limpar o acorde
+            if (!silenceTimer) {
+                silenceTimer = setTimeout(() => {
+                    el.chord.innerText = "...";
+                    el.history.innerText = "Aguardando...";
+                    chordHistory = []; // Limpa memória musical
+                    el.note.innerText = "--"; // Opcional: limpar nota principal
+                    silenceTimer = null;
+                }, CONF.chordResetTime);
             }
-            return "...";
         }
 
-        function calculateScore(buffer, chordNotes) {
-            // Conta quantas notas do buffer existem dentro do acorde alvo
-            let score = 0;
-            // Usamos Set para contar notas únicas que deram match
-            let matches = new Set();
+        function updateVisuals(noteData, pitch) {
+            el.note.innerText = noteData.name;
+            el.note.style.color = (Math.abs(noteData.cents) < 10) ? "#00e676" : "#ffffff";
 
-            buffer.forEach(note => {
-                if (chordNotes.includes(note)) {
-                    matches.add(note);
-                }
-            });
+            el.freq.innerText = Math.round(pitch) + " Hz";
 
-            // O score é baseado em quantas notas DISTINTAS do acorde foram cantadas.
-            // Ex: Cantar C e E dá 2 pontos para C Maior. Cantar C, E, G dá 3 pontos.
-            return matches.size;
+            // Movimento da bolinha do afinador
+            // Mapeia -50 cents a +50 cents para 0% a 100% da barra
+            let percent = 50 + (noteData.cents); // Simplificado 1 cent = 1% visualmente na região central
+            percent = Math.max(5, Math.min(95, percent)); // Clamp
+            el.indicator.style.left = percent + "%";
+            el.indicator.style.backgroundColor = (Math.abs(noteData.cents) < 10) ? "#00e676" : "#2979ff";
         }
 
-        // --- LÓGICA DE ÁUDIO ---
+        function getNoteFromPitch(frequency) {
+            const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+            const midi = Math.round(noteNum) + 69;
+            const index = midi % 12;
+            const name = NOTES[index];
+
+            // Calcula quão desafinado está (Cents)
+            const perfectFreq = 440 * Math.pow(2, (midi - 69) / 12);
+            const cents = Math.floor(1200 * (Math.log(frequency / perfectFreq) / Math.log(2)));
+
+            return { name, index, cents, midi };
+        }
+
         function autoCorrelate(buf, sampleRate) {
             let SIZE = buf.length;
             let rms = 0;
+
+            // Gate de Ruído
             for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
             rms = Math.sqrt(rms / SIZE);
+            if (rms < CONF.noiseThreshold) return -1;
 
-            if (rms < NOISE_THRESHOLD) return -1;
-
+            // Autocorrelação
             let r1 = 0, r2 = SIZE - 1, thres = 0.2;
             for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
             for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
 
             buf = buf.slice(r1, r2);
             SIZE = buf.length;
+
             let c = new Array(SIZE).fill(0);
             for (let i = 0; i < SIZE; i++) for (let j = 0; j < SIZE - i; j++) c[i] = c[i] + buf[j] * buf[j + i];
 
@@ -345,6 +464,7 @@
             let maxval = -1, maxpos = -1;
             for (let i = d; i < SIZE; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
             let T0 = maxpos;
+
             let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
             let a = (x1 + x3 - 2 * x2) / 2;
             let b = (x3 - x1) / 2;
@@ -352,75 +472,7 @@
 
             return sampleRate / T0;
         }
-
-        function updateLoop() {
-            if (!isListening) return;
-
-            const buf = new Float32Array(analyser.fftSize);
-            analyser.getFloatTimeDomainData(buf);
-            const pitch = autoCorrelate(buf, audioContext.sampleRate);
-
-            if (pitch !== -1 && pitch > 80 && pitch < 1200) {
-                // Reinicia timer de limpeza
-                clearTimeout(clearChordTimeout);
-                clearChordTimeout = setTimeout(() => {
-                    detectedNotesHistory = []; // Limpa histórico se ficar silêncio
-                    historyElem.innerText = "Silêncio...";
-                    chordElem.innerText = "...";
-                }, CLEAR_TIMER_MS);
-
-                const noteNum = 12 * (Math.log(pitch / 440) / Math.log(2));
-                const noteRounded = Math.round(noteNum) + 69;
-                const noteIndex = noteRounded % 12;
-
-                // Mostra nota atual
-                noteElem.innerText = notes[noteIndex];
-                freqElem.innerText = Math.round(pitch) + "Hz";
-
-                // Visualização Cents
-                const cents = Math.floor(1200 * (Math.log(pitch / (440 * Math.pow(2, (noteRounded - 69) / 12))) / Math.log(2)));
-                let visualPos = 50 + (cents / 50) * 45;
-                indicatorElem.style.left = Math.min(95, Math.max(5, visualPos)) + "%";
-
-                // --- Lógica de Histórico para Acordes ---
-                // Só adiciona ao histórico se a nota estabilizar (evitar notas de passagem rápidas)
-                if (noteIndex === lastDetectedNoteIndex) {
-                    noteStabilizerCount++;
-
-                    // Se a nota se manteve por alguns frames E não é repetida no topo da pilha
-                    if (noteStabilizerCount > 5) {
-                        // Se a última nota gravada no array não for igual a essa (evitar [C, C, C])
-                        if (detectedNotesHistory[detectedNotesHistory.length - 1] !== noteIndex) {
-
-                            detectedNotesHistory.push(noteIndex);
-
-                            // Mantém apenas as últimas X notas
-                            if (detectedNotesHistory.length > HISTORY_SIZE) {
-                                detectedNotesHistory.shift();
-                            }
-
-                            // Atualiza UI do histórico
-                            const historyNames = detectedNotesHistory.map(i => notes[i]).join(" - ");
-                            historyElem.innerText = historyNames;
-
-                            // Tenta adivinhar o acorde
-                            const guess = analyzeChord(detectedNotesHistory);
-                            if (guess !== "...") {
-                                chordElem.innerText = guess;
-                                // Efeito visual de pulso quando muda o acorde
-                                chordElem.style.transform = "scale(1.1)";
-                                setTimeout(() => chordElem.style.transform = "scale(1)", 200);
-                            }
-                        }
-                    }
-                } else {
-                    lastDetectedNoteIndex = noteIndex;
-                    noteStabilizerCount = 0;
-                }
-            }
-
-            requestAnimationFrame(updateLoop);
-        }
     </script>
+
 </body>
 </html>
