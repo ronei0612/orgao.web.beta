@@ -28,6 +28,7 @@ class App {
         this.musicaEscolhida = false;
         this.selectItemAntes = null;
         this.LOCAL_STORAGE_SAVES_KEY = 'saves';
+        this.LOCAL_STORAGE_ACORDES_KEY = 'savesAcordes';
         this.API_BASE_URL = 'https://apinode-h4wt.onrender.com';
         this.STYLES_LOCAL_KEY = 'drumStylesData';
         this.VERSION_LOCAL_KEY = 'versao_app';
@@ -65,13 +66,13 @@ class App {
         await this.melodyUI.init();
 
         //if (this.BASE_URL.includes('http')) {
-            document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
-            document.getElementById('styleButtons').classList.remove('d-none');
-            document.getElementById('drumEditor').classList.remove('d-none');
-            document.getElementById('melodyTracks').classList.remove('d-none');
-            document.getElementById('stepsMelody').classList.remove('d-none');
-            document.getElementById('melodySaveControl').classList.remove('d-none');
-            document.getElementById('save-melody').classList.remove('d-none');
+            //document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
+            //document.getElementById('styleButtons').classList.remove('d-none');
+            //document.getElementById('drumEditor').classList.remove('d-none');
+            //document.getElementById('melodyTracks').classList.remove('d-none');
+            //document.getElementById('stepsMelody').classList.remove('d-none');
+            //document.getElementById('melodySaveControl').classList.remove('d-none');
+            //document.getElementById('save-melody').classList.remove('d-none');
         //}
     }
 
@@ -291,16 +292,23 @@ class App {
             const acordesMode = !this.elements.acorde1.classList.contains('d-none');
 
             if (acordesMode) {
-                var localStorageSalvar = 'TomAcordes';
+                let localStorageSalvar = 'acordes';
                 if (!this.elements.liturgiaDiariaFrame.classList.contains('d-none')) {
-                    localStorageSalvar = 'Tom' + 'liturgiaDiariaFrame';
+                    localStorageSalvar = 'liturgiaDiariaFrame';
                 } else if (!this.elements.santamissaFrame.classList.contains('d-none')) {
-                    localStorageSalvar = 'Tom' + 'santamissaFrame';
+                    localStorageSalvar = 'santamissaFrame';
                 } else if (!this.elements.oracoesFrame.classList.contains('d-none')) {
-                    localStorageSalvar = 'Tom' + 'oracoesFrame';
+                    localStorageSalvar = 'oracoesFrame';
                 }
 
-                this.localStorageManager.save(localStorageSalvar, selectedTom);
+                const metaData = {
+                    key: selectedTom,
+                    instrument: this.cifraPlayer.instrumento,
+                    style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
+                    bpm: this.elements.bpmInput.value
+                }
+
+                this.localStorageManager.saveJson(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar, metaData);
                 this.cifraPlayer.preencherAcordes(selectedTom);
             }
             else {
@@ -382,13 +390,6 @@ class App {
         this.uiController.exibirBotoesAcordes();
         this.cifraPlayer.preencherSelectCifras('C');
         this.exibirInstrument(this.cifraPlayer.instrumento);
-    }
-
-    exibirBotaoInstrumento(selectItem) {
-        const instrumento = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem).instrument;
-        if (instrumento) {
-            this.escolherInstrumento(instrumento);
-        }
     }
 
     async handleDeleteSaveClick() {
@@ -487,8 +488,8 @@ class App {
     verifyLetraOuCifra(texto, saveData) {
         if (texto.includes('<pre class="cifra">')) {
             let tom = 'C';
-            if (saveData && saveData.tom && saveData.tom !== '') {
-                tom = saveData.tom;
+            if (saveData && saveData.key && saveData.key !== '') {
+                tom = saveData.key;
             }
             else {
                 tom = this.cifraPlayer.descobrirTom(texto);
@@ -506,6 +507,10 @@ class App {
             this.cifraPlayer.preencherIframeCifra(texto);
         }
 
+        this.preencherPaginaDoLocalStorage(saveData);
+    }
+
+    preencherPaginaDoLocalStorage(saveData) {
         if (saveData && saveData.instrument) {
             this.cifraPlayer.instrumento = saveData.instrument;
             this.exibirInstrument(saveData.instrument);
@@ -562,9 +567,17 @@ class App {
         else {
             this.uiController.resetInterface();
             this.uiController.exibirBotoesAcordes();
-            var tom = this.localStorageManager.getText('TomAcordes');
-            if (tom === '')
-                tom = 'C';
+            var saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_ACORDES_KEY, 'acordes');
+            let tom = 'C';
+
+            if (saveData) {
+                if (saveData.key) {
+                    tom = saveData.key;
+                    this.preencherPaginaDoLocalStorage(saveData);
+                }
+                else if (saveData !== '')
+                    tom = saveData;
+            }
 
             this.cifraPlayer.preencherSelectAcordes(tom);
             this.cifraPlayer.preencherAcordes(tom);
@@ -789,9 +802,18 @@ class App {
     }
 
     exibirFrame(frameId) {
-        var tom = this.localStorageManager.getText('Tom' + frameId);
-        if (tom === '')
-            tom = 'C';
+        var saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_ACORDES_KEY, frameId);
+        let tom = 'C';
+
+        if (saveData) {
+            if (saveData.key) {
+                tom = saveData.key;
+                this.preencherPaginaDoLocalStorage(saveData);
+            }
+            else if (saveData !== '')
+                tom = saveData;
+        }
+
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
         this.cifraPlayer.preencherAcordes(tom);
