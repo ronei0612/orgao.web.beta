@@ -576,6 +576,16 @@ class App {
         }
     }
 
+    escolherStyle(style) {
+        if (this.cifraPlayer.instrumento === 'orgao') {
+            this.elements.melodyStyleSelect.value = style;
+        }
+        else {
+            this.elements.drumStyleSelect.value = style;
+
+        }
+    }
+
     getUrlParam(param = 'selecao') {
         const urlParams = new URLSearchParams(window.location.search);
 
