@@ -89,6 +89,7 @@ class MelodyMachine {
         const gainNode = this.audioContext.createGain();
 
         source.buffer = buffer;
+        source.loop = true;
 
         gainNode.gain.setValueAtTime(0.001, time);
         gainNode.gain.exponentialRampToValueAtTime(volume, time + this.attackTime);
