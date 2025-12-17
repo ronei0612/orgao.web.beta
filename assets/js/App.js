@@ -286,29 +286,26 @@ class App {
         $('#searchModal').modal('hide');
     }
 
+    getIframeStorageName() {
+        let localStorageSalvar = 'acordes';
+        if (!this.elements.liturgiaDiariaFrame.classList.contains('d-none')) {
+            localStorageSalvar = 'liturgiaDiariaFrame';
+        } else if (!this.elements.santamissaFrame.classList.contains('d-none')) {
+            localStorageSalvar = 'santamissaFrame';
+        } else if (!this.elements.oracoesFrame.classList.contains('d-none')) {
+            localStorageSalvar = 'oracoesFrame';
+        }
+        return localStorageSalvar;
+    }
+
     handleTomSelectChange(event) {
         const selectedTom = this.elements.tomSelect.value;
         if (selectedTom) {
             const acordesMode = !this.elements.acorde1.classList.contains('d-none');
 
             if (acordesMode) {
-                let localStorageSalvar = 'acordes';
-                if (!this.elements.liturgiaDiariaFrame.classList.contains('d-none')) {
-                    localStorageSalvar = 'liturgiaDiariaFrame';
-                } else if (!this.elements.santamissaFrame.classList.contains('d-none')) {
-                    localStorageSalvar = 'santamissaFrame';
-                } else if (!this.elements.oracoesFrame.classList.contains('d-none')) {
-                    localStorageSalvar = 'oracoesFrame';
-                }
-
-                const metaData = {
-                    key: selectedTom,
-                    instrument: this.cifraPlayer.instrumento,
-                    style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
-                    bpm: this.elements.bpmInput.value
-                }
-
-                this.localStorageManager.saveJson(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar, metaData);
+                const localStorageSalvar = this.getIframeStorageName();
+                this.salvarMetaDataNoLocalStorage(localStorageSalvar);
                 this.cifraPlayer.preencherAcordes(selectedTom);
             }
             else {
@@ -388,7 +385,7 @@ class App {
         this.uiController.editarMusica();
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
-        this.cifraPlayer.preencherSelectCifras('C');
+        this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value);
         this.exibirInstrument(this.cifraPlayer.instrumento);
     }
 
@@ -483,6 +480,11 @@ class App {
         }
 
         this.exibirInstrument(this.cifraPlayer.instrumento);
+
+        if (!this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__') {
+            const localStorageSalvar = this.getIframeStorageName();
+            this.salvarMetaDataNoLocalStorage(localStorageSalvar);
+        }
     }
 
     verifyLetraOuCifra(texto, saveData) {
@@ -518,9 +520,11 @@ class App {
 
             if (saveData.instrument === 'orgao') {
                 this.elements.melodyStyleSelect.value = saveData.style;
+                this.uiController.esconderElementosBateria();
             }
             else {
                 this.elements.drumStyleSelect.value = saveData.style;
+                this.uiController.exibirElementosBateria();
             }
         }
     }
@@ -534,20 +538,24 @@ class App {
         this.cifraPlayer.indiceAcorde = 0;
     }
 
+    salvarMetaDataNoLocalStorage(item) {
+        const metaData = {
+            chords: this.elements.iframeCifra.contentDocument.body.innerText,
+            key: this.elements.tomSelect.value,
+            instrument: this.cifraPlayer.instrumento,
+            style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
+            bpm: this.elements.bpmInput.value
+        };
+
+        this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, item, metaData);
+    }
+
     async verificarTrocouTom() {
         if (this.cifraPlayer.tomOriginal && this.cifraPlayer.tomOriginal !== this.cifraPlayer.tomAtual) {
             const tom = this.cifraPlayer.tomAtual;
             const confirmed = await this.uiController.customConfirm(`Você trocou de tom de ${this.cifraPlayer.tomOriginal} para ${tom}. Substituir novo tom?`);
             if (confirmed) {
-                const metaData = {
-                    chords: this.elements.iframeCifra.contentDocument.body.innerText,
-                    key: tom,
-                    instrument: this.cifraPlayer.instrumento,
-                    style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
-                    bpm: this.elements.bpmInput.value
-                };
-
-                this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, this.selectItemAntes, metaData);
+                this.salvarMetaDataNoLocalStorage(this.selectItemAntes);
             }
             this.cifraPlayer.tomOriginal = null;
         }
@@ -802,6 +810,10 @@ class App {
     }
 
     exibirFrame(frameId) {
+        this.uiController.resetInterface(true);
+        this.uiController.exibirBotoesTom();
+        this.uiController.exibirBotoesAcordes();
+
         var saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_ACORDES_KEY, frameId);
         let tom = 'C';
 
@@ -813,9 +825,6 @@ class App {
             else if (saveData !== '')
                 tom = saveData;
         }
-
-        this.uiController.exibirBotoesTom();
-        this.uiController.exibirBotoesAcordes();
         this.cifraPlayer.preencherAcordes(tom);
         this.cifraPlayer.preencherSelectCifras(tom);
         this.uiController.exibirFrame(frameId);
@@ -1083,15 +1092,7 @@ class App {
             this.localStorageManager.editarNome(this.LOCAL_STORAGE_SAVES_KEY, oldSaveName, newSaveName);
         }
 
-        const metaData = {
-            chords: this.elements.editTextarea.value,
-            key: this.elements.tomSelect.value,
-            instrument: this.cifraPlayer.instrumento,
-            style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
-            bpm: this.elements.bpmInput.value
-        };
-
-        this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, metaData);
+        this.salvarMetaDataNoLocalStorage(newSaveName);
         this.elements.savesSelect.value = newSaveName;
 
         this.uiController.exibirIframeCifra();
