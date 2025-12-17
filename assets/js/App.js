@@ -42,7 +42,6 @@ class App {
         this.warmupApi();
         this.setupDarkMode();
         this.migrateLocalStorageSaves();
-
         this.uiController.exibirListaSaves();
         this.uiController.injetarEstilosNoIframeCifra();
 
@@ -305,7 +304,7 @@ class App {
 
             if (acordesMode) {
                 const localStorageSalvar = this.getIframeStorageName();
-                this.salvarMetaDataNoLocalStorage(localStorageSalvar);
+                this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
                 this.cifraPlayer.preencherAcordes(selectedTom);
             }
             else {
@@ -483,7 +482,7 @@ class App {
 
         if (!this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__') {
             const localStorageSalvar = this.getIframeStorageName();
-            this.salvarMetaDataNoLocalStorage(localStorageSalvar);
+            this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
         }
     }
 
@@ -538,7 +537,7 @@ class App {
         this.cifraPlayer.indiceAcorde = 0;
     }
 
-    salvarMetaDataNoLocalStorage(item) {
+    salvarMetaDataNoLocalStorage(name, item) {
         const metaData = {
             chords: this.elements.iframeCifra.contentDocument.body.innerText,
             key: this.elements.tomSelect.value,
@@ -547,7 +546,7 @@ class App {
             bpm: this.elements.bpmInput.value
         };
 
-        this.localStorageManager.saveJson(this.LOCAL_STORAGE_SAVES_KEY, item, metaData);
+        this.localStorageManager.saveJson(name, item, metaData);
     }
 
     async verificarTrocouTom() {
@@ -555,7 +554,7 @@ class App {
             const tom = this.cifraPlayer.tomAtual;
             const confirmed = await this.uiController.customConfirm(`Você trocou de tom de ${this.cifraPlayer.tomOriginal} para ${tom}. Substituir novo tom?`);
             if (confirmed) {
-                this.salvarMetaDataNoLocalStorage(this.selectItemAntes);
+                this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, this.selectItemAntes);
             }
             this.cifraPlayer.tomOriginal = null;
         }
@@ -1092,7 +1091,7 @@ class App {
             this.localStorageManager.editarNome(this.LOCAL_STORAGE_SAVES_KEY, oldSaveName, newSaveName);
         }
 
-        this.salvarMetaDataNoLocalStorage(newSaveName);
+        this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName);
         this.elements.savesSelect.value = newSaveName;
 
         this.uiController.exibirIframeCifra();
