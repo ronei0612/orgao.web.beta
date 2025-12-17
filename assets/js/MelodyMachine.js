@@ -5,12 +5,15 @@ class MelodyMachine {
         this.cifraPlayer = cifraPlayer;
         this.attackTime = 0.02;
         this.releaseTime = 0.1;
-
+        this.buffers = new Map();
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioPath = this.baseUrl + '/assets/audio/Orgao';
+        this.instrument = 'orgao';
         this.instruments = [
-            { note: 0, name: 'orgao', octave: '' },
-            { note: 2, name: 'orgao', octave: '_baixo' },
-            { note: 1, name: 'orgao', octave: '_baixo' },
-            { note: 0, name: 'orgao', octave: '_baixo' }
+            { note: 0, name: this.instrument, octave: '' },
+            { note: 2, name: this.instrument, octave: '_baixo' },
+            { note: 1, name: this.instrument, octave: '_baixo' },
+            { note: 0, name: this.instrument, octave: '_baixo' }
         ];
 
         this.acordes = {
@@ -35,8 +38,8 @@ class MelodyMachine {
             'f_m': ['f__baixo', 'a_baixo', 'c_'],
             'gm': ['g_baixo', 'a__baixo', 'd'],
             'g_m': ['g__baixo', 'b_baixo', 'd_'],
-            'am': ['a_baixo', 'c_', 'e'],
-            'a_m': ['a__baixo', 'd__', 'f'],
+            'am': ['a_baixo', 'c', 'e'],
+            'a_m': ['a__baixo', 'c_', 'f'],
             'bm': ['b_baixo', 'd', 'f_']
         };
 
@@ -55,15 +58,27 @@ class MelodyMachine {
         this.init();
     }
 
-    get audioContext() {
-        return this.cifraPlayer.audioContextManager.audioContext;
-    }
+    async loadSounds() {
+        const notasUnicas = new Set(Object.values(this.acordes).flat());
+        const loadPromises = [];
 
-    get buffers() {
-        return this.cifraPlayer.audioContextManager.buffers;
+        for (const nota of notasUnicas) {
+            const name = `${this.instrument}_${nota}`;
+            const url = `${this.audioPath}/${name}.ogg`;
+
+            loadPromises.push((async () => {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+                this.buffers.set(name, audioBuffer);
+            })());
+        }
+
+        await Promise.all(loadPromises);
     }
 
     async init() {
+        await this.loadSounds();
         await this.getStyles();
     }
 
@@ -81,7 +96,6 @@ class MelodyMachine {
         }
     }
 
-    // --- MODIFICADO: playSound agora tem um Attack suave ---
     playSound(buffer, time, volume = 1) {
         if (!buffer) return null;
 
@@ -171,7 +185,7 @@ class MelodyMachine {
             const notas = this.getAcordeNotas(acordeSimplificado);
             const nota = notas[foundTrack.noteIndex].replace('_baixo', foundTrack.octave);
             const bufferKey = `${foundTrack.name}_${nota}`;
-            const buffer = this.buffers[bufferKey];
+            const buffer = this.buffers.get(bufferKey);
             this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.5 : 1.0);
 
             foundTrack.element.classList.add('playing');
