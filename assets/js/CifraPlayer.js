@@ -19,6 +19,24 @@ class CifraPlayer {
         this.release = 0.2;
         this.baixo = null;
 
+        this.VOLUME_CONFIG = {
+            'grave': {
+                'orgao': 0,
+                'strings': 0.9,
+                'epiano': 1.0
+            },
+            'baixo': {
+                'orgao': 0,
+                'strings': 0.8,
+                'epiano': 1.0
+            },
+            'agudo': {
+                'orgao': 0,
+                'strings': 1.0,
+                'epiano': 1.0
+            }
+        };
+
         this.audioContextManager = new AudioContextManager();
         this.carregarAcordes();
     }
@@ -136,31 +154,13 @@ class CifraPlayer {
         const oitavas = ['grave', 'baixo', ''];
         const notas = this.musicTheory.notas;
 
-        const VOLUME_CONFIG = {
-            'grave': {
-                'orgao': 1.0,
-                'strings': 0.9,
-                'epiano': 1.0
-            },
-            'baixo': {
-                'orgao': 1.0,
-                'strings': 0.8,
-                'epiano': 1.0
-            },
-            'agudo': {
-                'orgao': 0.6,
-                'strings': 1.0,
-                'epiano': 1.0
-            }
-        };
-
         instrumentos.forEach(instrumento => {
             notas.forEach(nota => {
                 oitavas.forEach(oitava => {
                     const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
                     const path = `${this.audioPath}${instrumento.charAt(0).toUpperCase() + instrumento.slice(1)}/${key}.ogg`;
                     const oitavaKey = oitava === '' ? 'agudo' : oitava;
-                    const volume = VOLUME_CONFIG[oitavaKey]?.[instrumento] ?? 1.0;
+                    const volume = this.VOLUME_CONFIG[oitavaKey]?.[instrumento] ?? 1.0;
 
                     urlsDict[key] = { url: path, volume: volume };
                 });
@@ -553,11 +553,11 @@ class CifraPlayer {
         Object.keys(this.audioContextManager.instrumentSettings).forEach(key => {
             if (key.startsWith('strings_')) {
                 if (key.includes('_grave')) {
-                    this.audioContextManager.instrumentSettings[key].volume = 0.9;
+                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['grave']['strings'];
                 } else if (key.includes('_baixo')) {
-                    this.audioContextManager.instrumentSettings[key].volume = 0.8;
+                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['baixo']['strings'];
                 } else {
-                    this.audioContextManager.instrumentSettings[key].volume = 1.0;
+                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['agudo']['strings'];
                 }
             }
         });
