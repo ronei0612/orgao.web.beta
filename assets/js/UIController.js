@@ -279,7 +279,7 @@ class UIController {
         this.elements.cifraDisplay.classList.remove('d-none');
     }
 
-    resetInterface() {
+    resetInterface(ocultarBateria) {
         this.elements.editTextarea.classList.add('d-none');
         this.elements.itemNameInput.classList.add('d-none');
         this.elements.saveButton.classList.add('d-none');
@@ -295,7 +295,9 @@ class UIController {
         this.elements.orgaoInstrumentButton.classList.remove('d-none');
         this.elements.melodyWrapper.classList.remove('d-none');
         this.elements.bateriaInstrumentButton.classList.add('d-none');
-        //this.elements.rhythmButtonsControl.classList.add('d-none');
+
+        if (ocultarBateria)
+            this.elements.rhythmButtonsControl.classList.add('d-none');
     }
 
     exibirIframeCifra() {
