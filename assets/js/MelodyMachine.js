@@ -7,7 +7,7 @@ class MelodyMachine {
         this.releaseTime = 0.1;
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.audioPath = this.baseUrl + '/assets/audio/Orgao';
+        this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [
             { note: 0, name: this.instrument, octave: '' },
