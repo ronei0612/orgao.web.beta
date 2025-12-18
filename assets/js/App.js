@@ -379,12 +379,11 @@ class App {
             this.editing = true;
         this.elements.itemNameInput.value = saveName ? saveName : '';
 
-        // O conteúdo do iframe é a cifra atual (pode estar transposta)
         this.elements.editTextarea.value = this.elements.iframeCifra.contentDocument.body.innerText;
         this.uiController.editarMusica();
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
-        this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value);
+        this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
         this.exibirInstrument(this.cifraPlayer.instrumento);
     }
 
@@ -508,10 +507,10 @@ class App {
             this.cifraPlayer.preencherIframeCifra(texto);
         }
 
-        this.preencherPaginaDoLocalStorage(saveData);
+        this.preencherLayoutDoLocalStorage(saveData);
     }
 
-    preencherPaginaDoLocalStorage(saveData) {
+    preencherLayoutDoLocalStorage(saveData) {
         if (saveData && saveData.instrument) {
             this.cifraPlayer.instrumento = saveData.instrument;
             this.exibirInstrument(saveData.instrument);
@@ -519,18 +518,22 @@ class App {
 
             if (saveData.instrument === 'orgao') {
                 this.elements.melodyStyleSelect.value = saveData.style;
+                this.elements.melodyStyleSelect.dispatchEvent(new Event('change'));
                 this.uiController.esconderElementosBateria();
             }
             else {
                 this.elements.drumStyleSelect.value = saveData.style;
+                this.elements.drumStyleSelect.dispatchEvent(new Event('change'));
                 this.uiController.exibirElementosBateria();
             }
         }
     }
 
     showLetraCifra(saveData) {
-        var textoMusica = this.cifraPlayer.destacarCifras(saveData.chords, null);
-        this.verifyLetraOuCifra(textoMusica, saveData);
+        // Correção caso saveData seja apenas uma string (cifra simples) que veio da pesquisa
+        const texto = saveData.chords ?? saveData;
+        var textoMusica = this.cifraPlayer.destacarCifras(texto, null);
+        this.verifyLetraOuCifra(textoMusica, saveData.chords ? saveData : null);
 
         this.uiController.exibirBotoesTom();
         this.uiController.exibirIframeCifra();
@@ -539,7 +542,7 @@ class App {
 
     salvarMetaDataNoLocalStorage(name, item) {
         const metaData = {
-            chords: this.elements.iframeCifra.contentDocument.body.innerText,
+            chords: this.elements.editTextarea.value,
             key: this.elements.tomSelect.value,
             instrument: this.cifraPlayer.instrumento,
             style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
@@ -561,8 +564,9 @@ class App {
     }
 
     async selectEscolhido(selectItem) {
-        if (this.selectItemAntes && this.selectItemAntes !== 'acordes__' && this.selectItemAntes !== '')
-            await this.verificarTrocouTom();
+        // Desativado para melhorar a experiência do usuário (temporariamente)
+        //if (this.selectItemAntes && this.selectItemAntes !== 'acordes__' && this.selectItemAntes !== '')
+        //    await this.verificarTrocouTom();
 
         this.selectItemAntes = selectItem;
 
@@ -580,7 +584,7 @@ class App {
             if (saveData) {
                 if (saveData.key) {
                     tom = saveData.key;
-                    this.preencherPaginaDoLocalStorage(saveData);
+                    this.preencherLayoutDoLocalStorage(saveData);
                 }
                 else if (saveData !== '')
                     tom = saveData;
@@ -777,16 +781,6 @@ class App {
         } else {
             if (action === 'acorde') {
                 this.cifraPlayer.parado = false;
-
-                if (this.cifraPlayer.instrumento === 'orgao') {
-                    this.melodyUI.play();
-                    this.melodyMachine.currentStep = 1;
-                }
-                else {
-                    if (this.bateriaUI)
-                        this.bateriaUI.play();
-                }
-
                 this.cifraPlayer.tocarAcorde(button.value);
             }
 
@@ -800,11 +794,24 @@ class App {
             setTimeout(() => button.classList.add('pressed'), 100);
 
             if (action === 'play' || action === 'acorde') {
+                this.tocarBateriaMelody();
+
                 setTimeout(() => button.classList.add('pulse'), 100);
                 this.uiController.exibirBotaoStop();
             } else if (action === 'stop') {
                 this.uiController.exibirBotaoPlay();
             }
+        }
+    }
+
+    tocarBateriaMelody() {
+        if (this.cifraPlayer.instrumento === 'orgao') {
+            this.melodyUI.play();
+            this.melodyMachine.currentStep = 1;
+        }
+        else {
+            if (this.bateriaUI)
+                this.bateriaUI.play();
         }
     }
 
@@ -819,7 +826,7 @@ class App {
         if (saveData) {
             if (saveData.key) {
                 tom = saveData.key;
-                this.preencherPaginaDoLocalStorage(saveData);
+                this.preencherLayoutDoLocalStorage(saveData);
             }
             else if (saveData !== '')
                 tom = saveData;

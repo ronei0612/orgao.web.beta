@@ -11,7 +11,7 @@ class DraggableController {
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragMove = this.onDragMove.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
-        this.updatePosition = this.updatePosition.bind(this); // Nova função de renderização
+        this.updatePosition = this.updatePosition.bind(this);
 
         this.setupListeners();
     }
@@ -59,7 +59,7 @@ class DraggableController {
     }
 
     onDragMove(event) {
-        event.preventDefault(); // Evita scroll em mobile
+        event.preventDefault();
 
         const clientX = event.touches ? event.touches[0].clientX : event.clientX;
         const clientY = event.touches ? event.touches[0].clientY : event.clientY;
@@ -75,7 +75,6 @@ class DraggableController {
             }
         }
 
-        // Apenas atualiza as coordenadas, não toca no DOM aqui
         this.currentX = clientX - this.offset.x;
         this.currentY = clientY - this.offset.y;
 

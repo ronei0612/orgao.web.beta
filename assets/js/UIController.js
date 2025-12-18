@@ -301,13 +301,13 @@ class UIController {
     }
 
     exibirIframeCifra() {
-        this.resetInterface();
+        //this.resetInterface();
         this.elements.iframeCifra.classList.remove('d-none');
         this.elements.liturgiaDiariaFrame.classList.add('d-none');
         this.elements.santamissaFrame.classList.add('d-none');
         this.elements.oracoesFrame.classList.add('d-none');
-        this.elements.melodyStyleSelect.classList.add('d-none');
-        this.elements.orgaoInstrumentButton.classList.add('d-none');
+        //this.elements.melodyStyleSelect.classList.add('d-none');
+        //this.elements.orgaoInstrumentButton.classList.add('d-none');
     }
 
     esconderEditDeleteButtons() {
@@ -356,7 +356,6 @@ class UIController {
             }
         }
 
-        this.elements.savesSelect.selectedIndex = 0;
         $('#optionsModal').modal('hide');
     }
 
