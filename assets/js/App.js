@@ -806,8 +806,12 @@ class App {
 
     tocarBateriaMelody() {
         if (this.cifraPlayer.instrumento === 'orgao') {
-            this.melodyUI.play();
-            this.melodyMachine.currentStep = 1;
+            if (!this.melodyMachine.isPlaying) {
+                this.melodyUI.play();
+            }
+            else {
+                this.melodyMachine.trocarNota = true;
+            }
         }
         else {
             if (this.bateriaUI)

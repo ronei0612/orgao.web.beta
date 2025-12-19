@@ -9,6 +9,7 @@ class MelodyMachine {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
+        this.trocarNota = false;
         this.instruments = [
             { note: 3, name: this.instrument },
             { note: 2, name: this.instrument },
@@ -155,6 +156,7 @@ class MelodyMachine {
 
         if (this.currentStep > this.numSteps) {
             this.currentStep = 1;
+            this.trocarNota = false;
             if (typeof this.onStepsEnd === 'function') {
                 this.onStepsEnd();
             }
@@ -170,6 +172,15 @@ class MelodyMachine {
 
     scheduleCurrentStep() {
         if (!this.tracksCache) this.refreshTrackCache();
+
+        if (this.trocarNota) {
+            const compassoQuaternario = this.numSteps === 4 || this.numSteps === 8;
+            const compassoTernario = this.numSteps === 3 || this.numSteps === 6;
+            if (compassoQuaternario && this.currentStep === 5) {
+                this.currentStep = 1;
+                this.trocarNota = false;
+            }
+        }
 
         const stepIndex = this.currentStep - 1;
         let foundTrack = null;
