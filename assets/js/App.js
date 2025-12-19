@@ -806,12 +806,8 @@ class App {
 
     tocarBateriaMelody() {
         if (this.cifraPlayer.instrumento === 'orgao') {
-            if (!this.melodyMachine.isPlaying) {
                 this.melodyUI.play();
-            }
-            else if (this.melodyMachine.currentStep === 3 || this.melodyMachine.currentStep === 4 || this.melodyMachine.currentStep === 5) {
-                this.melodyMachine.trocarNota = true;
-            }
+            this.melodyMachine.currentStep = 1;
         }
         else {
             if (this.bateriaUI)
@@ -1105,6 +1101,7 @@ class App {
         this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName);
         this.elements.savesSelect.value = newSaveName;
 
+        this.uiController.resetInterface();
         this.uiController.exibirIframeCifra();
         this.uiController.exibirListaSaves(newSaveName);
 
