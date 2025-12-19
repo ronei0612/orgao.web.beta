@@ -806,7 +806,7 @@ class App {
 
     tocarBateriaMelody() {
         if (this.cifraPlayer.instrumento === 'orgao') {
-                this.melodyUI.play();
+            this.melodyUI.play();
             this.melodyMachine.currentStep = 1;
         }
         else {
@@ -968,7 +968,10 @@ class App {
                 id: maxId,
                 artista: artista,
                 titulo: titulo,
-                cifra: conteudoCifra
+                bpm: conteudoCifra.bpm,
+                chords: conteudoCifra.chords,
+                instrument: conteudoCifra.instrument,
+                style: conteudoCifra.style,
             };
         });
 
