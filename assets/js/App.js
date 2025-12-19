@@ -896,9 +896,9 @@ class App {
 
                     if (Array.isArray(importedData)) {
                         importedData.forEach(item => {
-                            if (item.titulo && item.cifra) {
+                            if (item.titulo && item.chords) {
                                 const chave = item.artista ? `${item.titulo} - ${item.artista}` : item.titulo;
-                                const dadosPadronizados = padronizarItem(item.cifra);
+                                const dadosPadronizados = padronizarItem(item.chords);
 
                                 if (dadosPadronizados) {
                                     newSaves[chave] = dadosPadronizados;
