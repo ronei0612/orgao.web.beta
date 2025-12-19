@@ -3,8 +3,11 @@ class MelodyMachine {
         this.baseUrl = baseUrl;
         this.musicTheory = musicTheory;
         this.cifraPlayer = cifraPlayer;
-        this.attackTime = 0.02;
-        this.releaseTime = 0.1;
+
+        // Aumentei levemente para suavizar o "tic"
+        this.attackTime = 0.05;
+        this.releaseTime = 0.15;
+
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
@@ -109,7 +112,7 @@ class MelodyMachine {
         }
     }
 
-    playSound(buffer, time, volume = 1) {
+    playSound(buffer, time, volume = 0.5) {
         if (!buffer) return null;
 
         const source = this.audioContext.createBufferSource();
@@ -118,18 +121,16 @@ class MelodyMachine {
         source.buffer = buffer;
         source.loop = true;
 
-        gainNode.gain.setValueAtTime(0.001, time);
-        gainNode.gain.exponentialRampToValueAtTime(volume, time + this.attackTime);
+        // Suavização do ataque
+        // Começamos em 0 absoluto no tempo exato
+        gainNode.gain.setValueAtTime(0, time);
+        // Rampa linear até o volume desejado
+        gainNode.gain.linearRampToValueAtTime(volume, time + this.attackTime);
 
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
 
         source.start(time);
-
-        source.onended = () => {
-            source.disconnect();
-            gainNode.disconnect();
-        };
 
         return { source, gainNode };
     }
@@ -138,12 +139,27 @@ class MelodyMachine {
         if (this.currentSource) {
             const { source, gainNode } = this.currentSource;
             try {
+                // Cancela qualquer mudança de volume futura agendada anteriormente
                 gainNode.gain.cancelScheduledValues(time);
-                gainNode.gain.setValueAtTime(gainNode.gain.value, time);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, time + this.releaseTime);
 
-                source.stop(time + this.releaseTime + 0.01);
-            } catch { }
+                // Mantém o volume atual e inicia a descida
+                const currentVal = gainNode.gain.value;
+                gainNode.gain.setValueAtTime(currentVal, time);
+
+                // Rampa linear para zero para evitar o "tic" no final
+                gainNode.gain.linearRampToValueAtTime(0, time + this.releaseTime);
+
+                // Para o som após o tempo de release
+                source.stop(time + this.releaseTime + 0.05);
+
+                // Limpeza de memória
+                source.onended = () => {
+                    source.disconnect();
+                    gainNode.disconnect();
+                };
+            } catch (e) {
+                console.error("Erro ao parar nota:", e);
+            }
             this.currentSource = null;
         }
     }
@@ -202,14 +218,23 @@ class MelodyMachine {
         }
 
         if (foundTrack) {
+            // Primeiro paramos a nota anterior suavemente
             this.stopCurrentNote(this.nextNoteTime);
 
             let acordeSimplificado = this.cifraPlayer.acordeTocando;
             const notas = this.getAcordeNotas(acordeSimplificado);
-            const nota = notas[foundTrack.noteIndex];
-            const bufferKey = `${foundTrack.name}_${nota}`;
-            const buffer = this.buffers.get(bufferKey);
-            this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : 0.5);
+
+            if (notas) {
+                const nota = notas[foundTrack.noteIndex];
+                const bufferKey = `${this.instrument}_${nota}`;
+                const buffer = this.buffers.get(bufferKey);
+
+                if (buffer) {
+                    // Toca a nova nota
+                    const targetVol = foundTrack.volume === 2 ? 0.3 : 0.5;
+                    this.currentSource = this.playSound(buffer, this.nextNoteTime, targetVol);
+                }
+            }
 
             foundTrack.element.classList.add('playing');
             setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
