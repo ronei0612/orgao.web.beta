@@ -9,7 +9,7 @@ class App {
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
         this.versionConfig = {
-            version: '5.9.7',
+            version: '5.9.8',
             htmlMessage: `
                 <p>Novo botão para trocar de Órgão para Bateria.</p>
 
@@ -110,16 +110,16 @@ class App {
         document.addEventListener('click', this.handleDocumentClick.bind(this));
         $('#searchModal').on('shown.bs.modal', this.handleSearchModalShown.bind(this));
 
-        document.getElementById('increment-bpm-10').addEventListener('click', () => {
-            this.elements.bpmInput.value = (parseInt(this.elements.bpmInput.value, 10) || 0) + 10;
+        document.getElementById('increment-bpm-5').addEventListener('click', () => {
+            this.elements.bpmInput.value = (parseInt(this.elements.bpmInput.value, 10) || 0) + 5;
             this.setBPM(parseInt(this.elements.bpmInput.value, 10));
         });
         document.getElementById('increment-bpm').addEventListener('click', () => {
             this.elements.bpmInput.value = (parseInt(this.elements.bpmInput.value, 10) || 0) + 1;
             this.setBPM(parseInt(this.elements.bpmInput.value, 10));
         });
-        document.getElementById('decrement-bpm-10').addEventListener('click', () => {
-            const bpm = Math.max(1, (parseInt(this.elements.bpmInput.value, 10) || 1) - 10);
+        document.getElementById('decrement-bpm-5').addEventListener('click', () => {
+            const bpm = Math.max(1, (parseInt(this.elements.bpmInput.value, 10) || 1) - 5);
             this.elements.bpmInput.value = bpm;
             this.setBPM(bpm);
         });

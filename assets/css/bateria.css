@@ -245,11 +245,11 @@ body.dark-mode .instrument-button img {
     transition: none;
 }
 
-#increment-bpm-10 {
+#increment-bpm-5 {
     font-size: small;
 }
 
-#decrement-bpm-10 {
+#decrement-bpm-5 {
     font-size: small;
 }
 
