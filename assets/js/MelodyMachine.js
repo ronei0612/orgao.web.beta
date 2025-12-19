@@ -10,37 +10,49 @@ class MelodyMachine {
         this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [
-            { note: 0, name: this.instrument, octave: '' },
-            { note: 2, name: this.instrument, octave: '_baixo' },
-            { note: 1, name: this.instrument, octave: '_baixo' },
-            { note: 0, name: this.instrument, octave: '_baixo' }
+            { note: 3, name: this.instrument },
+            { note: 2, name: this.instrument },
+            { note: 1, name: this.instrument },
+            { note: 0, name: this.instrument }
         ];
 
         this.acordes = {
-            'c': ['c_baixo', 'e_baixo', 'g_baixo'],
-            'c_': ['c__baixo', 'f_baixo', 'g__baixo'],
-            'd': ['d_baixo', 'f__baixo', 'a_baixo'],
-            'd_': ['d__baixo', 'g_baixo', 'a__baixo'],
-            'e': ['e_baixo', 'g__baixo', 'b_baixo'],
-            'f': ['f_baixo', 'a_baixo', 'c'],
-            'f_': ['f__baixo', 'a__baixo', 'c_'],
-            'g': ['g_baixo', 'b_baixo', 'd'],
-            'g_': ['g__baixo', 'c', 'd_'],
-            'a': ['a_baixo', 'c_', 'e'],
-            'a_': ['a__baixo', 'd', 'f'],
-            'b': ['b_baixo', 'd_', 'f_'],
-            'cm': ['c_baixo', 'd__baixo', 'g_baixo'],
-            'c_m': ['c__baixo', 'e_baixo', 'g__baixo'],
-            'dm': ['d_baixo', 'f_baixo', 'a_baixo'],
-            'd_m': ['d__baixo', 'f__baixo', 'a__baixo'],
-            'em': ['e_baixo', 'g_baixo', 'b_baixo'],
-            'fm': ['f_baixo', 'g__baixo', 'c'],
-            'f_m': ['f__baixo', 'a_baixo', 'c_'],
-            'gm': ['g_baixo', 'a__baixo', 'd'],
-            'g_m': ['g__baixo', 'b_baixo', 'd_'],
-            'am': ['a_baixo', 'c', 'e'],
-            'a_m': ['a__baixo', 'c_', 'f'],
-            'bm': ['b_baixo', 'd', 'f_']
+            'c': ['g_baixo', 'c', 'e', 'g'],
+            'c_': ['g__baixo', 'c_', 'f', 'g_'],
+            'd': ['a_baixo', 'd', 'f_', 'a'],
+            'd_': ['a__baixo', 'd_', 'g', 'a_'],
+            'e': ['g__baixo', 'b_baixo', 'e', 'g_'],
+            'f': ['a_baixo', 'c', 'f', 'a'],
+            'f_': ['a__baixo', 'c_', 'f_', 'a_'],
+            'g': ['g_baixo', 'b_baixo', 'd', 'g'],
+            'g_': ['g__baixo', 'c', 'd_', 'g_'],
+            'a': ['a_baixo', 'c_', 'e', 'a'],
+            'a_': ['a__baixo', 'd', 'f', 'a_'],
+            'b': ['b_baixo', 'd_', 'f_', 'b'],
+            'cm': ['g_baixo', 'c', 'd_', 'g'],
+            'c_m': ['g__baixo', 'c_', 'e', 'g_'],
+            'dm': ['a_baixo', 'd', 'f', 'a'],
+            'd_m': ['a__baixo', 'd_', 'f_', 'a_'],
+            'em': ['g_baixo', 'b_baixo', 'e', 'g'],
+            'fm': ['g__baixo', 'c', 'f', 'g_'],
+            'f_m': ['a_baixo', 'c_', 'f_', 'a'],
+            'gm': ['g_baixo', 'a__baixo', 'd', 'g'],
+            'g_m': ['g__baixo', 'b_baixo', 'd_', 'g_'],
+            'am': ['a_baixo', 'c', 'e', 'a'],
+            'a_m': ['a__baixo', 'c_', 'f', 'a_'],
+            'bm': ['b_baixo', 'd', 'f_', 'b'],
+            'cdim': ['f__baixo', 'c', 'd_', 'f_'],
+            'c_dim': ['g_baixo', 'c_', 'e', 'g'],
+            'ddim': ['g__baixo', 'd', 'f', 'g_'],
+            'd_dim': ['a_baixo', 'd_', 'f_', 'a'],
+            'edim': ['g_baixo', 'a__baixo', 'e', 'g'],
+            'fdim': ['g__baixo', 'b', 'f', 'g_'],
+            'f_dim': ['a_baixo', 'c', 'f_', 'a'],
+            'gdim': ['g_baixo', 'a__baixo', 'c_', 'g'],
+            'g_dim': ['g__baixo', 'b_baixo', 'd', 'g_'],
+            'adim': ['a_baixo', 'c', 'd_', 'a'],
+            'a_dim': ['a__baixo', 'c_', 'e', 'a_'],
+            'bdim': ['b_baixo', 'd', 'f', 'b']
         };
 
         this.isPlaying = false;
@@ -183,10 +195,10 @@ class MelodyMachine {
 
             let acordeSimplificado = this.cifraPlayer.acordeTocando;
             const notas = this.getAcordeNotas(acordeSimplificado);
-            const nota = notas[foundTrack.noteIndex].replace('_baixo', foundTrack.octave);
+            const nota = notas[foundTrack.noteIndex];
             const bufferKey = `${foundTrack.name}_${nota}`;
             const buffer = this.buffers.get(bufferKey);
-            this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.5 : 1.0);
+            this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : 0.5);
 
             foundTrack.element.classList.add('playing');
             setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
@@ -207,7 +219,6 @@ class MelodyMachine {
 
             return {
                 noteIndex: parseInt(button.dataset.noteIndex),
-                octave: button.dataset.octave,
                 name: button.dataset.name,
                 button,
                 steps

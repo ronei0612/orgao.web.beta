@@ -394,10 +394,12 @@ class MusicTheory {
 
         const tonica = match[1];
         const resto = match[2];
-        const ehMenor = /^(m(?!aj)|min|-)/.test(resto);        
+        const ehMenor = /^(m)/.test(resto);
+        const ehDiminuto = /^(°)/.test(resto);
         const tonicaNormalizada = this.acordeMap[tonica.toLowerCase()] || tonica.toLowerCase();
+        const notaFinal = tonicaNormalizada + (ehMenor ? 'm' : '') + (ehDiminuto ? 'dim' : '');
 
-        return tonicaNormalizada + (ehMenor ? 'm' : '');
+        return notaFinal;
     }
 
     getAcordeNotas(acordeNome) {

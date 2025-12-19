@@ -50,7 +50,7 @@ class MelodyUI {
     // ALTERAÇÃO: Gera chave única baseada no índice numérico e oitava
     getInstrumentKey(inst) {
         // Ex: orgao_0_baixo
-        return `${inst.name}_${inst.note}${inst.octave}`;
+        return `${inst.name}_${inst.note}`;
     }
 
     loadStyles() {
@@ -125,7 +125,6 @@ class MelodyUI {
         // ALTERAÇÃO CRÍTICA: Adiciona os datasets que o MelodyMachine.js lê no refreshTrackCache
         button.dataset.noteIndex = instrument.note; // 0, 1, 2...
         button.dataset.name = instrument.name;      // orgao
-        button.dataset.octave = instrument.octave;  // baixo
 
         const dataSpan = document.createElement('span');
 
