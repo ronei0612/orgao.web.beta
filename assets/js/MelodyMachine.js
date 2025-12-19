@@ -7,6 +7,7 @@ class MelodyMachine {
         // Aumentei levemente para suavizar o "tic"
         this.attackTime = 0.05;
         this.releaseTime = 0.15;
+        this.defaultVol = 0.5;
 
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -231,7 +232,7 @@ class MelodyMachine {
 
                 if (buffer) {
                     // Toca a nova nota
-                    const targetVol = foundTrack.volume === 2 ? 0.3 : 0.5;
+                    const targetVol = foundTrack.volume === 2 ? 0.3 : this.defaultVol;
                     this.currentSource = this.playSound(buffer, this.nextNoteTime, targetVol);
                 }
             }

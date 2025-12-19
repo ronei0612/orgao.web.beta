@@ -130,6 +130,10 @@ class App {
             this.setBPM(bpm);
         });
 
+        document.getElementById('volumeOrgao').addEventListener('change', () => {
+            this.melodyMachine.defaultVol = parseFloat(document.getElementById('volumeOrgao').value);
+        });
+
         // Refatoração: Adicionar listeners aos botões de acorde de forma programática
         ['mousedown'].forEach(event => {
             const controlButtons = [
