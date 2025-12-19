@@ -317,11 +317,19 @@ class MelodyUI {
 
         this.numStepsInput.addEventListener('change', () => this.initializeTracks());
         this.saveBtn.addEventListener('click', () => this.saveCurrentPattern());
-        this.elements.melodyStyleSelect.addEventListener('change', () => this.loadPattern(this.elements.melodyStyleSelect.value));
+        this.elements.melodyStyleSelect.addEventListener('change', () => this.reLoadPattern());
 
         this.addStyleBtn.addEventListener('click', () => this.addStyle());
         this.editStyleBtn.addEventListener('click', () => this.editStyle());
         this.deleteStyleBtn.addEventListener('click', () => this.deleteStyle());
+    }
+
+    reLoadPattern() {
+        this.loadPattern(this.elements.melodyStyleSelect.value);
+        if (this.elements.melodyStyleSelect.value === '')
+            this.stop();
+        else
+            this.play();
     }
 
     play() {

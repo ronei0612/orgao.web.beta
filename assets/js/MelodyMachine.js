@@ -3,17 +3,12 @@ class MelodyMachine {
         this.baseUrl = baseUrl;
         this.musicTheory = musicTheory;
         this.cifraPlayer = cifraPlayer;
-
-        // Aumentei levemente para suavizar o "tic"
-        this.attackTime = 0.05;
-        this.releaseTime = 0.15;
-        this.defaultVol = 0.5;
-
+        this.attackTime = 0.02;
+        this.releaseTime = 0.1;
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
+        this.audioPath = this.baseUrl + '/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
-        this.trocarNota = false;
         this.instruments = [
             { note: 3, name: this.instrument },
             { note: 2, name: this.instrument },
@@ -113,7 +108,7 @@ class MelodyMachine {
         }
     }
 
-    playSound(buffer, time, volume = 0.5) {
+    playSound(buffer, time, volume = 1) {
         if (!buffer) return null;
 
         const source = this.audioContext.createBufferSource();
@@ -122,16 +117,18 @@ class MelodyMachine {
         source.buffer = buffer;
         source.loop = true;
 
-        // Suavização do ataque
-        // Começamos em 0 absoluto no tempo exato
-        gainNode.gain.setValueAtTime(0, time);
-        // Rampa linear até o volume desejado
-        gainNode.gain.linearRampToValueAtTime(volume, time + this.attackTime);
+        gainNode.gain.setValueAtTime(0.001, time);
+        gainNode.gain.exponentialRampToValueAtTime(volume, time + this.attackTime);
 
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
 
         source.start(time);
+
+        source.onended = () => {
+            source.disconnect();
+            gainNode.disconnect();
+        };
 
         return { source, gainNode };
     }
@@ -140,27 +137,12 @@ class MelodyMachine {
         if (this.currentSource) {
             const { source, gainNode } = this.currentSource;
             try {
-                // Cancela qualquer mudança de volume futura agendada anteriormente
                 gainNode.gain.cancelScheduledValues(time);
+                gainNode.gain.setValueAtTime(gainNode.gain.value, time);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, time + this.releaseTime);
 
-                // Mantém o volume atual e inicia a descida
-                const currentVal = gainNode.gain.value;
-                gainNode.gain.setValueAtTime(currentVal, time);
-
-                // Rampa linear para zero para evitar o "tic" no final
-                gainNode.gain.linearRampToValueAtTime(0, time + this.releaseTime);
-
-                // Para o som após o tempo de release
-                source.stop(time + this.releaseTime + 0.05);
-
-                // Limpeza de memória
-                source.onended = () => {
-                    source.disconnect();
-                    gainNode.disconnect();
-                };
-            } catch (e) {
-                console.error("Erro ao parar nota:", e);
-            }
+                source.stop(time + this.releaseTime + 0.01);
+            } catch { }
             this.currentSource = null;
         }
     }
@@ -173,7 +155,6 @@ class MelodyMachine {
 
         if (this.currentStep > this.numSteps) {
             this.currentStep = 1;
-            this.trocarNota = false;
             if (typeof this.onStepsEnd === 'function') {
                 this.onStepsEnd();
             }
@@ -189,15 +170,6 @@ class MelodyMachine {
 
     scheduleCurrentStep() {
         if (!this.tracksCache) this.refreshTrackCache();
-
-        if (this.trocarNota) {
-            const compassoQuaternario = this.numSteps === 4 || this.numSteps === 8;
-            const compassoTernario = this.numSteps === 3 || this.numSteps === 6;
-            if (compassoQuaternario && this.currentStep === 5) {
-                this.currentStep = 1;
-                this.trocarNota = false;
-            }
-        }
 
         const stepIndex = this.currentStep - 1;
         let foundTrack = null;
@@ -218,24 +190,15 @@ class MelodyMachine {
             }
         }
 
-        if (foundTrack) {
-            // Primeiro paramos a nota anterior suavemente
+        if (foundTrack && this.cifraPlayer.acordeTocando) {
             this.stopCurrentNote(this.nextNoteTime);
 
             let acordeSimplificado = this.cifraPlayer.acordeTocando;
             const notas = this.getAcordeNotas(acordeSimplificado);
-
-            if (notas) {
-                const nota = notas[foundTrack.noteIndex];
-                const bufferKey = `${this.instrument}_${nota}`;
-                const buffer = this.buffers.get(bufferKey);
-
-                if (buffer) {
-                    // Toca a nova nota
-                    const targetVol = foundTrack.volume === 2 ? 0.3 : this.defaultVol;
-                    this.currentSource = this.playSound(buffer, this.nextNoteTime, targetVol);
-                }
-            }
+            const nota = notas[foundTrack.noteIndex];
+            const bufferKey = `${foundTrack.name}_${nota}`;
+            const buffer = this.buffers.get(bufferKey);
+            this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : 0.5);
 
             foundTrack.element.classList.add('playing');
             setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
