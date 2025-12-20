@@ -184,7 +184,7 @@
         const NOISE_THRESHOLD = 0.02; // Aumente para 0.03 ou 0.05 se ainda captar muito ruído
         const MIN_FREQ = 80;   // Frequência mínima (Grave humano)
         const MAX_FREQ = 1100; // Frequência máxima (Agudo humano - Soprano C6 é ~1046Hz)
-        const SMOOTHING_THRESHOLD = 5; // Quantos frames a nota precisa se manter para aparecer na tela
+        const SMOOTHING_THRESHOLD = 50; // Quantos frames a nota precisa se manter para aparecer na tela
 
         let lastNoteBuffer = [];
 
