@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Analisador de Harmonia</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1e1e1e;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .display-panel {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            min-width: 300px;
+        }
+
+        #chord-name {
+            font-size: 48px;
+            font-weight: bold;
+            color: #4db8ff;
+            margin: 10px 0;
+            height: 60px;
+        }
+
+        #key-name {
+            font-size: 18px;
+            color: #aaaaaa;
+        }
+
+        .piano {
+            display: flex;
+            position: relative;
+            padding: 10px;
+            background: #000;
+            border-radius: 8px;
+        }
+
+        .key {
+            width: 50px;
+            height: 180px;
+            background: white;
+            border: 1px solid #333;
+            border-radius: 0 0 5px 5px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            color: #333;
+            font-size: 12px;
+            font-weight: bold;
+            transition: background 0.1s;
+        }
+
+            .key.black {
+                width: 34px;
+                height: 110px;
+                background: #333;
+                color: white;
+                margin-left: -17px;
+                margin-right: -17px;
+                z-index: 2;
+                border-radius: 0 0 3px 3px;
+            }
+
+            .key.active {
+                background: #4db8ff !important;
+                transform: translateY(2px);
+            }
+
+        .history {
+            margin-top: 20px;
+            font-family: monospace;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="display-panel">
+        <div id="key-name">Tom: Detectando...</div>
+        <div id="chord-name">-</div>
+        <div id="notes-buffer">Toque para começar</div>
+    </div>
+
+    <div class="piano" id="piano">
+        <div class="key" data-note="0" id="k-z">Z</div>
+        <div class="key black" data-note="1" id="k-s">S</div>
+        <div class="key" data-note="2" id="k-x">X</div>
+        <div class="key black" data-note="3" id="k-d">D</div>
+        <div class="key" data-note="4" id="k-c">C</div>
+        <div class="key" data-note="5" id="k-v">V</div>
+        <div class="key black" data-note="6" id="k-g">G</div>
+        <div class="key" data-note="7" id="k-b">B</div>
+        <div class="key black" data-note="8" id="k-h">H</div>
+        <div class="key" data-note="9" id="k-n">N</div>
+        <div class="key black" data-note="10" id="k-j">J</div>
+        <div class="key" data-note="11" id="k-m">M</div>
+    </div>
+
+    <div class="history">Escala diatônica ativa em tempo real</div>
+
+    <script>
+        const noteNames = ["Dó", "Dó#", "Ré", "Ré#", "Mi", "Fá", "Fá#", "Sol", "Sol#", "Lá", "Lá#", "Si"];
+        const keyMap = { 'z': 0, 's': 1, 'x': 2, 'd': 3, 'c': 4, 'v': 5, 'g': 6, 'b': 7, 'h': 8, 'n': 9, 'j': 10, 'm': 11 };
+
+        // Definição de Escalas Maiores (Diatônicas)
+        const scales = {};
+        noteNames.forEach((name, root) => {
+            const intervals = [0, 2, 4, 5, 7, 9, 11];
+            scales[root] = intervals.map(i => (root + i) % 12);
+        });
+
+        let noteHistory = [];
+        let currentKey = null;
+        let resetTimer = null;
+
+        const chordDisplay = document.getElementById('chord-name');
+        const keyDisplay = document.getElementById('key-name');
+        const bufferDisplay = document.getElementById('notes-buffer');
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (keyMap.hasOwnProperty(key)) {
+                const note = keyMap[key];
+                playNote(note, key);
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (keyMap.hasOwnProperty(key)) {
+                document.getElementById('k-' + key).classList.remove('active');
+            }
+        });
+
+        function playNote(note, keyChar) {
+            // Visual
+            const el = document.getElementById('k-' + keyChar);
+            el.classList.add('active');
+
+            // Lógica de Histórico
+            noteHistory.push(note);
+            if (noteHistory.length > 12) noteHistory.shift(); // Mantém as últimas 12 notas
+
+            updateTheory();
+
+            // Timer para resetar
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(resetAll, 3000);
+        }
+
+        function updateTheory() {
+            // 1. Identificar o Tom (Escala que mais combina)
+            let bestKey = currentKey;
+            let maxMatches = 0;
+
+            // Contar notas únicas no histórico para análise
+            const uniqueNotes = [...new Set(noteHistory)];
+
+            for (let root = 0; root < 12; root++) {
+                let matches = uniqueNotes.filter(n => scales[root].includes(n)).length;
+                if (matches > maxMatches) {
+                    maxMatches = matches;
+                    bestKey = root;
+                }
+            }
+
+            // Só troca o tom se tivermos confiança (pelo menos 3 notas da escala nova)
+            if (maxMatches >= 3) {
+                currentKey = bestKey;
+            }
+
+            keyDisplay.innerText = currentKey !== null ? `Tom: ${noteNames[currentKey]} Maior` : "Tom: Analisando...";
+            bufferDisplay.innerText = noteHistory.map(n => noteNames[n]).join(" → ");
+
+            // 2. Identificar Acorde (baseado nas últimas 3 notas distintas)
+            const lastThree = [...new Set(noteHistory.slice(-5))].slice(-3).sort((a, b) => a - b);
+            if (lastThree.length === 3) {
+                chordDisplay.innerText = detectChord(lastThree);
+            }
+        }
+
+        function detectChord(notes) {
+            // Normaliza as notas para a fundamental 0 para detectar intervalos
+            const root = notes[0];
+            const i1 = (notes[1] - root + 12) % 12;
+            const i2 = (notes[2] - root + 12) % 12;
+
+            // Padrões de Tríades
+            if (i1 === 4 && i2 === 7) return noteNames[root]; // Maior
+            if (i1 === 3 && i2 === 7) return noteNames[root] + "m"; // Menor
+            if (i1 === 3 && i2 === 6) return noteNames[root] + " dim"; // Diminuto
+            if (i1 === 4 && i2 === 8) return noteNames[root] + " aug"; // Aumentado
+
+            // Tenta segunda inversão
+            const root2 = notes[1];
+            const j1 = (notes[2] - root2 + 12) % 12;
+            const j2 = (notes[0] - root2 + 12) % 12;
+            if (j1 === 4 && j2 === 9) return noteNames[notes[2]] + " (Inv)";
+
+            return "...";
+        }
+
+        function resetAll() {
+            noteHistory = [];
+            currentKey = null;
+            chordDisplay.innerText = "-";
+            keyDisplay.innerText = "Tom: Resetado";
+            bufferDisplay.innerText = "Toque para começar";
+        }
+    </script>
+</body>
+</html>
