@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piano Harmony & Rhythm Detector</title>
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --bg: #121212;
+            --panel: #1e1e1e;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: var(--bg);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        #chord-display {
+            font-size: 48px;
+            min-height: 60px;
+        }
+
+        .beat-indicator {
+            width: 20px;
+            height: 20px;
+            background: #333;
+            border-radius: 50%;
+            margin: 10px auto;
+            transition: background 0.1s;
+        }
+
+        .beat-active {
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .piano {
+            display: flex;
+            background: #000;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        .key {
+            width: 50px;
+            height: 180px;
+            background: white;
+            border: 1px solid #bbb;
+            border-radius: 0 0 6px 6px;
+            transition: all 0.05s;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            color: #333;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+            .key.black {
+                width: 34px;
+                height: 110px;
+                background: #222;
+                color: white;
+                margin-left: -17px;
+                margin-right: -17px;
+                z-index: 2;
+                border: none;
+            }
+
+            .key.active {
+                background: var(--primary) !important;
+                transform: translateY(2px);
+            }
+
+        .instructions {
+            margin-top: 20px;
+            color: #555;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="stat-card">
+            <div class="label">Compasso</div>
+            <div id="time-sig" class="value">--</div>
+            <div id="beat-dot" class="beat-indicator"></div>
+        </div>
+        <div class="stat-card">
+            <div class="label">Acorde / Tom</div>
+            <div id="chord-display" class="value">-</div>
+            <div id="tonality-display" class="label">Detectando Tom...</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">BPM</div>
+            <div id="bpm-display" class="value">0</div>
+            <div id="bpm-stability" class="label">Aguardando ritmo...</div>
+        </div>
+    </div>
+
+    <div class="piano">
+        <div class="key" id="key-0">Z</div>
+        <div class="key black" id="key-1">S</div>
+        <div class="key" id="key-2">X</div>
+        <div class="key black" id="key-3">D</div>
+        <div class="key" id="key-4">C</div>
+        <div class="key" id="key-5">V</div>
+        <div class="key black" id="key-6">G</div>
+        <div class="key" id="key-7">B</div>
+        <div class="key black" id="key-8">H</div>
+        <div class="key" id="key-9">N</div>
+        <div class="key black" id="key-10">J</div>
+        <div class="key" id="key-11">M</div>
+    </div>
+
+    <div class="instructions">Toque o teclado no ritmo da música. As trocas de acorde ajudam a identificar o compasso.</div>
+
+    <script>
+        const cipherNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const keyMap = { 'z': 0, 's': 1, 'x': 2, 'd': 3, 'c': 4, 'v': 5, 'g': 6, 'b': 7, 'h': 8, 'n': 9, 'j': 10, 'm': 11 };
+
+        // Estado da Música
+        let activeNotes = new Set();
+        let history = [];
+        let lastChord = "";
+        let currentTonality = null;
+
+        // Ritmo e BPM
+        let lastNoteTime = 0;
+        let intervals = [];
+        let bpm = 0;
+        let beatCounter = 0;
+        let lastChordChangeTime = 0;
+        let beatsSinceChordChange = 0;
+
+        // Timers
+        let resetTimer = null;
+        let metronomeInterval = null;
+
+        const chordDisplay = document.getElementById('chord-display');
+        const tonalityDisplay = document.getElementById('tonality-display');
+        const bpmDisplay = document.getElementById('bpm-display');
+        const timeSigDisplay = document.getElementById('time-sig');
+        const beatDot = document.getElementById('beat-dot');
+
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (keyMap.hasOwnProperty(key) && !activeNotes.has(keyMap[key])) {
+                const note = keyMap[key];
+                const now = performance.now();
+
+                calculateBPM(now);
+                activeNotes.add(note);
+                history.push(note);
+                if (history.length > 20) history.shift();
+
+                document.getElementById(`key-${note}`).classList.add('active');
+                analyzeHarmony();
+
+                clearTimeout(resetTimer);
+                resetTimer = setTimeout(resetAll, 5000);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            if (keyMap.hasOwnProperty(key)) {
+                activeNotes.delete(keyMap[key]);
+                document.getElementById(`key-${keyMap[key]}`).classList.remove('active');
+                analyzeHarmony();
+            }
+        });
+
+        function calculateBPM(now) {
+            if (lastNoteTime > 0) {
+                const diff = now - lastNoteTime;
+                // Ignora notas muito rápidas (acordes ou flams < 150ms)
+                if (diff > 150 && diff < 2000) {
+                    intervals.push(diff);
+                    if (intervals.length > 8) intervals.shift();
+
+                    const avg = intervals.reduce((a, b) => a + b) / intervals.length;
+                    bpm = Math.round(60000 / avg);
+                    bpmDisplay.innerText = bpm;
+
+                    // Lógica de Compasso: Conta pulsações entre mudanças de acorde
+                    beatsSinceChordChange++;
+                    startVisualMetronome(avg);
+                }
+            }
+            lastNoteTime = now;
+        }
+
+        function startVisualMetronome(ms) {
+            clearInterval(metronomeInterval);
+            const flash = () => {
+                beatDot.classList.add('beat-active');
+                setTimeout(() => beatDot.classList.remove('beat-active'), 100);
+            };
+            flash();
+            metronomeInterval = setInterval(flash, ms);
+        }
+
+        function analyzeHarmony() {
+            // Identificar Tom
+            updateTonality();
+
+            // Identificar Acorde
+            if (activeNotes.size > 0) {
+                const currentChord = detectChord([...activeNotes]);
+                chordDisplay.innerText = currentChord;
+
+                // Se o acorde mudou, tentamos estimar o compasso
+                if (currentChord !== lastChord && !currentChord.includes("...")) {
+                    estimateTimeSignature();
+                    lastChord = currentChord;
+                }
+            }
+        }
+
+        function estimateTimeSignature() {
+            console.log(`beatsSinceChordChange ${beatsSinceChordChange}`);
+            // Se mudou de acorde e temos batidas contadas
+            if (beatsSinceChordChange >= 2 && beatsSinceChordChange <= 8) {
+                let sig = "4/4";
+                if (beatsSinceChordChange === 3) sig = "3/4";
+                if (beatsSinceChordChange === 2) sig = "2/4";
+                if (beatsSinceChordChange >= 5) sig = "4/4"; // Simplificação
+
+                timeSigDisplay.innerText = sig;
+            }
+            beatsSinceChordChange = 0;
+        }
+
+        function updateTonality() {
+            if (history.length < 5) return;
+            const scales = Array.from({ length: 12 }, (_, r) => [0, 2, 4, 5, 7, 9, 11].map(i => (r + i) % 12));
+            let bestScale = 0, maxScore = 0;
+            scales.forEach((scale, root) => {
+                const score = history.filter(n => scale.includes(n)).length;
+                if (score > maxScore) { maxScore = score; bestScale = root; }
+            });
+            currentTonality = bestScale;
+            tonalityDisplay.innerText = `Tom: ${cipherNames[currentTonality]} Maior / Diatônico`;
+        }
+
+        function detectChord(notes) {
+            if (notes.length === 1) return cipherNames[notes[0]];
+            notes.sort((a, b) => a - b);
+            for (let i = 0; i < notes.length; i++) {
+                const root = notes[i];
+                const rel = notes.map(n => (n - root + 12) % 12);
+                if (rel.includes(4) && rel.includes(7)) return cipherNames[root];
+                if (rel.includes(3) && rel.includes(7)) return cipherNames[root] + "m";
+                if (rel.includes(3) && rel.includes(6)) return cipherNames[root] + "dim";
+            }
+            return cipherNames[notes[0]] + "...";
+        }
+
+        function resetAll() {
+            history = [];
+            intervals = [];
+            bpm = 0;
+            beatsSinceChordChange = 0;
+            bpmDisplay.innerText = "0";
+            chordDisplay.innerText = "-";
+            timeSigDisplay.innerText = "--";
+            tonalityDisplay.innerText = "Detectando Tom...";
+            clearInterval(metronomeInterval);
+        }
+    </script>
+</body>
+</html>
