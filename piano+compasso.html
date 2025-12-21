@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piano Harmony & Rhythm Detector</title>
+    <title>Piano Harmony & Rhythm History</title>
     <style>
         :root {
             --primary: #00ffcc;
+            --secondary: #ffcc00;
             --bg: #121212;
-            --panel: #1e1e1e;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
         }
 
         body {
@@ -16,63 +18,111 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-color: var(--bg);
-            color: #e0e0e0;
+            color: var(--text);
             font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
         }
 
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        .main-layout {
+            display: flex;
             gap: 20px;
-            margin-bottom: 30px;
-            width: 80%;
-            max-width: 800px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1000px;
         }
 
-        .stat-card {
-            background: var(--panel);
-            padding: 20px;
-            border-radius: 15px;
+        .display-container {
             text-align: center;
+            padding: 20px;
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            min-width: 250px;
             border: 1px solid #333;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
-        .label {
-            font-size: 12px;
+        #current-chord {
+            font-size: 58px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 5px 0;
+            height: 70px;
+        }
+
+        .bpm-value {
+            font-size: 58px;
+            font-weight: 800;
+            color: var(--secondary);
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 11px;
             color: #888;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
-        .value {
-            font-size: 32px;
-            font-weight: bold;
+        .history-panel {
+            background: var(--card);
+            border-radius: 20px;
+            width: 300px;
+            height: 250px;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #252525;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-note {
             color: var(--primary);
-            margin-top: 5px;
+            font-weight: bold;
+            font-size: 16px;
         }
 
-        #chord-display {
-            font-size: 48px;
-            min-height: 60px;
+        .history-rhythm {
+            color: var(--secondary);
         }
 
-        .beat-indicator {
-            width: 20px;
-            height: 20px;
-            background: #333;
-            border-radius: 50%;
-            margin: 10px auto;
-            transition: background 0.1s;
-        }
-
-        .beat-active {
-            background: var(--primary);
-            box-shadow: 0 0 15px var(--primary);
+        .history-time {
+            color: #666;
+            font-size: 11px;
         }
 
         .piano {
@@ -84,61 +134,68 @@
         }
 
         .key {
-            width: 50px;
-            height: 180px;
+            width: 45px;
+            height: 160px;
             background: white;
             border: 1px solid #bbb;
-            border-radius: 0 0 6px 6px;
-            transition: all 0.05s;
+            border-radius: 0 0 5px 5px;
+            position: relative;
             display: flex;
             align-items: flex-end;
             justify-content: center;
             padding-bottom: 10px;
             color: #333;
-            font-size: 10px;
             font-weight: bold;
         }
 
             .key.black {
-                width: 34px;
-                height: 110px;
+                width: 30px;
+                height: 100px;
                 background: #222;
                 color: white;
-                margin-left: -17px;
-                margin-right: -17px;
+                margin-left: -15px;
+                margin-right: -15px;
                 z-index: 2;
                 border: none;
             }
 
             .key.active {
                 background: var(--primary) !important;
+                height: 155px;
                 transform: translateY(2px);
+            }
+
+            .key.black.active {
+                background: #00bb99 !important;
+                height: 98px;
             }
 
         .instructions {
             margin-top: 20px;
             color: #555;
-            font-size: 13px;
+            font-size: 12px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard">
-        <div class="stat-card">
-            <div class="label">Compasso</div>
-            <div id="time-sig" class="value">--</div>
-            <div id="beat-dot" class="beat-indicator"></div>
+    <div class="main-layout">
+        <div class="display-container">
+            <div class="stat-label" id="current-key">Aguardando...</div>
+            <div id="current-chord">-</div>
+            <div class="stat-label">Acorde Atual</div>
         </div>
-        <div class="stat-card">
-            <div class="label">Acorde / Tom</div>
-            <div id="chord-display" class="value">-</div>
-            <div id="tonality-display" class="label">Detectando Tom...</div>
+
+        <div class="display-container">
+            <div class="stat-label">BPM Estimado</div>
+            <div id="bpm-display" class="bpm-value">0</div>
+            <div class="stat-label" id="last-note-type">Pulsação Dinâmica</div>
         </div>
-        <div class="stat-card">
-            <div class="label">BPM</div>
-            <div id="bpm-display" class="value">0</div>
-            <div id="bpm-stability" class="label">Aguardando ritmo...</div>
+
+        <div class="history-panel">
+            <div class="stat-label">Histórico de Notas</div>
+            <div id="history-list" class="history-list"></div>
         </div>
     </div>
 
@@ -157,135 +214,132 @@
         <div class="key" id="key-11">M</div>
     </div>
 
-    <div class="instructions">Toque o teclado no ritmo da música. As trocas de acorde ajudam a identificar o compasso.</div>
+    <div class="instructions">
+        <b>Semibreve:</b> Toque uma nota e aguarde um longo tempo (4x o pulso base) antes da próxima nota.<br>
+        A primeira nota tocada define o tempo de uma Semínima.
+    </div>
 
     <script>
         const cipherNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
         const keyMap = { 'z': 0, 's': 1, 'x': 2, 'd': 3, 'c': 4, 'v': 5, 'g': 6, 'b': 7, 'h': 8, 'n': 9, 'j': 10, 'm': 11 };
+        const diatonicScales = Array.from({ length: 12 }, (_, root) => [0, 2, 4, 5, 7, 9, 11].map(i => (root + i) % 12));
 
-        // Estado da Música
-        let activeNotes = new Set();
-        let history = [];
-        let lastChord = "";
+        const activeNotes = new Set();
+        let harmonyHistory = [];
         let currentTonality = null;
 
-        // Ritmo e BPM
+        // Rítmico
         let lastNoteTime = 0;
-        let intervals = [];
-        let bpm = 0;
-        let beatCounter = 0;
-        let lastChordChangeTime = 0;
-        let beatsSinceChordChange = 0;
+        let pulseMs = 0;
 
-        // Timers
-        let resetTimer = null;
-        let metronomeInterval = null;
-
-        const chordDisplay = document.getElementById('chord-display');
-        const tonalityDisplay = document.getElementById('tonality-display');
+        const chordDisplay = document.getElementById('current-chord');
+        const keyDisplay = document.getElementById('current-key');
         const bpmDisplay = document.getElementById('bpm-display');
-        const timeSigDisplay = document.getElementById('time-sig');
-        const beatDot = document.getElementById('beat-dot');
+        const historyList = document.getElementById('history-list');
+        const lastNoteTypeDisplay = document.getElementById('last-note-type');
 
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (keyMap.hasOwnProperty(key) && !activeNotes.has(keyMap[key])) {
-                const note = keyMap[key];
-                const now = performance.now();
+                const noteIndex = keyMap[key];
+                const now = Date.now();
 
-                calculateBPM(now);
-                activeNotes.add(note);
-                history.push(note);
-                if (history.length > 20) history.shift();
+                const rhythmData = processRhythm(now);
+                if (rhythmData) addNoteToHistory(cipherNames[noteIndex], rhythmData);
 
-                document.getElementById(`key-${note}`).classList.add('active');
+                activeNotes.add(noteIndex);
+                harmonyHistory.push(noteIndex);
+                if (harmonyHistory.length > 15) harmonyHistory.shift();
+
+                updateUI(noteIndex, true);
                 analyzeHarmony();
-
-                clearTimeout(resetTimer);
-                resetTimer = setTimeout(resetAll, 5000);
             }
         });
 
         window.addEventListener('keyup', (e) => {
             const key = e.key.toLowerCase();
             if (keyMap.hasOwnProperty(key)) {
-                activeNotes.delete(keyMap[key]);
-                document.getElementById(`key-${keyMap[key]}`).classList.remove('active');
+                const noteIndex = keyMap[key];
+                activeNotes.delete(noteIndex);
+                updateUI(noteIndex, false);
                 analyzeHarmony();
             }
         });
 
-        function calculateBPM(now) {
+        function processRhythm(now) {
+            let result = { name: "Início", icon: "▶" };
+
             if (lastNoteTime > 0) {
-                const diff = now - lastNoteTime;
-                // Ignora notas muito rápidas (acordes ou flams < 150ms)
-                if (diff > 150 && diff < 2000) {
-                    intervals.push(diff);
-                    if (intervals.length > 8) intervals.shift();
+                const interval = now - lastNoteTime;
 
-                    const avg = intervals.reduce((a, b) => a + b) / intervals.length;
-                    bpm = Math.round(60000 / avg);
-                    bpmDisplay.innerText = bpm;
+                // Ignora pressões quase simultâneas (acordes) para não quebrar o ritmo
+                if (interval < 50) return null;
 
-                    // Lógica de Compasso: Conta pulsações entre mudanças de acorde
-                    beatsSinceChordChange++;
-                    startVisualMetronome(avg);
+                // Se demorar mais de 5 segundos, reseta o pulso
+                if (interval > 5000) {
+                    pulseMs = 0;
+                    result = { name: "Novo Início", icon: "▶" };
+                } else {
+                    result = classifyNote(interval);
+                    bpmDisplay.innerText = Math.round(60000 / pulseMs);
+                    lastNoteTypeDisplay.innerText = `${result.icon} ${result.name}`;
                 }
             }
             lastNoteTime = now;
+            return result;
         }
 
-        function startVisualMetronome(ms) {
-            clearInterval(metronomeInterval);
-            const flash = () => {
-                beatDot.classList.add('beat-active');
-                setTimeout(() => beatDot.classList.remove('beat-active'), 100);
-            };
-            flash();
-            metronomeInterval = setInterval(flash, ms);
+        function classifyNote(interval) {
+            if (pulseMs === 0) {
+                pulseMs = interval;
+                return { name: "Semínima", icon: "𝅘𝅥" };
+            }
+
+            let ratio = interval / pulseMs;
+
+            // Se for muito rápido, ajusta a escala (o que era semínima vira mínima)
+            if (ratio < 0.3) {
+                pulseMs = pulseMs / 2;
+                ratio = interval / pulseMs;
+            }
+
+            // Lógica de classificação incluindo Semibreve
+            if (ratio >= 3.3) return { name: "Semibreve", icon: "𝅝" }; // ~4 tempos
+            if (ratio >= 1.7) return { name: "Mínima", icon: "𝅗𝅥" };    // ~2 tempos
+            if (ratio >= 0.75) return { name: "Semínima", icon: "𝅘𝅥" };  // ~1 tempo
+            if (ratio >= 0.35) return { name: "Colcheia", icon: "𝅘𝅥𝅮" };   // ~0.5 tempo
+            return { name: "Semicolcheia", icon: "𝅘𝅥𝅯" };               // ~0.25 tempo
+        }
+
+        function addNoteToHistory(noteName, rhythm) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            const timeStr = new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' });
+
+            item.innerHTML = `
+                    <span class="history-note">${noteName}</span>
+                    <span class="history-rhythm">${rhythm.icon} ${rhythm.name}</span>
+                    <span class="history-time">${timeStr}</span>
+                `;
+
+            historyList.prepend(item);
+            if (historyList.children.length > 30) historyList.removeChild(historyList.lastChild);
         }
 
         function analyzeHarmony() {
-            // Identificar Tom
-            updateTonality();
-
-            // Identificar Acorde
-            if (activeNotes.size > 0) {
-                const currentChord = detectChord([...activeNotes]);
-                chordDisplay.innerText = currentChord;
-
-                // Se o acorde mudou, tentamos estimar o compasso
-                if (currentChord !== lastChord && !currentChord.includes("...")) {
-                    estimateTimeSignature();
-                    lastChord = currentChord;
+            if (harmonyHistory.length >= 3) {
+                let bestScale = currentTonality;
+                let maxScore = 0;
+                diatonicScales.forEach((scale, root) => {
+                    const score = harmonyHistory.filter(n => scale.includes(n)).length;
+                    if (score > maxScore) { maxScore = score; bestScale = root; }
+                });
+                if (maxScore > harmonyHistory.length * 0.7) {
+                    currentTonality = bestScale;
+                    keyDisplay.innerText = `Tom: ${cipherNames[currentTonality]}`;
                 }
             }
-        }
-
-        function estimateTimeSignature() {
-            console.log(`beatsSinceChordChange ${beatsSinceChordChange}`);
-            // Se mudou de acorde e temos batidas contadas
-            if (beatsSinceChordChange >= 2 && beatsSinceChordChange <= 8) {
-                let sig = "4/4";
-                if (beatsSinceChordChange === 3) sig = "3/4";
-                if (beatsSinceChordChange === 2) sig = "2/4";
-                if (beatsSinceChordChange >= 5) sig = "4/4"; // Simplificação
-
-                timeSigDisplay.innerText = sig;
-            }
-            beatsSinceChordChange = 0;
-        }
-
-        function updateTonality() {
-            if (history.length < 5) return;
-            const scales = Array.from({ length: 12 }, (_, r) => [0, 2, 4, 5, 7, 9, 11].map(i => (r + i) % 12));
-            let bestScale = 0, maxScore = 0;
-            scales.forEach((scale, root) => {
-                const score = history.filter(n => scale.includes(n)).length;
-                if (score > maxScore) { maxScore = score; bestScale = root; }
-            });
-            currentTonality = bestScale;
-            tonalityDisplay.innerText = `Tom: ${cipherNames[currentTonality]} Maior / Diatônico`;
+            chordDisplay.innerText = activeNotes.size > 0 ? detectChord([...activeNotes]) : "-";
         }
 
         function detectChord(notes) {
@@ -293,24 +347,22 @@
             notes.sort((a, b) => a - b);
             for (let i = 0; i < notes.length; i++) {
                 const root = notes[i];
-                const rel = notes.map(n => (n - root + 12) % 12);
-                if (rel.includes(4) && rel.includes(7)) return cipherNames[root];
-                if (rel.includes(3) && rel.includes(7)) return cipherNames[root] + "m";
-                if (rel.includes(3) && rel.includes(6)) return cipherNames[root] + "dim";
+                const intervals = notes.map(n => (n - root + 12) % 12);
+                if (intervals.includes(4) && intervals.includes(7)) return cipherNames[root];
+                if (intervals.includes(3) && intervals.includes(7)) return cipherNames[root] + "m";
+                if (intervals.includes(3) && intervals.includes(6)) return cipherNames[root] + "dim";
+                if (intervals.includes(2) && intervals.includes(7)) return cipherNames[root] + "sus2";
+                if (intervals.includes(5) && intervals.includes(7)) return cipherNames[root] + "sus4";
             }
             return cipherNames[notes[0]] + "...";
         }
 
-        function resetAll() {
-            history = [];
-            intervals = [];
-            bpm = 0;
-            beatsSinceChordChange = 0;
-            bpmDisplay.innerText = "0";
-            chordDisplay.innerText = "-";
-            timeSigDisplay.innerText = "--";
-            tonalityDisplay.innerText = "Detectando Tom...";
-            clearInterval(metronomeInterval);
+        function updateUI(note, isActive) {
+            const el = document.getElementById(`key-${note}`);
+            if (el) {
+                if (isActive) el.classList.add('active');
+                else el.classList.remove('active');
+            }
         }
     </script>
 </body>
