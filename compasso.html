@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPM Analyzer Pro</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #ffffff;
+            --subtext: #888;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+
+        .container {
+            text-align: center;
+            background-color: var(--card);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            width: 350px;
+        }
+
+        .bpm-main {
+            margin-bottom: 20px;
+        }
+
+        #bpm-display {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--primary);
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .label {
+            color: var(--subtext);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        /* Tabela de Compasso */
+        .musical-values {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 25px 0;
+            text-align: left;
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .note-item {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid #333;
+            padding: 5px 0;
+        }
+
+        .note-name {
+            font-size: 0.75rem;
+            color: var(--subtext);
+        }
+
+        .note-value {
+            font-weight: bold;
+            color: #ddd;
+        }
+
+        #tap-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--primary);
+            color: #121212;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.05s;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            user-select: none;
+            margin: 10px 0;
+        }
+
+        .btn-active {
+            transform: scale(0.9) !important;
+            background-color: #00cc6e !important;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #555;
+            margin-top: 15px;
+        }
+
+        kbd {
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="bpm-main">
+            <div class="label">Tempo Atual</div>
+            <div id="bpm-display">0</div>
+            <div class="label">BPM (Semínima)</div>
+        </div>
+
+        <div class="musical-values">
+            <div class="note-item">
+                <span class="note-name">𝅝 Semibreve</span>
+                <span id="v-semibreve" class="note-value">-</span>
+            </div>
+            <div class="note-item">
+                <span class="note-name">𝅗𝅥 Mínima</span>
+                <span id="v-minima" class="note-value">-</span>
+            </div>
+            <div class="note-item">
+                <span class="note-name">𝅘𝅥 Semínima</span>
+                <span id="v-seminima" class="note-value">-</span>
+            </div>
+            <div class="note-item">
+                <span class="note-name">𝅘𝅥𝅮 Colcheia</span>
+                <span id="v-colcheia" class="note-value">-</span>
+            </div>
+        </div>
+
+        <button id="tap-btn">TAP</button>
+
+        <p class="hint">Pressione <kbd>F</kbd> para marcar o ritmo</p>
+        <button onclick="reset()" style="background:none; border:none; color:#555; cursor:pointer; text-decoration:underline; font-size:0.8rem">Resetar</button>
+    </div>
+
+    <script>
+        let taps = [];
+        let isKeyDown = false;
+
+        const bpmDisplay = document.getElementById('bpm-display');
+        const tapBtn = document.getElementById('tap-btn');
+
+        // Elementos dos valores musicais
+        const uiNotes = {
+            semibreve: document.getElementById('v-semibreve'),
+            minima: document.getElementById('v-minima'),
+            seminima: document.getElementById('v-seminima'),
+            colcheia: document.getElementById('v-colcheia')
+        };
+
+        function handleTap() {
+            const now = Date.now();
+
+            // Reset se houver hiato de 2.5s
+            if (taps.length > 0 && (now - taps[taps.length - 1]) > 2500) {
+                taps = [];
+            }
+
+            taps.push(now);
+
+            if (taps.length > 1) {
+                if (taps.length > 16) taps.shift(); // Média das últimas 16 batidas
+
+                const intervals = [];
+                for (let i = 1; i < taps.length; i++) {
+                    intervals.push(taps[i] - taps[i - 1]);
+                }
+
+                // Intervalo médio em Milissegundos
+                const avgMs = intervals.reduce((a, b) => a + b) / intervals.length;
+
+                // Cálculo do BPM (Baseado na Semínima)
+                const bpm = Math.round(60000 / avgMs);
+
+                updateUI(bpm, avgMs);
+            }
+        }
+
+        function updateUI(bpm, ms) {
+            bpmDisplay.innerText = bpm;
+
+            // Classificação do Compasso (em Milissegundos ou BPM relativo)
+            // Semibreve = 4x o tempo da semínima (ou bpm / 4)
+            // Colcheia = 0.5x o tempo da semínima (ou bpm * 2)
+
+            uiNotes.semibreve.innerText = (bpm / 4).toFixed(1) + " bpm";
+            uiNotes.minima.innerText = (bpm / 2).toFixed(1) + " bpm";
+            uiNotes.seminima.innerText = bpm + " bpm";
+            uiNotes.colcheia.innerText = (bpm * 2) + " bpm";
+        }
+
+        function reset() {
+            taps = [];
+            bpmDisplay.innerText = "0";
+            Object.values(uiNotes).forEach(el => el.innerText = "-");
+        }
+
+        // Lógica de Teclado (Tecla F)
+        window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'f' && !isKeyDown) {
+                isKeyDown = true;
+                handleTap();
+                tapBtn.classList.add('btn-active');
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.key.toLowerCase() === 'f') {
+                isKeyDown = false;
+                tapBtn.classList.remove('btn-active');
+            }
+        });
+
+        // Mouse/Touch
+        tapBtn.addEventListener('mousedown', () => {
+            handleTap();
+            tapBtn.classList.add('btn-active');
+        });
+        window.addEventListener('mouseup', () => tapBtn.classList.remove('btn-active'));
+
+        tapBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleTap();
+            tapBtn.classList.add('btn-active');
+        });
+        tapBtn.addEventListener('touchend', () => tapBtn.classList.remove('btn-active'));
+
+    </script>
+</body>
+</html>
