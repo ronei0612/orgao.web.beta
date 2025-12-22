@@ -44,12 +44,21 @@
             border: 1px solid #333;
         }
 
-        #current-chord {
+        /* IDs para os valores grandes */
+        #display-note, #display-chord {
             font-size: 58px;
             font-weight: 800;
             color: var(--primary);
             margin: 5px 0;
             height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* A nota atual será branca para diferenciar do acorde */
+        #display-note {
+            color: #ffffff;
         }
 
         .bpm-value {
@@ -182,9 +191,17 @@
 
     <div class="main-layout">
         <div class="display-container">
-            <div class="stat-label" id="current-key">Aguardando...</div>
-            <div id="current-chord">-</div>
-            <div class="stat-label">Acorde Atual</div>
+            <div class="stat-label" id="current-key">Aguardando Tom...</div>
+
+            <!-- Sessão Nota Atual -->
+            <div id="display-note">-</div>
+            <div class="stat-label">Nota Atual</div>
+
+            <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
+
+            <!-- Sessão Acorde -->
+            <div id="display-chord">-</div>
+            <div class="stat-label">Acorde</div>
         </div>
 
         <div class="display-container">
@@ -215,8 +232,8 @@
     </div>
 
     <div class="instructions">
-        <b>Semibreve:</b> Toque uma nota e aguarde um longo tempo (4x o pulso base) antes da próxima nota.<br>
-        A primeira nota tocada define o tempo de uma Semínima.
+        Toque uma <b>Mínima</b> ou <b>Semibreve</b> para gerar um acorde do Campo Harmônico.<br>
+        O acorde permanecerá na tela até que um novo seja detectado.
     </div>
 
     <script>
@@ -226,13 +243,15 @@
 
         const activeNotes = new Set();
         let harmonyHistory = [];
-        let currentTonality = null;
+        let currentTonality = 0; // Padrão C
+        let lastChordDetected = "-";
 
         // Rítmico
         let lastNoteTime = 0;
         let pulseMs = 0;
 
-        const chordDisplay = document.getElementById('current-chord');
+        const noteDisplay = document.getElementById('display-note');
+        const chordDisplay = document.getElementById('display-chord');
         const keyDisplay = document.getElementById('current-key');
         const bpmDisplay = document.getElementById('bpm-display');
         const historyList = document.getElementById('history-list');
@@ -249,10 +268,10 @@
 
                 activeNotes.add(noteIndex);
                 harmonyHistory.push(noteIndex);
-                if (harmonyHistory.length > 15) harmonyHistory.shift();
+                if (harmonyHistory.length > 20) harmonyHistory.shift();
 
                 updateUI(noteIndex, true);
-                analyzeHarmony();
+                analyzeMusic(noteIndex, rhythmData);
             }
         });
 
@@ -262,24 +281,21 @@
                 const noteIndex = keyMap[key];
                 activeNotes.delete(noteIndex);
                 updateUI(noteIndex, false);
-                analyzeHarmony();
+
+                // Limpa apenas a "Nota Atual" ao soltar, mas mantém o "Acorde"
+                if (activeNotes.size === 0) {
+                    noteDisplay.innerText = "-";
+                }
             }
         });
 
         function processRhythm(now) {
             let result = { name: "Início", icon: "▶" };
-
             if (lastNoteTime > 0) {
                 const interval = now - lastNoteTime;
-
-                // Ignora pressões quase simultâneas (acordes) para não quebrar o ritmo
                 if (interval < 50) return null;
-
-                // Se demorar mais de 5 segundos, reseta o pulso
-                if (interval > 5000) {
-                    pulseMs = 0;
-                    result = { name: "Novo Início", icon: "▶" };
-                } else {
+                if (interval > 5000) pulseMs = 0;
+                else {
                     result = classifyNote(interval);
                     bpmDisplay.innerText = Math.round(60000 / pulseMs);
                     lastNoteTypeDisplay.innerText = `${result.icon} ${result.name}`;
@@ -290,60 +306,65 @@
         }
 
         function classifyNote(interval) {
-            if (pulseMs === 0) {
-                pulseMs = interval;
-                return { name: "Semínima", icon: "𝅘𝅥" };
-            }
-
+            if (pulseMs === 0) { pulseMs = interval; return { name: "Semínima", icon: "𝅘𝅥" }; }
             let ratio = interval / pulseMs;
-
-            // Se for muito rápido, ajusta a escala (o que era semínima vira mínima)
-            if (ratio < 0.3) {
-                pulseMs = pulseMs / 2;
-                ratio = interval / pulseMs;
-            }
-
-            // Lógica de classificação incluindo Semibreve
-            if (ratio >= 3.3) return { name: "Semibreve", icon: "𝅝" }; // ~4 tempos
-            if (ratio >= 1.7) return { name: "Mínima", icon: "𝅗𝅥" };    // ~2 tempos
-            if (ratio >= 0.75) return { name: "Semínima", icon: "𝅘𝅥" };  // ~1 tempo
-            if (ratio >= 0.35) return { name: "Colcheia", icon: "𝅘𝅥𝅮" };   // ~0.5 tempo
-            return { name: "Semicolcheia", icon: "𝅘𝅥𝅯" };               // ~0.25 tempo
+            if (ratio < 0.3) { pulseMs = pulseMs / 2; ratio = interval / pulseMs; }
+            if (ratio >= 3.3) return { name: "Semibreve", icon: "𝅝" };
+            if (ratio >= 1.7) return { name: "Mínima", icon: "𝅗𝅥" };
+            if (ratio >= 0.75) return { name: "Semínima", icon: "𝅘𝅥" };
+            if (ratio >= 0.35) return { name: "Colcheia", icon: "𝅘𝅥𝅮" };
+            return { name: "Semicolcheia", icon: "𝅘𝅥𝅯" };
         }
 
-        function addNoteToHistory(noteName, rhythm) {
-            const item = document.createElement('div');
-            item.className = 'history-item';
-            const timeStr = new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' });
-
-            item.innerHTML = `
-                    <span class="history-note">${noteName}</span>
-                    <span class="history-rhythm">${rhythm.icon} ${rhythm.name}</span>
-                    <span class="history-time">${timeStr}</span>
-                `;
-
-            historyList.prepend(item);
-            if (historyList.children.length > 30) historyList.removeChild(historyList.lastChild);
-        }
-
-        function analyzeHarmony() {
-            if (harmonyHistory.length >= 3) {
+        function analyzeMusic(noteIndex, rhythmData) {
+            // 1. Detectar Tom
+            if (harmonyHistory.length >= 4) {
                 let bestScale = currentTonality;
                 let maxScore = 0;
                 diatonicScales.forEach((scale, root) => {
                     const score = harmonyHistory.filter(n => scale.includes(n)).length;
                     if (score > maxScore) { maxScore = score; bestScale = root; }
                 });
-                if (maxScore > harmonyHistory.length * 0.7) {
-                    currentTonality = bestScale;
-                    keyDisplay.innerText = `Tom: ${cipherNames[currentTonality]}`;
-                }
+                currentTonality = bestScale;
+                keyDisplay.innerText = `Tom: ${cipherNames[currentTonality]}`;
             }
-            chordDisplay.innerText = activeNotes.size > 0 ? detectChord([...activeNotes]) : "-";
+
+            // 2. Mostrar Nota Atual
+            noteDisplay.innerText = cipherNames[noteIndex];
+
+            // 3. Lógica de Acorde
+            let detected = null;
+
+            if (activeNotes.size > 1) {
+                // Acorde físico
+                detected = detectPhysicalChord([...activeNotes]);
+            } else if (rhythmData && (rhythmData.name === "Mínima" || rhythmData.name === "Semibreve")) {
+                // Sugestão de Campo Harmônico
+                detected = getChordFromField(noteIndex, currentTonality);
+            }
+
+            // Se detectou algo novo, atualiza a memória e o display
+            if (detected) {
+                lastChordDetected = detected;
+                chordDisplay.innerText = lastChordDetected;
+            }
         }
 
-        function detectChord(notes) {
-            if (notes.length === 1) return cipherNames[notes[0]];
+        function getChordFromField(note, tonality) {
+            const degree = (note - tonality + 12) % 12;
+            const field = {
+                0: cipherNames[tonality],              // I
+                2: cipherNames[(tonality + 2) % 12] + "m",   // ii
+                4: cipherNames[(tonality + 4) % 12] + "m",   // iii
+                5: cipherNames[(tonality + 5) % 12],       // IV
+                7: cipherNames[(tonality + 7) % 12],       // V
+                9: cipherNames[(tonality + 9) % 12] + "m",   // vi
+                11: cipherNames[(tonality + 11) % 12] + "º"  // viiº
+            };
+            return field[degree] || cipherNames[note];
+        }
+
+        function detectPhysicalChord(notes) {
             notes.sort((a, b) => a - b);
             for (let i = 0; i < notes.length; i++) {
                 const root = notes[i];
@@ -351,10 +372,21 @@
                 if (intervals.includes(4) && intervals.includes(7)) return cipherNames[root];
                 if (intervals.includes(3) && intervals.includes(7)) return cipherNames[root] + "m";
                 if (intervals.includes(3) && intervals.includes(6)) return cipherNames[root] + "dim";
-                if (intervals.includes(2) && intervals.includes(7)) return cipherNames[root] + "sus2";
-                if (intervals.includes(5) && intervals.includes(7)) return cipherNames[root] + "sus4";
             }
             return cipherNames[notes[0]] + "...";
+        }
+
+        function addNoteToHistory(noteName, rhythm) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            const timeStr = new Date().toLocaleTimeString([], { hour12: false, minute: '2-digit', second: '2-digit' });
+            item.innerHTML = `
+                    <span class="history-note">${noteName}</span>
+                    <span class="history-rhythm">${rhythm.icon} ${rhythm.name}</span>
+                    <span class="history-time">${timeStr}</span>
+                `;
+            historyList.prepend(item);
+            if (historyList.children.length > 30) historyList.removeChild(historyList.lastChild);
         }
 
         function updateUI(note, isActive) {
