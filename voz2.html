@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice Harmony & Rhythm Pro</title>
+    <title>Voice Harmony & Rhythm History Pro</title>
     <style>
         :root {
             --primary: #00ffcc;
@@ -12,6 +12,7 @@
             --card: #1e293b;
             --text: #f8fafc;
             --accent: #4f46e5;
+            --success: #10b981;
         }
 
         body {
@@ -28,10 +29,10 @@
 
         .dashboard {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
         }
 
         .card {
@@ -43,19 +44,27 @@
             text-align: center;
         }
 
+        .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #94a3b8;
+            margin-bottom: 5px;
+        }
+
         /* Displays Grandes */
-        .big-value {
-            font-size: 64px;
+        .display-big {
+            font-size: 58px;
             font-weight: 800;
-            margin: 10px 0;
-            height: 80px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 5px 0;
         }
 
         #display-note {
-            color: #fff;
+            color: #ffffff;
         }
 
         #display-chord {
@@ -66,20 +75,31 @@
             color: var(--secondary);
         }
 
-        .label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .freq-info {
+            font-family: monospace;
+            font-size: 1.2rem;
             color: #94a3b8;
+            margin-bottom: 10px;
         }
 
-        /* Tuner / Agulha */
-        .tuner-box {
-            margin: 20px 0;
+        /* Medidor de Afinação */
+        .tuner-container {
             position: relative;
-            height: 10px;
+            width: 100%;
+            height: 12px;
             background: #334155;
-            border-radius: 5px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .center-line {
+            position: absolute;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--success);
+            top: -4px;
+            z-index: 1;
         }
 
         #needle {
@@ -88,169 +108,210 @@
             width: 4px;
             height: 20px;
             background: var(--primary);
-            top: -5px;
+            top: -4px;
+            border-radius: 2px;
             transform: translateX(-50%);
             transition: left 0.1s ease-out;
-            border-radius: 2px;
+            z-index: 2;
         }
 
         /* Histórico */
-        .history-panel {
-            height: 300px;
-            display: flex;
-            flex-direction: column;
-        }
-
         .history-list {
-            flex-grow: 1;
+            height: 250px;
             overflow-y: auto;
             margin-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
         }
 
         .history-item {
-            background: #0f172a;
-            padding: 10px;
-            border-radius: 10px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #0f172a;
+            border-radius: 8px;
             font-family: monospace;
-            animation: fadeIn 0.3s ease;
+            font-size: 14px;
         }
 
-        /* Controles */
-        .controls {
+        /* Controles / Seletores */
+        .settings-grid {
             text-align: left;
-            font-size: 13px;
+            display: grid;
+            gap: 12px;
         }
 
-        .control-group {
-            margin-bottom: 10px;
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 4px;
         }
+
+            .control-group label span {
+                color: var(--primary);
+                font-weight: bold;
+            }
 
         input[type="range"] {
             width: 100%;
+            cursor: pointer;
             accent-color: var(--accent);
         }
 
         .btn-main {
             grid-column: 1 / -1;
-            padding: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 15px;
             background: var(--accent);
             color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
         }
 
             .btn-main.active {
                 background: #ef4444;
             }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-5px);
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 <body>
 
-    <h2 style="margin-bottom: 5px;">Music Analysis Pro</h2>
-    <p style="color: #94a3b8; margin-bottom: 25px;">Detecção de Notas, Acordes e Ritmo via Microfone</p>
+    <h2 style="margin-bottom: 10px;">Pitch, Harmony & Rhythm Pro</h2>
 
     <div class="dashboard">
 
-        <!-- Bloco Principal de Notas -->
+        <!-- Bloco 1: Detecção de Nota e Acorde -->
         <div class="card">
-            <div class="label" id="current-key">Aguardando áudio...</div>
-            <div id="display-note" class="big-value">--</div>
-            <div class="label">Nota Detectada</div>
+            <div class="label" id="current-key">Tom: Aguardando...</div>
+            <div id="display-note" class="display-big">--</div>
+            <div class="freq-info"><span id="frequency">0.00</span> Hz</div>
 
-            <div class="tuner-box">
-                <div style="position: absolute; left: 50%; width: 2px; height: 10px; background: white; z-index: 1;"></div>
+            <div class="tuner-container">
+                <div class="center-line"></div>
                 <div id="needle"></div>
             </div>
 
-            <div id="display-chord" class="big-value">-</div>
-            <div class="label">Sugestão de Acorde</div>
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+
+            <div id="display-chord" class="display-big">-</div>
+            <div class="label">Acorde Sugerido</div>
         </div>
 
-        <!-- Bloco de Ritmo -->
+        <!-- Bloco 2: Configurações Técnicas (OS SELETORES) -->
         <div class="card">
-            <div class="label">BPM Estimado</div>
-            <div id="bpm-display" class="big-value">0</div>
-            <div class="label" id="note-type-label">Silêncio</div>
-
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-
-            <div class="controls">
+            <div class="label">Ajustes do Detector</div>
+            <div class="settings-grid">
                 <div class="control-group">
-                    <label>Sensibilidade: <span id="v-noise">0.02</span></label>
+                    <label>Sensibilidade (Ruído): <span id="v-noise">0.02</span></label>
                     <input type="range" id="noise" min="0.001" max="0.1" step="0.001" value="0.02">
                 </div>
                 <div class="control-group">
+                    <label>Freq. Mínima: <span id="v-min">80</span> Hz</label>
+                    <input type="range" id="min-freq" min="40" max="200" step="1" value="80">
+                </div>
+                <div class="control-group">
+                    <label>Freq. Máxima: <span id="v-max">1100</span> Hz</label>
+                    <input type="range" id="max-freq" min="500" max="2000" step="10" value="1100">
+                </div>
+                <div class="control-group">
                     <label>Suavização: <span id="v-smooth">5</span></label>
-                    <input type="range" id="smooth" min="1" max="15" value="5">
+                    <input type="range" id="smooth" min="1" max="20" step="1" value="5">
+                </div>
+                <div class="control-group">
+                    <label>Duração Mínima: <span id="v-duration">100</span> ms</label>
+                    <input type="range" id="duration" min="0" max="1000" step="50" value="100">
                 </div>
             </div>
         </div>
 
-        <!-- Bloco de Histórico -->
-        <div class="card history-panel">
-            <div class="label">Histórico de Performance</div>
+        <!-- Bloco 3: Ritmo e Histórico -->
+        <div class="card">
+            <div class="label">Ritmo Estático</div>
+            <div id="bpm-display" class="display-big">0</div>
+            <div class="label" id="note-type-label">Pulsação Dinâmica</div>
+
+            <div class="label" style="margin-top: 20px;">Histórico Recente</div>
             <div id="history-list" class="history-list"></div>
         </div>
 
         <button id="start-btn" class="btn-main">Iniciar Captação</button>
-
     </div>
 
     <script>
-        // --- CONFIGURAÇÕES E ESTADOS ---
+        // --- CONFIGURAÇÃO E ESTADO ---
         const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
         const diatonicScales = Array.from({ length: 12 }, (_, root) => [0, 2, 4, 5, 7, 9, 11].map(i => (root + i) % 12));
 
-        let config = { noise: 0.02, smoothing: 5, minFreq: 60, maxFreq: 1200 };
+        let config = {
+            noiseThreshold: 0.02,
+            minFreq: 80,
+            maxFreq: 1100,
+            smoothing: 5,
+            minDuration: 100
+        };
+
         let audioCtx, analyser, dataArray;
         let isRunning = false;
-
         let pitchHistory = [];
         let harmonyHistory = [];
-        let lastStableNote = "";
+        let lastStableNoteName = "";
         let noteStartTime = 0;
         let currentTonality = 0;
 
-        // Ritmo
+        // Rítmico
         let lastNoteTime = 0;
         let pulseMs = 0;
 
-        // UI Elements
+        // --- UI ELEMENTS ---
         const ui = {
+            btn: document.getElementById('start-btn'),
             note: document.getElementById('display-note'),
             chord: document.getElementById('display-chord'),
+            freq: document.getElementById('frequency'),
             bpm: document.getElementById('bpm-display'),
-            key: document.getElementById('current-key'),
             needle: document.getElementById('needle'),
             history: document.getElementById('history-list'),
+            key: document.getElementById('current-key'),
             noteType: document.getElementById('note-type-label'),
-            btn: document.getElementById('start-btn')
+            // Sliders
+            inNoise: document.getElementById('noise'),
+            inMin: document.getElementById('min-freq'),
+            inMax: document.getElementById('max-freq'),
+            inSmooth: document.getElementById('smooth'),
+            inDuration: document.getElementById('duration'),
+            // Labels Valores
+            lNoise: document.getElementById('v-noise'),
+            lMin: document.getElementById('v-min'),
+            lMax: document.getElementById('v-max'),
+            lSmooth: document.getElementById('v-smooth'),
+            lDuration: document.getElementById('v-duration')
         };
 
-        // --- INICIALIZAÇÃO DO ÁUDIO ---
+        // --- ATUALIZAÇÃO DINÂMICA DOS SELETORES ---
+        function updateConfigs() {
+            config.noiseThreshold = parseFloat(ui.inNoise.value);
+            config.minFreq = parseInt(ui.inMin.value);
+            config.maxFreq = parseInt(ui.inMax.value);
+            config.smoothing = parseInt(ui.inSmooth.value);
+            config.minDuration = parseInt(ui.inDuration.value);
+
+            ui.lNoise.innerText = config.noiseThreshold;
+            ui.lMin.innerText = config.minFreq;
+            ui.lMax.innerText = config.maxFreq;
+            ui.lSmooth.innerText = config.smoothing;
+            ui.lDuration.innerText = config.minDuration;
+        }
+        [ui.inNoise, ui.inMin, ui.inMax, ui.inSmooth, ui.inDuration].forEach(el => el.oninput = updateConfigs);
+
+        // --- LÓGICA DE ÁUDIO ---
         ui.btn.onclick = async () => {
             if (isRunning) { location.reload(); return; }
-
             try {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -259,125 +320,107 @@
                 analyser.fftSize = 2048;
                 source.connect(analyser);
                 dataArray = new Float32Array(analyser.fftSize);
-
                 isRunning = true;
-                ui.btn.innerText = "Parar Sistema";
+                ui.btn.innerText = "Parar Detecção";
                 ui.btn.classList.add('active');
                 update();
-            } catch (e) { alert("Erro ao acessar microfone."); }
+            } catch (err) { alert("Erro: Permita o acesso ao microfone."); }
         };
 
-        // --- LOOP DE PROCESSAMENTO ---
         function update() {
             if (!isRunning) return;
-
             analyser.getFloatTimeDomainData(dataArray);
             let pitch = autoCorrelate(dataArray, audioCtx.sampleRate);
 
             if (pitch !== -1 && pitch >= config.minFreq && pitch <= config.maxFreq) {
-                const noteData = getNote(pitch);
+                const rawNoteData = getNote(pitch);
+                const now = performance.now();
 
-                // Suavização
-                pitchHistory.push(pitch);
-                if (pitchHistory.length > config.smoothing) pitchHistory.shift();
-                const avgPitch = pitchHistory.reduce((a, b) => a + b) / pitchHistory.length;
-                const stableNoteData = getNote(avgPitch);
+                // Checa se a nota mudou para resetar o tempo de duração mínima
+                if (rawNoteData.name !== lastStableNoteName) {
+                    lastStableNoteName = rawNoteData.name;
+                    noteStartTime = now;
+                }
 
-                // UI Imediata (Tuner)
-                ui.note.innerText = stableNoteData.name;
-                ui.needle.style.left = `${50 + stableNoteData.cents}%`;
-                ui.note.style.color = Math.abs(stableNoteData.cents) < 10 ? "var(--primary)" : "#fff";
+                // Só processa se a nota for sustentada pelo tempo mínimo configurado
+                if (now - noteStartTime >= config.minDuration) {
+                    pitchHistory.push(pitch);
+                    if (pitchHistory.length > config.smoothing) pitchHistory.shift();
+                    const avgPitch = pitchHistory.reduce((a, b) => a + b) / pitchHistory.length;
 
-                // Detecção de Nova Nota (Evento Rítmico/Harmônico)
-                if (stableNoteData.name !== lastStableNote) {
-                    handleNewNote(stableNoteData.name);
-                    lastStableNote = stableNoteData.name;
+                    const noteData = getNote(avgPitch);
+                    ui.note.innerText = noteData.name;
+                    ui.freq.innerText = avgPitch.toFixed(2);
+                    ui.needle.style.left = `${50 + noteData.cents}%`;
+                    ui.note.style.color = Math.abs(noteData.cents) < 10 ? "var(--success)" : "#fff";
+
+                    // Dispara lógica rítmica e harmônica quando uma nota se estabiliza
+                    handleStableNote(noteData.name);
                 }
             } else {
-                // Silêncio
                 if (pitchHistory.length > 0) pitchHistory.shift();
             }
-
             requestAnimationFrame(update);
         }
 
-        // --- LÓGICA DE MÚSICA (INTEGRAÇÃO) ---
-        function handleNewNote(noteName) {
+        let lastTrackedNote = "";
+        function handleStableNote(noteName) {
+            if (noteName === lastTrackedNote) return;
+            lastTrackedNote = noteName;
+
             const now = Date.now();
             const noteIndex = noteStrings.indexOf(noteName);
 
-            // 1. Processar Ritmo
+            // 1. Ritmo
             const rhythm = processRhythm(now);
 
-            // 2. Adicionar ao Histórico
             if (rhythm) {
+                // 2. Histórico
                 addNoteToHistory(noteName, rhythm);
 
-                // 3. Atualizar Tonalidade
+                // 3. Tonalidade
                 harmonyHistory.push(noteIndex);
                 if (harmonyHistory.length > 15) harmonyHistory.shift();
                 detectTonality();
 
-                // 4. Analisar Acorde (Baseado no Campo Harmônico do Tom atual)
-                // Se for uma nota longa (Mínima/Semibreve), sugerimos o acorde
+                // 4. Acorde (Sugestão baseada na duração)
                 if (rhythm.name === "Mínima" || rhythm.name === "Semibreve" || rhythm.name === "Semínima") {
-                    const suggestedChord = getChordFromField(noteIndex, currentTonality);
-                    ui.chord.innerText = suggestedChord;
+                    ui.chord.innerText = getChordFromField(noteIndex, currentTonality);
                 }
             }
         }
 
+        // --- RITMO E CAMPO HARMÔNICO ---
         function processRhythm(now) {
-            if (lastNoteTime === 0) {
-                lastNoteTime = now;
-                return { name: "Início", icon: "▶" };
-            }
-
+            if (lastNoteTime === 0) { lastNoteTime = now; return { name: "Início", icon: "▶" }; }
             const interval = now - lastNoteTime;
-            if (interval < 150) return null; // Debounce para ruído
+            if (interval < 150) return null;
 
             let result = classifyNote(interval);
-
-            if (pulseMs > 0) {
-                ui.bpm.innerText = Math.round(60000 / pulseMs);
-                ui.noteType.innerText = `${result.icon} ${result.name}`;
-            }
+            ui.bpm.innerText = Math.round(60000 / pulseMs);
+            ui.noteType.innerText = `${result.icon} ${result.name}`;
 
             lastNoteTime = now;
             return result;
         }
 
         function classifyNote(interval) {
-            if (pulseMs === 0 || interval > 3000) {
-                pulseMs = interval;
-                return { name: "Semínima", icon: "𝅘𝅥" };
-            }
-
+            if (pulseMs === 0 || interval > 4000) { pulseMs = interval; return { name: "Semínima", icon: "𝅘𝅥" }; }
             let ratio = interval / pulseMs;
             if (ratio >= 3.2) return { name: "Semibreve", icon: "𝅝" };
             if (ratio >= 1.7) return { name: "Mínima", icon: "𝅗𝅥" };
-            if (ratio >= 0.8) {
-                pulseMs = (pulseMs * 0.7 + interval * 0.3); // Ajuste dinâmico do BPM
-                return { name: "Semínima", icon: "𝅘𝅥" };
-            }
+            if (ratio >= 0.8) { pulseMs = (pulseMs * 0.8 + interval * 0.2); return { name: "Semínima", icon: "𝅘𝅥" }; }
             if (ratio >= 0.4) return { name: "Colcheia", icon: "𝅘𝅥𝅮" };
             return { name: "Semicolcheia", icon: "𝅘𝅥𝅯" };
         }
 
         function detectTonality() {
-            if (harmonyHistory.length < 5) return;
-
             let bestScale = currentTonality;
             let maxScore = -1;
-
             diatonicScales.forEach((scale, root) => {
                 const score = harmonyHistory.filter(n => scale.includes(n)).length;
-                if (score > maxScore) {
-                    maxScore = score;
-                    bestScale = root;
-                }
+                if (score > maxScore) { maxScore = score; bestScale = root; }
             });
-
             currentTonality = bestScale;
             ui.key.innerText = `Tom: ${noteStrings[currentTonality]}`;
         }
@@ -385,13 +428,13 @@
         function getChordFromField(note, tonality) {
             const degree = (note - tonality + 12) % 12;
             const field = {
-                0: noteStrings[tonality],              // I
-                2: noteStrings[(tonality + 2) % 12] + "m",   // ii
-                4: noteStrings[(tonality + 4) % 12] + "m",   // iii
-                5: noteStrings[(tonality + 5) % 12],       // IV
-                7: noteStrings[(tonality + 7) % 12],       // V
-                9: noteStrings[(tonality + 9) % 12] + "m",   // vi
-                11: noteStrings[(tonality + 11) % 12] + "º"  // viiº
+                0: noteStrings[tonality],
+                2: noteStrings[(tonality + 2) % 12] + "m",
+                4: noteStrings[(tonality + 4) % 12] + "m",
+                5: noteStrings[(tonality + 5) % 12],
+                7: noteStrings[(tonality + 7) % 12],
+                9: noteStrings[(tonality + 9) % 12] + "m",
+                11: noteStrings[(tonality + 11) % 12] + "º"
             };
             return field[degree] || noteStrings[note];
         }
@@ -400,23 +443,21 @@
             const item = document.createElement('div');
             item.className = 'history-item';
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
             item.innerHTML = `
-                    <b style="color:var(--primary)">${noteName}</b>
+                    <span style="color:var(--primary); font-weight:bold;">${noteName}</span>
                     <span style="color:var(--secondary)">${rhythm.icon} ${rhythm.name}</span>
-                    <small style="color:#475569">${time}</small>
+                    <span style="color:#475569; font-size:10px;">${time}</span>
                 `;
-
             ui.history.prepend(item);
             if (ui.history.children.length > 20) ui.history.removeChild(ui.history.lastChild);
         }
 
-        // --- ALGORITMOS DE ÁUDIO ---
+        // --- ALGORITMOS BASE ---
         function autoCorrelate(buffer, sampleRate) {
             let rms = 0;
             for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
             rms = Math.sqrt(rms / buffer.length);
-            if (rms < config.noise) return -1;
+            if (rms < config.noiseThreshold) return -1;
 
             let minPeriod = sampleRate / config.maxFreq;
             let maxPeriod = sampleRate / config.minFreq;
@@ -429,10 +470,7 @@
                     correlation += Math.abs(buffer[i] - buffer[i + offset]);
                 }
                 correlation = 1 - (correlation / buffer.length);
-                if (correlation > bestCorrelation) {
-                    bestCorrelation = correlation;
-                    bestOffset = offset;
-                }
+                if (correlation > bestCorrelation) { bestCorrelation = correlation; bestOffset = offset; }
             }
             return bestCorrelation > 0.9 ? sampleRate / bestOffset : -1;
         }
@@ -443,16 +481,6 @@
             const cents = Math.floor((semitones - Math.round(semitones)) * 100);
             return { name: noteStrings[noteNum % 12], cents: cents };
         }
-
-        // Sliders
-        document.getElementById('noise').oninput = function () {
-            config.noise = parseFloat(this.value);
-            document.getElementById('v-noise').innerText = this.value;
-        };
-        document.getElementById('smooth').oninput = function () {
-            config.smoothing = parseInt(this.value);
-            document.getElementById('v-smooth').innerText = this.value;
-        };
     </script>
 </body>
 </html>
