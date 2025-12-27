@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detector de Notas Musicais</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        #note-display {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 10px 0;
+            height: 100px;
+        }
+
+        .info {
+            font-size: 1.2rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        /* Estilo do Medidor (Tuner) */
+        .tuner-container {
+            position: relative;
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        #needle {
+            position: absolute;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            transition: left 0.1s ease-out;
+            transform: translateX(-50%);
+        }
+
+        .center-mark {
+            position: absolute;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: var(--success);
+            z-index: 1;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+            button:hover {
+                background-color: #4338ca;
+                transform: scale(1.05);
+            }
+
+            button:active {
+                transform: scale(0.95);
+            }
+
+        .status {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Detector de Nota</h1>
+
+        <div id="note-display">--</div>
+
+        <div class="info">
+            <span id="frequency">0.0</span> Hz
+        </div>
+
+        <div class="tuner-container">
+            <div class="center-mark"></div>
+            <div id="needle"></div>
+        </div>
+
+        <button id="start-btn">Começar a Cantar</button>
+
+        <div class="status" id="status">Clique no botão para ativar o microfone</div>
+    </div>
+
+    <script>
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let isRunning = false;
+
+        const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+        const startBtn = document.getElementById('start-btn');
+        const noteDisplay = document.getElementById('note-display');
+        const freqDisplay = document.getElementById('frequency');
+        const needle = document.getElementById('needle');
+        const statusText = document.getElementById('status');
+
+        startBtn.onclick = async () => {
+            if (isRunning) {
+                location.reload(); // Forma simples de parar
+                return;
+            }
+
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const source = audioContext.createMediaStreamSource(stream);
+
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
+
+                dataArray = new Float32Array(analyser.fftSize);
+
+                isRunning = true;
+                startBtn.innerText = "Parar";
+                statusText.innerText = "Ouvindo...";
+                update();
+            } catch (err) {
+                alert("Erro ao acessar microfone: " + err);
+            }
+        };
+
+        function update() {
+            if (!isRunning) return;
+
+            analyser.getFloatTimeDomainData(dataArray);
+            const pitch = autoCorrelate(dataArray, audioContext.sampleRate);
+
+            if (pitch !== -1) {
+                const noteData = getNote(pitch);
+                noteDisplay.innerText = noteData.name;
+                freqDisplay.innerText = pitch.toFixed(1);
+
+                // Atualiza o ponteiro (cents variam de -50 a 50)
+                const movePos = 50 + noteData.cents;
+                needle.style.left = `${movePos}%`;
+
+                // Muda cor se estiver afinado
+                noteDisplay.style.color = Math.abs(noteData.cents) < 10 ? "var(--success)" : "var(--primary)";
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // Algoritmo para extrair a frequência fundamental
+        function autoCorrelate(buffer, sampleRate) {
+            let SIZE = buffer.length;
+            let rms = 0;
+
+            for (let i = 0; i < SIZE; i++) {
+                rms += buffer[i] * buffer[i];
+            }
+            rms = Math.sqrt(rms / SIZE);
+            if (rms < 0.01) return -1; // Muito silencioso
+
+            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+            for (let i = 0; i < SIZE / 2; i++) {
+                if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
+            }
+            for (let i = 1; i < SIZE / 2; i++) {
+                if (Math.abs(buffer[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+            }
+
+            buffer = buffer.slice(r1, r2);
+            SIZE = buffer.length;
+
+            let c = new Float32Array(SIZE);
+            for (let i = 0; i < SIZE; i++) {
+                for (let j = 0; j < SIZE - i; j++) {
+                    c[i] = c[i] + buffer[j] * buffer[j + i];
+                }
+            }
+
+            let d = 0; while (c[d] > c[d + 1]) d++;
+            let maxval = -1, maxpos = -1;
+            for (let i = d; i < SIZE; i++) {
+                if (c[i] > maxval) {
+                    maxval = c[i];
+                    maxpos = i;
+                }
+            }
+            let T0 = maxpos;
+
+            return sampleRate / T0;
+        }
+
+        function getNote(frequency) {
+            const minNote = 69; // A4
+            const minFreq = 440;
+            const semitones = 12 * Math.log2(frequency / minFreq);
+            const noteNum = Math.round(semitones) + minNote;
+
+            const cents = Math.floor((semitones - Math.round(semitones)) * 100);
+            const name = noteStrings[noteNum % 12];
+
+            return { name, cents };
+        }
+    </script>
+</body>
+</html>
