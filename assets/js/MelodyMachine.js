@@ -192,7 +192,7 @@ class MelodyMachine {
         }
 
         if (foundTrack && this.cifraPlayer.acordeTocando) {
-            this.stopCurrentNote(this.nextNoteTime);
+            //this.stopCurrentNote(this.nextNoteTime);
 
             let acordeSimplificado = this.cifraPlayer.acordeTocando;
             const notas = this.getAcordeNotas(acordeSimplificado);
