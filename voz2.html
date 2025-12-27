@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitch Detector Pro + Harmony</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #f59e0b;
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 20px;
+            max-width: 900px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            flex: 1;
+            min-width: 320px;
+            text-align: center;
+        }
+
+        /* Histórico Lateral */
+        .history-panel {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            max-height: 600px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        #note-display {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+            margin: 10px 0;
+        }
+
+        #chord-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-val {
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: block;
+        }
+
+        .stat-lbl {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-sub);
+        }
+
+        /* Medidor */
+        .tuner-container {
+            position: relative;
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .center-line {
+            position: absolute;
+            left: 50%;
+            width: 2px;
+            height: 14px;
+            background: var(--success);
+            top: -3px;
+        }
+
+        #needle {
+            position: absolute;
+            left: 50%;
+            width: 4px;
+            height: 14px;
+            background: var(--primary);
+            top: -3px;
+            border-radius: 2px;
+            transform: translateX(-50%);
+            transition: left 0.1s;
+        }
+
+        /* Lista de Histórico */
+        .history-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            border: 1px solid #eee;
+        }
+
+        .h-note {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .settings-panel {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 16px;
+            text-align: left;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.8rem;
+        }
+
+        .control-group {
+            margin-bottom: 8px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .main-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+            .main-btn.active {
+                background: #ef4444;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="main-layout">
+        <div class="container">
+            <h1>Pitch Detector Pro</h1>
+
+            <div class="stat-lbl" id="current-key">Aguardando Tom...</div>
+            <div id="note-display">--</div>
+            <div id="chord-display">-</div>
+
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <span class="stat-val" id="bpm-display">0</span>
+                    <span class="stat-lbl">BPM</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="rhythm-icon">--</span>
+                    <span class="stat-lbl" id="rhythm-name">Ritmo</span>
+                </div>
+            </div>
+
+            <div class="freq-info"><span id="frequency">0.00</span> Hz</div>
+
+            <div class="tuner-container">
+                <div class="center-line"></div>
+                <div id="needle"></div>
+            </div>
+
+            <div class="settings-panel">
+                <div class="control-group">
+                    <label>Sensibilidade: <span id="v-noise">0.02</span></label>
+                    <input type="range" id="noise" min="0.001" max="0.1" step="0.001" value="0.02">
+                </div>
+                <div class="control-group">
+                    <label>Duração Mínima: <span id="v-duration">150</span> ms</label>
+                    <input type="range" id="duration" min="50" max="1000" step="50" value="150">
+                </div>
+                <div class="control-group">
+                    <label>Suavização: <span id="v-smooth">5</span></label>
+                    <input type="range" id="smooth" min="1" max="20" step="1" value="5">
+                </div>
+            </div>
+
+            <button id="start-btn" class="main-btn">Iniciar Microfone</button>
+        </div>
+
+        <div class="history-panel">
+            <span class="stat-lbl">Histórico Musical</span>
+            <div id="history-list" class="history-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const config = { noiseThreshold: 0.02, minFreq: 80, maxFreq: 1100, smoothing: 5, minDuration: 150 };
+        const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const diatonicScales = Array.from({ length: 12 }, (_, root) => [0, 2, 4, 5, 7, 9, 11].map(i => (root + i) % 12));
+
+        let audioContext, analyser, dataArray, isRunning = false;
+        let pitchHistory = [];
+        let harmonyHistory = [];
+        let currentTonality = 0;
+
+        // Tempo e Ritmo
+        let lastDetectedNoteName = "";
+        let noteStartTime = 0;
+        let lastStableNoteTime = 0;
+        let pulseMs = 0;
+
+        const ui = {
+            btn: document.getElementById('start-btn'),
+            note: document.getElementById('note-display'),
+            chord: document.getElementById('chord-display'),
+            freq: document.getElementById('frequency'),
+            needle: document.getElementById('needle'),
+            bpm: document.getElementById('bpm-display'),
+            rIcon: document.getElementById('rhythm-icon'),
+            rName: document.getElementById('rhythm-name'),
+            key: document.getElementById('current-key'),
+            hList: document.getElementById('history-list'),
+            inputs: {
+                noise: document.getElementById('noise'),
+                smooth: document.getElementById('smooth'),
+                duration: document.getElementById('duration')
+            },
+            labels: {
+                noise: document.getElementById('v-noise'),
+                smooth: document.getElementById('v-smooth'),
+                duration: document.getElementById('v-duration')
+            }
+        };
+
+        const updateConfigs = () => {
+            config.noiseThreshold = parseFloat(ui.inputs.noise.value);
+            config.smoothing = parseInt(ui.inputs.smooth.value);
+            config.minDuration = parseInt(ui.inputs.duration.value);
+            ui.labels.noise.innerText = config.noiseThreshold;
+            ui.labels.smooth.innerText = config.smoothing;
+            ui.labels.duration.innerText = config.minDuration;
+        };
+
+        [ui.inputs.noise, ui.inputs.smooth, ui.inputs.duration].forEach(el => el.oninput = updateConfigs);
+
+        ui.btn.onclick = async () => {
+            if (isRunning) { location.reload(); return; }
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const source = audioContext.createMediaStreamSource(stream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                source.connect(analyser);
+                dataArray = new Float32Array(analyser.fftSize);
+                isRunning = true;
+                ui.btn.innerText = "Parar";
+                ui.btn.classList.add('active');
+                update();
+            } catch (err) { alert("Erro ao acessar microfone."); }
+        };
+
+        function update() {
+            if (!isRunning) return;
+            analyser.getFloatTimeDomainData(dataArray);
+            let pitch = autoCorrelate(dataArray, audioContext.sampleRate);
+
+            if (pitch !== -1 && pitch >= 40 && pitch <= 2000) {
+                const rawNoteData = getNote(pitch);
+                const now = performance.now();
+
+                if (rawNoteData.name !== lastDetectedNoteName) {
+                    // Se uma nota acabou de terminar e era estável, poderíamos salvar aqui,
+                    // mas vamos salvar no momento que ela atinge a estabilidade mínima.
+                    lastDetectedNoteName = rawNoteData.name;
+                    noteStartTime = now;
+                }
+
+                let durationStable = now - noteStartTime;
+
+                if (durationStable >= config.minDuration) {
+                    // NOTA ESTÁVEL DETECTADA
+                    pitchHistory.push(pitch);
+                    if (pitchHistory.length > config.smoothing) pitchHistory.shift();
+                    const avgPitch = pitchHistory.reduce((a, b) => a + b) / pitchHistory.length;
+                    const finalNote = getNote(avgPitch);
+
+                    // Só processa como "Nova Nota" para histórico/BPM se for realmente uma mudança estável
+                    if (ui.note.innerText !== finalNote.name) {
+                        processNewStableNote(finalNote, pitch, now);
+                    }
+
+                    ui.note.innerText = finalNote.name;
+                    ui.freq.innerText = avgPitch.toFixed(2);
+                    ui.needle.style.left = `${50 + finalNote.cents}%`;
+                }
+            } else {
+                lastDetectedNoteName = "";
+                if (pitchHistory.length > 0) pitchHistory.shift();
+            }
+            requestAnimationFrame(update);
+        }
+
+        function processNewStableNote(noteData, pitch, now) {
+            // 1. BPM e Ritmo
+            if (lastStableNoteTime > 0) {
+                const interval = now - lastStableNoteTime;
+                if (interval > 100) { // evitar repetições bobas
+                    if (pulseMs === 0) pulseMs = interval;
+                    else pulseMs = pulseMs * 0.8 + interval * 0.2; // Suavização de BPM
+
+                    const bpm = Math.round(60000 / pulseMs);
+                    ui.bpm.innerText = bpm > 200 ? "--" : bpm;
+
+                    const rhythm = classifyRhythm(interval);
+                    ui.rIcon.innerText = rhythm.icon;
+                    ui.rName.innerText = rhythm.name;
+
+                    addHistory(noteData.name, rhythm);
+                }
+            }
+            lastStableNoteTime = now;
+
+            // 2. Campo Harmônico e Tom
+            const noteIndex = noteStrings.indexOf(noteData.name.replace(/[0-9]/g, ''));
+            harmonyHistory.push(noteIndex);
+            if (harmonyHistory.length > 15) harmonyHistory.shift();
+
+            // Detectar Tom
+            let bestScale = currentTonality;
+            let maxScore = 0;
+            diatonicScales.forEach((scale, root) => {
+                const score = harmonyHistory.filter(n => scale.includes(n)).length;
+                if (score > maxScore) { maxScore = score; bestScale = root; }
+            });
+            currentTonality = bestScale;
+            ui.key.innerText = `Tom: ${noteStrings[currentTonality]}`;
+
+            // Sugerir Acorde
+            ui.chord.innerText = getChordFromField(noteIndex, currentTonality);
+        }
+
+        function classifyRhythm(interval) {
+            const ratio = interval / pulseMs;
+            if (ratio >= 3.3) return { name: "Semibreve", icon: "𝅝" };
+            if (ratio >= 1.7) return { name: "Mínima", icon: "𝅗𝅥" };
+            if (ratio >= 0.8) return { name: "Semínima", icon: "𝅘𝅥" };
+            return { name: "Colcheia", icon: "𝅘𝅥𝅮" };
+        }
+
+        function getChordFromField(noteIdx, tonality) {
+            const degree = (noteIdx - tonality + 12) % 12;
+            const field = {
+                0: noteStrings[tonality],
+                2: noteStrings[(tonality + 2) % 12] + "m",
+                4: noteStrings[(tonality + 4) % 12] + "m",
+                5: noteStrings[(tonality + 5) % 12],
+                7: noteStrings[(tonality + 7) % 12],
+                9: noteStrings[(tonality + 9) % 12] + "m",
+                11: noteStrings[(tonality + 11) % 12] + "º"
+            };
+            return field[degree] || noteStrings[noteIdx];
+        }
+
+        function addHistory(note, rhythm) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<span class="h-note">${note}</span> <span>${rhythm.icon}</span> <span style="color:#888">${new Date().toLocaleTimeString([], { minute: '2-digit', second: '2-digit' })}</span>`;
+            ui.hList.prepend(item);
+            if (ui.hList.children.length > 20) ui.hList.lastChild.remove();
+        }
+
+        function autoCorrelate(buffer, sampleRate) {
+            let rms = 0;
+            for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+            rms = Math.sqrt(rms / buffer.length);
+            if (rms < config.noiseThreshold) return -1;
+
+            let minPeriod = sampleRate / 1200;
+            let maxPeriod = sampleRate / 50;
+            let bestOffset = -1;
+            let bestCorrelation = 0;
+
+            for (let offset = Math.floor(minPeriod); offset < Math.ceil(maxPeriod); offset++) {
+                let correlation = 0;
+                for (let i = 0; i < buffer.length - offset; i++) {
+                    correlation += Math.abs(buffer[i] - buffer[i + offset]);
+                }
+                correlation = 1 - (correlation / buffer.length);
+                if (correlation > bestCorrelation) {
+                    bestCorrelation = correlation;
+                    bestOffset = offset;
+                }
+            }
+            return bestCorrelation > 0.9 ? sampleRate / bestOffset : -1;
+        }
+
+        function getNote(frequency) {
+            const semitones = 12 * Math.log2(frequency / 440);
+            const noteNum = Math.round(semitones) + 69;
+            const cents = Math.floor((semitones - Math.round(semitones)) * 100);
+            return { name: noteStrings[noteNum % 12], cents: cents };
+        }
+    </script>
+</body>
+</html>
