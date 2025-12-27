@@ -18,30 +18,30 @@ class MelodyMachine {
         ];
 
         this.acordes = {
-            'c': ['g_baixo', 'c', 'e', 'g'],
-            'c_': ['g__baixo', 'c_', 'f', 'g_'],
-            'd': ['a_baixo', 'd', 'f_', 'a'],
-            'd_': ['a__baixo', 'd_', 'g', 'a_'],
-            'e': ['g__baixo', 'b_baixo', 'e', 'g_'],
-            'f': ['a_baixo', 'c', 'f', 'a'],
-            'f_': ['a__baixo', 'c_', 'f_', 'a_'],
-            'g': ['g_baixo', 'b_baixo', 'd', 'g'],
-            'g_': ['g__baixo', 'c', 'd_', 'g_'],
-            'a': ['a_baixo', 'c_', 'e', 'a'],
-            'a_': ['a__baixo', 'd', 'f', 'a_'],
-            'b': ['b_baixo', 'd_', 'f_', 'b'],
-            'cm': ['g_baixo', 'c', 'd_', 'g'],
-            'c_m': ['g__baixo', 'c_', 'e', 'g_'],
-            'dm': ['a_baixo', 'd', 'f', 'a'],
-            'd_m': ['a__baixo', 'd_', 'f_', 'a_'],
-            'em': ['g_baixo', 'b_baixo', 'e', 'g'],
-            'fm': ['g__baixo', 'c', 'f', 'g_'],
-            'f_m': ['a_baixo', 'c_', 'f_', 'a'],
-            'gm': ['g_baixo', 'a__baixo', 'd', 'g'],
-            'g_m': ['g__baixo', 'b_baixo', 'd_', 'g_'],
-            'am': ['a_baixo', 'c', 'e', 'a'],
-            'a_m': ['a__baixo', 'c_', 'f', 'a_'],
-            'bm': ['b_baixo', 'd', 'f_', 'b'],
+            'c': ['c_baixo', 'e_baixo', 'g_baixo', 'c'],
+            'c_': ['c__baixo', 'f_baixo', 'g__baixo', 'c_'],
+            'd': ['d_baixo', 'f__baixo', 'a_baixo', 'd'],
+            'd_': ['d__baixo', 'g_baixo', 'a__baixo', 'd_'],
+            'e': ['e_baixo', 'g__baixo', 'b_baixo', 'e'],
+            'f': ['c_baixo', 'f_baixo', 'a_baixo', 'c'],
+            'f_': ['c__baixo', 'f__baixo', 'a__baixo', 'c_'],
+            'g': ['d_baixo', 'g_baixo', 'b_baixo', 'd'],
+            'g_': ['d__baixo', 'g__baixo', 'c', 'd_'],
+            'a': ['c__baixo', 'e_baixo', 'a_baixo', 'c_'],
+            'a_': ['d_baixo', 'f_baixo', 'a__baixo', 'd'],
+            'b': ['d__baixo', 'f__baixo', 'b_baixo', 'd_'],
+            'cm': ['c_baixo', 'd__baixo', 'g_baixo', 'c'],
+            'c_m': ['c__baixo', 'e_baixo', 'g__baixo', 'c_'],
+            'dm': ['d_baixo', 'f_baixo', 'a_baixo', 'd'],
+            'd_m': ['d__baixo', 'f__baixo', 'a__baixo', 'd_'],
+            'em': ['e_baixo', 'g_baixo', 'b_baixo', 'e'],
+            'fm': ['c_baixo', 'f_baixo', 'g__baixo', 'c'],
+            'f_m': ['c__baixo', 'f__baixo', 'a_baixo', 'c_'],
+            'gm': ['d_baixo', 'g_baixo', 'a__baixo', 'd'],
+            'g_m': ['d__baixo', 'g__baixo', 'b_baixo', 'd_'],
+            'am': ['c_baixo', 'e_baixo', 'a_baixo', 'c'],
+            'a_m': ['c__baixo', 'f_baixo', 'a__baixo', 'c_'],
+            'bm': ['d_baixo', 'f__baixo', 'b_baixo', 'd'],
             'cdim': ['f__baixo', 'c', 'd_', 'f_'],
             'c_dim': ['g_baixo', 'c_', 'e', 'g'],
             'ddim': ['g__baixo', 'd', 'f', 'g_'],
@@ -192,7 +192,7 @@ class MelodyMachine {
         }
 
         if (foundTrack && this.cifraPlayer.acordeTocando) {
-            //this.stopCurrentNote(this.nextNoteTime);
+            this.stopCurrentNote(this.nextNoteTime);
 
             let acordeSimplificado = this.cifraPlayer.acordeTocando;
             const notas = this.getAcordeNotas(acordeSimplificado);
