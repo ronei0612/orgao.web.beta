@@ -3,155 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector de Notas Musicais</title>
+    <title>Pitch Detector Pro</title>
     <style>
         :root {
             --primary: #4f46e5;
-            --bg: #f8fafc;
+            --primary-light: #818cf8;
+            --bg: #f1f5f9;
             --card: #ffffff;
-            --text: #1e293b;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
             --success: #10b981;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
 
         .container {
             background: var(--card);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
             text-align: center;
-            width: 90%;
-            max-width: 400px;
+            width: 100%;
+            max-width: 450px;
         }
 
         h1 {
             font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .tagline {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 2rem;
+        }
+
+        /* Display de Nota */
+        #note-display {
+            font-size: 6rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .freq-info {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-sub);
             margin-bottom: 1.5rem;
         }
 
-        #note-display {
-            font-size: 5rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 10px 0;
-            height: 100px;
-        }
-
-        .info {
-            font-size: 1.2rem;
-            color: #64748b;
-            margin-bottom: 2rem;
-        }
-
-        /* Estilo do Medidor (Tuner) */
+        /* Medidor de Afinação */
         .tuner-container {
             position: relative;
             width: 100%;
-            height: 20px;
+            height: 12px;
             background: #e2e8f0;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            overflow: hidden;
+            border-radius: 6px;
+            margin: 2rem 0;
+            overflow: visible;
+        }
+
+        .center-line {
+            position: absolute;
+            left: 50%;
+            width: 2px;
+            height: 20px;
+            background: var(--success);
+            top: -4px;
+            z-index: 1;
         }
 
         #needle {
             position: absolute;
             left: 50%;
             width: 4px;
-            height: 100%;
+            height: 20px;
             background: var(--primary);
-            transition: left 0.1s ease-out;
+            top: -4px;
+            border-radius: 2px;
             transform: translateX(-50%);
+            transition: left 0.1s ease-out;
+            z-index: 2;
+            box-shadow: 0 0 8px rgba(79, 70, 229, 0.4);
         }
 
-        .center-mark {
-            position: absolute;
-            left: 50%;
-            width: 2px;
-            height: 100%;
-            background: var(--success);
-            z-index: 1;
+        /* Painel de Controles */
+        .settings-panel {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: left;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
         }
 
-        button {
-            background-color: var(--primary);
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+            .control-group:last-child {
+                margin-bottom: 0;
+            }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 0.4rem;
+        }
+
+            label span {
+                color: var(--primary);
+            }
+
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Botão */
+        .main-btn {
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 1rem 2rem;
-            border-radius: 50px;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
             font-size: 1rem;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
+            transition: all 0.2s;
         }
 
-            button:hover {
-                background-color: #4338ca;
-                transform: scale(1.05);
+            .main-btn:hover {
+                background: #4338ca;
+                transform: translateY(-2px);
             }
 
-            button:active {
-                transform: scale(0.95);
+            .main-btn.active {
+                background: #ef4444;
             }
 
-        .status {
-            margin-top: 1rem;
-            font-size: 0.8rem;
-            color: #94a3b8;
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #cbd5e1;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+            .status-dot.on {
+                background: #ef4444;
+                animation: pulse 1s infinite;
+            }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Detector de Nota</h1>
+        <h1>Pitch Detector Pro</h1>
+        <p class="tagline"><span id="dot" class="status-dot"></span> <span id="status-text">Microfone inativo</span></p>
 
         <div id="note-display">--</div>
-
-        <div class="info">
-            <span id="frequency">0.0</span> Hz
-        </div>
+        <div class="freq-info"><span id="frequency">0.00</span> Hz</div>
 
         <div class="tuner-container">
-            <div class="center-mark"></div>
+            <div class="center-line"></div>
             <div id="needle"></div>
         </div>
 
-        <button id="start-btn">Começar a Cantar</button>
+        <div class="settings-panel">
+            <div class="control-group">
+                <label>Sensibilidade (Noise): <span id="v-noise">0.02</span></label>
+                <input type="range" id="noise" min="0.001" max="0.1" step="0.001" value="0.02">
+            </div>
+            <div class="control-group">
+                <label>Freq. Mínima: <span id="v-min">80</span> Hz</label>
+                <input type="range" id="min-freq" min="40" max="200" step="1" value="80">
+            </div>
+            <div class="control-group">
+                <label>Freq. Máxima: <span id="v-max">1100</span> Hz</label>
+                <input type="range" id="max-freq" min="500" max="2000" step="10" value="1100">
+            </div>
+            <div class="control-group">
+                <label>Suavização (Smoothing): <span id="v-smooth">5</span></label>
+                <input type="range" id="smooth" min="1" max="20" step="1" value="5">
+            </div>
+        </div>
 
-        <div class="status" id="status">Clique no botão para ativar o microfone</div>
+        <button id="start-btn" class="main-btn">Iniciar Detecção</button>
     </div>
 
     <script>
+        // --- CONFIGURAÇÃO ---
+        const config = {
+            noiseThreshold: 0.02,
+            minFreq: 80,
+            maxFreq: 1100,
+            smoothing: 5
+        };
+
+        const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+        // --- ESTADO ---
         let audioContext = null;
         let analyser = null;
         let dataArray = null;
         let isRunning = false;
+        let pitchHistory = []; // Para o efeito de Smoothing
 
-        const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        // --- ELEMENTOS UI ---
+        const ui = {
+            btn: document.getElementById('start-btn'),
+            note: document.getElementById('note-display'),
+            freq: document.getElementById('frequency'),
+            needle: document.getElementById('needle'),
+            dot: document.getElementById('dot'),
+            status: document.getElementById('status-text'),
+            // Inputs
+            inNoise: document.getElementById('noise'),
+            inMin: document.getElementById('min-freq'),
+            inMax: document.getElementById('max-freq'),
+            inSmooth: document.getElementById('smooth'),
+            // Labels de valor
+            lNoise: document.getElementById('v-noise'),
+            lMin: document.getElementById('v-min'),
+            lMax: document.getElementById('v-max'),
+            lSmooth: document.getElementById('v-smooth')
+        };
 
-        const startBtn = document.getElementById('start-btn');
-        const noteDisplay = document.getElementById('note-display');
-        const freqDisplay = document.getElementById('frequency');
-        const needle = document.getElementById('needle');
-        const statusText = document.getElementById('status');
+        // --- ATUALIZAÇÃO DE CONFIGURAÇÕES ---
+        const updateConfigs = () => {
+            config.noiseThreshold = parseFloat(ui.inNoise.value);
+            config.minFreq = parseInt(ui.inMin.value);
+            config.maxFreq = parseInt(ui.inMax.value);
+            config.smoothing = parseInt(ui.inSmooth.value);
 
-        startBtn.onclick = async () => {
-            if (isRunning) {
-                location.reload(); // Forma simples de parar
-                return;
-            }
+            ui.lNoise.innerText = config.noiseThreshold;
+            ui.lMin.innerText = config.minFreq;
+            ui.lMax.innerText = config.maxFreq;
+            ui.lSmooth.innerText = config.smoothing;
+        };
+
+        [ui.inNoise, ui.inMin, ui.inMax, ui.inSmooth].forEach(el => el.oninput = updateConfigs);
+
+        // --- LOGICA DE ÁUDIO ---
+        ui.btn.onclick = async () => {
+            if (isRunning) { location.reload(); return; }
 
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -165,11 +295,14 @@
                 dataArray = new Float32Array(analyser.fftSize);
 
                 isRunning = true;
-                startBtn.innerText = "Parar";
-                statusText.innerText = "Ouvindo...";
+                ui.btn.innerText = "Parar Detecção";
+                ui.btn.classList.add('active');
+                ui.dot.classList.add('on');
+                ui.status.innerText = "Capturando áudio...";
+
                 update();
             } catch (err) {
-                alert("Erro ao acessar microfone: " + err);
+                alert("Erro: Permita o acesso ao microfone.");
             }
         };
 
@@ -177,64 +310,62 @@
             if (!isRunning) return;
 
             analyser.getFloatTimeDomainData(dataArray);
-            const pitch = autoCorrelate(dataArray, audioContext.sampleRate);
+            let pitch = autoCorrelate(dataArray, audioContext.sampleRate);
 
-            if (pitch !== -1) {
-                const noteData = getNote(pitch);
-                noteDisplay.innerText = noteData.name;
-                freqDisplay.innerText = pitch.toFixed(1);
+            if (pitch !== -1 && pitch >= config.minFreq && pitch <= config.maxFreq) {
+                // Aplicar Smoothing (Média Móvel)
+                pitchHistory.push(pitch);
+                if (pitchHistory.length > config.smoothing) pitchHistory.shift();
 
-                // Atualiza o ponteiro (cents variam de -50 a 50)
-                const movePos = 50 + noteData.cents;
-                needle.style.left = `${movePos}%`;
+                const avgPitch = pitchHistory.reduce((a, b) => a + b) / pitchHistory.length;
+                const noteData = getNote(avgPitch);
 
-                // Muda cor se estiver afinado
-                noteDisplay.style.color = Math.abs(noteData.cents) < 10 ? "var(--success)" : "var(--primary)";
+                ui.note.innerText = noteData.name;
+                ui.freq.innerText = avgPitch.toFixed(2);
+                ui.needle.style.left = `${50 + noteData.cents}%`;
+                ui.note.style.color = Math.abs(noteData.cents) < 10 ? "var(--success)" : "var(--primary)";
+            } else {
+                // Se o som for ruído ou silêncio, limpa o histórico gradualmente
+                if (pitchHistory.length > 0) pitchHistory.shift();
             }
 
             requestAnimationFrame(update);
         }
 
-        // Algoritmo para extrair a frequência fundamental
+        // Algoritmo de Autocorrelação (AMDF adaptado)
         function autoCorrelate(buffer, sampleRate) {
-            let SIZE = buffer.length;
+            // Checa volume (Noise Threshold)
             let rms = 0;
+            for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+            rms = Math.sqrt(rms / buffer.length);
+            if (rms < config.noiseThreshold) return -1;
 
-            for (let i = 0; i < SIZE; i++) {
-                rms += buffer[i] * buffer[i];
-            }
-            rms = Math.sqrt(rms / SIZE);
-            if (rms < 0.01) return -1; // Muito silencioso
+            // Encontrar os limites de busca baseado nas frequências min/max
+            let minPeriod = sampleRate / config.maxFreq;
+            let maxPeriod = sampleRate / config.minFreq;
 
-            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-            for (let i = 0; i < SIZE / 2; i++) {
-                if (Math.abs(buffer[i]) < thres) { r1 = i; break; }
-            }
-            for (let i = 1; i < SIZE / 2; i++) {
-                if (Math.abs(buffer[SIZE - i]) < thres) { r2 = SIZE - i; break; }
-            }
+            let bestOffset = -1;
+            let bestCorrelation = 0;
+            let rms_threshold = 0.2;
 
-            buffer = buffer.slice(r1, r2);
-            SIZE = buffer.length;
-
-            let c = new Float32Array(SIZE);
-            for (let i = 0; i < SIZE; i++) {
-                for (let j = 0; j < SIZE - i; j++) {
-                    c[i] = c[i] + buffer[j] * buffer[j + i];
+            // Busca pelo melhor deslocamento (pico de correlação)
+            for (let offset = Math.floor(minPeriod); offset < Math.ceil(maxPeriod); offset++) {
+                let correlation = 0;
+                for (let i = 0; i < buffer.length - offset; i++) {
+                    correlation += Math.abs(buffer[i] - buffer[i + offset]);
+                }
+                // Queremos a menor diferença (AMDF)
+                correlation = 1 - (correlation / buffer.length);
+                if (correlation > bestCorrelation) {
+                    bestCorrelation = correlation;
+                    bestOffset = offset;
                 }
             }
 
-            let d = 0; while (c[d] > c[d + 1]) d++;
-            let maxval = -1, maxpos = -1;
-            for (let i = d; i < SIZE; i++) {
-                if (c[i] > maxval) {
-                    maxval = c[i];
-                    maxpos = i;
-                }
+            if (bestCorrelation > 0.9) { // Precisão de 90%
+                return sampleRate / bestOffset;
             }
-            let T0 = maxpos;
-
-            return sampleRate / T0;
+            return -1;
         }
 
         function getNote(frequency) {
@@ -242,11 +373,8 @@
             const minFreq = 440;
             const semitones = 12 * Math.log2(frequency / minFreq);
             const noteNum = Math.round(semitones) + minNote;
-
             const cents = Math.floor((semitones - Math.round(semitones)) * 100);
-            const name = noteStrings[noteNum % 12];
-
-            return { name, cents };
+            return { name: noteStrings[noteNum % 12], cents: cents };
         }
     </script>
 </body>
