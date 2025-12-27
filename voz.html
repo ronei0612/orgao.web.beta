@@ -221,6 +221,10 @@
                 <label>Suavização (Smoothing): <span id="v-smooth">5</span></label>
                 <input type="range" id="smooth" min="1" max="20" step="1" value="5">
             </div>
+            <div class="control-group">
+                <label>Duração Mínima: <span id="v-duration">150</span> ms</label>
+                <input type="range" id="duration" min="0" max="1000" step="50" value="150">
+            </div>
         </div>
 
         <button id="start-btn" class="main-btn">Iniciar Detecção</button>
@@ -232,7 +236,8 @@
             noiseThreshold: 0.02,
             minFreq: 80,
             maxFreq: 1100,
-            smoothing: 5
+            smoothing: 5,
+            minDuration: 150
         };
 
         const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
@@ -242,7 +247,9 @@
         let analyser = null;
         let dataArray = null;
         let isRunning = false;
-        let pitchHistory = []; // Para o efeito de Smoothing
+        let pitchHistory = [];
+        let lastDetectedNoteName = "";
+        let noteStartTime = 0;
 
         // --- ELEMENTOS UI ---
         const ui = {
@@ -252,16 +259,16 @@
             needle: document.getElementById('needle'),
             dot: document.getElementById('dot'),
             status: document.getElementById('status-text'),
-            // Inputs
             inNoise: document.getElementById('noise'),
             inMin: document.getElementById('min-freq'),
             inMax: document.getElementById('max-freq'),
             inSmooth: document.getElementById('smooth'),
-            // Labels de valor
+            inDuration: document.getElementById('duration'),
             lNoise: document.getElementById('v-noise'),
             lMin: document.getElementById('v-min'),
             lMax: document.getElementById('v-max'),
-            lSmooth: document.getElementById('v-smooth')
+            lSmooth: document.getElementById('v-smooth'),
+            lDuration: document.getElementById('v-duration')
         };
 
         // --- ATUALIZAÇÃO DE CONFIGURAÇÕES ---
@@ -270,14 +277,16 @@
             config.minFreq = parseInt(ui.inMin.value);
             config.maxFreq = parseInt(ui.inMax.value);
             config.smoothing = parseInt(ui.inSmooth.value);
+            config.minDuration = parseInt(ui.inDuration.value);
 
             ui.lNoise.innerText = config.noiseThreshold;
             ui.lMin.innerText = config.minFreq;
             ui.lMax.innerText = config.maxFreq;
             ui.lSmooth.innerText = config.smoothing;
+            ui.lDuration.innerText = config.minDuration;
         };
 
-        [ui.inNoise, ui.inMin, ui.inMax, ui.inSmooth].forEach(el => el.oninput = updateConfigs);
+        [ui.inNoise, ui.inMin, ui.inMax, ui.inSmooth, ui.inDuration].forEach(el => el.oninput = updateConfigs);
 
         // --- LOGICA DE ÁUDIO ---
         ui.btn.onclick = async () => {
@@ -313,19 +322,28 @@
             let pitch = autoCorrelate(dataArray, audioContext.sampleRate);
 
             if (pitch !== -1 && pitch >= config.minFreq && pitch <= config.maxFreq) {
-                // Aplicar Smoothing (Média Móvel)
-                pitchHistory.push(pitch);
-                if (pitchHistory.length > config.smoothing) pitchHistory.shift();
+                const rawNoteData = getNote(pitch);
+                const now = performance.now();
 
-                const avgPitch = pitchHistory.reduce((a, b) => a + b) / pitchHistory.length;
-                const noteData = getNote(avgPitch);
+                if (rawNoteData.name !== lastDetectedNoteName) {
+                    lastDetectedNoteName = rawNoteData.name;
+                    noteStartTime = now;
+                }
 
-                ui.note.innerText = noteData.name;
-                ui.freq.innerText = avgPitch.toFixed(2);
-                ui.needle.style.left = `${50 + noteData.cents}%`;
-                ui.note.style.color = Math.abs(noteData.cents) < 10 ? "var(--success)" : "var(--primary)";
+                if (now - noteStartTime >= config.minDuration) {
+                    pitchHistory.push(pitch);
+                    if (pitchHistory.length > config.smoothing) pitchHistory.shift();
+
+                    const avgPitch = pitchHistory.reduce((a, b) => a + b) / pitchHistory.length;
+                    const noteData = getNote(avgPitch);
+
+                    ui.note.innerText = noteData.name;
+                    ui.freq.innerText = avgPitch.toFixed(2);
+                    ui.needle.style.left = `${50 + noteData.cents}%`;
+                    ui.note.style.color = Math.abs(noteData.cents) < 10 ? "var(--success)" : "var(--primary)";
+                }
             } else {
-                // Se o som for ruído ou silêncio, limpa o histórico gradualmente
+                lastDetectedNoteName = ""; // Reseta se houver silêncio
                 if (pitchHistory.length > 0) pitchHistory.shift();
             }
 
@@ -334,27 +352,22 @@
 
         // Algoritmo de Autocorrelação (AMDF adaptado)
         function autoCorrelate(buffer, sampleRate) {
-            // Checa volume (Noise Threshold)
             let rms = 0;
             for (let i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
             rms = Math.sqrt(rms / buffer.length);
             if (rms < config.noiseThreshold) return -1;
 
-            // Encontrar os limites de busca baseado nas frequências min/max
             let minPeriod = sampleRate / config.maxFreq;
             let maxPeriod = sampleRate / config.minFreq;
 
             let bestOffset = -1;
             let bestCorrelation = 0;
-            let rms_threshold = 0.2;
 
-            // Busca pelo melhor deslocamento (pico de correlação)
             for (let offset = Math.floor(minPeriod); offset < Math.ceil(maxPeriod); offset++) {
                 let correlation = 0;
                 for (let i = 0; i < buffer.length - offset; i++) {
                     correlation += Math.abs(buffer[i] - buffer[i + offset]);
                 }
-                // Queremos a menor diferença (AMDF)
                 correlation = 1 - (correlation / buffer.length);
                 if (correlation > bestCorrelation) {
                     bestCorrelation = correlation;
@@ -362,7 +375,7 @@
                 }
             }
 
-            if (bestCorrelation > 0.9) { // Precisão de 90%
+            if (bestCorrelation > 0.9) {
                 return sampleRate / bestOffset;
             }
             return -1;
