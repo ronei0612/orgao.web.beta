@@ -5,6 +5,7 @@ class MelodyMachine {
         this.cifraPlayer = cifraPlayer;
         this.attackTime = 0.02;
         this.releaseTime = 0.1;
+        this.defaultVol = 0.5;
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.audioPath = //this.baseUrl + '/assets/audio/studio/Orgao';
@@ -199,7 +200,7 @@ class MelodyMachine {
             const nota = notas[foundTrack.noteIndex];
             const bufferKey = `${foundTrack.name}_${nota}`;
             const buffer = this.buffers.get(bufferKey);
-            this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : 0.5);
+            this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : this.defaultVol);
 
             foundTrack.element.classList.add('playing');
             setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
