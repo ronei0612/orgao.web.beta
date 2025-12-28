@@ -228,7 +228,7 @@ class MelodyMachine {
                         // Removido: this.stopCurrentNote(this.nextNoteTime); 
                         // As notas agora vão se sobrepor.
 
-                        this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : this.defaultVol);
+                        this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? (this.defaultVol / 2) : this.defaultVol);
 
                         foundTrack.element.classList.add('playing');
                         setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
