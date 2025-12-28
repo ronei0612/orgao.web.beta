@@ -328,8 +328,8 @@ class MelodyUI {
         this.loadPattern(this.elements.melodyStyleSelect.value);
         if (this.elements.melodyStyleSelect.value === '')
             this.stop();
-        else
-            this.play();
+        else if (this.melodyMachine.isPlaying)
+            this.melodyMachine.start();
     }
 
     play() {
@@ -340,7 +340,7 @@ class MelodyUI {
 
     stop() {
         if (this.melodyMachine.isPlaying) {
-            this.melodyMachine.stop();
+            this.melodyMachine.stop(true);
         }
     }
 }

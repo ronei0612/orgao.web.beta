@@ -67,7 +67,7 @@ class MelodyMachine {
         this.styles = null;
         this.stepsPorTempo = null;
         this.tracksCache = null;
-        this.currentSource = null;
+        this.activeSources = [];
 
         this.init();
     }
@@ -127,12 +127,30 @@ class MelodyMachine {
 
         source.start(time);
 
+        const noteEntry = { source, gainNode };
+        this.activeSources.push(noteEntry);
+
         source.onended = () => {
+            // Remove da lista de ativos quando o som acabar naturalmente
+            this.activeSources = this.activeSources.filter(item => item !== noteEntry);
             source.disconnect();
             gainNode.disconnect();
         };
 
-        return { source, gainNode };
+        return noteEntry;
+    }
+
+    stopNotes(time) {
+        this.activeSources.forEach(item => {
+            try {
+                const { source, gainNode } = item;
+                gainNode.gain.cancelScheduledValues(time);
+                gainNode.gain.setValueAtTime(gainNode.gain.value, time);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, time + this.releaseTime);
+                source.stop(time + this.releaseTime + 0.01);
+            } catch (e) { }
+        });
+        this.activeSources = [];
     }
 
     stopCurrentNote(time) {
@@ -153,10 +171,12 @@ class MelodyMachine {
         const secondsPerQuarterNote = 60.0 / this.musicTheory.bpm;
         const secondsPerStep = secondsPerQuarterNote / 2;
         this.nextNoteTime += secondsPerStep;
+
         this.currentStep++;
 
+        // Se ultrapassou o número de passos, para tudo.
         if (this.currentStep > this.numSteps) {
-            this.stop();
+            this.stop(); // O stop já limpa o intervalo e faz o reset do step para 1
             if (typeof this.onStepsEnd === 'function') {
                 this.onStepsEnd();
             }
@@ -164,7 +184,8 @@ class MelodyMachine {
     }
 
     scheduler() {
-        while (this.nextNoteTime < this.audioContext.currentTime + this.scheduleAheadTime) {
+        // Adicionamos "this.isPlaying &&" para interromper o agendamento imediatamente no fim
+        while (this.isPlaying && this.nextNoteTime < this.audioContext.currentTime + this.scheduleAheadTime) {
             this.scheduleCurrentStep();
             this.nextNote();
         }
@@ -174,8 +195,13 @@ class MelodyMachine {
         if (!this.tracksCache) this.refreshTrackCache();
 
         const stepIndex = this.currentStep - 1;
-        let foundTrack = null;
 
+        // NOVIDADE: Se for o primeiro step, limpa todos os sons remanescentes da rodada anterior
+        if (this.currentStep === 1) {
+            this.stopNotes(this.nextNoteTime);
+        }
+
+        let foundTrack = null;
         if (this.tracksCache) {
             for (let i = 0; i < this.tracksCache.length; i++) {
                 const trackData = this.tracksCache[i];
@@ -187,23 +213,28 @@ class MelodyMachine {
                 const volume = parseInt(stepEl.dataset.volume || '0', 10);
                 if (volume > 0) {
                     foundTrack = { ...trackData, volume, element: stepEl };
-                    break;
+
+                    // IMPORTANTE: Se você quiser que múltiplas vozes soem no MESMO step, 
+                    // você deve processar todos os tracks aqui em vez de dar 'break'.
+                    // Se quiser apenas uma nota por vez (polifonia entre steps, mas não no mesmo step), mantenha o break.
+
+                    if (this.cifraPlayer.acordeTocando) {
+                        let acordeSimplificado = this.cifraPlayer.acordeTocando;
+                        const notas = this.getAcordeNotas(acordeSimplificado);
+                        const nota = notas[foundTrack.noteIndex];
+                        const bufferKey = `${foundTrack.name}_${nota}`;
+                        const buffer = this.buffers.get(bufferKey);
+
+                        // Removido: this.stopCurrentNote(this.nextNoteTime); 
+                        // As notas agora vão se sobrepor.
+
+                        this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : this.defaultVol);
+
+                        foundTrack.element.classList.add('playing');
+                        setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
+                    }
                 }
             }
-        }
-
-        if (foundTrack && this.cifraPlayer.acordeTocando) {
-            this.stopCurrentNote(this.nextNoteTime);
-
-            let acordeSimplificado = this.cifraPlayer.acordeTocando;
-            const notas = this.getAcordeNotas(acordeSimplificado);
-            const nota = notas[foundTrack.noteIndex];
-            const bufferKey = `${foundTrack.name}_${nota}`;
-            const buffer = this.buffers.get(bufferKey);
-            this.currentSource = this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? 0.3 : this.defaultVol);
-
-            foundTrack.element.classList.add('playing');
-            setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
         }
     }
 
@@ -232,19 +263,29 @@ class MelodyMachine {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
+
         this.isPlaying = true;
+        this.currentStep = 1; // Sempre começa do 1
         this.nextNoteTime = this.audioContext.currentTime;
+
+        // Limpa qualquer som antes de começar a sequência
+        this.stopNotes(this.nextNoteTime);
+
         this.refreshTrackCache();
         if (this.timerInterval) clearInterval(this.timerInterval);
         this.timerInterval = setInterval(() => this.scheduler(), this.lookahead);
     }
 
-    stop() {
+    stop(stopAll = false) {
         this.isPlaying = false;
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
+            this.timerInterval = null;
         }
-        this.stopCurrentNote(this.audioContext.currentTime);
+        // Para todos os sons imediatamente ao dar Stop
+        if (stopAll)
+            this.stopNotes(this.audioContext.currentTime);
+
         this.reset();
     }
 
