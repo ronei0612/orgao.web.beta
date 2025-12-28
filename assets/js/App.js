@@ -64,6 +64,12 @@ class App {
         this.melodyUI = new MelodyUI(this.elements, this.melodyMachine, this.uiController);
         await this.melodyUI.init();
 
+        this.cifraPlayer.onChordChange = () => {
+            if (this.cifraPlayer.instrumento === 'orgao' && this.elements.melodyStyleSelect.value !== '') {
+                this.melodyUI.play();
+            }
+        };
+
         //if (this.BASE_URL.includes('http')) {
             //document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
             //document.getElementById('styleButtons').classList.remove('d-none');

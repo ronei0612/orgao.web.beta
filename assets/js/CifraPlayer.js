@@ -316,6 +316,10 @@ class CifraPlayer {
                 this.tocarEpiano = true;
             }
         }
+
+        if (typeof this.onChordChange === 'function') {
+            this.onChordChange();
+        }
     }
 
     epianoPlay() {
