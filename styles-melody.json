@@ -1,5 +1,5 @@
 {
-  "styles": [ "4/4", "2/4", "3/4", "3/8", "6/8", "4/8" ],
+  "styles": [ "4/4", "2/4", "3/4", "3/8", "6/8", "2/8", "4/8" ],
   "data": {
     "4/4": {
       "numSteps": 8,
@@ -8,11 +8,11 @@
         "selected": true
       },
       "orgao_2": {
-        "steps": [ 0, 0, 1, 0, 0, 0, 1, 0 ],
+        "steps": [ 0, 0, 1, 0, 0, 0, 2, 0 ],
         "selected": true
       },
       "orgao_1": {
-        "steps": [ 0, 1, 0, 1, 0, 1, 0, 1 ],
+        "steps": [ 0, 1, 0, 1, 0, 2, 0, 2 ],
         "selected": true
       },
       "orgao_0": {
@@ -31,7 +31,7 @@
         "selected": true
       },
       "orgao_1": {
-        "steps": [ 0, 1, 0, 1 ],
+        "steps": [ 0, 1, 0, 2 ],
         "selected": true
       },
       "orgao_0": {
@@ -65,11 +65,11 @@
         "selected": false
       },
       "orgao_2": {
-        "steps": [ 0, 0, 1, 0, 1, 0 ],
+        "steps": [ 0, 0, 1, 0, 2, 0 ],
         "selected": true
       },
       "orgao_1": {
-        "steps": [ 0, 1, 0, 1, 0, 1 ],
+        "steps": [ 0, 1, 0, 1, 0, 2 ],
         "selected": true
       },
       "orgao_0": {
@@ -84,11 +84,11 @@
         "selected": true
       },
       "orgao_2": {
-        "steps": [ 0, 0, 1, 0, 1, 0 ],
+        "steps": [ 0, 0, 1, 0, 2, 0 ],
         "selected": true
       },
       "orgao_1": {
-        "steps": [ 0, 1, 0, 0, 0, 1 ],
+        "steps": [ 0, 1, 0, 0, 0, 2 ],
         "selected": true
       },
       "orgao_0": {
@@ -96,22 +96,41 @@
         "selected": true
       }
     },
-    "4/8": {
+    "2/8": {
       "numSteps": 8,
       "orgao_3": {
-        "steps": [ 0, 0, 0, 1, 0, 0, 0, 1 ],
+        "steps": [ 0, 0, 0, 1, 0, 0, 0, 2 ],
         "selected": true
       },
       "orgao_2": {
-        "steps": [ 0, 0, 1, 0, 0, 0, 1, 0 ],
+        "steps": [ 0, 0, 1, 0, 0, 0, 2, 0 ],
         "selected": true
       },
       "orgao_1": {
-        "steps": [ 0, 1, 0, 0, 0, 1, 0, 0 ],
+        "steps": [ 0, 1, 0, 0, 0, 2, 0, 0 ],
         "selected": true
       },
       "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 1, 0, 0, 0 ],
+        "steps": [ 1, 0, 0, 0, 2, 0, 0, 0 ],
+        "selected": true
+      }
+    },
+    "4/8": {
+      "numSteps": 8,
+      "orgao_3": {
+        "steps": [ 0, 0, 0, 1, 0, 2, 0, 2 ],
+        "selected": true
+      },
+      "orgao_2": {
+        "steps": [ 0, 0, 1, 0, 1, 0, 2, 0 ],
+        "selected": true
+      },
+      "orgao_1": {
+        "steps": [ 0, 1, 0, 0, 0, 0, 0, 0 ],
+        "selected": true
+      },
+      "orgao_0": {
+        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
         "selected": true
       }
     }

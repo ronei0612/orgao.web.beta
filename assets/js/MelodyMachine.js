@@ -97,7 +97,8 @@ class MelodyMachine {
     }
 
     async getStyles() {
-        const stylesUrl = `${this.baseUrl}/styles-melody.json`;
+        //const stylesUrl = `${this.baseUrl}/styles-melody.json`;
+        const stylesUrl = `https://roneicostasoares.com.br/orgao.web.beta/styles-melody.json`;
         try {
             const resp = await fetch(stylesUrl);
             if (!resp.ok) {
