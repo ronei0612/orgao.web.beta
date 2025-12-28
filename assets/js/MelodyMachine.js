@@ -117,7 +117,7 @@ class MelodyMachine {
         const gainNode = this.audioContext.createGain();
 
         source.buffer = buffer;
-        source.loop = true;
+        source.loop = false;
 
         gainNode.gain.setValueAtTime(0.001, time);
         gainNode.gain.exponentialRampToValueAtTime(volume, time + this.attackTime);
@@ -156,7 +156,7 @@ class MelodyMachine {
         this.currentStep++;
 
         if (this.currentStep > this.numSteps) {
-            this.currentStep = 1;
+            this.stop();
             if (typeof this.onStepsEnd === 'function') {
                 this.onStepsEnd();
             }
