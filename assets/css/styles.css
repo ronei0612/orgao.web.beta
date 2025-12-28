@@ -126,14 +126,14 @@ iframe {
     -o-user-drag: none; /* Opera */
 }
 
-#savesSelect option {
-    color: black;
-}
+    #savesSelect option {
+        color: black;
+    }
 
-#savesSelect:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+    #savesSelect:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 
 .select2-results__options > li[aria-selected="false"][data-select2-id*="acordes"] {
     color: gray;
@@ -479,6 +479,10 @@ img.icon-svg {
     display: inline-block;
 }
 
+body.dark-mode img.dark-invert {
+    filter: invert(1);
+}
+
 #avancarButton:active,
 #retrocederButton:active {
     transform: scale(0.95);
@@ -574,16 +578,16 @@ body.dark-mode .control-panel {
     outline: none;
 }
 
-.btn-instrument img {
-    width: 28px;
-    height: 28px;
-    display: block;
-    pointer-events: none;
-}
+    .btn-instrument img {
+        width: 28px;
+        height: 28px;
+        display: block;
+        pointer-events: none;
+    }
 
-.btn-instrument:active {
-    transform: translateY(2px);
-}
+    .btn-instrument:active {
+        transform: translateY(2px);
+    }
 
 body.dark-mode .btn-instrument {
     background-color: #6c757d;

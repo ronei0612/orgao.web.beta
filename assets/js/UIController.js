@@ -300,6 +300,14 @@ class UIController {
             this.elements.rhythmButtonsControl.classList.add('d-none');
     }
 
+    rolarIframeParaTopo(iframe) {
+        iframe.contentWindow.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    }
+
     exibirIframeCifra() {
         //this.resetInterface();
         this.elements.iframeCifra.classList.remove('d-none');

@@ -519,6 +519,7 @@ class App {
             this.cifraPlayer.instrumento = saveData.instrument;
             this.exibirInstrument(saveData.instrument);
             this.elements.bpmInput.value = saveData.bpm;
+            this.setBPM(saveData.bpm);
 
             if (saveData.instrument === 'orgao') {
                 this.elements.melodyStyleSelect.value = saveData.style;
@@ -578,6 +579,7 @@ class App {
             const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem);
             this.showLetraCifra(saveData);
             this.escolherStyle(saveData.style);
+            this.uiController.rolarIframeParaTopo(this.elements.iframeCifra);
         }
         else {
             this.uiController.resetInterface();
