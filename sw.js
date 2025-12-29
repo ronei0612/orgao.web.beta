@@ -1,4 +1,4 @@
-const version = '5.9.8';
+const version = '5.9.9';
 const CACHE_NAME = 'cifra-app-cache-' + version;
 
 const urlsToCache = [
@@ -89,6 +89,25 @@ const urlsToCache = [
     './assets/audio/Orgao/orgao_g_grave.ogg',
     './assets/audio/Orgao/orgao_g__baixo.ogg',
     './assets/audio/Orgao/orgao_g__grave.ogg',
+
+    './assets/audio/studio/Orgao/orgao_a_baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_a__baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_b_baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_c.ogg',
+    './assets/audio/studio/Orgao/orgao_c_.ogg',
+    './assets/audio/studio/Orgao/orgao_c_baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_c__baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_d.ogg',
+    './assets/audio/studio/Orgao/orgao_d_.ogg',
+    './assets/audio/studio/Orgao/orgao_d_baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_d__baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_e.ogg',
+    './assets/audio/studio/Orgao/orgao_e_baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_f.ogg',
+    './assets/audio/studio/Orgao/orgao_f_baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_f__baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_g_baixo.ogg',
+    './assets/audio/studio/Orgao/orgao_g__baixo.ogg',
 
     // Dependências externas (CDNs) - CRÍTICO para o modo offline!
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css'

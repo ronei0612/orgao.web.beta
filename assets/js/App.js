@@ -1,7 +1,7 @@
 class App {
     constructor(elements) {
         this.elements = elements;
-        this.BASE_URL = location.origin.includes('file:') ? 'https://roneicostasoares.com.br/orgao.web.beta' : '.';
+        this.BASE_URL = location.origin.includes('file:') ? 'https://roneicostasoares.com.br/orgao.web' : '.';
         this.musicTheory = new MusicTheory();
         this.uiController = new UIController(this.elements);
         this.localStorageManager = new LocalStorageManager();
@@ -9,9 +9,9 @@ class App {
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
         this.versionConfig = {
-            version: '5.9.8',
+            version: '5.9.9',
             htmlMessage: `
-                <p>Novo botão para trocar de Órgão para Bateria.</p>
+                <p>O ritmo de Órgão agora não será mais em loop.</p>
 
                 👉 <button class="btn btn-outline-secondary mx-1 font-weight-bold" aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
                         Órgão
@@ -71,13 +71,13 @@ class App {
         };
 
         //if (this.BASE_URL.includes('http')) {
-            //document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
-            //document.getElementById('styleButtons').classList.remove('d-none');
-            //document.getElementById('drumEditor').classList.remove('d-none');
-            //document.getElementById('melodyTracks').classList.remove('d-none');
-            //document.getElementById('stepsMelody').classList.remove('d-none');
-            //document.getElementById('melodySaveControl').classList.remove('d-none');
-            //document.getElementById('save-melody').classList.remove('d-none');
+            document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
+            document.getElementById('styleButtons').classList.remove('d-none');
+            document.getElementById('drumEditor').classList.remove('d-none');
+            document.getElementById('melodyTracks').classList.remove('d-none');
+            document.getElementById('stepsMelody').classList.remove('d-none');
+            document.getElementById('melodySaveControl').classList.remove('d-none');
+            document.getElementById('save-melody').classList.remove('d-none');
         //}
     }
 
