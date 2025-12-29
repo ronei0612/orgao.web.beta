@@ -8,8 +8,7 @@ class MelodyMachine {
         this.defaultVol = 0.5;
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.audioPath = //this.baseUrl + '/assets/audio/studio/Orgao';
-            this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
+        this.audioPath = this.baseUrl + '/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [
             { note: 3, name: this.instrument },
@@ -97,8 +96,7 @@ class MelodyMachine {
     }
 
     async getStyles() {
-        //const stylesUrl = `${this.baseUrl}/styles-melody.json`;
-        const stylesUrl = `https://roneicostasoares.com.br/orgao.web.beta/styles-melody.json`;
+        const stylesUrl = `${this.baseUrl}/styles-melody.json`;
         try {
             const resp = await fetch(stylesUrl);
             if (!resp.ok) {
