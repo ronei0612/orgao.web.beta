@@ -9,7 +9,7 @@ class MelodyMachine {
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.audioPath = //this.baseUrl + '/assets/audio/studio/Orgao';
-        this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
+            this.audioPath = 'https://roneicostasoares.com.br/orgao.web.beta/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [
             { note: 3, name: this.instrument },
@@ -154,20 +154,6 @@ class MelodyMachine {
         this.activeSources = [];
     }
 
-    stopCurrentNote(time) {
-        if (this.currentSource) {
-            const { source, gainNode } = this.currentSource;
-            try {
-                gainNode.gain.cancelScheduledValues(time);
-                gainNode.gain.setValueAtTime(gainNode.gain.value, time);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, time + this.releaseTime);
-
-                source.stop(time + this.releaseTime + 0.01);
-            } catch { }
-            this.currentSource = null;
-        }
-    }
-
     nextNote() {
         const secondsPerQuarterNote = 60.0 / this.musicTheory.bpm;
         const secondsPerStep = secondsPerQuarterNote / 2;
@@ -175,9 +161,8 @@ class MelodyMachine {
 
         this.currentStep++;
 
-        // Se ultrapassou o número de passos, para tudo.
         if (this.currentStep > this.numSteps) {
-            this.stop(); // O stop já limpa o intervalo e faz o reset do step para 1
+            this.stop();
             if (typeof this.onStepsEnd === 'function') {
                 this.onStepsEnd();
             }
@@ -185,7 +170,6 @@ class MelodyMachine {
     }
 
     scheduler() {
-        // Adicionamos "this.isPlaying &&" para interromper o agendamento imediatamente no fim
         while (this.isPlaying && this.nextNoteTime < this.audioContext.currentTime + this.scheduleAheadTime) {
             this.scheduleCurrentStep();
             this.nextNote();
@@ -196,9 +180,9 @@ class MelodyMachine {
         if (!this.tracksCache) this.refreshTrackCache();
 
         const stepIndex = this.currentStep - 1;
+        const iniciouNovoAcorde = this.currentStep === 1;
 
-        // NOVIDADE: Se for o primeiro step, limpa todos os sons remanescentes da rodada anterior
-        if (this.currentStep === 1) {
+        if (iniciouNovoAcorde) {
             this.stopNotes(this.nextNoteTime);
         }
 
@@ -215,19 +199,12 @@ class MelodyMachine {
                 if (volume > 0) {
                     foundTrack = { ...trackData, volume, element: stepEl };
 
-                    // IMPORTANTE: Se você quiser que múltiplas vozes soem no MESMO step, 
-                    // você deve processar todos os tracks aqui em vez de dar 'break'.
-                    // Se quiser apenas uma nota por vez (polifonia entre steps, mas não no mesmo step), mantenha o break.
-
                     if (this.cifraPlayer.acordeTocando) {
                         let acordeSimplificado = this.cifraPlayer.acordeTocando;
                         const notas = this.getAcordeNotas(acordeSimplificado);
                         const nota = notas[foundTrack.noteIndex];
                         const bufferKey = `${foundTrack.name}_${nota}`;
                         const buffer = this.buffers.get(bufferKey);
-
-                        // Removido: this.stopCurrentNote(this.nextNoteTime); 
-                        // As notas agora vão se sobrepor.
 
                         this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? (this.defaultVol / 2) : this.defaultVol);
 
@@ -266,10 +243,9 @@ class MelodyMachine {
         }
 
         this.isPlaying = true;
-        this.currentStep = 1; // Sempre começa do 1
+        this.currentStep = 1;
         this.nextNoteTime = this.audioContext.currentTime;
 
-        // Limpa qualquer som antes de começar a sequência
         this.stopNotes(this.nextNoteTime);
 
         this.refreshTrackCache();
@@ -283,7 +259,7 @@ class MelodyMachine {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-        // Para todos os sons imediatamente ao dar Stop
+
         if (stopAll)
             this.stopNotes(this.audioContext.currentTime);
 

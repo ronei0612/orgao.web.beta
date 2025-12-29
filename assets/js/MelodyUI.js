@@ -328,12 +328,15 @@ class MelodyUI {
         this.loadPattern(this.elements.melodyStyleSelect.value);
         if (this.elements.melodyStyleSelect.value === '')
             this.stop();
-        else if (this.melodyMachine.isPlaying)
+        else if (this.melodyMachine.isPlaying) {
+            this.melodyMachine.stop(true);
             this.melodyMachine.start();
+        }
     }
 
     play() {
         if (!this.melodyMachine.isPlaying) {
+            this.melodyMachine.stop(true);
             this.melodyMachine.start();
         }
     }
