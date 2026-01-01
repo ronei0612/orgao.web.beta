@@ -549,7 +549,7 @@ class CifraPlayer {
     atualizarVolumeStringsParaEpiano() {
         Object.keys(this.audioContextManager.instrumentSettings).forEach(key => {
             if (key.startsWith('strings_')) {
-                this.audioContextManager.instrumentSettings[key].volume = 1.0;
+                this.audioContextManager.instrumentSettings[key].volume = 0.9;
             }
         });
     }
