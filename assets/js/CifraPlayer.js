@@ -32,7 +32,7 @@ class CifraPlayer {
             },
             'agudo': {
                 'orgao': 0.6,
-                'strings': 0.6,
+                'strings': 0.5,
                 'epiano': 1.0
             }
         };
