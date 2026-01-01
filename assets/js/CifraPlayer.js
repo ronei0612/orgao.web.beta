@@ -22,12 +22,12 @@ class CifraPlayer {
         this.VOLUME_CONFIG = {
             'grave': {
                 'orgao': 1.0,
-                'strings': 0.7,
+                'strings': 0.6,
                 'epiano': 1.0
             },
             'baixo': {
                 'orgao': 1.0,
-                'strings': 0.6,
+                'strings': 0.5,
                 'epiano': 1.0
             },
             'agudo': {
