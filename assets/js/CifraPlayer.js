@@ -75,7 +75,7 @@ class CifraPlayer {
 
     destacarCifras(texto, tom) {
         const textoAcordesCorrigidos = texto.replace('º', '°');
-        const linhas = texto.split('\n');
+        const linhas = textoAcordesCorrigidos.split('\n');
         let cifraNum = 1;
         const temPalavra = /[a-zA-Z]{4,}/; // Não remover! Usar caso necessário
         const temColchetes = /\[.*?\]/;
@@ -549,7 +549,7 @@ class CifraPlayer {
     atualizarVolumeStringsParaEpiano() {
         Object.keys(this.audioContextManager.instrumentSettings).forEach(key => {
             if (key.startsWith('strings_')) {
-                this.audioContextManager.instrumentSettings[key].volume = 0.9;
+                this.audioContextManager.instrumentSettings[key].volume = 1.0;
             }
         });
     }
