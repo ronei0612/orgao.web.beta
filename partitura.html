@@ -55,54 +55,43 @@
         const outputDiv = document.getElementById('output');
 
         // Configurações do VexFlow
-        const { Renderer, Stave, StaveNote, Voice, Formatter, ChordSymbol, Modifier } = Vex.Flow;
+        const { Renderer, Stave, StaveNote, Voice, Formatter, ChordSymbol, BarNote, Barline } = Vex.Flow;
 
         // Função para desenhar a partitura
         function drawMusic(data) {
-            // Limpa o container
             outputDiv.innerHTML = '';
-
-            // 1. Criar o renderizador
             const renderer = new Renderer(outputDiv, Renderer.Backends.SVG);
 
-            // Ajusta o tamanho baseado na quantidade de notas
             const width = Math.max(500, data.length * 100);
             renderer.resize(width, 250);
             const context = renderer.getContext();
 
-            // 2. Criar o pentagrama (Stave)
             const stave = new Stave(10, 40, width - 20);
             stave.addClef("treble").addTimeSignature("4/4");
             stave.setContext(context).draw();
 
-            // 3. Processar as notas do arquivo JSON
-            const notes = data.map(item => {
-                // Criamos uma nota (ex: 'c/4')
-                // Usamos duração 'q' (quarter/semínima) para ser preenchida
+            const tickables = data.flatMap(item => {
                 const note = new StaveNote({
                     keys: item.notes,
                     duration: "q",
                 });
 
-                // Se houver cifra (chord symbol)
+                if (note.getStem()) note.getStem().hide = true;
+
                 if (item.chord) {
                     note.addModifier(new ChordSymbol().setFont('Arial', 12, 'bold').addText(item.chord));
                 }
 
-                // Desativa a renderização da haste (stem) para ficar apenas a bolinha preenchida
-                //note.render_options.draw_stem = false;
-                note.setStyle({ fillStyle: "black", strokeStyle: "black" });
-
-                return note;
+                return item.bar ? [note, new BarNote()] : [note];
             });
 
-            // 4. Criar a voz e formatar
+            // IMPORTANTE: A Voice deve contar apenas o tempo das NOTAS. 
+            // O BarNote tem duração zero, então ele não altera a contagem de beats.
             const voice = new Voice({ num_beats: data.length, beat_value: 4 });
-            voice.addTickables(notes);
+            voice.addTickables(tickables);
 
             new Formatter().joinVoices([voice]).format([voice], width - 100);
 
-            // 5. Desenhar as notas
             voice.draw(context, stave);
         }
 
@@ -123,22 +112,14 @@
             reader.readAsText(file);
         });
 
-        // Exemplo de estrutura que o arquivo JSON deve ter:
-        /*
-        [
-            { "chord": "C", "notes": ["c/4"] },
-            { "chord": "Am", "notes": ["a/4"] },
-            { "chord": "F", "notes": ["f/4"] },
-            { "chord": "G7", "notes": ["g/4"] }
-        ]
-        */
-
         // Renderização inicial de exemplo
         const exampleData = [
-            { "chord": "C", "notes": ["c/4", "e/4", "g/4"] },
-            { "chord": "G", "notes": ["g/3", "b/3", "d/4"] },
-            { "chord": "Am", "notes": ["a/3", "c/4", "e/4"] },
-            { "chord": "F", "notes": ["f/3", "a/3", "c/4"] }
+            { "chord": "D", "notes": ["d/4"], "lyric": "Sal" },
+            { "notes": ["d/4"] },
+            { "notes": ["e/4"] },
+            { "chord": "Bm", "notes": ["b/3", "d/4", "f#/4"] },
+            { "chord": "G", "notes": ["g/3", "b/3", "d/4"], "bar": true },
+            { "chord": "A7", "notes": ["a/3", "c#/4", "e/4", "g/4"] }
         ];
 
         // Aguarda carregar a biblioteca e desenha o exemplo
