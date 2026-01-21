@@ -3,270 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Editor de Partitura Pro</title>
-    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.5/build/cjs/vexflow.js"></script>
+    <title>Editor de Partitura Mobile</title>
+    <!-- Usando a versão UMD para compatibilidade direta no navegador -->
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: sans-serif;
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            background-color: #eef2f3;
-            user-select: none;
+            background-color: #f0f0f0;
         }
 
         #controls {
-            margin-bottom: 20px;
-            background: white;
             padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        button {
-            padding: 10px 15px;
-            cursor: pointer;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .btn-save {
-            background-color: #2ecc71;
+            background: #333;
             color: white;
-        }
-
-        .btn-reset {
-            background-color: #e74c3c;
-            color: white;
-        }
-
-        .btn-clear {
-            background-color: #95a5a6;
-            color: white;
-        }
-
-        #output {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            touch-action: none;
-            cursor: crosshair;
-            overflow-x: auto;
-            max-width: 95vw;
-        }
-
-        .info {
-            margin-top: 15px;
-            color: #666;
-            font-size: 0.85em;
+            width: 100%;
             text-align: center;
-            line-height: 1.6;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        .hint {
-            color: #3498db;
-            font-weight: bold;
+        #score-container {
+            background: white;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: crosshair;
+        }
+
+        .instructions {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
-    <h2>Editor de Partitura Interativo</h2>
-
     <div id="controls">
-        <button class="btn-save" onclick="saveToLocal()">Salvar no Navegador</button>
-        <button class="btn-reset" onclick="resetData()">Resetar Padrão</button>
-        <button class="btn-clear" onclick="clearAll()">Limpar Tudo</button>
+        <strong>Editor VexFlow Mobile</strong><br>
+        <span class="instructions">Toque para adicionar | Arraste a nota para mudar o tom</span>
+        <br>
+        <button onclick="clearScore()" style="margin-top:10px; padding: 8px 15px;">Limpar Tudo</button>
     </div>
 
-    <div id="output"></div>
-
-    <div class="info">
-        <span class="hint">Adicionar:</span> Clique no espaço vazio do pentagrama.<br>
-        <span class="hint">Mover:</span> Arraste a nota para cima ou baixo.<br>
-        <span class="hint">Editar Texto:</span> Clique rápido na nota.<br>
-        <span class="hint">Excluir:</span> Clique duplo na nota.
-    </div>
+    <div id="score-container"></div>
 
     <script>
-        const { Renderer, Stave, StaveNote, Voice, Formatter, ChordSymbol, BarNote, Annotation } = Vex.Flow;
-        const outputDiv = document.getElementById('output');
+        const { Renderer, Stave, StaveNote, Voice, Formatter, Beam } = Vex.Flow;
 
-        let musicData = [];
-        const STORAGE_KEY = 'minha_partitura_vexflow_v2';
-        const PITCHES = ["c/6", "b/5", "a/5", "g/5", "f/5", "e/5", "d/5", "c/5", "b/4", "a/4", "g/4", "f/4", "e/4", "d/4", "c/4", "b/3", "a/3", "g/3"];
+        // Configurações Básicas
+        const container = document.getElementById('score-container');
+        const width = window.innerWidth * 0.95;
+        const height = 250;
 
-        let isDragging = false;
-        let selectedNoteIndex = null;
-        let startY = 0;
-        let lastClickTime = 0;
-
-        const defaultData = [
-            { "chord": "C", "notes": ["c/4"], "lyric": "Dó" },
-            { "chord": "D", "notes": ["d/4"], "lyric": "Ré" },
-            { "chord": "E", "notes": ["e/4"], "lyric": "Mi" }
+        // Estado da Partitura
+        let notesData = [
+            { key: "c/4", duration: "q" },
+            { key: "e/4", duration: "q" },
+            { key: "g/4", duration: "q" }
         ];
 
-        window.onload = () => {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            musicData = saved ? JSON.parse(saved) : defaultData;
-            drawMusic();
-            setupInteractions();
-        };
+        let isDragging = false;
+        let selectedNoteIndex = -1;
+        let startY = 0;
 
-        function drawMusic() {
-            outputDiv.innerHTML = '';
-            const renderer = new Renderer(outputDiv, Renderer.Backends.SVG);
+        // Mapeamento de Posição Y para Notas (Escala de C maior simplificada)
+        const pitchMap = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5"];
 
-            // Largura dinâmica: 120px por nota + margens
-            const width = Math.max(600, (musicData.length + 1) * 100);
-            renderer.resize(width, 300);
+        function draw() {
+            container.innerHTML = "";
+            const renderer = new Renderer(container, Renderer.Backends.SVG);
+            renderer.resize(width, height);
             const context = renderer.getContext();
 
-            const stave = new Stave(10, 60, width - 20);
+            const stave = new Stave(10, 40, width - 20);
             stave.addClef("treble").addTimeSignature("4/4");
             stave.setContext(context).draw();
 
-            if (musicData.length > 0) {
-                const tickables = musicData.flatMap((item) => {
-                    const note = new StaveNote({ keys: item.notes, duration: "q" });
-                    if (note.getStem()) note.getStem().hide = true;
-                    if (item.chord) note.addModifier(new ChordSymbol().setFont('Arial', 10, 'bold').addText(item.chord));
-                    if (item.lyric) note.addModifier(new Annotation(item.lyric).setFont('Serif', 11, 'italic').setVerticalJustification(Annotation.VerticalJustify.BOTTOM));
-                    return item.bar ? [note, new BarNote()] : [note];
-                });
+            const vexNotes = notesData.map((data, index) => {
+                const note = new StaveNote({ keys: [data.key], duration: data.duration });
+                // Destacar a nota que está sendo arrastada
+                if (index === selectedNoteIndex) {
+                    note.setStyle({ fillStyle: "red", strokeStyle: "red" });
+                }
+                return note;
+            });
 
-                const voice = new Voice({ num_beats: musicData.length, beat_value: 4 });
-                voice.addTickables(tickables);
-                new Formatter().joinVoices([voice]).format([voice], width - 150);
+            if (vexNotes.length > 0) {
+                const voice = new Voice({ num_beats: vexNotes.length, beat_value: 4 });
+                voice.setStrict(false);
+                voice.addTickables(vexNotes);
+                new Formatter().joinVoices([voice]).format([voice], width - 100);
                 voice.draw(context, stave);
             }
         }
 
-        function setupInteractions() {
-            const handleStart = (e) => {
-                const pos = getMousePos(e);
-                const rect = outputDiv.getBoundingClientRect();
-                const xRel = pos.x - rect.left;
-                const yRel = pos.y - rect.top;
-
-                // 1. Verificar Clique Duplo (Excluir)
-                const now = Date.now();
-                const isDoubleClick = (now - lastClickTime < 300);
-                lastClickTime = now;
-
-                // 2. Localizar Nota clicada (Heurística baseada no X)
-                const noteWidth = rect.width / (musicData.length + 1);
-                const clickedIndex = Math.floor(xRel / 100); // 100 é o espaçamento aproximado
-
-                if (clickedIndex < musicData.length) {
-                    if (isDoubleClick) {
-                        musicData.splice(clickedIndex, 1);
-                        drawMusic();
-                        return;
-                    }
-                    // Clique simples: Iniciar Arraste ou Editar Texto
-                    selectedNoteIndex = clickedIndex;
-                    isDragging = true;
-                    startY = pos.y;
-
-                    // Timer para distinguir arraste de clique para editar texto
-                    this.clickTimeout = setTimeout(() => {
-                        if (!isDragging) editNoteText(clickedIndex);
-                    }, 200);
-
-                } else if (yRel > 60 && yRel < 160) {
-                    // 3. Adicionar nota se clicar no vazio do pentagrama
-                    addNewNote();
-                }
-            };
-
-            const handleMove = (e) => {
-                if (!isDragging || selectedNoteIndex === null) return;
-                e.preventDefault();
-                const pos = getMousePos(e);
-                const diffY = pos.y - startY;
-
-                if (Math.abs(diffY) > 10) {
-                    clearTimeout(this.clickTimeout); // Se arrastou, não abre o editor de texto
-                    const direction = diffY > 0 ? 1 : -1;
-                    updateNotePitch(selectedNoteIndex, direction);
-                    startY = pos.y;
-                    drawMusic();
-                }
-            };
-
-            const handleEnd = () => {
-                isDragging = false;
-                selectedNoteIndex = null;
-            };
-
-            outputDiv.addEventListener('mousedown', handleStart);
-            window.addEventListener('mousemove', handleMove);
-            window.addEventListener('mouseup', handleEnd);
-            outputDiv.addEventListener('touchstart', handleStart);
-            window.addEventListener('touchmove', handleMove, { passive: false });
-            window.addEventListener('touchend', handleEnd);
+        // Lógica de Interação (Mouse e Touch)
+        function getNoteIndexAtX(x) {
+            // Divide o espaço do stave proporcionalmente pelo número de notas
+            const staveWidth = width - 100;
+            const relativeX = x - 50;
+            const index = Math.floor((relativeX / staveWidth) * notesData.length);
+            return Math.max(0, Math.min(index, notesData.length - 1));
         }
 
-        function addNewNote() {
-            musicData.push({ "chord": "", "notes": ["b/4"], "lyric": "" });
-            drawMusic();
+        function getYToPitch(y) {
+            // Cálculo aproximado: cada linha/espaço tem cerca de 5 a 10px
+            const centerY = 110; // Posição aproximada da linha do meio (B4)
+            const step = 8; // Distância em pixels entre semitons visuais
+            const diff = Math.round((centerY - y) / step);
+
+            // Referência: B/4 é o centro.
+            const basePitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5"];
+            const b4Index = 6;
+            let newIndex = b4Index + diff;
+            newIndex = Math.max(0, Math.min(newIndex, basePitches.length - 1));
+            return basePitches[newIndex];
         }
 
-        function editNoteText(index) {
-            const item = musicData[index];
-            const newChord = prompt("Cifra (Ex: C, G7, Am):", item.chord);
-            const newLyric = prompt("Letra da música:", item.lyric);
-
-            if (newChord !== null) item.chord = newChord;
-            if (newLyric !== null) item.lyric = newLyric;
-
-            drawMusic();
-        }
-
-        function getMousePos(e) {
+        function handleStart(e) {
+            const rect = container.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return { x: clientX, y: clientY };
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            // Se clicar muito à direita, adiciona nova nota
+            if (x > (notesData.length * (width / 10)) + 50 || notesData.length === 0) {
+                notesData.push({ key: getYToPitch(y), duration: "q" });
+                selectedNoteIndex = notesData.length - 1;
+            } else {
+                selectedNoteIndex = getNoteIndexAtX(x);
+            }
+
+            isDragging = true;
+            draw();
         }
 
-        function updateNotePitch(index, direction) {
-            const currentPitch = musicData[index].notes[0];
-            const pitchIndex = PITCHES.indexOf(currentPitch);
-            let newIndex = pitchIndex + direction;
-            if (newIndex >= 0 && newIndex < PITCHES.length) {
-                musicData[index].notes = [PITCHES[newIndex]];
+        function handleMove(e) {
+            if (!isDragging || selectedNoteIndex === -1) return;
+            e.preventDefault();
+
+            const rect = container.getBoundingClientRect();
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const y = clientY - rect.top;
+
+            const newPitch = getYToPitch(y);
+            if (notesData[selectedNoteIndex].key !== newPitch) {
+                notesData[selectedNoteIndex].key = newPitch;
+                draw();
             }
         }
 
-        // Persistência
-        function saveToLocal() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(musicData));
-            alert("Salvo!");
+        function handleEnd() {
+            isDragging = false;
+            selectedNoteIndex = -1;
+            draw();
         }
 
-        function resetData() {
-            if (confirm("Resetar?")) {
-                musicData = JSON.parse(JSON.stringify(defaultData));
-                drawMusic();
-            }
+        function clearScore() {
+            notesData = [];
+            draw();
         }
 
-        function clearAll() {
-            if (confirm("Limpar toda a partitura?")) {
-                musicData = [];
-                drawMusic();
-            }
-        }
+        // Eventos
+        container.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        container.addEventListener('touchstart', handleStart, { passive: false });
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd);
+
+        // Renderização Inicial
+        draw();
+
     </script>
+
 </body>
 </html>
