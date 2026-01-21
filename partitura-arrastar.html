@@ -35,10 +35,35 @@
             cursor: crosshair;
         }
 
+        .btn-group {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-danger {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: #ffbb33;
+            color: white;
+        }
+
         .instructions {
             font-size: 12px;
             color: #ccc;
-            margin-top: 5px;
         }
     </style>
 </head>
@@ -46,22 +71,25 @@
 
     <div id="controls">
         <strong>Editor VexFlow Mobile</strong><br>
-        <span class="instructions">Toque para adicionar | Arraste a nota para mudar o tom</span>
-        <br>
-        <button onclick="clearScore()" style="margin-top:10px; padding: 8px 15px;">Limpar Tudo</button>
+        <span class="instructions">Toque para adicionar | Arraste para mover</span>
+
+        <div class="btn-group">
+            <!-- BOTÃO DE APAGAR ÚLTIMA NOTA -->
+            <button class="btn-warning" onclick="deleteLastNote()">⌫ Apagar Última</button>
+            <!-- BOTÃO DE LIMPAR TUDO -->
+            <button class="btn-danger" onclick="clearScore()">🗑️ Limpar Tudo</button>
+        </div>
     </div>
 
     <div id="score-container"></div>
 
     <script>
-        const { Renderer, Stave, StaveNote, Voice, Formatter, Beam } = Vex.Flow;
+        const { Renderer, Stave, StaveNote, Voice, Formatter } = Vex.Flow;
 
-        // Configurações Básicas
         const container = document.getElementById('score-container');
         const width = window.innerWidth * 0.95;
         const height = 250;
 
-        // Estado da Partitura
         let notesData = [
             { key: "c/4", duration: "q" },
             { key: "e/4", duration: "q" },
@@ -70,10 +98,8 @@
 
         let isDragging = false;
         let selectedNoteIndex = -1;
-        let startY = 0;
 
-        // Mapeamento de Posição Y para Notas (Escala de C maior simplificada)
-        const pitchMap = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5"];
+        const pitchMap = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5"];
 
         function draw() {
             container.innerHTML = "";
@@ -87,7 +113,6 @@
 
             const vexNotes = notesData.map((data, index) => {
                 const note = new StaveNote({ keys: [data.key], duration: data.duration });
-                // Destacar a nota que está sendo arrastada
                 if (index === selectedNoteIndex) {
                     note.setStyle({ fillStyle: "red", strokeStyle: "red" });
                 }
@@ -103,27 +128,39 @@
             }
         }
 
-        // Lógica de Interação (Mouse e Touch)
+        // --- FUNÇÕES DE CONTROLE ---
+
+        function deleteLastNote() {
+            if (notesData.length > 0) {
+                notesData.pop(); // Remove o último item do array
+                draw(); // Redesenha a partitura
+            }
+        }
+
+        function clearScore() {
+            if (confirm("Deseja apagar toda a partitura?")) {
+                notesData = [];
+                draw();
+            }
+        }
+
+        // --- LÓGICA DE INTERAÇÃO ---
+
+        function getYToPitch(y) {
+            const centerY = 110;
+            const step = 8;
+            const diff = Math.round((centerY - y) / step);
+            const b4Index = 6;
+            let newIndex = b4Index + diff;
+            newIndex = Math.max(0, Math.min(newIndex, pitchMap.length - 1));
+            return pitchMap[newIndex];
+        }
+
         function getNoteIndexAtX(x) {
-            // Divide o espaço do stave proporcionalmente pelo número de notas
             const staveWidth = width - 100;
             const relativeX = x - 50;
             const index = Math.floor((relativeX / staveWidth) * notesData.length);
             return Math.max(0, Math.min(index, notesData.length - 1));
-        }
-
-        function getYToPitch(y) {
-            // Cálculo aproximado: cada linha/espaço tem cerca de 5 a 10px
-            const centerY = 110; // Posição aproximada da linha do meio (B4)
-            const step = 8; // Distância em pixels entre semitons visuais
-            const diff = Math.round((centerY - y) / step);
-
-            // Referência: B/4 é o centro.
-            const basePitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5"];
-            const b4Index = 6;
-            let newIndex = b4Index + diff;
-            newIndex = Math.max(0, Math.min(newIndex, basePitches.length - 1));
-            return basePitches[newIndex];
         }
 
         function handleStart(e) {
@@ -133,8 +170,9 @@
             const x = clientX - rect.left;
             const y = clientY - rect.top;
 
-            // Se clicar muito à direita, adiciona nova nota
-            if (x > (notesData.length * (width / 10)) + 50 || notesData.length === 0) {
+            // Se clicar após a última nota, adiciona uma nova
+            const lastNoteX = (notesData.length * (width / 12)) + 50;
+            if (x > lastNoteX || notesData.length === 0) {
                 notesData.push({ key: getYToPitch(y), duration: "q" });
                 selectedNoteIndex = notesData.length - 1;
             } else {
@@ -147,7 +185,7 @@
 
         function handleMove(e) {
             if (!isDragging || selectedNoteIndex === -1) return;
-            e.preventDefault();
+            if (e.cancelable) e.preventDefault();
 
             const rect = container.getBoundingClientRect();
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -166,12 +204,6 @@
             draw();
         }
 
-        function clearScore() {
-            notesData = [];
-            draw();
-        }
-
-        // Eventos
         container.addEventListener('mousedown', handleStart);
         window.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleEnd);
@@ -180,9 +212,7 @@
         window.addEventListener('touchmove', handleMove, { passive: false });
         window.addEventListener('touchend', handleEnd);
 
-        // Renderização Inicial
         draw();
-
     </script>
 
 </body>
