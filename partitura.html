@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Partitura com VexFlow 4.2.5</title>
-    <!-- Importando VexFlow 4.2.5 via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.5/build/cjs/vexflow.js"></script>
     <style>
         body {
@@ -30,17 +29,11 @@
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-
-        .info {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
 
-    <h2>Gerador de Partitura e Cifra</h2>
+    <h2>Gerador de Partitura, Cifra e Letra</h2>
 
     <div id="controls">
         <input type="file" id="fileInput" accept=".json">
@@ -50,24 +43,23 @@
     <div id="output"></div>
 
     <script>
-        // Referência aos elementos da página
         const fileInput = document.getElementById('fileInput');
         const outputDiv = document.getElementById('output');
 
-        // Configurações do VexFlow
-        const { Renderer, Stave, StaveNote, Voice, Formatter, ChordSymbol, BarNote, Barline } = Vex.Flow;
+        // 1. Adicionado Annotation aqui
+        const { Renderer, Stave, StaveNote, Voice, Formatter, ChordSymbol, BarNote, Annotation } = Vex.Flow;
 
-        // Função para desenhar a partitura
         function drawMusic(data) {
             outputDiv.innerHTML = '';
             const renderer = new Renderer(outputDiv, Renderer.Backends.SVG);
 
-            const width = Math.max(500, data.length * 100);
-            renderer.resize(width, 250);
+            // Aumentamos um pouco a largura por causa das letras
+            const width = Math.max(600, data.length * 120);
+            renderer.resize(width, 300); // Aumentei a altura para 300
             const context = renderer.getContext();
 
-            const stave = new Stave(10, 40, width - 20);
-            stave.addClef("treble").addTimeSignature("4/4");
+            const stave = new Stave(10, 60, width - 20); // Desci um pouco o pentagrama (y=60)
+            stave.addClef("treble");//.addTimeSignature("4/4");
             stave.setContext(context).draw();
 
             const tickables = data.flatMap(item => {
@@ -82,11 +74,18 @@
                     note.addModifier(new ChordSymbol().setFont('Arial', 12, 'bold').addText(item.chord));
                 }
 
+                if (item.lyric) {
+                    const lyric = new Annotation(item.lyric)
+                        .setFont('Serif', 12, 'italic')
+                        .setVerticalJustification(Annotation.VerticalJustify.BOTTOM); // Posiciona embaixo
+
+                    note.addModifier(lyric);
+                }
+
                 return item.bar ? [note, new BarNote()] : [note];
             });
 
-            // IMPORTANTE: A Voice deve contar apenas o tempo das NOTAS. 
-            // O BarNote tem duração zero, então ele não altera a contagem de beats.
+            // A voz conta apenas as notas (ignore BarNotes para o tempo)
             const voice = new Voice({ num_beats: data.length, beat_value: 4 });
             voice.addTickables(tickables);
 
@@ -95,11 +94,9 @@
             voice.draw(context, stave);
         }
 
-        // Função para ler o arquivo
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
@@ -112,19 +109,17 @@
             reader.readAsText(file);
         });
 
-        // Renderização inicial de exemplo
+        // Exemplo atualizado com letras (lyric)
         const exampleData = [
-            { "chord": "D", "notes": ["d/4"], "lyric": "Sal" },
-            { "notes": ["d/4"] },
-            { "notes": ["e/4"] },
-            { "chord": "Bm", "notes": ["b/3", "d/4", "f#/4"] },
-            { "chord": "G", "notes": ["g/3", "b/3", "d/4"], "bar": true },
-            { "chord": "A7", "notes": ["a/3", "c#/4", "e/4", "g/4"] }
+            { "chord": "D", "notes": ["d/4"], "lyric": "Bem" },
+            { "notes": ["d/4"], "lyric": "vin-" },
+            { "notes": ["e/4"], "lyric": "dos" },
+            { "chord": "Bm", "notes": ["b/3", "d/4", "f#/4"], "bar": true },
+            { "chord": "G", "notes": ["g/3"] },
+            { "chord": "A7", "notes": ["a/3"] }
         ];
 
-        // Aguarda carregar a biblioteca e desenha o exemplo
         window.onload = () => drawMusic(exampleData);
-
     </script>
 </body>
 </html>
