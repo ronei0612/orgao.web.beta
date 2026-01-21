@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Editor de Partitura Mobile</title>
-    <!-- Usando a versão UMD para compatibilidade direta no navegador -->
+    <title>Editor de Partitura Preciso</title>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <style>
         body {
@@ -32,13 +31,12 @@
             margin-top: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            cursor: crosshair;
         }
 
-        .instructions {
-            font-size: 12px;
-            color: #ccc;
-            margin-top: 5px;
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -46,36 +44,31 @@
 
     <div id="controls">
         <strong>Editor VexFlow Mobile</strong><br>
-        <span class="instructions">Toque para adicionar | Arraste a nota para mudar o tom</span>
-        <br>
-        <!-- Adicionado o botão de apagar última nota abaixo -->
-        <button onclick="deleteLastNote()" style="margin-top:10px; padding: 8px 15px;">Apagar Última</button>
-        <button onclick="clearScore()" style="margin-top:10px; padding: 8px 15px;">Limpar Tudo</button>
+        <button onclick="deleteLastNote()">Apagar Última</button>
+        <button onclick="clearScore()">Limpar Tudo</button>
     </div>
 
     <div id="score-container"></div>
 
     <script>
-        const { Renderer, Stave, StaveNote, Voice, Formatter, Beam } = Vex.Flow;
+        const { Renderer, Stave, StaveNote, Voice, Formatter } = Vex.Flow;
 
-        // Configurações Básicas
         const container = document.getElementById('score-container');
         const width = window.innerWidth * 0.95;
-        const height = 250;
+        const height = 200;
 
-        // Estado da Partitura
         let notesData = [
             { key: "c/4", duration: "q" },
             { key: "e/4", duration: "q" },
             { key: "g/4", duration: "q" }
         ];
 
+        let noteXPositions = []; // Guardará a posição X exata de cada nota desenhada
         let isDragging = false;
         let selectedNoteIndex = -1;
-        let startY = 0;
 
-        // Mapeamento de Posição Y para Notas (Escala de C maior simplificada)
-        const pitchMap = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5"];
+        // Notas mapeadas por índice (0 é B/4 - a linha central da clave de sol)
+        const basePitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5"];
 
         function draw() {
             container.innerHTML = "";
@@ -83,13 +76,14 @@
             renderer.resize(width, height);
             const context = renderer.getContext();
 
+            // A pauta começa em y=40. O VexFlow tem 5 linhas com 10px de espaço.
+            // Linhas: 40, 50, 60, 70, 80. A linha central (Si4) está em 60.
             const stave = new Stave(10, 40, width - 20);
             stave.addClef("treble").addTimeSignature("4/4");
             stave.setContext(context).draw();
 
             const vexNotes = notesData.map((data, index) => {
                 const note = new StaveNote({ keys: [data.key], duration: data.duration });
-                // Destacar a nota que está sendo arrastada
                 if (index === selectedNoteIndex) {
                     note.setStyle({ fillStyle: "red", strokeStyle: "red" });
                 }
@@ -100,30 +94,25 @@
                 const voice = new Voice({ num_beats: vexNotes.length, beat_value: 4 });
                 voice.setStrict(false);
                 voice.addTickables(vexNotes);
+
                 new Formatter().joinVoices([voice]).format([voice], width - 100);
                 voice.draw(context, stave);
+
+                // IMPORTANTE: Captura a posição X real de cada nota após o Formatter posicioná-las
+                noteXPositions = vexNotes.map(n => n.getAbsoluteX());
             }
         }
 
-        // Lógica de Interação (Mouse e Touch)
-        function getNoteIndexAtX(x) {
-            // Divide o espaço do stave proporcionalmente pelo número de notas
-            const staveWidth = width - 100;
-            const relativeX = x - 50;
-            const index = Math.floor((relativeX / staveWidth) * notesData.length);
-            return Math.max(0, Math.min(index, notesData.length - 1));
-        }
-
         function getYToPitch(y) {
-            // Cálculo aproximado: cada linha/espaço tem cerca de 5 a 10px
-            const centerY = 110; // Posição aproximada da linha do meio (B4)
-            const step = 8; // Distância em pixels entre semitons visuais
-            const diff = Math.round((centerY - y) / step);
+            // Ajuste fino: A linha central (B/4) no stave(10, 40) fica em Y = 90 no sistema de coordenadas do SVG
+            // (40 do offset + 50 que é o meio da pauta de 100px)
+            const centerY = 90;
+            const stepHeight = 5; // Cada nota/espaço na pauta VexFlow tem 5px de altura
 
-            // Referência: B/4 é o centro.
-            const basePitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5"];
-            const b4Index = 6;
+            const diff = Math.round((centerY - y) / stepHeight);
+            const b4Index = 6; // Índice de "b/4" no array basePitches
             let newIndex = b4Index + diff;
+
             newIndex = Math.max(0, Math.min(newIndex, basePitches.length - 1));
             return basePitches[newIndex];
         }
@@ -135,12 +124,22 @@
             const x = clientX - rect.left;
             const y = clientY - rect.top;
 
-            // Se clicar muito à direita, adiciona nova nota
-            if (x > (notesData.length * (width / 10)) + 50 || notesData.length === 0) {
+            // Busca se o clique foi perto de alguma nota existente (raio de 20px)
+            let foundIndex = -1;
+            for (let i = 0; i < noteXPositions.length; i++) {
+                if (Math.abs(x - noteXPositions[i]) < 20) {
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (foundIndex !== -1) {
+                // Seleciona nota existente
+                selectedNoteIndex = foundIndex;
+            } else if (x > (noteXPositions[noteXPositions.length - 1] || 50) + 10) {
+                // Adiciona nova nota se clicar à direita da última
                 notesData.push({ key: getYToPitch(y), duration: "q" });
                 selectedNoteIndex = notesData.length - 1;
-            } else {
-                selectedNoteIndex = getNoteIndexAtX(x);
             }
 
             isDragging = true;
@@ -168,7 +167,6 @@
             draw();
         }
 
-        // Função para apagar apenas a última nota
         function deleteLastNote() {
             notesData.pop();
             draw();
@@ -179,7 +177,6 @@
             draw();
         }
 
-        // Eventos
         container.addEventListener('mousedown', handleStart);
         window.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleEnd);
@@ -188,10 +185,7 @@
         window.addEventListener('touchmove', handleMove, { passive: false });
         window.addEventListener('touchend', handleEnd);
 
-        // Renderização Inicial
         draw();
-
     </script>
-
 </body>
 </html>
