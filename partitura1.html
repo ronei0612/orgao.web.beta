@@ -26,7 +26,6 @@
             font-size: 14px;
         }
 
-        /* Container principal: Partitura + Barra Lateral */
         .editor-container {
             display: flex;
             align-items: flex-start;
@@ -41,28 +40,26 @@
             cursor: pointer;
         }
 
-        /* Barra de ferramentas lateral */
         .side-toolbar {
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-left: 10px;
-            margin-top: 30px; /* Alinhado mais ou menos com a pauta */
+            margin-top: 30px;
         }
 
-        /* Botões Quadrados/Retangulares */
         .tool-btn {
             width: 50px;
             height: 50px;
             background: #ffffff;
             border: 2px solid #333;
-            border-radius: 4px; /* Quadrado com leve arredondamento */
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             padding: 0;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
 
             .tool-btn:active {
@@ -80,7 +77,6 @@
             color: #c62828;
         }
 
-            /* Ajuste do tamanho do SVG dentro do botão */
             .btn-delete svg {
                 width: 30px;
                 height: 30px;
@@ -90,19 +86,15 @@
 <body>
 
     <div id="header">
-        Editor Musical: Arraste as notas para editar
+        Toque em uma nota para selecionar. Arraste para mudar o tom.
     </div>
 
     <div class="editor-container">
-        <!-- Partitura -->
         <div id="score-container"></div>
 
-        <!-- Barra Lateral de Botões -->
         <div class="side-toolbar">
-            <!-- Botão Adicionar -->
             <button class="tool-btn btn-add" onclick="addNewNote()" title="Adicionar Nota">+♪</button>
 
-            <!-- Botão Apagar Última (SVG) -->
             <button class="tool-btn btn-delete" onclick="deleteLastNote()" title="Apagar Última">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-backspace" viewBox="0 0 16 16">
                     <path d="M5.83 5.146a.5.5 0 0 0 0 .708L7.975 8l-2.147 2.146a.5.5 0 0 0 .707.708l2.147-2.147 2.146 2.147a.5.5 0 0 0 .707-.708L9.39 8l2.146-2.146a.5.5 0 0 0-.707-.708L8.683 7.293 6.536 5.146a.5.5 0 0 0-.707 0z" />
@@ -122,7 +114,8 @@
         let notesData = [{ key: "b/4", duration: "q" }];
         let noteXPositions = [];
         let isDragging = false;
-        let selectedNoteIndex = -1;
+        let selectedNoteIndex = -1; // Índice durante o arrasto
+        let persistentSelectedIndex = 0; // Índice da nota selecionada (azul)
 
         const basePitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5"];
 
@@ -138,9 +131,16 @@
 
             const vexNotes = notesData.map((data, index) => {
                 const note = new StaveNote({ keys: [data.key], duration: data.duration });
-                if (index === selectedNoteIndex) {
+
+                // Prioridade de cores:
+                // 1. Vermelho (arrastando agora)
+                // 2. Azul (selecionada persistente)
+                if (index === selectedNoteIndex && isDragging) {
+                    note.setStyle({ fillStyle: "red", strokeStyle: "red" });
+                } else if (index === persistentSelectedIndex) {
                     note.setStyle({ fillStyle: "red", strokeStyle: "red" });
                 }
+
                 return note;
             });
 
@@ -166,12 +166,17 @@
 
         function addNewNote() {
             notesData.push({ key: "b/4", duration: "q" });
+            persistentSelectedIndex = notesData.length - 1; // Seleciona a nova nota automaticamente
             draw();
         }
 
         function deleteLastNote() {
             if (notesData.length > 0) {
                 notesData.pop();
+                // Se a nota apagada era a selecionada, limpa a seleção
+                if (persistentSelectedIndex >= notesData.length) {
+                    persistentSelectedIndex = notesData.length - 1;
+                }
                 draw();
             }
         }
@@ -189,11 +194,15 @@
                 }
             }
 
+            // Atualiza a seleção persistente
+            persistentSelectedIndex = foundIndex;
+
             if (foundIndex !== -1) {
                 selectedNoteIndex = foundIndex;
                 isDragging = true;
-                draw();
             }
+
+            draw();
         }
 
         function handleMove(e) {
