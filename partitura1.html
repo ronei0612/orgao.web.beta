@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Editor de Partitura Preciso</title>
+    <title>Editor de Partitura Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
     <style>
         body {
@@ -14,60 +14,116 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f0f0f0;
+            background-color: #f4f4f4;
         }
 
-        #controls {
-            padding: 15px;
+        #header {
+            padding: 10px;
             background: #333;
             color: white;
             width: 100%;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 14px;
+        }
+
+        /* Container principal: Partitura + Barra Lateral */
+        .editor-container {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
 
         #score-container {
-            background: white;
-            margin-top: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        button {
-            margin: 5px;
-            padding: 10px 15px;
             cursor: pointer;
         }
+
+        /* Barra de ferramentas lateral */
+        .side-toolbar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-left: 10px;
+            margin-top: 30px; /* Alinhado mais ou menos com a pauta */
+        }
+
+        /* Botões Quadrados/Retangulares */
+        .tool-btn {
+            width: 50px;
+            height: 50px;
+            background: #ffffff;
+            border: 2px solid #333;
+            border-radius: 4px; /* Quadrado com leve arredondamento */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            transition: background 0.2s;
+        }
+
+            .tool-btn:active {
+                background: #e0e0e0;
+                transform: scale(0.95);
+            }
+
+        .btn-add {
+            color: #2e7d32;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .btn-delete {
+            color: #c62828;
+        }
+
+            /* Ajuste do tamanho do SVG dentro do botão */
+            .btn-delete svg {
+                width: 30px;
+                height: 30px;
+            }
     </style>
 </head>
 <body>
 
-    <div id="controls">
-        <strong>Editor VexFlow Mobile</strong><br>
-        <button onclick="deleteLastNote()">Apagar Última</button>
-        <button onclick="clearScore()">Limpar Tudo</button>
+    <div id="header">
+        Editor Musical: Arraste as notas para editar
     </div>
 
-    <div id="score-container"></div>
+    <div class="editor-container">
+        <!-- Partitura -->
+        <div id="score-container"></div>
+
+        <!-- Barra Lateral de Botões -->
+        <div class="side-toolbar">
+            <!-- Botão Adicionar -->
+            <button class="tool-btn btn-add" onclick="addNewNote()" title="Adicionar Nota">+♪</button>
+
+            <!-- Botão Apagar Última (SVG) -->
+            <button class="tool-btn btn-delete" onclick="deleteLastNote()" title="Apagar Última">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-backspace" viewBox="0 0 16 16">
+                    <path d="M5.83 5.146a.5.5 0 0 0 0 .708L7.975 8l-2.147 2.146a.5.5 0 0 0 .707.708l2.147-2.147 2.146 2.147a.5.5 0 0 0 .707-.708L9.39 8l2.146-2.146a.5.5 0 0 0-.707-.708L8.683 7.293 6.536 5.146a.5.5 0 0 0-.707 0z" />
+                    <path d="M13.683 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7.08a2 2 0 0 1-1.519-.698L.241 8.65a1 1 0 0 1 0-1.302L5.084 1.7A2 2 0 0 1 6.603 1zm-7.08 1a1 1 0 0 0-.76.35L1 8l4.844 5.65a1 1 0 0 0 .759.35h7.08a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" />
+                </svg>
+            </button>
+        </div>
+    </div>
 
     <script>
         const { Renderer, Stave, StaveNote, Voice, Formatter } = Vex.Flow;
 
         const container = document.getElementById('score-container');
-        const width = window.innerWidth * 0.95;
+        const width = window.innerWidth * 0.75;
         const height = 200;
 
-        let notesData = [
-            { key: "c/4", duration: "q" },
-            { key: "e/4", duration: "q" },
-            { key: "g/4", duration: "q" }
-        ];
-
-        let noteXPositions = []; // Guardará a posição X exata de cada nota desenhada
+        let notesData = [{ key: "b/4", duration: "q" }];
+        let noteXPositions = [];
         let isDragging = false;
         let selectedNoteIndex = -1;
 
-        // Notas mapeadas por índice (0 é B/4 - a linha central da clave de sol)
         const basePitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5"];
 
         function draw() {
@@ -76,8 +132,6 @@
             renderer.resize(width, height);
             const context = renderer.getContext();
 
-            // A pauta começa em y=40. O VexFlow tem 5 linhas com 10px de espaço.
-            // Linhas: 40, 50, 60, 70, 80. A linha central (Si4) está em 60.
             const stave = new Stave(10, 40, width - 20);
             stave.addClef("treble").addTimeSignature("4/4");
             stave.setContext(context).draw();
@@ -94,62 +148,57 @@
                 const voice = new Voice({ num_beats: vexNotes.length, beat_value: 4 });
                 voice.setStrict(false);
                 voice.addTickables(vexNotes);
-
-                new Formatter().joinVoices([voice]).format([voice], width - 100);
+                new Formatter().joinVoices([voice]).format([voice], width - 50);
                 voice.draw(context, stave);
-
-                // IMPORTANTE: Captura a posição X real de cada nota após o Formatter posicioná-las
                 noteXPositions = vexNotes.map(n => n.getAbsoluteX());
             }
         }
 
         function getYToPitch(y) {
-            // Ajuste fino: A linha central (B/4) no stave(10, 40) fica em Y = 90 no sistema de coordenadas do SVG
-            // (40 do offset + 50 que é o meio da pauta de 100px)
             const centerY = 90;
-            const stepHeight = 5; // Cada nota/espaço na pauta VexFlow tem 5px de altura
-
+            const stepHeight = 5;
             const diff = Math.round((centerY - y) / stepHeight);
-            const b4Index = 6; // Índice de "b/4" no array basePitches
+            const b4Index = 6;
             let newIndex = b4Index + diff;
-
             newIndex = Math.max(0, Math.min(newIndex, basePitches.length - 1));
             return basePitches[newIndex];
+        }
+
+        function addNewNote() {
+            notesData.push({ key: "b/4", duration: "q" });
+            draw();
+        }
+
+        function deleteLastNote() {
+            if (notesData.length > 0) {
+                notesData.pop();
+                draw();
+            }
         }
 
         function handleStart(e) {
             const rect = container.getBoundingClientRect();
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             const x = clientX - rect.left;
-            const y = clientY - rect.top;
 
-            // Busca se o clique foi perto de alguma nota existente (raio de 20px)
             let foundIndex = -1;
             for (let i = 0; i < noteXPositions.length; i++) {
-                if (Math.abs(x - noteXPositions[i]) < 20) {
+                if (Math.abs(x - noteXPositions[i]) < 25) {
                     foundIndex = i;
                     break;
                 }
             }
 
             if (foundIndex !== -1) {
-                // Seleciona nota existente
                 selectedNoteIndex = foundIndex;
-            } else if (x > (noteXPositions[noteXPositions.length - 1] || 50) + 10) {
-                // Adiciona nova nota se clicar à direita da última
-                notesData.push({ key: getYToPitch(y), duration: "q" });
-                selectedNoteIndex = notesData.length - 1;
+                isDragging = true;
+                draw();
             }
-
-            isDragging = true;
-            draw();
         }
 
         function handleMove(e) {
             if (!isDragging || selectedNoteIndex === -1) return;
             e.preventDefault();
-
             const rect = container.getBoundingClientRect();
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             const y = clientY - rect.top;
@@ -167,20 +216,9 @@
             draw();
         }
 
-        function deleteLastNote() {
-            notesData.pop();
-            draw();
-        }
-
-        function clearScore() {
-            notesData = [];
-            draw();
-        }
-
         container.addEventListener('mousedown', handleStart);
         window.addEventListener('mousemove', handleMove);
         window.addEventListener('mouseup', handleEnd);
-
         container.addEventListener('touchstart', handleStart, { passive: false });
         window.addEventListener('touchmove', handleMove, { passive: false });
         window.addEventListener('touchend', handleEnd);
