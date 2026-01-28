@@ -10,6 +10,7 @@ class CifraPlayer {
         this.tocarEpiano = false;
         this.parado = true;
         this.acordeTocando = '';
+        this.acordeFull = false;
         this.indiceAcorde = 0;
         this.tomAtual = 'C';
         this.tomOriginal = null;

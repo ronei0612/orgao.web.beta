@@ -781,17 +781,20 @@ class App {
         if (action === 'notes') {
             var icon = this.elements.notesButton.querySelector('i');
             if (!this.held && this.elements.musicNoteBeamedIcon.classList.contains('d-none')) {
+                this.cifraPlayer.acordeFull = false;
                 this.elements.musicNoteIcon.classList.add('d-none');
                 this.elements.musicNoteBeamedIcon.classList.remove('d-none');
                 this.elements.notesButton.classList.remove('notaSolo');
             }
             else if (this.elements.notesButton.classList.contains('pressed')) {
+                this.cifraPlayer.acordeFull = false;
                 this.elements.musicNoteIcon.classList.remove('d-none');
                 this.elements.musicNoteBeamedIcon.classList.add('d-none');
 
                 this.elements.notesButton.classList.remove('pressed');
                 this.elements.notesButton.classList.add('notaSolo');
             } else if (!this.elements.notesButton.classList.contains('notaSolo')) {
+                this.cifraPlayer.acordeFull = true;
                 this.elements.notesButton.classList.add('pressed');
             }
         } else {

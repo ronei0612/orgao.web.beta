@@ -113,6 +113,7 @@ class MelodyMachine {
         const loadPromises = [];
 
         for (const nota of notasUnicas) {
+            //const notaNormalized = nota.replace('1', '');
             const name = `${this.instrument}_${nota}`;
             const url = `${this.audioPath}/${name}.ogg`;
 
@@ -236,6 +237,8 @@ class MelodyMachine {
 
                     if (this.cifraPlayer.acordeTocando) {
                         let acordeSimplificado = this.cifraPlayer.acordeTocando;
+                        if (this.cifraPlayer.acordeFull)
+                            acordeSimplificado += '1';
                         const notas = this.getAcordeNotas(acordeSimplificado);
                         const nota = notas[foundTrack.noteIndex];
                         const bufferKey = `${foundTrack.name}_${nota}`;
