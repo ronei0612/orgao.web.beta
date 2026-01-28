@@ -28,7 +28,7 @@ class MelodyUI {
         if (tem_styles_melody)
             return JSON.parse(tem_styles_melody);
 
-        
+
 
         return this.melodyMachine.styles;
     }
