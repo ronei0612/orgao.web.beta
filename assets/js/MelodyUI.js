@@ -342,8 +342,6 @@ class MelodyUI {
     }
 
     stop() {
-        if (this.melodyMachine.isPlaying) {
-            this.melodyMachine.stop(true);
-        }
+        this.melodyMachine.stop(true);
     }
 }
