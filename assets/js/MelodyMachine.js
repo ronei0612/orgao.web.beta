@@ -5,7 +5,7 @@ class MelodyMachine {
         this.cifraPlayer = cifraPlayer;
         this.attackTime = 0.02;
         this.releaseTime = 0.1;
-        this.defaultVol = 0.8;
+        this.defaultVol = 0.7;
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         this.audioPath = this.baseUrl + '/assets/audio/studio/Orgao';
