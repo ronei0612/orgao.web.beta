@@ -156,8 +156,9 @@ class MelodyMachine {
         source.buffer = buffer;
         source.loop = false;
 
-        gainNode.gain.setValueAtTime(0.001, time);
-        gainNode.gain.exponentialRampToValueAtTime(volume, time + this.attackTime);
+        const atackSemTic = 0; // era 0.001
+        gainNode.gain.setValueAtTime(atackSemTic, time);
+        gainNode.gain.linearRampToValueAtTime(volume, time + this.attackTime);
 
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
