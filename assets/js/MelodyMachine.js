@@ -11,6 +11,7 @@ class MelodyMachine {
         this.audioPath = this.baseUrl + '/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [
+            { note: 4, name: this.instrument },
             { note: 3, name: this.instrument },
             { note: 2, name: this.instrument },
             { note: 1, name: this.instrument },
@@ -18,79 +19,79 @@ class MelodyMachine {
         ];
 
         this.acordes = {
-            'c': ['c_baixo', 'e_baixo', 'g_baixo', 'c'],
-            'c_': ['c__baixo', 'f_baixo', 'g__baixo', 'c_'],
-            'd': ['d_baixo', 'f__baixo', 'a_baixo', 'd'],
-            'd_': ['d__baixo', 'g_baixo', 'a__baixo', 'd_'],
-            'e': ['e_baixo', 'g__baixo', 'b_baixo', 'e'],
-            'f': ['c_baixo', 'f_baixo', 'a_baixo', 'c'],
-            'f_': ['c__baixo', 'f__baixo', 'a__baixo', 'c_'],
-            'g': ['d_baixo', 'g_baixo', 'b_baixo', 'd'],
-            'g_': ['d__baixo', 'g__baixo', 'c', 'd_'],
-            'a': ['c__baixo', 'e_baixo', 'a_baixo', 'c_'],
-            'a_': ['d_baixo', 'f_baixo', 'a__baixo', 'd'],
-            'b': ['d__baixo', 'f__baixo', 'b_baixo', 'd_'],
-            'cm': ['c_baixo', 'd__baixo', 'g_baixo', 'c'],
-            'c_m': ['c__baixo', 'e_baixo', 'g__baixo', 'c_'],
-            'dm': ['d_baixo', 'f_baixo', 'a_baixo', 'd'],
-            'd_m': ['d__baixo', 'f__baixo', 'a__baixo', 'd_'],
-            'em': ['e_baixo', 'g_baixo', 'b_baixo', 'e'],
-            'fm': ['c_baixo', 'f_baixo', 'g__baixo', 'c'],
-            'f_m': ['c__baixo', 'f__baixo', 'a_baixo', 'c_'],
-            'gm': ['d_baixo', 'g_baixo', 'a__baixo', 'd'],
-            'g_m': ['d__baixo', 'g__baixo', 'b_baixo', 'd_'],
-            'am': ['c_baixo', 'e_baixo', 'a_baixo', 'c'],
-            'a_m': ['c__baixo', 'f_baixo', 'a__baixo', 'c_'],
-            'bm': ['d_baixo', 'f__baixo', 'b_baixo', 'd'],
-            'cdim': ['c_baixo', 'd__baixo', 'f__baixo', 'c'],
-            'c_dim': ['c__baixo', 'e_baixo', 'g_baixo', 'c_'],
-            'ddim': ['d_baixo', 'f_baixo', 'g__baixo', 'd'],
-            'd_dim': ['d__baixo', 'f__baixo', 'a_baixo', 'd_'],
-            'edim': ['e_baixo', 'g_baixo', 'a__baixo', 'e'],
-            'fdim': ['f_baixo', 'g__baixo', 'b_baixo', 'f'],
-            'f_dim': ['c_baixo', 'f__baixo', 'a_baixo', 'c'],
-            'gdim': ['c__baixo', 'g_baixo', 'a__baixo', 'c_'],
-            'g_dim': ['d_baixo', 'g__baixo', 'b_baixo', 'd'],
-            'adim': ['c_baixo', 'd__baixo', 'a_baixo', 'c'],
-            'a_dim': ['c__baixo', 'e_baixo', 'a__baixo', 'c_'],
-            'bdim': ['d_baixo', 'f_baixo', 'b_baixo', 'd'],
+            'c': ['c_grave', 'c_baixo', 'e_baixo', 'g_baixo', 'c'],
+            'c_': ['c__grave', 'c__baixo', 'f_baixo', 'g__baixo', 'c_'],
+            'd': ['d_grave', 'd_baixo', 'f__baixo', 'a_baixo', 'd'],
+            'd_': ['d__grave', 'd__baixo', 'g_baixo', 'a__baixo', 'd_'],
+            'e': ['e_grave', 'e_baixo', 'g__baixo', 'b_baixo', 'e'],
+            'f': ['f_grave', 'c_baixo', 'f_baixo', 'a_baixo', 'c'],
+            'f_': ['f__grave', 'c__baixo', 'f__baixo', 'a__baixo', 'c_'],
+            'g': ['g_grave', 'd_baixo', 'g_baixo', 'b_baixo', 'd'],
+            'g_': ['g__grave', 'd__baixo', 'g__baixo', 'c', 'd_'],
+            'a': ['a_grave', 'c__baixo', 'e_baixo', 'a_baixo', 'c_'],
+            'a_': ['a__grave', 'd_baixo', 'f_baixo', 'a__baixo', 'd'],
+            'b': ['b_grave', 'd__baixo', 'f__baixo', 'b_baixo', 'd_'],
+            'cm': ['c_grave', 'c_baixo', 'd__baixo', 'g_baixo', 'c'],
+            'c_m': ['c__grave', 'c__baixo', 'e_baixo', 'g__baixo', 'c_'],
+            'dm': ['d_grave', 'd_baixo', 'f_baixo', 'a_baixo', 'd'],
+            'd_m': ['d__grave', 'd__baixo', 'f__baixo', 'a__baixo', 'd_'],
+            'em': ['e_grave', 'e_baixo', 'g_baixo', 'b_baixo', 'e'],
+            'fm': ['f_grave', 'c_baixo', 'f_baixo', 'g__baixo', 'c'],
+            'f_m': ['f__grave', 'c__baixo', 'f__baixo', 'a_baixo', 'c_'],
+            'gm': ['g_grave', 'd_baixo', 'g_baixo', 'a__baixo', 'd'],
+            'g_m': ['g__grave', 'd__baixo', 'g__baixo', 'b_baixo', 'd_'],
+            'am': ['a_grave', 'c_baixo', 'e_baixo', 'a_baixo', 'c'],
+            'a_m': ['a__grave', 'c__baixo', 'f_baixo', 'a__baixo', 'c_'],
+            'bm': ['b_grave', 'd_baixo', 'f__baixo', 'b_baixo', 'd'],
+            'cdim': ['c_grave', 'c_baixo', 'd__baixo', 'f__baixo', 'c'],
+            'c_dim': ['c__grave', 'c__baixo', 'e_baixo', 'g_baixo', 'c_'],
+            'ddim': ['d_grave', 'd_baixo', 'f_baixo', 'g__baixo', 'd'],
+            'd_dim': ['d__grave', 'd__baixo', 'f__baixo', 'a_baixo', 'd_'],
+            'edim': ['e_grave', 'e_baixo', 'g_baixo', 'a__baixo', 'e'],
+            'fdim': ['f_grave', 'f_baixo', 'g__baixo', 'b_baixo', 'f'],
+            'f_dim': ['f__grave', 'c_baixo', 'f__baixo', 'a_baixo', 'c'],
+            'gdim': ['g_grave', 'c__baixo', 'g_baixo', 'a__baixo', 'c_'],
+            'g_dim': ['g__grave', 'd_baixo', 'g__baixo', 'b_baixo', 'd'],
+            'adim': ['a_grave', 'c_baixo', 'd__baixo', 'a_baixo', 'c'],
+            'a_dim': ['a__grave', 'c__baixo', 'e_baixo', 'a__baixo', 'c_'],
+            'bdim': ['b_grave', 'd_baixo', 'f_baixo', 'b_baixo', 'd'],
 
-            'c1': ['c_baixo', 'c', 'e', 'g'],
-            'cm1': ['c_baixo', 'c', 'd_', 'g'],
-            'cdim1': ['c_baixo', 'c', 'd_', 'f_'],
-            'c_1': ['c__baixo', 'c_', 'f', 'g_'],
-            'c_m1': ['c__baixo', 'c_', 'e', 'g_'],
-            'c_dim1': ['c__baixo', 'c_', 'e', 'g'],
-            'd1': ['d_baixo', 'd', 'f_', 'a'],
-            'dm1': ['d_baixo', 'd', 'f', 'a'],
-            'ddim1': ['d_baixo', 'd', 'f', 'g_'],
-            'd_1': ['d__baixo', 'd_', 'g', 'a_'],
-            'd_m1': ['d__baixo', 'd_', 'f_', 'a_'],
-            'd_dim1': ['d__baixo', 'd_', 'f_', 'a'],
-            'e1': ['e_baixo', 'e', 'g_', 'b'],
-            'em1': ['e_baixo', 'e', 'g', 'b'],
-            'edim1': ['e_baixo', 'e', 'g', 'a_'],
-            'f1': ['f_baixo', 'c', 'f', 'a'],
-            'fm1': ['f_baixo', 'c', 'f', 'g_'],
-            'fdim1': ['f_baixo', 'f', 'g_', 'b'],
-            'f_1': ['f__baixo', 'c_', 'f_', 'a_'],
-            'f_m1': ['f__baixo', 'c_', 'f_', 'a'],
-            'f_dim1': ['f__baixo', 'c', 'f_', 'a'],
-            'g1': ['g_baixo', 'd', 'g', 'b'],
-            'gm1': ['g_baixo', 'd', 'g', 'a_'],
-            'gdim1': ['g_baixo', 'c_', 'g', 'a_'],
-            'g_1': ['g__baixo', 'c', 'd_', 'g_'],
-            'g_m1': ['g__baixo', 'd_', 'g_', 'b'],
-            'g_dim1': ['g__baixo', 'd', 'g_', 'b'],
-            'a1': ['a_baixo', 'c_', 'e', 'a'],
-            'am1': ['a_baixo', 'c', 'e', 'a'],
-            'adim1': ['a_baixo', 'c', 'd_', 'a'],
-            'a_1': ['a__baixo', 'd', 'f', 'a_'],
-            'a_m1': ['a__baixo', 'c_', 'f', 'a_'],
-            'a_dim1': ['a__baixo', 'c_', 'e', 'a_'],
-            'b1': ['b_baixo', 'd_', 'f_', 'b'],
-            'bm1': ['b_baixo', 'd', 'f_', 'b'],
-            'bdim1': ['b_baixo', 'd', 'f', 'b']
+            'c1': ['c_grave', 'c_baixo', 'c', 'e', 'g'],
+            'cm1': ['c_grave', 'c_baixo', 'c', 'd_', 'g'],
+            'cdim1': ['c_grave', 'c_baixo', 'c', 'd_', 'f_'],
+            'c_1': ['c__grave', 'c__baixo', 'c_', 'f', 'g_'],
+            'c_m1': ['c__grave', 'c__baixo', 'c_', 'e', 'g_'],
+            'c_dim1': ['c__grave', 'c__baixo', 'c_', 'e', 'g'],
+            'd1': ['d_grave', 'd_baixo', 'd', 'f_', 'a'],
+            'dm1': ['d_grave', 'd_baixo', 'd', 'f', 'a'],
+            'ddim1': ['d_grave', 'd_baixo', 'd', 'f', 'g_'],
+            'd_1': ['d__grave', 'd__baixo', 'd_', 'g', 'a_'],
+            'd_m1': ['d__grave', 'd__baixo', 'd_', 'f_', 'a_'],
+            'd_dim1': ['d__grave', 'd__baixo', 'd_', 'f_', 'a'],
+            'e1': ['e_grave', 'e_baixo', 'e', 'g_', 'b'],
+            'em1': ['e_grave', 'e_baixo', 'e', 'g', 'b'],
+            'edim1': ['e_grave', 'e_baixo', 'e', 'g', 'a_'],
+            'f1': ['f_grave', 'f_baixo', 'c', 'f', 'a'],
+            'fm1': ['f_grave', 'f_baixo', 'c', 'f', 'g_'],
+            'fdim1': ['f_grave', 'f_baixo', 'f', 'g_', 'b'],
+            'f_1': ['f__grave', 'f__baixo', 'c_', 'f_', 'a_'],
+            'f_m1': ['f__grave', 'f__baixo', 'c_', 'f_', 'a'],
+            'f_dim1': ['f__grave', 'f__baixo', 'c', 'f_', 'a'],
+            'g1': ['g_grave', 'g_baixo', 'd', 'g', 'b'],
+            'gm1': ['g_grave', 'g_baixo', 'd', 'g', 'a_'],
+            'gdim1': ['g_grave', 'g_baixo', 'c_', 'g', 'a_'],
+            'g_1': ['g__grave', 'g__baixo', 'c', 'd_', 'g_'],
+            'g_m1': ['g__grave', 'g__baixo', 'd_', 'g_', 'b'],
+            'g_dim1': ['g__grave', 'g__baixo', 'd', 'g_', 'b'],
+            'a1': ['a_grave', 'a_baixo', 'c_', 'e', 'a'],
+            'am1': ['a_grave', 'a_baixo', 'c', 'e', 'a'],
+            'adim1': ['a_grave', 'a_baixo', 'c', 'd_', 'a'],
+            'a_1': ['a__grave', 'a__baixo', 'd', 'f', 'a_'],
+            'a_m1': ['a__grave', 'a__baixo', 'c_', 'f', 'a_'],
+            'a_dim1': ['a__grave', 'a__baixo', 'c_', 'e', 'a_'],
+            'b1': ['b_grave', 'b_baixo', 'd_', 'f_', 'b'],
+            'bm1': ['b_grave', 'b_baixo', 'd', 'f_', 'b'],
+            'bdim1': ['b_grave', 'b_baixo', 'd', 'f', 'b']
         };
 
         this.isPlaying = false;
@@ -110,10 +111,18 @@ class MelodyMachine {
 
     async loadSounds() {
         const notasUnicas = new Set(Object.values(this.acordes).flat());
+        //const notasUnicas = new Set();
+
+        //Object.values(this.acordes).flat().forEach(nota => {
+        //    notasUnicas.add(nota);
+        //    if (nota.endsWith('_baixo')) {
+        //        notasUnicas.add(nota.replace('_baixo', '_grave'));
+        //    }
+        //});
+
         const loadPromises = [];
 
         for (const nota of notasUnicas) {
-            //const notaNormalized = nota.replace('1', '');
             const name = `${this.instrument}_${nota}`;
             const url = `${this.audioPath}/${name}.ogg`;
 
@@ -169,7 +178,6 @@ class MelodyMachine {
         this.activeSources.push(noteEntry);
 
         source.onended = () => {
-            // Remove da lista de ativos quando o som acabar naturalmente
             this.activeSources = this.activeSources.filter(item => item !== noteEntry);
             source.disconnect();
             gainNode.disconnect();
@@ -182,10 +190,16 @@ class MelodyMachine {
         this.activeSources.forEach(item => {
             try {
                 const { source, gainNode } = item;
+
+                // Cancela agendamentos futuros para não haver conflito
                 gainNode.gain.cancelScheduledValues(time);
-                gainNode.gain.setValueAtTime(gainNode.gain.value, time);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, time + this.releaseTime);
-                source.stop(time + this.releaseTime + 0.01);
+
+                // setTargetAtTime é muito mais suave para evitar estalos
+                // 0.02 é a constante de tempo (quanto menor, mais rápido o fade-out)
+                gainNode.gain.setTargetAtTime(0, time, 0.02);
+
+                // Para o som um pouco depois do fade-out para garantir silêncio
+                source.stop(time + 0.1);
             } catch (e) { }
         });
         this.activeSources = [];

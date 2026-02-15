@@ -1,18 +1,22 @@
 {
-  "styles": [ "4/4", "2/4", "3/4", "3/8", "6/8", "2/8", "4/8" ],
+  "styles": [ "4/4", "2/4", "3/4", "3/8", "6/8", "2/8", "4/8", "5/4", "1/4" ],
   "data": {
     "4/4": {
       "numSteps": 8,
-      "orgao_3": {
+      "orgao_4": {
         "steps": [ 0, 0, 0, 0, 1, 0, 0, 0 ],
         "selected": true
       },
-      "orgao_2": {
+      "orgao_3": {
         "steps": [ 0, 0, 1, 0, 0, 0, 2, 0 ],
         "selected": true
       },
-      "orgao_1": {
+      "orgao_2": {
         "steps": [ 0, 1, 0, 1, 0, 2, 0, 2 ],
+        "selected": true
+      },
+      "orgao_1": {
+        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
         "selected": true
       },
       "orgao_0": {
@@ -22,16 +26,20 @@
     },
     "2/4": {
       "numSteps": 4,
-      "orgao_3": {
+      "orgao_4": {
         "steps": [ 0, 0, 0, 0 ],
         "selected": false
       },
-      "orgao_2": {
+      "orgao_3": {
         "steps": [ 0, 0, 1, 0 ],
         "selected": true
       },
-      "orgao_1": {
+      "orgao_2": {
         "steps": [ 0, 1, 0, 2 ],
+        "selected": true
+      },
+      "orgao_1": {
+        "steps": [ 1, 0, 0, 0 ],
         "selected": true
       },
       "orgao_0": {
@@ -41,16 +49,20 @@
     },
     "3/4": {
       "numSteps": 6,
-      "orgao_3": {
+      "orgao_4": {
         "steps": [ 0, 0, 0, 0, 0, 0 ],
         "selected": false
       },
-      "orgao_2": {
+      "orgao_3": {
         "steps": [ 0, 0, 0, 0, 1, 0 ],
         "selected": true
       },
-      "orgao_1": {
+      "orgao_2": {
         "steps": [ 0, 0, 1, 0, 0, 0 ],
+        "selected": true
+      },
+      "orgao_1": {
+        "steps": [ 1, 0, 0, 0, 0, 0 ],
         "selected": true
       },
       "orgao_0": {
@@ -60,16 +72,20 @@
     },
     "3/8": {
       "numSteps": 6,
-      "orgao_3": {
+      "orgao_4": {
         "steps": [ 0, 0, 0, 0, 0, 0 ],
         "selected": false
       },
-      "orgao_2": {
+      "orgao_3": {
         "steps": [ 0, 0, 1, 0, 2, 0 ],
         "selected": true
       },
-      "orgao_1": {
+      "orgao_2": {
         "steps": [ 0, 1, 0, 1, 0, 2 ],
+        "selected": true
+      },
+      "orgao_1": {
+        "steps": [ 1, 0, 0, 0, 0, 0 ],
         "selected": true
       },
       "orgao_0": {
@@ -79,16 +95,20 @@
     },
     "6/8": {
       "numSteps": 6,
-      "orgao_3": {
+      "orgao_4": {
         "steps": [ 0, 0, 0, 1, 0, 0 ],
         "selected": true
       },
-      "orgao_2": {
+      "orgao_3": {
         "steps": [ 0, 0, 1, 0, 2, 0 ],
         "selected": true
       },
-      "orgao_1": {
+      "orgao_2": {
         "steps": [ 0, 1, 0, 0, 0, 2 ],
+        "selected": true
+      },
+      "orgao_1": {
+        "steps": [ 1, 0, 0, 0, 0, 0 ],
         "selected": true
       },
       "orgao_0": {
@@ -98,36 +118,90 @@
     },
     "2/8": {
       "numSteps": 8,
-      "orgao_3": {
+      "orgao_4": {
         "steps": [ 0, 0, 0, 1, 0, 0, 0, 2 ],
         "selected": true
       },
-      "orgao_2": {
+      "orgao_3": {
         "steps": [ 0, 0, 1, 0, 0, 0, 2, 0 ],
         "selected": true
       },
-      "orgao_1": {
+      "orgao_2": {
         "steps": [ 0, 1, 0, 0, 0, 2, 0, 0 ],
         "selected": true
       },
-      "orgao_0": {
+      "orgao_1": {
         "steps": [ 1, 0, 0, 0, 2, 0, 0, 0 ],
+        "selected": true
+      },
+      "orgao_0": {
+        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
         "selected": true
       }
     },
     "4/8": {
       "numSteps": 8,
+      "orgao_4": {
+        "steps": [ 0, 0, 1, 0, 1, 0, 2, 0 ],
+        "selected": true
+      },
       "orgao_3": {
         "steps": [ 0, 0, 0, 1, 0, 2, 0, 2 ],
         "selected": true
       },
       "orgao_2": {
-        "steps": [ 0, 0, 1, 0, 1, 0, 2, 0 ],
+        "steps": [ 0, 1, 0, 0, 0, 0, 0, 0 ],
+        "selected": true
+      },
+      "orgao_1": {
+        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
+        "selected": true
+      },
+      "orgao_0": {
+        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
+        "selected": true
+      }
+    },
+    "5/4": {
+      "numSteps": 8,
+      "orgao_4": {
+        "steps": [ 0, 0, 0, 0, 1, 0, 0, 0 ],
+        "selected": true
+      },
+      "orgao_3": {
+        "steps": [ 0, 0, 0, 1, 0, 0, 0, 0 ],
+        "selected": true
+      },
+      "orgao_2": {
+        "steps": [ 0, 0, 1, 0, 0, 0, 0, 0 ],
         "selected": true
       },
       "orgao_1": {
         "steps": [ 0, 1, 0, 0, 0, 0, 0, 0 ],
         "selected": true
+      },
+      "orgao_0": {
+        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
+        "selected": true
+      }
+    },
+    "1/4": {
+      "numSteps": 8,
+      "orgao_4": {
+        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        "selected": false
+      },
+      "orgao_3": {
+        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        "selected": false
+      },
+      "orgao_2": {
+        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        "selected": false
+      },
+      "orgao_1": {
+        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        "selected": false
       },
       "orgao_0": {
         "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
