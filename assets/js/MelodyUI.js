@@ -335,8 +335,8 @@ class MelodyUI {
     }
 
     play() {
+        this.melodyMachine.stop(true);
         if (!this.melodyMachine.isPlaying) {
-            this.melodyMachine.stop(true);
             this.melodyMachine.start();
         }
     }
