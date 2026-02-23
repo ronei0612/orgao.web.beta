@@ -159,7 +159,6 @@ class App {
     }
 
     setupSelect2() {
-        // 1. Salva a referência 'this' da instância da App porque senão o valor de this dentro dessa função é definido pelo jQuery e geralmente aponta para o elemento DOM 
         const appInstance = this;
 
         var $select = $('#savesSelect').select2({
@@ -167,31 +166,33 @@ class App {
             placeholder: "Escolha a Música...",
             width: '100%',
             minimumResultsForSearch: 0,
+            escapeMarkup: function (markup) { return markup; },
             language: {
                 noResults: function () {
-                    return "";
+                    return `<li class="select2-results__option pesquisar-na-web" style="cursor:pointer">🔍 Pesquisar na Web</li>`;
                 }
             }
         });
 
-        $(document).on('keyup.appSelect2', '.select2-search__field', function (e) {
-            var searchTerm = $(this).val().trim();
-
-            $('.select2-results__options').find('.pesquisar-na-web').remove();
-
-            if (searchTerm) {
-                var $optionPesquisaWeb = $('<li class="select2-results__option pesquisar-na-web" role="treeitem" aria-selected="false"></li>');
-                $optionPesquisaWeb.html('🔍 Pesquisar na Web');
-
-                $('.select2-results__options').prepend($optionPesquisaWeb);
-
-                $optionPesquisaWeb.on('click', function () {
-                    appInstance.pesquisarWeb(searchTerm);
-                    $select.select2('close');
-                });
-            }
+        $(document).on('click', '.pesquisar-na-web', function () {
+            const searchTerm = $('.select2-search__field').val();
+            $('#savesSelect').select2('close');
+            appInstance.pesquisarWeb(searchTerm);
         });
 
+        $(document).on('keydown', '.select2-search__field', function (e) {
+            const enter = 13;
+            if (e.which === enter) {
+                const searchTerm = $(this).val();
+                const pesquisarWebVisible = $('.pesquisar-na-web').length > 0;
+
+                if (pesquisarWebVisible) {
+                    e.preventDefault();
+                    $('#savesSelect').select2('close');
+                    appInstance.pesquisarWeb(searchTerm);
+                }
+            }
+        });
 
         $('#savesSelect').on('select2:select', function (e) {
             var selectedValue = e.params.data.id;
