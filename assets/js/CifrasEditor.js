@@ -282,7 +282,7 @@ class CifrasEditor {
             <div class="card cifras-card shadow-sm mb-3" data-import-idx="${index}">
                 <div class="card-body">
                     <h5 class="card-title text-warning">${title} - ${artist}</h5>
-                    <p class="card-text text-muted" style="white-space: pre-wrap; max-height: 100px; overflow: hidden;">${item.cifra || 'Cifra Vazia'}</p>
+                    <p class="card-text text-muted" style="white-space: pre-wrap; max-height: 100px; overflow: hidden;">${item.chords || 'Cifra Vazia'}</p>
                     <div class="d-flex justify-content-end">
                         <button class="btn btn-sm btn-success mr-2" data-action="import-add" data-import-idx="${index}">Adicionar</button>
                         <button class="btn btn-sm btn-secondary" data-action="import-ignore" data-import-idx="${index}">Ignorar</button>
