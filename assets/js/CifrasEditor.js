@@ -324,9 +324,20 @@ class CifrasEditor {
     addCifraFromImport(importIndex, reRender = true) {
         const importedCifra = this.cifrasToImport[importIndex];
 
+        const padronizarItem = (conteudo) => {
+            return {
+                artista: conteudo.artista,
+                cifra: conteudo.chords,
+                id: conteudo.id,
+                titulo: conteudo.titulo,
+            };
+        };
+
+        const dadosPadronizados = padronizarItem(importedCifra);
+
         // 1. Gera um novo ID e adiciona ao array principal
         let maxId = this.cifras.length > 0 ? Math.max(...this.cifras.map(c => c.id || 0)) : 0;
-        const newCifra = { ...importedCifra, id: maxId + 1 };
+        const newCifra = { ...dadosPadronizados, id: maxId + 1 };
 
         this.cifras.push(newCifra);
 
