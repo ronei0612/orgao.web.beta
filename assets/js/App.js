@@ -906,11 +906,11 @@ class App {
 
                     const padronizarItem = (conteudo) => {
                         return {
-                            chords: conteudo,
-                            tom: 'C',
-                            instrument: 'orgao',
-                            style: '',
-                            bpm: 90
+                            chords: conteudo.chords ?? '',
+                            tom: conteudo.chords ?? 'C',
+                            instrument: conteudo.instrument ?? 'orgao',
+                            style: conteudo.style ?? '',
+                            bpm: conteudo.bpm ?? 90
                         };
                     };
 
@@ -918,7 +918,7 @@ class App {
                         importedData.forEach(item => {
                             if (item.titulo && item.chords) {
                                 const chave = item.artista ? `${item.titulo} - ${item.artista}` : item.titulo;
-                                const dadosPadronizados = padronizarItem(item.chords);
+                                const dadosPadronizados = padronizarItem(item);
 
                                 if (dadosPadronizados) {
                                     newSaves[chave] = dadosPadronizados;
