@@ -80,6 +80,7 @@ class CifraPlayer {
         let cifraNum = 1;
         const temPalavra = /[a-zA-Z]{4,}/; // Não remover! Usar caso necessário
         const temColchetes = /\[.*?\]/;
+        const temParenteses = /\(.*?\)/;
         var musicaCifrada = false;
 
         const linhasDestacadas = linhas.map(linha => {
@@ -90,8 +91,9 @@ class CifraPlayer {
                 const ehLinhaDeAcordeUnico = acordes.length === 1 && this.musicTheory.notasAcordes.includes(primeiroAcordePuro);
                 const ehLinhaDeAcordesConsecutivos = acordes.length >= 2 && this.musicTheory.notasAcordes.includes(primeiroAcordePuro) && this.musicTheory.notasAcordes.includes(segundoAcordePuro);
                 const linhDeColcheteseAcordes = temColchetes.test(linha) && acordes.length >= 2 && this.musicTheory.notasAcordes.includes(segundoAcordePuro);
+                const linhDeParenteseseAcordes = temParenteses.test(linha) && acordes.length >= 2 && (this.musicTheory.notasAcordes.includes(primeiroAcordePuro) || this.musicTheory.notasAcordes.includes(segundoAcordePuro));
 
-                if (ehLinhaDeAcordeUnico || ehLinhaDeAcordesConsecutivos || linhDeColcheteseAcordes) {
+                if (ehLinhaDeAcordeUnico || ehLinhaDeAcordesConsecutivos || linhDeColcheteseAcordes || linhDeParenteseseAcordes) {
                     let espacos = [''];
                     if (linha.startsWith(' ')) {
                         espacos = linha.match(/\s+/g);
