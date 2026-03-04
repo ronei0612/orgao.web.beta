@@ -227,8 +227,21 @@ class MelodyMachine {
         }
     }
 
+    piscarStopButton() {
+        const isInicioTempo = ((this.currentStep - 1) % this.stepsPorTempo === 0);
+        const temRitmo = this.cifraPlayer.elements.melodyStyleSelect.value !== '' && !this.cifraPlayer.elements.melodyStyleSelect.value.startsWith(1);
+        const stopButton = this.cifraPlayer.elements.stopButton;
+
+        if (isInicioTempo && temRitmo) {
+            stopButton.classList.add('pulse');
+            setTimeout(() => stopButton.classList.remove('pulse'), 150);
+        }
+    }
+
     scheduleCurrentStep() {
         if (!this.tracksCache) this.refreshTrackCache();
+
+        this.piscarStopButton();
 
         const stepIndex = this.currentStep - 1;
         const iniciouNovoAcorde = this.currentStep === 1;
