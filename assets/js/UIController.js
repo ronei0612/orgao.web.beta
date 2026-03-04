@@ -183,9 +183,19 @@ class UIController {
         this.elements.bateriaInstrumentButton.classList.add('d-none');
         this.elements.bateriaWrapper.classList.add('d-none');
         this.elements.rhythmButtonsControl.classList.add('d-none');
-        this.elements.playButton.classList.remove('blinking');
         this.elements.drumStyleSelect.classList.add('d-none');
+        this.piscarPlayButton();
         this.exibirElementosMelody();
+    }
+
+    piscarPlayButton() {
+        const temRitmo = this.elements.melodyStyleSelect.value !== '' && !this.elements.melodyStyleSelect.value.startsWith(1);
+        const orgao = !this.elements.orgaoInstrumentButton.classList.contains('d-none');
+        if (orgao && temRitmo) {
+            this.elements.playButton.classList.add('blinking');
+        } else {
+            this.elements.playButton.classList.remove('blinking');
+        }
     }
 
     exibirElementosBateria() {

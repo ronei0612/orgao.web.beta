@@ -332,6 +332,7 @@ class MelodyUI {
             this.melodyMachine.stop(true);
             this.melodyMachine.start();
         }
+        this.uiController.piscarPlayButton();
     }
 
     play() {
