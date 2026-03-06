@@ -420,6 +420,7 @@ class MusicTheory {
             'G#': ['F#', 'F', 'G°', 'C', 'Bb', 'Ab', 'Fm', 'C#', 'Bbm', 'Eb', 'Cm'],
             'Ab': ['F#', 'F', 'G°', 'C', 'Bb', 'Ab', 'Fm', 'C#', 'Bbm', 'Eb', 'Cm'],
             'A': ['G', 'F#', 'Ab°', 'C#', 'B', 'A', 'F#m', 'D', 'Bm', 'E', 'C#m'],
+            'A#': ['Ab', 'G', 'A°', 'D', 'C', 'Bb', 'Gm', 'Eb', 'Cm', 'F', 'Dm'],
             'Bb': ['Ab', 'G', 'A°', 'D', 'C', 'Bb', 'Gm', 'Eb', 'Cm', 'F', 'Dm'],
             'B': ['A', 'Ab', 'Bb°', 'Eb', 'C#', 'B', 'Abm', 'E', 'C#m', 'F#', 'Ebm']
         };
