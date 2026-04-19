@@ -20,13 +20,13 @@ class BateriaUI {
         if (tem_styles_bateria)
             return JSON.parse(tem_styles_bateria);
 
-        return this.drumMachine.styles;                
+        return this.drumMachine.styles;
     }
 
     persistStorageData(obj) {
         localStorage.setItem(this.storageKey, JSON.stringify(obj));
     }
-    
+
     getStoredRhythm(styleName, rhythmKey) {
         const s = this.drumMachine.styles;
         return s.data && s.data[styleName] ? s.data[styleName][rhythmKey] || null : null;
@@ -467,12 +467,13 @@ class BateriaUI {
             this.play();
         }
     }
-    
-    // Calcula quantos tempos tem o compasso baseado no número de steps
+
     calcularCompasso(numSteps) {
+        const ritmo68 = this.elements.drumStyleSelect.value === '6/8';
         let temposCompasso = 4;
         if (numSteps === '8') temposCompasso = 2;
-        else if (numSteps === '12') temposCompasso = 3;
+        else if (numSteps === '12' && !ritmo68) temposCompasso = 3;
+        else if (numSteps === '12' && ritmo68) temposCompasso = 6;
         else if (numSteps === '24') temposCompasso = 6;
         else if (numSteps === '16') temposCompasso = 4;
 

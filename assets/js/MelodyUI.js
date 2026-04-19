@@ -80,13 +80,20 @@ class MelodyUI {
         this.loadPattern(this.elements.melodyStyleSelect.value);
     }
 
+    calcularCompasso(numSteps, ritmo) {
+        let temposCompasso = 4;
+        if (ritmo[0] === '2') temposCompasso = 2;
+        else if (ritmo[0] === '3') temposCompasso = 3;
+        else if (ritmo[0] === '6') temposCompasso = 6;
+
+        this.melodyMachine.stepsPorTempo = numSteps / temposCompasso;
+    }
+
     initializeTracks() {
         const numSteps = parseInt(this.numStepsInput.value, 10) || 8;
         this.melodyMachine.setNumSteps(numSteps);
         this.tracksContainer.innerHTML = '';
-
-        this.melodyMachine.stepsPorTempo = numSteps / 4;
-
+        this.calcularCompasso(numSteps, this.elements.melodyStyleSelect.value);
         const frag = document.createDocumentFragment();
 
         const instruments = this.melodyMachine.instruments;
@@ -212,10 +219,10 @@ class MelodyUI {
             return;
         }
 
-        if (data.numSteps && data.numSteps !== parseInt(this.numStepsInput.value)) {
-            this.numStepsInput.value = data.numSteps;
-            this.initializeTracks();
-        }
+        //if (data.numSteps && data.numSteps !== parseInt(this.numStepsInput.value)) {
+        this.numStepsInput.value = data.numSteps;
+        this.initializeTracks();
+        //}
 
         const tracks = this.tracksContainer.querySelectorAll('.track');
         tracks.forEach(track => {
