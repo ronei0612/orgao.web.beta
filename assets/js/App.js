@@ -9,7 +9,7 @@ class App {
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
         this.versionConfig = {
-            version: '6.0.3',
+            version: '6.0.4',
             htmlMessage: `
                 <p>Melhorias</p>
 
