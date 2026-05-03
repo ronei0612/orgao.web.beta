@@ -126,11 +126,13 @@
             const context = renderer.getContext();
 
             const stave = new Stave(10, 40, width - 20);
-            stave.addClef("treble").addTimeSignature("4/4");
+            stave.addClef("treble");
             stave.setContext(context).draw();
 
             const vexNotes = notesData.map((data, index) => {
                 const note = new StaveNote({ keys: [data.key], duration: data.duration });
+
+                if (note.getStem()) note.getStem().hide = true;
 
                 // Prioridade de cores:
                 // 1. Vermelho (arrastando agora)
