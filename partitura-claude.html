@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Editor de Partitura</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --ink: #1a1209;
+            --paper: #f5f0e8;
+            --paper-dark: #ede7d5;
+            --accent: #8b3a12;
+            --accent2: #2a5c45;
+            --shadow: rgba(26,18,9,0.18);
+            --toolbar-bg: #2a1f0f;
+            --toolbar-text: #f5f0e8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .app-header {
+            background: var(--toolbar-bg);
+            color: var(--toolbar-text);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            box-shadow: 0 3px 12px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin: 0;
+            flex: 1 1 auto;
+            white-space: nowrap;
+        }
+
+        .tbtn {
+            background: rgba(245,240,232,0.12);
+            border: 1px solid rgba(245,240,232,0.25);
+            color: var(--toolbar-text);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.73rem;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+
+            .tbtn:hover {
+                background: rgba(245,240,232,0.22);
+            }
+
+            .tbtn.active {
+                background: var(--accent);
+                border-color: var(--accent);
+            }
+
+            .tbtn.green {
+                background: var(--accent2);
+                border-color: var(--accent2);
+            }
+
+        .sep {
+            width: 1px;
+            height: 26px;
+            background: rgba(245,240,232,0.2);
+            margin: 0 2px;
+        }
+
+        .note-palette {
+            background: var(--paper-dark);
+            border-bottom: 2px solid var(--accent);
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .palette-label {
+            font-size: 0.67rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #7a6a52;
+        }
+
+        .note-btn {
+            width: 34px;
+            height: 34px;
+            background: white;
+            border: 2px solid #ccc5b0;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--ink);
+            transition: border-color 0.12s, transform 0.1s;
+            user-select: none;
+            position: relative;
+        }
+
+            .note-btn:hover {
+                border-color: var(--accent);
+                transform: scale(1.1);
+            }
+
+            .note-btn.selected {
+                border-color: var(--accent);
+                background: #fdf5ec;
+                box-shadow: 0 0 0 3px rgba(139,58,18,0.2);
+            }
+
+        .sharp-sup {
+            font-size: 0.5rem;
+            position: absolute;
+            top: 3px;
+            right: 4px;
+            color: var(--accent);
+        }
+
+        .score-wrapper {
+            padding: 16px 10px 60px;
+        }
+
+        .score-title-input {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 100%;
+            color: var(--ink);
+            outline: none;
+            border-bottom: 1px dashed #ccc5b0;
+            margin-bottom: 4px;
+            padding: 3px;
+        }
+
+        .score-sub-input {
+            font-family: 'Lora', serif;
+            font-size: 0.88rem;
+            font-style: italic;
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 100%;
+            color: #7a6a52;
+            outline: none;
+            border-bottom: 1px dashed #ccc5b0;
+            margin-bottom: 14px;
+            padding: 2px;
+        }
+
+        #score-box {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px var(--shadow);
+            padding: 16px 8px;
+            overflow-x: auto;
+        }
+
+        #score-canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+            margin: 0 auto;
+        }
+
+        #lc-area {
+            margin-top: 10px;
+        }
+
+        .lc-row {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .lc-row-label {
+            width: 100%;
+            font-size: 0.62rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 2px 4px 4px;
+        }
+
+        .note-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 44px;
+            flex: 1;
+            padding: 2px 3px;
+        }
+
+        .cell-note-name {
+            font-size: 0.6rem;
+            color: #bbb;
+            margin-bottom: 1px;
+        }
+
+        .chord-inp {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.74rem;
+            font-weight: 500;
+            color: var(--accent2);
+            border: none;
+            border-bottom: 1px dashed #ccc5b0;
+            background: transparent;
+            width: 100%;
+            text-align: center;
+            outline: none;
+        }
+
+            .chord-inp::placeholder {
+                color: #ddd;
+            }
+
+        .lyric-inp {
+            font-family: 'Lora', serif;
+            font-size: 0.76rem;
+            color: var(--ink);
+            border: none;
+            border-bottom: 1px dashed #eee;
+            background: transparent;
+            width: 100%;
+            text-align: center;
+            outline: none;
+            margin-top: 2px;
+        }
+
+            .lyric-inp::placeholder {
+                color: #e0e0e0;
+            }
+
+        .notes-list {
+            margin-top: 20px;
+        }
+
+            .notes-list h6 {
+                font-family: 'Playfair Display', serif;
+                font-size: 0.82rem;
+                text-transform: uppercase;
+                letter-spacing: 0.12em;
+                color: #7a6a52;
+                border-bottom: 1px solid #ccc5b0;
+                padding-bottom: 3px;
+                margin-bottom: 8px;
+            }
+
+        .ntag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--paper-dark);
+            border: 1px solid #ccc5b0;
+            border-radius: 4px;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            margin: 2px;
+        }
+
+            .ntag .x {
+                color: var(--accent);
+                cursor: pointer;
+                margin-left: 3px;
+            }
+
+        .hint {
+            background: rgba(42,92,69,0.06);
+            border-left: 3px solid var(--accent2);
+            border-radius: 0 6px 6px 0;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            color: #3a5040;
+            margin-top: 14px;
+            line-height: 1.7;
+        }
+
+        #note-ghost {
+            width: 16px;
+            height: 16px;
+            background: var(--ink);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+            opacity: 0.7;
+            transform: translate(-50%,-50%);
+        }
+
+        @media (max-width: 576px) {
+            .app-title {
+                font-size: 1rem;
+            }
+
+            .tbtn {
+                padding: 5px 8px;
+                font-size: 0.67rem;
+            }
+
+            .note-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <h1 class="app-title">🎵 Partitura</h1>
+        <div class="sep"></div>
+        <button class="tbtn" id="btn-add-row">+ Linha</button>
+        <button class="tbtn" id="btn-undo">↩ Desfazer</button>
+        <div class="sep"></div>
+        <button class="tbtn green" id="btn-save">💾 Salvar</button>
+        <label class="tbtn" style="margin:0;cursor:pointer">
+            📂 Carregar
+            <input type="file" id="file-load" accept=".partjson,application/json" style="display:none" />
+        </label>
+    </header>
+
+    <div class="note-palette">
+        <span class="palette-label">Nota:</span>
+        <div id="palette" style="display:flex;flex-wrap:wrap;gap:5px;"></div>
+        <div class="sep"></div>
+        <button class="tbtn" id="btn-rest">— Pausa</button>
+        <button class="tbtn" id="btn-erase">✕ Borracha</button>
+    </div>
+
+    <div id="note-ghost"></div>
+
+    <div class="score-wrapper container-fluid">
+        <input class="score-title-input" id="score-title" placeholder="Título da música" value="Minha Composição" />
+        <input class="score-sub-input" id="score-author" placeholder="Compositor / Intérprete" />
+
+        <div id="score-box">
+            <canvas id="score-canvas"></canvas>
+        </div>
+
+        <div id="lc-area"></div>
+
+        <div class="notes-list">
+            <h6>Notas adicionadas</h6>
+            <div id="notes-tags"></div>
+        </div>
+
+        <div class="hint">
+            <strong>Como usar:</strong><br />
+            • Selecione uma nota no palete → clique na pauta para adicionar na altura desejada<br />
+            • Arraste notas existentes para mover (funciona no celular também)<br />
+            • Edite cifra (verde) e letra abaixo de cada nota<br />
+            • <em>+ Linha</em> adiciona novas linhas de pauta &nbsp;|&nbsp; <em>↩ Desfazer</em> remove a última nota<br />
+            • <em>💾 Salvar</em> baixa um <code>.partjson</code> que pode ser recarregado depois
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ═══════════════════════════════════════════
+        // LAYOUT CONSTANTS
+        // ═══════════════════════════════════════════
+        const CLEF_W = 56;   // width reserved for clef
+        const NOTE_W = 52;   // horizontal spacing between note slots
+        const ROW_H = 120;  // total height per stave row
+        const ROW_PAD = 30;   // padding above staff top line within each row
+        const LINE_GAP = 10;   // pixels between staff lines
+        const N_LINES = 5;
+        const STAVE_H = (N_LINES - 1) * LINE_GAP; // = 40px
+        const HALF_STEP = LINE_GAP / 2;              // = 5px per pitch step
+        const MARGIN_X = 18;
+
+        // Treble staff lines, top to bottom: F5, D5, B4, G4, E4
+        // All pitches top-to-bottom (each row = one line or space):
+        const PITCHES = [
+            'F5', 'E5', 'D5', 'C5', 'B4', 'A4', 'G4', 'F4', 'E4', 'D4', 'C4', 'B3', 'A3', 'G3', 'F3', 'E3', 'D3', 'C3'
+        ];
+        // Indices of the 5 staff lines within PITCHES (top to bottom):
+        const STAFF_LINE_IDX = [0, 2, 4, 6, 8]; // F5, D5, B4, G4, E4
+
+        const CHROMATIC = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+        // ═══════════════════════════════════════════
+        // STATE
+        // ═══════════════════════════════════════════
+        let state = {
+            selectedPitch: 'REST_AUTO', // 'REST' | any pitch label | 'REST_AUTO' means use click Y
+            mode: 'add',  // 'add' | 'erase'
+            rows: [{ notes: [] }],
+            chords: {},
+            lyrics: {},
+        };
+
+        // ═══════════════════════════════════════════
+        // CANVAS
+        // ═══════════════════════════════════════════
+        const canvas = document.getElementById('score-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function availW() {
+            return Math.max(document.getElementById('score-box').clientWidth - 32, 340);
+        }
+
+        function rowOriginY(ri) { return ri * ROW_H; }
+
+        function staffTopY(ri) { return rowOriginY(ri) + ROW_PAD; }
+
+        function pitchY(pitch, ri) {
+            const idx = PITCHES.indexOf(pitch);
+            if (idx < 0) return staffTopY(ri) + STAVE_H / 2;
+            return staffTopY(ri) + idx * HALF_STEP;
+        }
+
+        function yToPitch(canvasY, ri) {
+            const rel = canvasY - staffTopY(ri);
+            const idx = Math.round(rel / HALF_STEP);
+            return PITCHES[Math.max(0, Math.min(PITCHES.length - 1, idx))];
+        }
+
+        function slotX(slot) {
+            return MARGIN_X + CLEF_W + slot * NOTE_W + NOTE_W / 2;
+        }
+
+        // ═══════════════════════════════════════════
+        // RENDER
+        // ═══════════════════════════════════════════
+        function render() {
+            const w = availW();
+            const h = ROW_PAD + state.rows.length * ROW_H + 30;
+            canvas.width = w;
+            canvas.height = h;
+            ctx.clearRect(0, 0, w, h);
+
+            state.rows.forEach((row, ri) => {
+                drawStaff(ri, w);
+                row.notes.forEach((note, ni) => {
+                    if (!note) return;
+                    const x = slotX(ni);
+                    if (note.pitch === 'REST') {
+                        drawRest(x, staffTopY(ri) + STAFF_LINE_IDX[1] * HALF_STEP);
+                    } else {
+                        const y = pitchY(note.pitch, ri);
+                        drawLedgers(note.pitch, x, ri);
+                        drawNotehead(x, y);
+                        if (note.pitch.includes('#')) drawSharp(x, y);
+                    }
+                });
+            });
+        }
+
+        function drawStaff(ri, w) {
+            ctx.save();
+            ctx.strokeStyle = '#2a2a2a';
+            ctx.lineWidth = 1.1;
+            STAFF_LINE_IDX.forEach(si => {
+                const y = staffTopY(ri) + si * HALF_STEP;
+                ctx.beginPath();
+                ctx.moveTo(MARGIN_X, y);
+                ctx.lineTo(w - MARGIN_X, y);
+                ctx.stroke();
+            });
+
+            // Treble clef glyph
+            ctx.fillStyle = '#1a1a1a';
+            const clefSize = STAVE_H * 2.6;
+            ctx.font = `${clefSize}px serif`;
+            ctx.textBaseline = 'alphabetic';
+            // Position clef: baseline near bottom staff line (E4 = STAFF_LINE_IDX[4])
+            const baselineY = staffTopY(ri) + STAFF_LINE_IDX[4] * HALF_STEP + clefSize * 0.14;
+            ctx.fillText('𝄞', MARGIN_X + 2, baselineY);
+            ctx.restore();
+        }
+
+        function drawNotehead(x, y) {
+            ctx.save();
+            ctx.fillStyle = '#1a1209';
+            ctx.beginPath();
+            ctx.ellipse(x, y, 7, 5.5, -0.28, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawRest(x, y) {
+            ctx.save();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x - 7, y);
+            ctx.lineTo(x + 7, y);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawSharp(x, y) {
+            ctx.save();
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 11px Georgia';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('♯', x - 17, y);
+            ctx.restore();
+        }
+
+        function drawLedgers(pitch, x, ri) {
+            const idx = PITCHES.indexOf(pitch);
+            if (idx < 0) return;
+            const lw = 13;
+            ctx.save();
+            ctx.strokeStyle = '#2a2a2a';
+            ctx.lineWidth = 1.1;
+            // Below bottom staff line (E4 = idx 8): draw ledger lines at even indices 10, 12, ...
+            if (idx > 8) {
+                for (let li = 10; li <= idx; li += 2) {
+                    const y = staffTopY(ri) + li * HALF_STEP;
+                    ctx.beginPath(); ctx.moveTo(x - lw, y); ctx.lineTo(x + lw, y); ctx.stroke();
+                }
+            }
+            // Above top staff line (F5 = idx 0): indices -2, -4 would be above, not in our table
+            // but if idx < 0 we'd need them — for now table starts at F5 which is top line
+            ctx.restore();
+        }
+
+        // ═══════════════════════════════════════════
+        // HIT TEST
+        // ═══════════════════════════════════════════
+        function canvasXY(e) {
+            const rect = canvas.getBoundingClientRect();
+            const sx = canvas.width / rect.width;
+            const sy = canvas.height / rect.height;
+            const src = e.touches ? e.touches[0] : (e.changedTouches ? e.changedTouches[0] : e);
+            return {
+                cx: (src.clientX - rect.left) * sx,
+                cy: (src.clientY - rect.top) * sy,
+                px: src.clientX,
+                py: src.clientY
+            };
+        }
+
+        function hitRow(canvasY) {
+            for (let ri = 0; ri < state.rows.length; ri++) {
+                const top = staffTopY(ri) - LINE_GAP * 3;
+                const bot = staffTopY(ri) + STAVE_H + LINE_GAP * 4;
+                if (canvasY >= top && canvasY <= bot) return ri;
+            }
+            return -1;
+        }
+
+        function hitSlot(canvasX) {
+            const relX = canvasX - MARGIN_X - CLEF_W;
+            if (relX < 0) return -1;
+            return Math.floor(relX / NOTE_W);
+        }
+
+        // ═══════════════════════════════════════════
+        // ACTIONS
+        // ═══════════════════════════════════════════
+        function placeNote(ri, slot, pitch) {
+            const row = state.rows[ri];
+            while (row.notes.length <= slot) row.notes.push(null);
+            row.notes[slot] = { pitch };
+            refresh();
+        }
+
+        function deleteNote(ri, slot) {
+            if (!state.rows[ri]) return;
+            state.rows[ri].notes[slot] = null;
+            const key = `${ri}-${slot}`;
+            delete state.chords[key];
+            delete state.lyrics[key];
+            refresh();
+        }
+
+        function refresh() {
+            render();
+            buildLCUI();
+            buildTags();
+        }
+
+        // ═══════════════════════════════════════════
+        // DRAG
+        // ═══════════════════════════════════════════
+        let drag = null;
+        const ghost = document.getElementById('note-ghost');
+
+        canvas.addEventListener('mousedown', onDown);
+        canvas.addEventListener('touchstart', onDown, { passive: false });
+
+        function onDown(e) {
+            e.preventDefault();
+            const { cx, cy, px, py } = canvasXY(e);
+            const ri = hitRow(cx, cy); // we pass cy below
+            const ri2 = hitRow(cy);
+            const slot = hitSlot(cx);
+            if (ri2 < 0 || slot < 0) return;
+
+            if (state.mode === 'erase') {
+                deleteNote(ri2, slot);
+                return;
+            }
+
+            const existing = state.rows[ri2]?.notes[slot];
+            if (existing) {
+                drag = { ri: ri2, slot, note: existing };
+                ghost.style.display = 'block';
+                ghost.style.left = px + 'px';
+                ghost.style.top = py + 'px';
+            } else {
+                let pitch;
+                if (state.selectedPitch === 'REST') {
+                    pitch = 'REST';
+                } else {
+                    // Use clicked Y position to determine pitch (musical pitch from staff position)
+                    pitch = yToPitch(cy, ri2);
+                }
+                placeNote(ri2, slot, pitch);
+            }
+        }
+
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('touchmove', onMove, { passive: false });
+
+        function onMove(e) {
+            if (!drag) return;
+            e.preventDefault();
+            const src = e.touches ? e.touches[0] : e;
+            ghost.style.left = src.clientX + 'px';
+            ghost.style.top = src.clientY + 'px';
+        }
+
+        window.addEventListener('mouseup', onUp);
+        window.addEventListener('touchend', onUp);
+
+        function onUp(e) {
+            if (!drag) return;
+            ghost.style.display = 'none';
+            const { cx, cy } = canvasXY(e);
+            const ri = hitRow(cy);
+            const slot = hitSlot(cx);
+
+            if (ri >= 0 && slot >= 0) {
+                const oldKey = `${drag.ri}-${drag.slot}`;
+                const newKey = `${ri}-${slot}`;
+                // Remove old
+                state.rows[drag.ri].notes[drag.slot] = null;
+                // Place at new position with new pitch from Y
+                const newPitch = drag.note.pitch === 'REST' ? 'REST' : yToPitch(cy, ri);
+                while (state.rows[ri].notes.length <= slot) state.rows[ri].notes.push(null);
+                state.rows[ri].notes[slot] = { pitch: newPitch };
+                if (state.chords[oldKey]) { state.chords[newKey] = state.chords[oldKey]; delete state.chords[oldKey]; }
+                if (state.lyrics[oldKey]) { state.lyrics[newKey] = state.lyrics[oldKey]; delete state.lyrics[oldKey]; }
+            }
+            drag = null;
+            refresh();
+        }
+
+        // ═══════════════════════════════════════════
+        // PALETTE
+        // ═══════════════════════════════════════════
+        function buildPalette() {
+            const pal = document.getElementById('palette');
+            pal.innerHTML = '';
+            CHROMATIC.forEach(n => {
+                const btn = document.createElement('div');
+                btn.className = 'note-btn';
+                btn.dataset.n = n;
+                btn.innerHTML = n.replace('#', '') + (n.includes('#') ? '<span class="sharp-sup">♯</span>' : '');
+                btn.title = n;
+                btn.addEventListener('click', () => {
+                    // Selecting from palette doesn't override Y-position pitch;
+                    // it's mainly a visual indicator. REST mode is different.
+                    state.selectedPitch = n;
+                    state.mode = 'add';
+                    document.getElementById('btn-erase').classList.remove('active');
+                    document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                });
+                pal.appendChild(btn);
+            });
+            pal.querySelector('[data-n="C"]').classList.add('selected');
+        }
+
+        document.getElementById('btn-rest').addEventListener('click', () => {
+            state.selectedPitch = 'REST';
+            state.mode = 'add';
+            document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('btn-erase').classList.remove('active');
+        });
+
+        document.getElementById('btn-erase').addEventListener('click', () => {
+            state.mode = state.mode === 'erase' ? 'add' : 'erase';
+            document.getElementById('btn-erase').classList.toggle('active', state.mode === 'erase');
+        });
+
+        document.getElementById('btn-add-row').addEventListener('click', () => {
+            state.rows.push({ notes: [] });
+            refresh();
+        });
+
+        document.getElementById('btn-undo').addEventListener('click', () => {
+            for (let ri = state.rows.length - 1; ri >= 0; ri--) {
+                for (let ni = state.rows[ri].notes.length - 1; ni >= 0; ni--) {
+                    if (state.rows[ri].notes[ni]) { deleteNote(ri, ni); return; }
+                }
+            }
+        });
+
+        // ═══════════════════════════════════════════
+        // LYRICS / CHORDS UI
+        // ═══════════════════════════════════════════
+        function buildLCUI() {
+            const area = document.getElementById('lc-area');
+            area.innerHTML = '';
+            state.rows.forEach((row, ri) => {
+                const filled = row.notes.some(n => n);
+                if (!filled) return;
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'lc-row';
+                const lbl = document.createElement('div');
+                lbl.className = 'lc-row-label';
+                lbl.textContent = `Linha ${ri + 1}`;
+                rowDiv.appendChild(lbl);
+                row.notes.forEach((note, ni) => {
+                    if (!note) return;
+                    const key = `${ri}-${ni}`;
+                    const cell = document.createElement('div');
+                    cell.className = 'note-cell';
+                    cell.innerHTML = `<div class="cell-note-name">${note.pitch === 'REST' ? '—' : note.pitch.replace('#', '♯')}</div>`;
+                    const ci = document.createElement('input');
+                    ci.className = 'chord-inp'; ci.placeholder = 'Am'; ci.value = state.chords[key] || '';
+                    ci.addEventListener('input', ev => state.chords[key] = ev.target.value);
+                    const li = document.createElement('input');
+                    li.className = 'lyric-inp'; li.placeholder = 'sí-la-ba'; li.value = state.lyrics[key] || '';
+                    li.addEventListener('input', ev => state.lyrics[key] = ev.target.value);
+                    cell.appendChild(ci); cell.appendChild(li);
+                    rowDiv.appendChild(cell);
+                });
+                area.appendChild(rowDiv);
+            });
+        }
+
+        // ═══════════════════════════════════════════
+        // TAGS
+        // ═══════════════════════════════════════════
+        function buildTags() {
+            const el = document.getElementById('notes-tags');
+            el.innerHTML = '';
+            let any = false;
+            state.rows.forEach((row, ri) => {
+                row.notes.forEach((note, ni) => {
+                    if (!note) return;
+                    any = true;
+                    const t = document.createElement('span');
+                    t.className = 'ntag';
+                    t.innerHTML = `L${ri + 1}:${ni + 1} <strong>${note.pitch === 'REST' ? '—' : note.pitch.replace('#', '♯')}</strong><span class="x">✕</span>`;
+                    t.querySelector('.x').addEventListener('click', () => deleteNote(ri, ni));
+                    el.appendChild(t);
+                });
+            });
+            if (!any) el.innerHTML = '<span style="color:#bbb;font-size:0.7rem">Nenhuma nota ainda — clique na pauta acima!</span>';
+        }
+
+        // ═══════════════════════════════════════════
+        // SAVE / LOAD
+        // ═══════════════════════════════════════════
+        document.getElementById('btn-save').addEventListener('click', () => {
+            const data = {
+                version: 2,
+                title: document.getElementById('score-title').value,
+                author: document.getElementById('score-author').value,
+                rows: state.rows,
+                chords: state.chords,
+                lyrics: state.lyrics,
+                savedAt: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = (data.title || 'partitura').replace(/\s+/g, '_') + '.partjson';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        });
+
+        document.getElementById('file-load').addEventListener('change', function (e) {
+            const f = e.target.files[0]; if (!f) return;
+            new FileReader().addEventListener = null; // just use onload
+            const r = new FileReader();
+            r.onload = ev => {
+                try {
+                    const d = JSON.parse(ev.target.result);
+                    document.getElementById('score-title').value = d.title || '';
+                    document.getElementById('score-author').value = d.author || '';
+                    state.rows = d.rows || [{ notes: [] }];
+                    state.chords = d.chords || {};
+                    state.lyrics = d.lyrics || {};
+                    refresh();
+                } catch (err) { alert('Erro ao carregar: ' + err.message); }
+            };
+            r.readAsText(f);
+            this.value = '';
+        });
+
+        // ═══════════════════════════════════════════
+        // RESIZE
+        // ═══════════════════════════════════════════
+        let resizeT;
+        window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(refresh, 180); });
+
+        // ═══════════════════════════════════════════
+        // BOOT
+        // ═══════════════════════════════════════════
+        buildPalette();
+        refresh();
+    </script>
+</body>
+</html>
