@@ -272,7 +272,7 @@ class MelodyMachine {
                         const bufferKey = `${foundTrack.name}_${nota}`;
                         const buffer = this.buffers.get(bufferKey);
 
-                        this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? (this.defaultVol / 2) : this.defaultVol);
+                        this.playSound(buffer, this.nextNoteTime, foundTrack.volume === 2 ? (this.defaultVol / 1.5) : this.defaultVol);
 
                         foundTrack.element.classList.add('playing');
                         setTimeout(() => foundTrack.element.classList.remove('playing'), 100);
