@@ -2,45 +2,37 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partitura em Tela Cheia</title>
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.5/build/cjs/vexflow.js"></script>
     <style>
         body {
             font-family: sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #ffffff;
-            overflow-x: auto; /* Permite rolar para o lado se a partitura for longa */
-            overflow-y: hidden;
+            background-color: transparent;
+            overflow-x: auto;
             display: flex;
-            align-items: center; /* Centraliza a pauta verticalmente na tela */
+            align-items: center;
             min-height: 100vh;
         }
 
         #output {
-            /* Deixa a partitura livre para crescer na horizontal */
             min-width: max-content;
             padding: 20px;
+        }
+
+        .dark-mode-svg {
+            filter: invert(1) hue-rotate(180deg);
         }
     </style>
 </head>
 <body>
-
     <div id="output"></div>
 
     <script>
-        const outputDiv = document.getElementById('output');
-
-        // Adicionado Accidental para tratar os Sustenidos (#) e Bemóis (b)
         const { Renderer, Stave, StaveNote, Voice, Formatter, ChordSymbol, BarNote, Annotation, Accidental } = Vex.Flow;
 
-        // Função que traduz a nossa string compacta para os objetos do VexFlow
         function normalizeItem(item) {
             let str = String(item).trim();
             let chord = "", lyric = "", bar = false;
-
-            // 1. Extrai a Cifra[X]
             if (str.startsWith('[')) {
                 let closeIdx = str.indexOf(']');
                 if (closeIdx !== -1) {
@@ -48,53 +40,61 @@
                     str = str.substring(closeIdx + 1);
                 }
             }
-            // 2. Extrai a Barra de Compasso |
-            if (str.endsWith('|')) {
-                bar = true;
-                str = str.slice(0, -1);
-            }
-            // 3. Extrai a Letra @...
+            if (str.endsWith('|')) { bar = true; str = str.slice(0, -1); }
             if (str.includes('@')) {
                 let parts = str.split('@');
                 lyric = parts[1];
                 str = parts[0];
             }
-
-            // 4. O restante são as notas separadas por vírgula
             let notes = str.split(',').map(n => n.trim());
-            if (notes.length === 1 && notes[0] === "") notes = ["b/4"]; // Evita erros se estiver vazio
-
+            if (notes.length === 1 && notes[0] === "") notes = ["b/4"];
             return { notes, chord, lyric, bar };
         }
 
-        function drawMusic(rawNanoData) {
-            // Transforma os dados curtinhos (strings) em objetos pro código ler
-            const data = rawNanoData.map(normalizeItem);
+        // FUNÇÃO PRINCIPAL QUE LÊ DO LOCALSTORAGE
+        window.loadFromLocalStorage = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const songName = 'asdf';//urlParams.get('music');
 
+            if (!songName) return;
+
+            // Busca o objeto 'saves'
+            const saves = JSON.parse(localStorage.getItem('saves') || '{}');
+            const musicData = saves[songName];
+
+            if (!musicData || !musicData.chords) return;
+
+            // Verifica modo escuro (baseado no localStorage ou classe do pai)
+            const isDark = localStorage.getItem('darkMode') === 'true';
+
+            const rawLines = musicData.chords.split('\n').filter(l => l.trim() !== '');
+            render(rawLines, isDark);
+        };
+
+        function render(rawNanoData, isDarkMode) {
+            const outputDiv = document.getElementById('output');
             outputDiv.innerHTML = '';
+
+            if (isDarkMode) outputDiv.classList.add('dark-mode-svg');
+            else outputDiv.classList.remove('dark-mode-svg');
+
+            const data = rawNanoData.map(normalizeItem);
             const renderer = new Renderer(outputDiv, Renderer.Backends.SVG);
 
-            // Largura dinâmica: se adapta ao tamanho da tela ou à quantidade de notas
-            const width = Math.max(window.innerWidth - 40, data.length * 120);
-            renderer.resize(width, 300);
-            const context = renderer.getContext();
+            // Ajuste de largura baseado na quantidade de notas
+            const width = Math.max(window.innerWidth - 40, data.length * 110);
+            renderer.resize(width, 250);
 
-            const stave = new Stave(10, 100, width - 20);
-            stave.addClef("treble");
-            stave.setContext(context).draw();
+            const context = renderer.getContext();
+            const stave = new Stave(10, 40, width - 20);
+            stave.addClef("treble").setContext(context).draw();
 
             const tickables = data.flatMap(item => {
-                const note = new StaveNote({
-                    keys: item.notes,
-                    duration: "q",
-                });
+                const note = new StaveNote({ keys: item.notes, duration: "q" });
 
-                // Detecção automática de Sustenidos e Bemóis
                 item.notes.forEach((keyName, i) => {
                     const match = keyName.match(/([a-g])([#b])\//i);
-                    if (match) {
-                        note.addModifier(new Accidental(match[2]), i);
-                    }
+                    if (match) note.addModifier(new Accidental(match[2]), i);
                 });
 
                 if (note.getStem()) note.getStem().hide = true;
@@ -104,11 +104,9 @@
                 }
 
                 if (item.lyric) {
-                    const lyric = new Annotation(item.lyric)
+                    note.addModifier(new Annotation(item.lyric)
                         .setFont('Serif', 12, 'italic')
-                        .setVerticalJustification(Annotation.VerticalJustify.BOTTOM);
-
-                    note.addModifier(lyric);
+                        .setVerticalJustification(Annotation.VerticalJustify.BOTTOM));
                 }
 
                 return item.bar ? [note, new BarNote()] : [note];
@@ -116,24 +114,12 @@
 
             const voice = new Voice({ num_beats: data.length, beat_value: 4 });
             voice.addTickables(tickables);
-
             new Formatter().joinVoices([voice]).format([voice], width - 100);
-
             voice.draw(context, stave);
         }
 
-        // Aplicação do NOVO JSON (Micro-sintaxe super leve)
-        const exampleData = [
-            "[D]d/4@Bem",
-            "d/4@vin-",
-            "e/4@dos",
-            "[Bm]b/3,d/4,f#/4|",
-            "g/3",
-            "[A7]a/3"
-        ];
-
-        // Desenha a partitura assim que a página carrega
-        window.onload = () => drawMusic(exampleData);
+        // Inicia automaticamente ao carregar a página
+        window.onload = loadFromLocalStorage;
     </script>
 </body>
 </html>

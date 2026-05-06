@@ -558,32 +558,59 @@ class App {
     }
 
     showLetraCifra(saveData) {
-        const isPartitura = saveData.type === 'partitura';
+        // 1. Identifica o nome da música (chave usada no localStorage)
+        const songName = this.elements.savesSelect.value;
 
-        if (isPartitura) {
-            // Modo Partitura
-            this.elements.iframeCifra.src = './partitura.html';
+        // 2. Identifica o tipo (Fallback para dados antigos caso 'type' não exista)
+        const type = saveData.type || (saveData.chords?.includes('@') ? 'partitura' : 'cifra');
 
-            // Espera o iframe carregar para renderizar
-            this.elements.iframeCifra.onload = () => {
-                const dataArray = saveData.chords.split('\n').filter(line => line.trim() !== '');
-                const isDark = document.body.classList.contains('dark-mode');
-                this.elements.iframeCifra.contentWindow.renderPartitura(dataArray, isDark);
-            };
+        this.uiController.exibirIframeCifra();
+        this.uiController.exibirBotoesTom();
+        this.cifraPlayer.indiceAcorde = 0;
 
-            this.uiController.esconderBotoesCifras(); // Partitura não usa os botões automáticos do CifraPlayer por enquanto
-        } else {
-            // Modo Cifra Normal
-            this.elements.iframeCifra.removeAttribute('src'); // Limpa o src do modo partitura
+        // 3. Lógica de renderização por tipo
+        if (type === 'partitura') {
+            // --- MODO PARTITURA ---
+            const urlPartitura = `./partitura.html?music=${encodeURIComponent(songName)}`;
+
+            // Se o iframe já estiver na página de partitura, apenas manda ele recarregar os dados
+            // Se for uma música diferente ou o iframe estava em outro modo, muda o SRC
+            if (this.elements.iframeCifra.src.includes('partitura.html')) {
+                // Se o parâmetro music na URL for diferente do atual, atualiza o src
+                if (!this.elements.iframeCifra.src.includes(encodeURIComponent(songName))) {
+                    this.elements.iframeCifra.src = urlPartitura;
+                } else if (this.elements.iframeCifra.contentWindow.loadFromLocalStorage) {
+                    this.elements.iframeCifra.contentWindow.loadFromLocalStorage();
+                }
+            } else {
+                this.elements.iframeCifra.src = urlPartitura;
+            }
+
+            this.uiController.esconderBotoesAcordes();
+            this.uiController.esconderBotoesAvancarVoltarCifra();
+
+        } else if (type === 'cifra') {
+            // --- MODO CIFRA ---
+            this.elements.iframeCifra.removeAttribute('src'); // Limpa o modo partitura
             const texto = saveData.chords ?? saveData;
-            var textoMusica = this.cifraPlayer.destacarCifras(texto, null);
+            const textoMusica = this.cifraPlayer.destacarCifras(texto, saveData.key || null);
+
             this.verifyLetraOuCifra(textoMusica, saveData.chords ? saveData : null);
             this.uiController.exibirBotoesCifras();
+
+        } else if (type === 'letra') {
+            // --- MODO LETRA ---
+            this.elements.iframeCifra.removeAttribute('src');
+            const texto = saveData.chords ?? saveData;
+            const html = `<pre class="letra">${texto}</pre>`;
+
+            this.cifraPlayer.preencherIframeCifra(html);
+            this.uiController.esconderBotoesAcordes();
+            this.uiController.esconderBotoesAvancarVoltarCifra();
         }
 
-        this.uiController.exibirBotoesTom();
-        this.uiController.exibirIframeCifra();
-        this.cifraPlayer.indiceAcorde = 0;
+        // 4. Aplica as configurações de BPM, Instrumento e Estilo
+        this.preencherLayoutDoLocalStorage(saveData);
     }
 
     salvarMetaDataNoLocalStorage(name, item) {
