@@ -366,7 +366,7 @@ class App {
         }
     }
 
-    handleAddClick() {
+    async handleAddClick() {
         this.elements.addButton.classList.add('pressed');
 
         setTimeout(() => {
@@ -374,11 +374,14 @@ class App {
         }, 100);
 
         if (!this.elements.deleteSavesSelect.classList.contains('d-none')) {
+            const tipo = await this.uiController.chooseEditorType();
+            this.currentEditorType = tipo;
+
             this.elements.itemNameInput.value = '';
             $('#savesSelect').val('').trigger('change');
-            this.elements.editTextarea.value = this.elements.iframeCifra.contentDocument.body.innerText;
 
-            this.uiController.editarMusica();
+            this.uiController.editarMusica(tipo);
+
             this.uiController.exibirBotoesTom();
             this.uiController.exibirBotoesAcordes();
             this.cifraPlayer.preencherSelectCifras('C');
@@ -388,14 +391,23 @@ class App {
         this.uiController.toggleEditDeleteButtons();
     }
 
-    handleEditSaveClick() {
+    async handleEditSaveClick() {
         const saveName = this.elements.savesSelect.value;
-        if (saveName)
-            this.editing = true;
-        this.elements.itemNameInput.value = saveName ? saveName : '';
+        if (!saveName) return;
 
-        this.elements.editTextarea.value = this.elements.iframeCifra.contentDocument.body.innerText;
-        this.uiController.editarMusica();
+        const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, saveName);
+        const tipo = saveData.type || 'cifra';
+        this.currentEditorType = tipo;
+
+        this.editing = true;
+        this.elements.itemNameInput.value = saveName;
+
+        if (tipo === 'cifra') {
+            this.elements.editTextarea.value = saveData.chords || "";
+        }
+
+        this.uiController.editarMusica(tipo);
+
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
         this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
@@ -546,10 +558,28 @@ class App {
     }
 
     showLetraCifra(saveData) {
-        // Correção caso saveData seja apenas uma string (cifra simples) que veio da pesquisa
-        const texto = saveData.chords ?? saveData;
-        var textoMusica = this.cifraPlayer.destacarCifras(texto, null);
-        this.verifyLetraOuCifra(textoMusica, saveData.chords ? saveData : null);
+        const isPartitura = saveData.type === 'partitura';
+
+        if (isPartitura) {
+            // Modo Partitura
+            this.elements.iframeCifra.src = './partitura.html';
+
+            // Espera o iframe carregar para renderizar
+            this.elements.iframeCifra.onload = () => {
+                const dataArray = saveData.chords.split('\n').filter(line => line.trim() !== '');
+                const isDark = document.body.classList.contains('dark-mode');
+                this.elements.iframeCifra.contentWindow.renderPartitura(dataArray, isDark);
+            };
+
+            this.uiController.esconderBotoesCifras(); // Partitura não usa os botões automáticos do CifraPlayer por enquanto
+        } else {
+            // Modo Cifra Normal
+            this.elements.iframeCifra.removeAttribute('src'); // Limpa o src do modo partitura
+            const texto = saveData.chords ?? saveData;
+            var textoMusica = this.cifraPlayer.destacarCifras(texto, null);
+            this.verifyLetraOuCifra(textoMusica, saveData.chords ? saveData : null);
+            this.uiController.exibirBotoesCifras();
+        }
 
         this.uiController.exibirBotoesTom();
         this.uiController.exibirIframeCifra();
@@ -562,7 +592,8 @@ class App {
             key: this.elements.tomSelect.value,
             instrument: this.cifraPlayer.instrumento,
             style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
-            bpm: this.elements.bpmInput.value
+            bpm: this.elements.bpmInput.value,
+            type: this.currentEditorType || 'cifra' // NOVO: salva se é cifra ou partitura
         };
 
         this.localStorageManager.saveJson(name, item, metaData);
@@ -1245,6 +1276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreLink: document.getElementById('restoreLink'),
         downloadStylesLink: document.getElementById('downloadStylesLink'),
         liturgiaDiariaFrame: document.getElementById('liturgiaDiariaFrame'),
+        partituraFrame: document.getElementById('partituraFrame'),
         acorde1: document.getElementById('acorde1'),
         acorde2: document.getElementById('acorde2'),
         acorde3: document.getElementById('acorde3'),
