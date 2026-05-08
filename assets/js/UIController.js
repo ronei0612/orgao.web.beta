@@ -50,12 +50,16 @@ class UIController {
 
     editarMusica(tipo = 'cifra') {
         this.elements.iframeCifra.classList.add('d-none');
+        this.elements.partituraFrame.classList.add('d-none');
+
         if (tipo === 'cifra') {
-        this.elements.editTextarea.classList.remove('d-none');
-            this.elements.editTextarea.value = this.elements.iframeCifra.contentDocument.body.innerText;
+            this.elements.editTextarea.classList.remove('d-none');
+            this.elements.partituraEditFrame.classList.add('d-none');
+        } else {
+            this.elements.editTextarea.classList.add('d-none');
+            this.elements.partituraEditFrame.classList.remove('d-none');
         }
-        else
-            this.elements.partituraFrame.classList.remove('d-none');
+
         this.elements.selectContainer.classList.add('d-none');
         this.elements.itemNameInput.classList.remove('d-none');
         this.elements.saveButton.classList.remove('d-none');

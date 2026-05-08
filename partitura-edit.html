@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Editor de Partitura Órgão.Web</title>
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+            .action-btn.local {
+                background: #607D8B;
+            }
+
+            .action-btn.file {
+                background: #673AB7;
+            }
+
+            .action-btn.confirm {
+                background: #2e7d32;
+            }
+
+        .editor-container {
+            display: flex;
+            /*background: white;*/
+            width: 98vw;
+        }
+
+        .score-wrapper {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 10px;
+        }
+
+        #score-container {
+            cursor: pointer;
+            min-width: max-content;
+            position: relative;
+        }
+
+        .side-toolbar {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-left: 10px;
+        }
+
+        .tool-btn {
+            width: 45px;
+            height: 45px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            .tool-btn:active {
+                transform: scale(0.9);
+            }
+
+        .btn-add {
+            color: #2e7d32;
+            font-size: 20px;
+        }
+
+        .btn-chord {
+            color: #1565C0;
+        }
+
+        .btn-lyric {
+            color: #E65100;
+        }
+
+        .btn-bar {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .btn-delete {
+            color: #c62828;
+        }
+
+        .inline-input {
+            position: absolute;
+            transform: translateX(-50%);
+            width: 70px;
+            text-align: center;
+            font-weight: bold;
+            border: 2px solid #2196F3;
+            border-radius: 4px;
+            z-index: 100;
+        }
+
+        /* Feedback visual de seleção */
+        .dark-mode-svg {
+            filter: invert(1) hue-rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="editor-container">
+        <div class="score-wrapper">
+            <div id="score-container">
+                <div id="vexflow-target"></div>
+            </div>
+        </div>
+
+        <div class="side-toolbar">
+            <button class="tool-btn btn-add" onclick="addNewNote()" title="Nova Nota">+♪</button>
+            <button class="tool-btn btn-chord" onclick="showInlineInput('chord')" title="Cifra">C7</button>
+            <button class="tool-btn btn-lyric" onclick="showInlineInput('lyric')" title="Letra">Abc</button>
+            <button class="tool-btn btn-bar" onclick="toggleBar()" title="Compasso">|</button>
+            <button class="tool-btn btn-delete" onclick="deleteLastNote()" title="Apagar">
+                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M5.83 5.146a.5.5 0 0 0 0 .708L7.975 8l-2.147 2.146a.5.5 0 0 0 .707.708l2.147-2.147 2.146 2.147a.5.5 0 0 0 .707-.708L9.39 8l2.146-2.146a.5.5 0 0 0-.707-.708L8.683 7.293 6.536 5.146a.5.5 0 0 0-.707 0z" /><path d="M13.683 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7.08a2 2 0 0 1-1.519-.698L.241 8.65a1 1 0 0 1 0-1.302L5.084 1.7A2 2 0 0 1 6.603 1zm-7.08 1a1 1 0 0 0-.76.35L1 8l4.844 5.65a1 1 0 0 0 .759.35h7.08a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" /></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const { Renderer, Stave, StaveNote, Voice, Formatter, Annotation, ChordSymbol, Accidental, BarNote } = Vex.Flow;
+
+        const container = document.getElementById('score-container');
+        const vfTarget = document.getElementById('vexflow-target');
+        const basePitches = ["c/4", "d/4", "e/4", "f/4", "g/4", "a/4", "b/4", "c/5", "d/5", "e/5", "f/5", "g/5", "a/5"];
+
+        let notesData = [];
+        let noteXPositions = [];
+        let isDragging = false;
+        let persistentSelectedIndex = 0;
+
+        // Baseado na normalizeItem do seu visualizador (partitura.html)
+        function normalizeItem(item) {
+            let str = String(item).trim();
+            let chord = "", lyric = "", bar = false;
+            if (str.startsWith('[')) {
+                let closeIdx = str.indexOf(']');
+                if (closeIdx !== -1) {
+                    chord = str.substring(1, closeIdx);
+                    str = str.substring(closeIdx + 1);
+                }
+            }
+            if (str.endsWith('|')) { bar = true; str = str.slice(0, -1); }
+            if (str.includes('@')) {
+                let parts = str.split('@');
+                lyric = parts[1]; str = parts[0];
+            }
+            let notes = str.split(',').map(n => n.trim());
+            if (notes.length === 1 && notes[0] === "") notes = ["b/4"];
+            return { notes, chord, lyric, bar };
+        }
+
+        function initData() {
+            const saved = localStorage.getItem("partitura_salva_nano");
+            if (saved) {
+                notesData = JSON.parse(saved).map(normalizeItem);
+            } else {
+                notesData = ["[D]d/4@Bem", "d/4@vin-", "e/4@dos", "[Bm]b/3,d/4,f#/4|"].map(normalizeItem);
+            }
+            persistentSelectedIndex = notesData.length - 1;
+            draw();
+        }
+
+        function draw() {
+            commitInput();
+            vfTarget.innerHTML = "";
+            const width = Math.max(window.innerWidth - 100, notesData.length * 100);
+            const renderer = new Renderer(vfTarget, Renderer.Backends.SVG);
+            renderer.resize(width, 250);
+            const context = renderer.getContext();
+
+            const stave = new Stave(10, 40, width - 20);
+            stave.addClef("treble").setContext(context).draw();
+
+            // Lógica de Tickables baseada no visualizador para manter paridade
+            const tickables = notesData.flatMap((data, index) => {
+                const note = new StaveNote({ keys: data.notes, duration: "q" });
+
+                data.notes.forEach((keyName, i) => {
+                    const match = keyName.match(/([a-g])([#b])\//i);
+                    if (match) note.addModifier(new Accidental(match[2]), i);
+                });
+
+                if (note.getStem()) note.getStem().hide = true;
+                if (data.chord) note.addModifier(new ChordSymbol().setFont('Arial', 12, 'bold').addText(data.chord), 0);
+                if (data.lyric) {
+                    note.addModifier(new Annotation(data.lyric).setFont('Serif', 12, 'italic')
+                        .setVerticalJustification(Annotation.VerticalJustify.BOTTOM), 0);
+                }
+
+                // Destaque para nota selecionada (Vermelho)
+                if (index === persistentSelectedIndex) {
+                    note.setStyle({ fillStyle: "red", strokeStyle: "red" });
+                }
+
+                return data.bar ? [note, new BarNote()] : [note];
+            });
+
+            if (tickables.length > 0) {
+                const voice = new Voice({ num_beats: notesData.length, beat_value: 4 }).setStrict(false);
+                voice.addTickables(tickables);
+                new Formatter().joinVoices([voice]).format([voice], width - 100);
+                voice.draw(context, stave);
+
+                // Mapeia posições apenas das notas (ignora BarNotes no clique)
+                noteXPositions = tickables
+                    .filter(t => t instanceof StaveNote)
+                    .map(n => n.getAbsoluteX());
+            }
+        }
+
+        function commitInput() {
+            const input = document.getElementById('inline-input');
+            if (input) {
+                const { type, index } = input.dataset;
+                if (notesData[index]) {
+                    if (type === 'chord') notesData[index].chord = input.value;
+                    else notesData[index].lyric = input.value;
+                }
+                input.remove();
+            }
+        }
+
+        function showInlineInput(type) {
+            if (persistentSelectedIndex === -1) return;
+            commitInput();
+            const xPos = noteXPositions[persistentSelectedIndex];
+            const input = document.createElement('input');
+            input.id = 'inline-input';
+            input.className = 'inline-input';
+            input.style.left = xPos + 'px';
+            input.style.top = (type === 'chord' ? '15px' : '185px');
+            input.dataset.type = type;
+            input.dataset.index = persistentSelectedIndex;
+            input.value = type === 'chord' ? (notesData[persistentSelectedIndex].chord || "") : (notesData[persistentSelectedIndex].lyric || "");
+            container.appendChild(input);
+            input.focus();
+            input.addEventListener('keydown', (e) => e.key === 'Enter' && draw());
+            input.addEventListener('blur', draw);
+        }
+
+        function toggleBar() {
+            if (persistentSelectedIndex === -1) return;
+            notesData[persistentSelectedIndex].bar = !notesData[persistentSelectedIndex].bar;
+            draw();
+        }
+
+        function addNewNote() {
+            notesData.push({ notes: ["b/4"], chord: "", lyric: "", bar: false });
+            persistentSelectedIndex = notesData.length - 1;
+            draw();
+        }
+
+        function deleteLastNote() {
+            if (notesData.length > 1) {
+                notesData.pop();
+                persistentSelectedIndex = notesData.length - 1;
+                draw();
+            }
+        }
+
+        function getYToPitch(y) {
+            const stepHeight = 5;
+            const b4Index = 6; // basePitches[6] = "b/4"
+            const diff = Math.round((95 - y) / stepHeight);
+            let newIndex = b4Index + diff;
+            return basePitches[Math.max(0, Math.min(newIndex, basePitches.length - 1))];
+        }
+
+        // Eventos de clique e Arrastar nota
+        function handleStart(e) {
+            if (e.target.id === 'inline-input') return;
+            const rect = container.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            let found = noteXPositions.findIndex(pos => Math.abs(x - pos) < 20);
+            if (found !== -1) {
+                persistentSelectedIndex = found;
+                isDragging = true;
+                draw();
+            }
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const rect = container.getBoundingClientRect();
+            const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+            const newPitch = getYToPitch(y);
+            if (notesData[persistentSelectedIndex].notes[0] !== newPitch) {
+                notesData[persistentSelectedIndex].notes = [newPitch];
+                draw();
+            }
+        }
+
+        window.setDataFromApp = function (dataArray) {
+            if (dataArray && dataArray.length > 0) {
+                notesData = dataArray.map(normalizeItem);
+            } else {
+                notesData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false }];
+            }
+            persistentSelectedIndex = 0;
+            draw();
+        };
+
+        // Envia dados para o App.js (para quando você clicar em SALVAR no botão azul do topo)
+        window.getDataForApp = function () {
+            commitInput(); // Garante que campos abertos sejam processados
+            return notesData.map(d => {
+                let s = "";
+                if (d.chord) s += `[${d.chord}]`;
+                s += d.notes.join(",");
+                if (d.lyric) s += `@${d.lyric}`;
+                if (d.bar) s += `|`;
+                return s;
+            }).join('\n');
+        };
+
+        container.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', () => isDragging = false);
+        container.addEventListener('touchstart', handleStart, { passive: false });
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', () => isDragging = false);
+
+        window.onload = initData;
+    </script>
+</body>
+</html>

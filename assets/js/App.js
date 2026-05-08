@@ -368,24 +368,32 @@ class App {
 
     async handleAddClick() {
         this.elements.addButton.classList.add('pressed');
-
-        setTimeout(() => {
-            this.elements.addButton.classList.remove('pressed');
-        }, 100);
+        setTimeout(() => this.elements.addButton.classList.remove('pressed'), 100);
 
         if (!this.elements.deleteSavesSelect.classList.contains('d-none')) {
+            // 1. Pergunta o tipo (Cifra ou Partitura)
             const tipo = await this.uiController.chooseEditorType();
             this.currentEditorType = tipo;
 
+            // 2. Prepara os campos de nome
             this.elements.itemNameInput.value = '';
             $('#savesSelect').val('').trigger('change');
 
+            // 3. Abre a interface de edição correta
             this.uiController.editarMusica(tipo);
+
+            if (tipo === 'partitura') {
+                // Inicializa o editor de partitura com um exemplo limpo ou vazio
+                const defaultData = ["[C]c/4@Nova"].map(l => l.trim());
+                this.elements.partituraEditFrame.contentWindow.setDataFromApp(defaultData);
+            } else {
+                this.elements.editTextarea.value = '';
+            }
 
             this.uiController.exibirBotoesTom();
             this.uiController.exibirBotoesAcordes();
             this.cifraPlayer.preencherSelectCifras('C');
-            this.elements.itemNameInput.click();
+            this.elements.itemNameInput.focus();
         }
 
         this.uiController.toggleEditDeleteButtons();
@@ -1159,6 +1167,7 @@ class App {
     }
 
     async salvarSave(newSaveName, oldSaveName) {
+        // 1. Define um nome padrão caso o usuário não tenha digitado nenhum
         if (!newSaveName) {
             const musicasDefault = this.elements.savesSelect.querySelectorAll('option[value^="Música "]');
             const count = musicasDefault.length + 1;
@@ -1166,39 +1175,69 @@ class App {
         }
 
         const saves = this.localStorageManager.getSavesJson(this.LOCAL_STORAGE_SAVES_KEY);
-
         newSaveName = newSaveName.trim();
-        const temSaveName = Object.keys(saves).some(saveName => saveName.toLowerCase() === newSaveName.toLowerCase());
 
-        if (temSaveName && newSaveName.toLowerCase() !== this.elements.savesSelect.value.toLowerCase()) {
-            await this.uiController.customAlert(`Já existe "${newSaveName}". Escolha outro nome`, 'Salvar Música');
+        // 2. Verifica se o nome já existe (para evitar sobrescrever outra música por erro)
+        // Se o nome existe e não é a música que já estávamos editando, avisa o usuário.
+        const temSaveName = Object.keys(saves).some(saveName => saveName.toLowerCase() === newSaveName.toLowerCase());
+        const alterouNome = oldSaveName && oldSaveName.toLowerCase() !== newSaveName.toLowerCase();
+
+        if (temSaveName && (alterouNome || !oldSaveName)) {
+            await this.uiController.customAlert(`Já existe uma música chamada "${newSaveName}". Escolha outro nome.`, 'Salvar Música');
             return;
         }
 
-        let content = this.elements.editTextarea.value;
-        const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
+        // --- 3. COLETA O CONTEÚDO (O CORPO DA MÚSICA) ---
+        let content = "";
+        if (this.currentEditorType === 'partitura') {
+            // Acessa a função global que colocamos no partitura-edit.html para pegar a nano-sintaxe
+            if (this.elements.partituraEditFrame.contentWindow.getDataForApp) {
+                content = this.elements.partituraEditFrame.contentWindow.getDataForApp();
+            } else {
+                console.error("Erro: Função getDataForApp não encontrada no Iframe.");
+                return;
+            }
+        } else {
+            // Pega o texto normal do textarea (Cifra ou Letra)
+            content = this.elements.editTextarea.value;
+        }
 
+        // Importante: Atualizamos o valor do editTextarea com o conteúdo coletado, 
+        // pois o método 'salvarMetaDataNoLocalStorage' lê os dados de lá.
+        this.elements.editTextarea.value = content;
+
+        // 4. Lógica para identificar o Tom (Key)
+        const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
         let tom;
 
         if (this.cifraPlayer.tomOriginal && this.cifraPlayer.tomOriginal !== this.elements.tomSelect.value) {
+            // Se o usuário mudou o tom manualmente no select durante a edição
             tom = this.elements.tomSelect.value;
         } else {
+            // Tenta descobrir o tom automaticamente ou usa o que estiver no select
             tom = this.cifraPlayer.descobrirTom(musicaCifrada) || this.elements.tomSelect.value || 'C';
         }
-
         this.elements.tomSelect.value = tom;
 
+        // 5. Se foi uma edição com troca de nome, remove o registro antigo
         if (oldSaveName && oldSaveName !== newSaveName) {
-            this.localStorageManager.editarNome(this.LOCAL_STORAGE_SAVES_KEY, oldSaveName, newSaveName);
+            this.localStorageManager.deleteJson(this.LOCAL_STORAGE_SAVES_KEY, oldSaveName);
         }
 
+        // 6. Grava os dados finais no LocalStorage
+        // Isso chama a função que monta o objeto com type, chords, bpm, instrument, style, etc.
         this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName);
+
+        // 7. Atualiza o Select principal para focar na música salva
         this.elements.savesSelect.value = newSaveName;
 
+        // 8. Limpa a interface de edição
         this.uiController.resetInterface();
-        this.uiController.exibirIframeCifra();
-        this.uiController.exibirListaSaves(newSaveName);
+        this.elements.partituraEditFrame.classList.add('d-none'); // Esconde o editor gráfico
+        this.uiController.exibirIframeCifra(); // Volta para o iframe de visualização
+        this.uiController.exibirListaSaves(newSaveName); // Recarrega a lista do select2
 
+        // 9. Renderiza a música salva imediatamente na tela
         this.selectEscolhido(newSaveName);
     }
 
@@ -1304,6 +1343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadStylesLink: document.getElementById('downloadStylesLink'),
         liturgiaDiariaFrame: document.getElementById('liturgiaDiariaFrame'),
         partituraFrame: document.getElementById('partituraFrame'),
+        partituraEditFrame: document.getElementById('partituraEditFrame'),
         acorde1: document.getElementById('acorde1'),
         acorde2: document.getElementById('acorde2'),
         acorde3: document.getElementById('acorde3'),
