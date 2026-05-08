@@ -5,6 +5,7 @@ class App {
         this.musicTheory = new MusicTheory();
         this.uiController = new UIController(this.elements);
         this.localStorageManager = new LocalStorageManager();
+        this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame);
         this.draggableController = new DraggableController(this.elements.draggableControls);
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
@@ -412,6 +413,10 @@ class App {
 
         if (tipo === 'cifra') {
             this.elements.editTextarea.value = saveData.chords || "";
+        }
+        else if (tipo === 'partitura') {
+            const dataArray = saveData.chords.split('\n').filter(l => l.trim());
+            this.partituraEditor.resetAndFill(dataArray); // Método do Gerenciador
         }
 
         this.uiController.editarMusica(tipo);
@@ -1190,7 +1195,6 @@ class App {
         // --- 3. COLETA O CONTEÚDO (O CORPO DA MÚSICA) ---
         let content = "";
         if (this.currentEditorType === 'partitura') {
-            // Acessa a função global que colocamos no partitura-edit.html para pegar a nano-sintaxe
             if (this.elements.partituraEditFrame.contentWindow.getDataForApp) {
                 content = this.elements.partituraEditFrame.contentWindow.getDataForApp();
             } else {
@@ -1319,6 +1323,7 @@ document.addEventListener('DOMContentLoaded', () => {
         iframeCifra: document.getElementById('iframeCifra'),
         santamissaFrame: document.getElementById('santamissaFrame'),
         oracoesFrame: document.getElementById('oracoesFrame'),
+        partituraEditFrame: document.getElementById('partituraEditFrame'),
         darkModeToggle: document.getElementById('darkModeToggle'),
         searchModalLabel: document.getElementById('searchModalLabel'),
         savesSelect: document.getElementById('savesSelect'),
