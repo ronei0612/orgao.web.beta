@@ -4,12 +4,16 @@ class PartituraEditor {
         this.viewIframe = viewIframe;
         this.vf = Vex.Flow;
 
+        // 1. EXTENSÃO ATUALIZADA: G3 até G6 (Cromático)
         this.basePitches = [
+            "e/3", "f/3", "f#/3", "g/3", "g#/3", "a/3", "a#/3", "b/3",
             "c/4", "c#/4", "d/4", "d#/4", "e/4", "f/4", "f#/4", "g/4", "g#/4", "a/4", "a#/4", "b/4",
-            "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5", "g#/5", "a/5", "a#/5", "b/5"
+            "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5", "g#/5", "a/5", "a#/5", "b/5",
+            "c/6", "c#/6", "d/6", "d#/6"
         ];
 
         this.currentData = [];
+        this.noteXPositions = [];
         this.persistentSelectedIndex = 0;
 
         this.prepararIframe(this.editIframe, true);
@@ -34,7 +38,7 @@ class PartituraEditor {
                 <button class="tool-btn btn-chord" id="btn-chord">C7</button>
                 <button class="tool-btn btn-lyric" id="btn-lyric">Abc</button>
                 <button class="tool-btn btn-delete" id="btn-delete">
-                    <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M5.83 5.146a.5.5 0 0 0 0 .708L7.975 8l-2.147 2.146a.5.5 0 0 0 .707.708l2.147-2.147 2.146 2.147a.5.5 0 0 0 .707-.708L9.39 8l2.146-2.146a.5.5 0 0 0-.707-.708L8.683 7.293 6.536 5.146a.5.5 0 0 0-.707 0z"/><path d="M13.683 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7.08a2 2 0 0 1-1.519-.698L.241 8.65a1 1 0 0 1 0-1.302L5.084 1.7A2 2 0 0 1 6.603 1zm-7.08 1a1 1 0 0 0-.76.35L1 8l4.844 5.65a1 1 0 0 0 .759.35h7.08a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg>
+                   <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M5.83 5.146a.5.5 0 0 0 0 .708L7.975 8l-2.147 2.146a.5.5 0 0 0 .707.708l2.147-2.147 2.146 2.147a.5.5 0 0 0 .707-.708L9.39 8l2.146-2.146a.5.5 0 0 0-.707-.708L8.683 7.293 6.536 5.146a.5.5 0 0 0-.707 0z"/><path d="M13.683 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7.08a2 2 0 0 1-1.519-.698L.241 8.65a1 1 0 0 1 0-1.302L5.084 1.7A2 2 0 0 1 6.603 1zm-7.08 1a1 1 0 0 0-.76.35L1 8l4.844 5.65a1 1 0 0 0 .759.35h7.08a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg>
                 </button>
             </div>` : '';
 
@@ -42,7 +46,18 @@ class PartituraEditor {
 
         const style = doc.createElement('style');
         style.innerHTML = `
-            body { font-family: sans-serif; margin: 0; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; min-height: 100vh; background-color: transparent; }
+            body { 
+                font-family: sans-serif; 
+                margin: 0; 
+                overflow-x: auto; 
+                overflow-y: hidden; 
+                display: flex; 
+                /* 2. PARTITURA NO TOPO */
+                align-items: flex-start; 
+                padding-top: 60px; 
+                min-height: 100vh; 
+                background-color: transparent; 
+            }
             #score-container { min-width: max-content; padding: 20px; position: relative; }
             .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
@@ -239,9 +254,14 @@ class PartituraEditor {
 
         const width = Math.max(iframe.clientWidth - 80, this.currentData.length * 100);
         const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
-        renderer.resize(width, 300);
+
+        // 3. AJUSTE DE ALTURA DO RENDERER
+        renderer.resize(width, 400);
         const context = renderer.getContext();
-        const stave = new this.vf.Stave(10, 80, width - 20);
+
+        // 4. POSIÇÃO DA PAUTA (Stave) NO IFRAME
+        // y: 20 para ficar bem no topo, mas deixar espaço para cifras
+        const stave = new this.vf.Stave(10, 40, width - 20);
         stave.addClef("treble").setContext(context).draw();
 
         const tickables = this.currentData.flatMap((data, index) => {
