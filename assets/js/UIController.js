@@ -14,6 +14,10 @@ class UIController {
         this.esconderBotoesAcordes();
     }
 
+    esconderPartitura() {
+        this.elements.partituraFrame.classList.add('d-none');
+    }
+
     esconderBotoesAvancarVoltarCifra() {
         this.elements.retrocederButton.classList.remove('fade-in');
         this.elements.retrocederButton.classList.add('d-none');

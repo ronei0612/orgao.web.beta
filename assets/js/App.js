@@ -599,26 +599,16 @@ class App {
 
             this.partituraEditor.renderizarVisualizacao(dataArray); // MANDA DESENHAR NO FRAME DE VIEW
 
-            this.uiController.esconderBotoesAcordes();
-            this.uiController.esconderBotoesAvancarVoltarCifra();
+            this.uiController.exibirBotoesCifras();
         } else if (type === 'cifra') {
-            // --- MODO CIFRA ---
             this.elements.iframeCifra.removeAttribute('src'); // Limpa o modo partitura
             const texto = saveData.chords ?? saveData;
             const textoMusica = this.cifraPlayer.destacarCifras(texto, saveData.key || null);
 
             this.verifyLetraOuCifra(textoMusica, saveData.chords ? saveData : null);
+            this.uiController.esconderPartitura();
             this.uiController.exibirBotoesCifras();
 
-        } else if (type === 'letra') {
-            // --- MODO LETRA ---
-            this.elements.iframeCifra.removeAttribute('src');
-            const texto = saveData.chords ?? saveData;
-            const html = `<pre class="letra">${texto}</pre>`;
-
-            this.cifraPlayer.preencherIframeCifra(html);
-            this.uiController.esconderBotoesAcordes();
-            this.uiController.esconderBotoesAvancarVoltarCifra();
         }
 
         // 4. Aplica as configurações de BPM, Instrumento e Estilo
