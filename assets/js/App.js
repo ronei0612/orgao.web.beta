@@ -5,7 +5,7 @@ class App {
         this.musicTheory = new MusicTheory();
         this.uiController = new UIController(this.elements);
         this.localStorageManager = new LocalStorageManager();
-        this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame);
+        this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame);
         this.draggableController = new DraggableController(this.elements.draggableControls);
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
 
@@ -371,26 +371,30 @@ class App {
         this.elements.addButton.classList.add('pressed');
         setTimeout(() => this.elements.addButton.classList.remove('pressed'), 100);
 
+        // Verifica se o menu de edição (lápis/lixeira) está ativo
         if (!this.elements.deleteSavesSelect.classList.contains('d-none')) {
+
             // 1. Pergunta o tipo (Cifra ou Partitura)
             const tipo = await this.uiController.chooseEditorType();
             this.currentEditorType = tipo;
 
-            // 2. Prepara os campos de nome
+            // 2. Limpa o nome da música e o select
             this.elements.itemNameInput.value = '';
             $('#savesSelect').val('').trigger('change');
 
-            // 3. Abre a interface de edição correta
+            // 3. Prepara a visualização (Mostra o Iframe de edição ou o Textarea)
             this.uiController.editarMusica(tipo);
 
             if (tipo === 'partitura') {
-                // Inicializa o editor de partitura com um exemplo limpo ou vazio
-                const defaultData = ["[C]c/4@Nova"].map(l => l.trim());
-                this.elements.partituraEditFrame.contentWindow.setDataFromApp(defaultData);
+                // 4. Inicializa o editor gráfico limpo
+                // Passamos um array vazio [] para o PartituraEditor colocar a nota padrão (b/4)
+                this.partituraEditor.abrirEditor([]);
             } else {
+                // Limpa o editor de texto normal
                 this.elements.editTextarea.value = '';
             }
 
+            // 5. Configurações padrão de UI
             this.uiController.exibirBotoesTom();
             this.uiController.exibirBotoesAcordes();
             this.cifraPlayer.preencherSelectCifras('C');
@@ -404,26 +408,31 @@ class App {
         const saveName = this.elements.savesSelect.value;
         if (!saveName) return;
 
+        // 1. Busca os dados salvos
         const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, saveName);
-        const tipo = saveData.type || 'cifra';
+
+        // 2. Identifica o tipo (se for dado antigo sem 'type', tenta adivinhar)
+        const tipo = saveData.type || (saveData.chords?.includes('@') ? 'partitura' : 'cifra');
         this.currentEditorType = tipo;
 
         this.editing = true;
         this.elements.itemNameInput.value = saveName;
 
-        if (tipo === 'cifra') {
-            this.elements.editTextarea.value = saveData.chords || "";
-        }
-        else if (tipo === 'partitura') {
-            const dataArray = saveData.chords.split('\n').filter(l => l.trim());
-            this.partituraEditor.resetAndFill(dataArray); // Método do Gerenciador
-        }
-
+        // 3. Prepara a UI correta
         this.uiController.editarMusica(tipo);
 
+        if (tipo === 'partitura') {
+            const dataArray = saveData.chords.split('\n').filter(l => l.trim());
+            this.partituraEditor.abrirEditor(dataArray); // MANDA DESENHAR NO FRAME DE EDIT
+        } else {
+            // Preenche o editor de texto normal
+            this.elements.editTextarea.value = saveData.chords || "";
+        }
+
+        // 4. Ajustes de botões e transposição
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
-        this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
+        this.cifraPlayer.preencherSelectCifras(saveData.key ?? 'C');
         this.exibirInstrument(this.cifraPlayer.instrumento);
     }
 
@@ -583,25 +592,15 @@ class App {
 
         // 3. Lógica de renderização por tipo
         if (type === 'partitura') {
-            // --- MODO PARTITURA ---
-            const urlPartitura = `./partitura.html?music=${encodeURIComponent(songName)}`;
+            const dataArray = saveData.chords.split('\n').filter(l => l.trim() !== '');
 
-            // Se o iframe já estiver na página de partitura, apenas manda ele recarregar os dados
-            // Se for uma música diferente ou o iframe estava em outro modo, muda o SRC
-            if (this.elements.iframeCifra.src.includes('partitura.html')) {
-                // Se o parâmetro music na URL for diferente do atual, atualiza o src
-                if (!this.elements.iframeCifra.src.includes(encodeURIComponent(songName))) {
-                    this.elements.iframeCifra.src = urlPartitura;
-                } else if (this.elements.iframeCifra.contentWindow.loadFromLocalStorage) {
-                    this.elements.iframeCifra.contentWindow.loadFromLocalStorage();
-                }
-            } else {
-                this.elements.iframeCifra.src = urlPartitura;
-            }
+            this.elements.partituraFrame.classList.remove('d-none'); // Mostra o frame de visualização
+            this.elements.iframeCifra.classList.add('d-none');       // Esconde a cifra de texto
+
+            this.partituraEditor.renderizarVisualizacao(dataArray); // MANDA DESENHAR NO FRAME DE VIEW
 
             this.uiController.esconderBotoesAcordes();
             this.uiController.esconderBotoesAvancarVoltarCifra();
-
         } else if (type === 'cifra') {
             // --- MODO CIFRA ---
             this.elements.iframeCifra.removeAttribute('src'); // Limpa o modo partitura
@@ -651,20 +650,24 @@ class App {
     }
 
     async selectEscolhido(selectItem) {
-        // Desativado para melhorar a experiência do usuário (temporariamente)
-        //if (this.selectItemAntes && this.selectItemAntes !== 'acordes__' && this.selectItemAntes !== '')
-        //    await this.verificarTrocouTom();
-
         this.selectItemAntes = selectItem;
+
+        // 1. SEMPRE garante que os editores (texto e gráfico) sejam escondidos ao trocar de música
+        this.uiController.resetInterface();
+        this.elements.partituraEditFrame.classList.add('d-none');
+        this.editing = false; // Desliga a flag de edição
 
         if (selectItem && selectItem !== 'acordes__') {
             const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem);
+
+            // 2. O showLetraCifra vai cuidar de carregar o partitura.html ou o HTML da cifra
             this.showLetraCifra(saveData);
+
             this.escolherStyle(saveData.style);
             this.uiController.rolarIframeParaTopo(this.elements.iframeCifra);
         }
         else {
-            this.uiController.resetInterface();
+            // Lógica para quando seleciona "Acordes" (vazio)
             this.uiController.exibirBotoesAcordes();
             var saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_ACORDES_KEY, 'acordes');
             let tom = 'C';
@@ -684,6 +687,8 @@ class App {
 
             if (selectItem === 'acordes__') {
                 this.cifraPlayer.preencherIframeCifra('');
+                // Garante que o iframe de partitura de visualização também suma
+                this.elements.partituraFrame.classList.add('d-none');
             }
         }
     }
@@ -1195,14 +1200,8 @@ class App {
         // --- 3. COLETA O CONTEÚDO (O CORPO DA MÚSICA) ---
         let content = "";
         if (this.currentEditorType === 'partitura') {
-            if (this.elements.partituraEditFrame.contentWindow.getDataForApp) {
-                content = this.elements.partituraEditFrame.contentWindow.getDataForApp();
-            } else {
-                console.error("Erro: Função getDataForApp não encontrada no Iframe.");
-                return;
-            }
+            content = this.partituraEditor.obterDadosParaSalvar(); // COLECIONA OS DADOS
         } else {
-            // Pega o texto normal do textarea (Cifra ou Letra)
             content = this.elements.editTextarea.value;
         }
 
@@ -1323,7 +1322,6 @@ document.addEventListener('DOMContentLoaded', () => {
         iframeCifra: document.getElementById('iframeCifra'),
         santamissaFrame: document.getElementById('santamissaFrame'),
         oracoesFrame: document.getElementById('oracoesFrame'),
-        partituraEditFrame: document.getElementById('partituraEditFrame'),
         darkModeToggle: document.getElementById('darkModeToggle'),
         searchModalLabel: document.getElementById('searchModalLabel'),
         savesSelect: document.getElementById('savesSelect'),
