@@ -19,7 +19,6 @@ class PartituraEditor {
     prepararIframe(iframe, isEditable) {
         const doc = iframe.contentDocument || iframe.contentWindow.document;
 
-        // Toolbar Superior: Navegação Horizontal (Esq/Dir), Vertical (Cima/Baixo) e Compasso
         let topToolbarHtml = isEditable ? `
             <div class="top-toolbar">
                 <button class="tool-btn btn-nav" id="btn-prev" title="Nota Anterior">◀</button>
@@ -31,7 +30,7 @@ class PartituraEditor {
         let sideToolbarHtml = isEditable ? `
             <div class="side-toolbar">
                 <button class="tool-btn btn-add" id="btn-add">+♪</button>
-                <button class="tool-btn btn-bar" id="btn-bar" title="Compasso">+|</button>
+                <button class="tool-btn btn-bar" id="btn-bar" title="Compasso">|</button>
                 <button class="tool-btn btn-chord" id="btn-chord">C7</button>
                 <button class="tool-btn btn-lyric" id="btn-lyric">Abc</button>
                 <button class="tool-btn btn-delete" id="btn-delete">
@@ -47,25 +46,38 @@ class PartituraEditor {
             #score-container { min-width: max-content; padding: 20px; position: relative; }
             .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-            .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; }
+            .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; outline: none; }
             .tool-btn:active { transform: scale(0.9); background: #f0f0f0; }
             .btn-nav { color: green; font-size: 20px; border-radius: 8px; }
             .btn-bar { color: #333; font-size: 24px; border-width: 1px; }
             .btn-add { color: #2e7d32; font-size: 24px; }
             .btn-delete { color: #c62828; }
-            .inline-input { position: absolute; transform: translateX(-50%); width: 70px; text-align: center; font-weight: bold; border: 2px solid #2196F3; border-radius: 4px; z-index: 100; background: white; }
+            .inline-input { 
+                position: absolute; 
+                transform: translateX(-50%); 
+                width: 80px; 
+                text-align: center; 
+                font-size: 16px;
+                font-weight: bold; 
+                border: 2px solid #2196F3; 
+                border-radius: 4px; 
+                z-index: 1200; 
+                background: white; 
+                color: black;
+                padding: 5px;
+                outline: none;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            }
             .dark-mode-svg { filter: invert(1) hue-rotate(180deg); }
         `;
         doc.head.appendChild(style);
 
         if (isEditable) {
-            // Eventos Top (Navegação e Altura)
             doc.getElementById('btn-prev').onclick = () => this.navegarCursor(-1);
             doc.getElementById('btn-next').onclick = () => this.navegarCursor(1);
             doc.getElementById('btn-up').onclick = () => this.alterarAltura(1);
             doc.getElementById('btn-down').onclick = () => this.alterarAltura(-1);
             doc.getElementById('btn-bar').onclick = () => this.toggleBar();
-            // Eventos Side
             doc.getElementById('btn-add').onclick = () => this.addNewNote();
             doc.getElementById('btn-chord').onclick = () => this.showInlineInput('chord');
             doc.getElementById('btn-lyric').onclick = () => this.showInlineInput('lyric');
@@ -73,7 +85,78 @@ class PartituraEditor {
         }
     }
 
-    // --- NAVEGAÇÃO ---
+    // ... (seu construtor e prepararIframe permanecem iguais)
+
+    showInlineInput(type) {
+        this.commitInput();
+
+        const doc = this.editIframe.contentDocument;
+        const win = this.editIframe.contentWindow;
+        const xPos = this.noteXPositions[this.persistentSelectedIndex];
+
+        const input = doc.createElement('input');
+        input.id = 'inline-input';
+        input.className = 'inline-input';
+        input.style.left = xPos + 'px';
+        input.style.top = (type === 'chord' ? '40px' : '230px');
+        input.dataset.type = type;
+        input.dataset.index = this.persistentSelectedIndex;
+        input.value = this.currentData[this.persistentSelectedIndex][type] || "";
+
+        doc.getElementById('score-container').appendChild(input);
+
+        win.focus();
+        setTimeout(() => {
+            input.focus();
+            if (input.value) input.select();
+        }, 50);
+
+        input.onclick = (e) => e.stopPropagation();
+
+        input.onkeydown = (e) => {
+            if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                input.blur(); // Apenas forçamos o blur. O onblur cuidará do commit e do draw.
+            }
+            if (e.key === 'Escape') {
+                input.dataset.cancel = "true"; // Marcamos que foi cancelado
+                input.blur();
+            }
+        };
+
+        input.onblur = () => {
+            // Se não foi cancelado via ESC, salvamos
+            if (input.dataset.cancel !== "true") {
+                this.commitInput();
+            } else {
+                input.remove(); // Se foi ESC, apenas removemos sem salvar
+            }
+            this.draw(this.editIframe, true);
+        };
+    }
+
+    commitInput() {
+        const doc = this.editIframe.contentDocument;
+        const input = doc.getElementById('inline-input');
+
+        // Verificamos se o input existe E se ele ainda está anexado ao DOM (parentNode)
+        if (input && input.parentNode) {
+            const { type, index } = input.dataset;
+            if (this.currentData[index]) {
+                this.currentData[index][type] = input.value;
+            }
+
+            // Usamos uma verificação extra para evitar o erro do remove
+            try {
+                input.parentNode.removeChild(input);
+            } catch (e) {
+                // Se por algum motivo o nó já sumiu, ignoramos silenciosamente
+                console.warn("Input já havia sido removido");
+            }
+        }
+    }
+
+    // ... (o restante dos métodos draw, addNewNote, etc, permanecem iguais)
 
     navegarCursor(direcao) {
         this.commitInput();
@@ -81,7 +164,6 @@ class PartituraEditor {
         if (novoIndex >= 0 && novoIndex < this.currentData.length) {
             this.persistentSelectedIndex = novoIndex;
             this.draw(this.editIframe, true);
-            // Faz scroll automático para o cursor
             this.centralizarNoCursor();
         }
     }
@@ -104,8 +186,6 @@ class PartituraEditor {
         const target = doc.querySelector('svg .vf-stavenote:nth-child(' + (this.persistentSelectedIndex + 1) + ')');
         if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
-
-    // --- MÉTODOS APP.JS ---
 
     abrirEditor(dataArray = []) {
         this.currentData = (dataArray && dataArray.length > 0)
@@ -130,8 +210,6 @@ class PartituraEditor {
             return s;
         }).join('\n');
     }
-
-    // --- LÓGICA VEXFLOW ---
 
     normalizeItem(item) {
         let str = String(item).trim();
@@ -188,42 +266,13 @@ class PartituraEditor {
         new this.vf.Formatter().joinVoices([voice]).format([voice], width - 100);
         voice.draw(context, stave);
 
-        // Armazena posições apenas para o posicionamento dos inputs de texto
         if (isEditable) {
             this.noteXPositions = tickables.filter(t => t instanceof this.vf.StaveNote).map(n => n.getAbsoluteX());
         }
     }
 
-    commitInput() {
-        const input = this.editIframe.contentDocument.getElementById('inline-input');
-        if (input) {
-            const { type, index } = input.dataset;
-            this.currentData[index][type] = input.value;
-            input.remove();
-        }
-    }
-
-    showInlineInput(type) {
-        this.commitInput();
-        const doc = this.editIframe.contentDocument;
-        const xPos = this.noteXPositions[this.persistentSelectedIndex];
-        const input = doc.createElement('input');
-        input.id = 'inline-input';
-        input.className = 'inline-input';
-        input.style.left = xPos + 'px';
-        input.style.top = (type === 'chord' ? '40px' : '230px');
-        input.dataset.type = type;
-        input.dataset.index = this.persistentSelectedIndex;
-        input.value = this.currentData[this.persistentSelectedIndex][type] || "";
-        doc.getElementById('score-container').appendChild(input);
-        input.focus();
-        input.onkeydown = (e) => e.key === 'Enter' && this.draw(this.editIframe, true);
-        input.onblur = () => this.draw(this.editIframe, true);
-    }
-
     addNewNote() {
         this.commitInput();
-        // Adiciona nota Si central por padrão após a nota atual
         this.currentData.splice(this.persistentSelectedIndex + 1, 0, { notes: ["b/4"], chord: "", lyric: "", bar: false });
         this.persistentSelectedIndex++;
         this.draw(this.editIframe, true);
