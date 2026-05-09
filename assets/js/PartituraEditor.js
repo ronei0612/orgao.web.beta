@@ -222,6 +222,7 @@ class PartituraEditor {
             let s = d.chord ? `[${d.chord}]` : "";
             s += d.notes.join(",");
             if (d.lyric) s += `@${d.lyric}`;
+            if (d.rest) s = 'R|' + s; // prefixo R indica pausa
             if (d.bar) s += `|`;
             return s;
         }).join('\n');
@@ -229,7 +230,9 @@ class PartituraEditor {
 
     normalizeItem(item) {
         let str = String(item).trim();
-        let chord = "", lyric = "", bar = false;
+        let chord = "", lyric = "", bar = false, rest = false;
+        // No normalizeItem, detectar o prefixo:
+        if (str.startsWith('R|')) { rest = true; str = str.slice(2); }
         if (str.startsWith('[')) {
             let closeIdx = str.indexOf(']');
             if (closeIdx !== -1) { chord = str.substring(1, closeIdx); str = str.substring(closeIdx + 1); }
@@ -241,7 +244,8 @@ class PartituraEditor {
         }
         let notes = str.split(',').map(n => n.trim());
         if (notes.length === 1 && notes[0] === "") notes = ["b/4"];
-        return { notes, chord, lyric, bar };
+        // No normalizeItem, adicionar ao retorno:
+        return { notes, chord, lyric, bar, rest };
     }
 
     draw(iframe, isEditable) {
@@ -266,7 +270,10 @@ class PartituraEditor {
         stave.addClef("treble").setContext(context).draw();
 
         const tickables = this.currentData.flatMap((data, index) => {
-            const note = new this.vf.StaveNote({ keys: data.notes, duration: "q" });
+            const note = new this.vf.StaveNote({
+                keys: data.rest ? ["b/4"] : data.notes,
+                duration: data.rest ? "qr" : "q"
+            });
             data.notes.forEach((keyName, i) => {
                 const match = keyName.match(/([a-g])([#b])\//i);
                 if (match) note.addModifier(new this.vf.Accidental(match[2]), i);
@@ -305,11 +312,22 @@ class PartituraEditor {
     }
 
     deleteNoteAtCursor() {
-        if (this.currentData.length > 1) {
+        if (this.currentData.length < 1) return;
+
+        const nota = this.currentData[this.persistentSelectedIndex];
+
+        if (!nota.rest) {
+            // Primeiro clique: vira pausa
+            nota.rest = true;
+        } else {
+            // Segundo clique: deleta
             this.currentData.splice(this.persistentSelectedIndex, 1);
-            if (this.persistentSelectedIndex >= this.currentData.length) this.persistentSelectedIndex = this.currentData.length - 1;
-            this.draw(this.editIframe, true);
+            if (this.persistentSelectedIndex >= this.currentData.length) {
+                this.persistentSelectedIndex = this.currentData.length - 1;
+            }
         }
+
+        this.draw(this.editIframe, true);
     }
 
     toggleBar() {

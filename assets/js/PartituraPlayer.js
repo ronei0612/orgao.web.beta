@@ -62,12 +62,14 @@ class PartituraPlayer {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
-        // 1. Som da Nota Melódica
-        data.notes.forEach(n => {
-            const [nota, oitava] = n.split('/');
-            const notaLimpa = nota.toLowerCase().replace('#', '_');
-            this.playSound(this.instrumento, notaLimpa, oitava);
-        });
+        // 1. Som da Nota Melódica (ignora se for pausa)
+        if (!data.rest) {
+            data.notes.forEach(n => {
+                const [nota, oitava] = n.split('/');
+                const notaLimpa = nota.toLowerCase().replace('#', '_');
+                this.playSound(this.instrumento, notaLimpa, oitava);
+            });
+        }
 
         // 2. Som do Acorde (se houver [C] na nota)
         if (data.chord) {
