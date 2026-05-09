@@ -4,6 +4,8 @@
 
 Este é um aplicativo web de música com editor e player de cifras e partituras. O sistema é composto por três classes principais que trabalham em conjunto: `PartituraEditor`, `PartituraPlayer` e `App`.
 
+O ponto de entrada é o `index.html`, que monta toda a estrutura de DOM, carrega as dependências e instancia a classe `App` no evento `DOMContentLoaded`.
+
 ---
 
 ## Arquitetura das Classes
@@ -153,11 +155,147 @@ O `PartituraEditor` recebe referências a ambos e usa `draw(iframe, isEditable)`
 
 ---
 
+## Estrutura do HTML (`index.html`)
+
+### Elementos de UI e seus IDs
+
+Todos os IDs abaixo são coletados no objeto `elements` dentro do `DOMContentLoaded` e passados ao construtor de `App`.
+
+#### Barra Superior
+| ID | Tipo | Função |
+|---|---|---|
+| `tomSelect` | `<select>` | Seletor de tom (C a B). Dispara `change` ao trocar tom. |
+| `decreaseTom` | `<button>` | Diminui o tom em um semitom. |
+| `increaseTom` | `<button>` | Aumenta o tom em um semitom. |
+| `bpm-input` | `<input text>` | Valor de BPM. Padrão: `90`. |
+| `decrement-bpm` | `<button>` | Diminui BPM em 1. |
+| `decrement-bpm-5` | `<button>` | Diminui BPM em 5. |
+| `increment-bpm-5` | `<button>` | Aumenta BPM em 5. |
+| `savesSelect` | `<select>` | Lista de músicas salvas (Select2). |
+| `selectedButton` | `<button>` | Exibido no lugar do select em modo compacto. |
+| `itemNameInput` | `<input text>` | Nome da música durante criação/edição. |
+| `saveButton` | `<button>` | Confirma o salvamento. Ícone: ✓ |
+| `cancelButton` | `<button>` | Cancela a edição. |
+| `addButton` | `<button>` | Abre opções para adicionar nova música. Ícone: `plus-square.svg` |
+| `editSavesSelect` | `<button>` | Abre editor da música selecionada. Ícone: lápis. Oculto por padrão. |
+| `deleteSavesSelect` | `<button>` | Exclui a música selecionada. Ícone: lixeira. Oculto por padrão. |
+
+#### Área de Conteúdo (iframes e textarea)
+| ID | Tipo | Visibilidade padrão | Função |
+|---|---|---|---|
+| `iframeCifra` | `<iframe>` | **Visível** | Exibe a cifra/letra formatada em HTML. |
+| `partituraFrame` | `<iframe>` | `d-none` | Exibe a partitura em modo visualização (somente leitura). |
+| `partituraEditFrame` | `<iframe>` | `d-none` | Exibe o editor interativo de partitura. |
+| `editTextarea` | `<textarea>` | `d-none` | Editor de texto para cifras. |
+| `liturgiaDiariaFrame` | `<iframe>` | `d-none` | Liturgia diária (URL externa). |
+| `santamissaFrame` | `<iframe>` | `d-none` | Ordinário da Santa Missa (`santamissa.html`). |
+| `oracoesFrame` | `<iframe>` | `d-none` | Orações (`oracoes.html`). |
+
+> **Regra de visibilidade**: em qualquer momento, apenas **um** dos iframes de conteúdo deve estar visível. `UIController` gerencia isso via `classList.add/remove('d-none')`.
+
+#### Controles de Transporte (Playback)
+Ficam dentro de `#draggableControls` (posição arrastável).
+
+| ID | Tipo | `data-action` | Função |
+|---|---|---|---|
+| `playButton` | `<button>` | `play` | Inicia reprodução. |
+| `stopButton` | `<button>` | `stop` | Para reprodução. Oculto por padrão. |
+| `avancarButton` | `<button>` | — | Avança nota (partitura) ou acorde (cifra). Oculto por padrão. |
+| `retrocederButton` | `<button>` | — | Retrocede nota/acorde. Oculto por padrão. |
+| `notesButton` | `<button>` | `notes` | Alterna entre acorde cheio e nota solo. |
+
+#### Botões de Acordes
+Todos têm `data-action="acorde"` e `value` com o nome do acorde.
+
+**Acordes principais** (linha inferior, maior):
+`acorde1=C`, `acorde2=Am`, `acorde3=F`, `acorde4=Dm`, `acorde5=G`, `acorde6=Em`
+
+**Acordes secundários** (linha superior, menor):
+`acorde7=A`, `acorde8=E`, `acorde9=Bb`, `acorde10=D`, `acorde11=B°`
+
+#### Bateria (`#bateriaWrapper`) — oculto por padrão
+| ID | Função |
+|---|---|
+| `drumStyleSelect` | Select de estilos de bateria. |
+| `bateriaInstrumentButton` | Alterna instrumento para Bateria/E-Piano. |
+| `num-steps` | Número de steps do sequenciador (padrão: 4). |
+| `tracks` | Container onde `DrumMachine` injeta as trilhas dinamicamente. |
+| `save-rhythm` / `copy-rhythm` / `paste-rhythm` | Operações de ritmo. |
+
+#### Melodia (`#melodyWrapper`) — sempre visível
+| ID | Função |
+|---|---|
+| `melodyStyleSelect` | Select de estilos de melodia para o órgão. |
+| `orgaoInstrumentButton` | Alterna instrumento para Órgão/E-Piano. |
+| `melodyTracks` | Container de trilhas de melodia. Oculto por padrão. |
+| `melody-num-steps` | Número de steps da melodia (padrão: 8). |
+
+#### Botões de Percussão (`#rhythm-buttons`) — oculto por padrão
+Cinco botões com classe `.rhythm-button`:
+`rhythm-a` (Chimbal Fechado), `rhythm-b` (Bumbo), `rhythm-c` (Caixa), `rhythm-d` (Chimbal Aberto), `rhythm-e` (Meia-Lua).
+
+---
+
+### Modais Bootstrap
+
+| ID | Acionado por | Função |
+|---|---|---|
+| `optionsModal` | `#menuButton` (ícone menu.svg) | Menu de opções: dark mode, links, salvar/importar repertório, restaurar, sobre. |
+| `searchModal` | `#searchButton` ou botão Pesquisar | Pesquisa de músicas local + CifraClub. Contém `#searchInput`, `#searchResults`, `#cifraDisplay`, botão `#tocarButton`. |
+| `customConfirmModal` | `uiController.customConfirm()` | Modal de confirmação customizado com botões "Sim" / "Não". |
+| `customAlertModal` | `uiController.customAlert()` | Modal de alerta customizado com botão "OK". |
+
+#### Itens do `#optionsModal`
+| ID | Função |
+|---|---|
+| `darkModeToggle` | Checkbox que ativa/desativa o modo escuro. |
+| `missaOrdinarioLink` | Exibe `santamissaFrame`. |
+| `liturgiaDiariaLink` | Exibe `liturgiaDiariaFrame`. |
+| `oracoesLink` | Exibe `oracoesFrame`. |
+| `downloadSavesLink` | Baixa repertório como JSON. |
+| `uploadSavesLink` | Importa JSON de repertório. |
+| `downloadStylesLink` | Baixa styles de bateria (oculto em produção). |
+| `restoreLink` | Limpa localStorage e recarrega. |
+| `about` | Exibe modal com versão e logs de debug. |
+| `volumeOrgao` | Input numérico para volume do órgão (padrão: `0.7`). |
+
+---
+
+### Ordem de Carregamento dos Scripts
+
+Os scripts são carregados no final do `<body>` nesta ordem, o que define as dependências:
+
+```
+jQuery → Popper.js → Bootstrap → Select2 → VexFlow
+  ↓
+logIntercepted.js
+AudioContextManager.js
+DraggableController.js
+CifraPlayer.js
+PartituraPlayer.js
+MusicTheory.js
+UIController.js
+LocalStorageManager.js
+PartituraEditor.js
+App.js          ← instancia tudo no DOMContentLoaded
+DrumMachine.js
+BateriaUI.js
+MelodyMachine.js
+MelodyUI.js
+```
+
+> **Atenção**: `App.js` deve vir antes de `DrumMachine`, `BateriaUI`, `MelodyMachine` e `MelodyUI` porque estes são instanciados dentro do método `App.init()`, que é `async`.
+
+---
+
 ## Dependências Externas
 
-- **VexFlow** (`Vex.Flow`): biblioteca de notação musical para SVG. Deve estar carregada globalmente antes das classes.
-- **Bootstrap 4** + **Select2**: UI e componente de busca do select.
-- **jQuery**: utilizado para manipulação do Select2.
+- **VexFlow 4.2.5** (`Vex.Flow`): biblioteca de notação musical para SVG. CDN: `cdn.jsdelivr.net/npm/vexflow@4.2.5/build/cjs/vexflow.js`
+- **Bootstrap 4.6.2**: grid, modais, botões. CSS e JS locais em `./assets/lib/`.
+- **Bootstrap Icons 1.8.1**: ícones (`bi bi-*`) usados nos botões da bateria e melodia.
+- **Select2 4.1.0-rc.0**: componente de busca do `#savesSelect`. CDN: `cdn.jsdelivr.net`.
+- **jQuery 3.5.1**: requerido pelo Bootstrap 4 e Select2. Local em `./assets/lib/`.
+- **Font Awesome 5.15.4**: ícones adicionais. CDN: `cdnjs.cloudflare.com`.
 
 ---
 
