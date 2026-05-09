@@ -8,6 +8,7 @@ class App {
         this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame);
         this.draggableController = new DraggableController(this.elements.draggableControls);
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
+        this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor);
 
         this.versionConfig = {
             version: '6.0.4',
@@ -110,8 +111,8 @@ class App {
         this.elements.missaOrdinarioLink.addEventListener('click', () => this.exibirFrame('santamissaFrame'));
         this.elements.stopButton.addEventListener('mousedown', this.handleStopMousedown.bind(this));
         this.elements.playButton.addEventListener('mousedown', this.handlePlayMousedown.bind(this));
-        this.elements.avancarButton.addEventListener('mousedown', () => this.cifraPlayer.avancarCifra());
-        this.elements.retrocederButton.addEventListener('mousedown', () => this.cifraPlayer.retrocederCifra());
+        this.elements.avancarButton.addEventListener('mousedown', () => this.avancar());
+        this.elements.retrocederButton.addEventListener('mousedown', () => this.retroceder());
         this.elements.orgaoInstrumentButton.addEventListener('click', () => this.handleOrgaoInstrumentClick());
         this.elements.bateriaInstrumentButton.addEventListener('click', () => this.handleOrgaoInstrumentClick());
         document.addEventListener('mousedown', this.fullScreen.bind(this));
@@ -249,6 +250,22 @@ class App {
     setBPM(bpm) {
         this.musicTheory.bpm = bpm;
         this.updateFillBlink(bpm);
+    }
+
+    avancar() {
+        if (!this.elements.partituraFrame.classList.contains('d-none')) {
+            this.partituraPlayer.avancarNotaAtualPartitura();
+        } else {
+            this.cifraPlayer.avancarCifra();
+        }
+    }
+
+    retroceder() {
+        if (!this.elements.partituraFrame.classList.contains('d-none')) {
+            this.partituraPlayer.retrocederNotaAtualPartitura();
+        } else {
+            this.cifraPlayer.retrocederCifra();
+        }
     }
 
     updateFillBlink(bpm) {
@@ -471,15 +488,25 @@ class App {
         if (this.elements.acorde1.classList.contains('d-none')) {
             this.uiController.esconderBotoesAvancarVoltarCifra();
         }
+
+        this.partituraPlayer.partituraPlaybackIndex = -1;
+        this.partituraEditor.highlightIndex = -1;
+        this.partituraEditor.draw(this.elements.partituraFrame, false);
+
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
         this.melodyUI.stop();
     }
 
     handlePlayMousedown() {
-        if (this.elements.acorde1.classList.contains('d-none')) {
-            this.cifraPlayer.iniciarReproducao();
+        if (this.currentEditorType === 'partitura' || (!this.elements.partituraFrame.classList.contains('d-none'))) {
+            this.partituraPlayer.partituraPlaybackIndex = 0;
+            this.partituraPlayer.tocarNotaAtualPartitura();
+            this.uiController.exibirBotaoStop();
             this.uiController.exibirBotoesAvancarVoltarCifra();
+        }
+        else if (this.elements.acorde1.classList.contains('d-none')) {
+            this.cifraPlayer.iniciarReproducao();
         } else {
             this.bateriaUI.play();
         }

@@ -15,6 +15,7 @@ class PartituraEditor {
         this.currentData = [];
         this.noteXPositions = [];
         this.persistentSelectedIndex = 0;
+        this.highlightIndex = -1;
 
         this.prepararIframe(this.editIframe, true);
         this.prepararIframe(this.viewIframe, false);
@@ -277,6 +278,10 @@ class PartituraEditor {
             }
             if (isEditable && index === this.persistentSelectedIndex) {
                 note.setStyle({ fillStyle: "green", strokeStyle: "green" });
+            }
+            // NOVO: Destaque de reprodução (Modo Visualização)
+            else if (!isEditable && index === this.highlightIndex) {
+                note.setStyle({ fillStyle: "#007bff", strokeStyle: "#007bff" });
             }
             return data.bar ? [note, new this.vf.BarNote()] : [note];
         });
