@@ -1,14 +1,61 @@
 class PartituraPlayer {
-    constructor(elements, cifraPlayer, partituraEditor) {
-        //this.audioPath = `${baseUrl}/assets/audio/`;
-        //this.uiController = uiController;
-        //this.musicTheory = musicTheory;
+    constructor(elements, cifraPlayer, partituraEditor, baseUrl) {
+        this.audioPath = `${baseUrl}/assets/audio/studio/Flauta`;
+        this.instrumento = 'flauta';
         this.elements = elements;
         this.cifraPlayer = cifraPlayer;
         this.partituraEditor = partituraEditor;
         this.partituraPlaybackIndex = -1;
-        //this.audioContextManager = new AudioContextManager();
-        //this.carregarAcordes();
+        this.buffers = new Map();
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.init();
+    }
+
+    async init() {
+        await this.loadSounds();
+    }
+
+    async loadSounds() {
+        const loadPromises = [];
+
+        Object.values(this.partituraEditor.basePitches).flat().forEach(nota => {
+            const name = this.instrumento + '_' + nota.replace('/', '').replace('#', '_');
+            const url = `${this.audioPath}/${name}.ogg`;
+
+            loadPromises.push((async () => {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) return; // arquivo não existe, ignora silenciosamente
+                    const arrayBuffer = await response.arrayBuffer();
+                    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+                    this.buffers.set(name, audioBuffer);
+                } catch (e) {
+                    console.warn(`Som não encontrado: ${name}`);
+                }
+            })());
+        });
+
+        await Promise.all(loadPromises);
+    }
+
+    playSound(instrumento, notaLimpa, oitava) {
+        const name = `${instrumento}_${notaLimpa}${oitava}`;
+        const buffer = this.buffers.get(name);
+
+        if (!buffer) {
+            console.warn(`Buffer não encontrado: ${name}`);
+            return;
+        }
+
+        // Retoma o contexto se estiver suspenso (política de autoplay dos browsers)
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(this.audioContext.destination);
+        source.start(0);
     }
 
     tocarNotaAtualPartitura() {
@@ -17,22 +64,14 @@ class PartituraPlayer {
 
         // 1. Som da Nota Melódica
         data.notes.forEach(n => {
-            // Traduz "c/4" -> "c" oitava "baixo"
-            const [nota, oitavaNum] = n.split('/');
-            let sufixo = "";
-            if (oitavaNum === "3") sufixo = "grave";
-            if (oitavaNum === "4") sufixo = "baixo";
-            // oitava 5 é a padrão (vazio)
-
+            const [nota, oitava] = n.split('/');
             const notaLimpa = nota.toLowerCase().replace('#', '_');
-            //this.cifraPlayer.adicionarSom(this.cifraPlayer.instrumento, notaLimpa, sufixo);
+            this.playSound(this.instrumento, notaLimpa, oitava);
         });
 
         // 2. Som do Acorde (se houver [C] na nota)
         if (data.chord) {
             this.cifraPlayer.tocarAcorde(data.chord);
-        } else {
-            this.cifraPlayer.audioContextManager.play(this.cifraPlayer.attack);
         }
 
         // 3. Visual: Atualiza o destaque no Iframe

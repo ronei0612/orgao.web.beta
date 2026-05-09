@@ -8,7 +8,7 @@ class App {
         this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame);
         this.draggableController = new DraggableController(this.elements.draggableControls);
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
-        this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor);
+        this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor, this.BASE_URL);
 
         this.versionConfig = {
             version: '6.0.4',
