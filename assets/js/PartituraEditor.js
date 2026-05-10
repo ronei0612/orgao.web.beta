@@ -330,20 +330,45 @@ class PartituraEditor {
     }
 
     transporVisualizacao(semitones) {
-        debugger;
         if (semitones === 0) return;
 
         this.currentData = this.currentData.map(item => {
             if (item.rest) return { ...item };
-            return {
-                ...item,
-                notes: item.notes.map(n => {
-                    const idx = this.basePitches.indexOf(n);
-                    if (idx === -1) return n;
-                    const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
-                    return this.basePitches[novoIdx];
-                })
-            };
+
+            // Transpõe as notas via basePitches (cuida das oitavas)
+            const notes = item.notes.map(n => {
+                const idx = this.basePitches.indexOf(n);
+                if (idx === -1) return n;
+                const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
+                return this.basePitches[novoIdx];
+            });
+
+            // Transpõe a cifra harmônica (se houver)
+            let chord = item.chord;
+            if (chord) {
+                const partes = chord.split('/');
+                const principal = partes[0];
+
+                // Extrai só a tônica (ex: "Am7" -> "A", "C#m" -> "C#")
+                const match = principal.match(/^([A-G][#b]?)(.*)/);
+                if (match) {
+                    const tonica = match[1];
+                    const resto = match[2];
+                    const tonicaTransposta = this.musicTheory.transposeAcorde(tonica, semitones, null);
+                    chord = tonicaTransposta + resto;
+
+                    // Transpõe o baixo se houver (ex: "G/B")
+                    if (partes[1]) {
+                        const baixoMatch = partes[1].match(/^([A-G][#b]?)(.*)/);
+                        if (baixoMatch) {
+                            const baixoTransposto = this.musicTheory.transposeAcorde(baixoMatch[1], semitones, null);
+                            chord += '/' + baixoTransposto + baixoMatch[2];
+                        }
+                    }
+                }
+            }
+
+            return { ...item, notes, chord };
         });
 
         this.draw(this.viewIframe, false);
