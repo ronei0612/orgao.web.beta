@@ -1,11 +1,12 @@
 class PartituraEditor {
-    constructor(editIframe, viewIframe) {
+    constructor(editIframe, viewIframe, musicTheory) {
         this.editIframe = editIframe;
         this.viewIframe = viewIframe;
+        this.musicTheory = musicTheory;
         this.vf = Vex.Flow;
 
         this.basePitches = [
-            "g/3", "g#/3", "a/3", "a#/3", "b/3",
+            "g#/3", "a/3", "a#/3", "b/3",
             "c/4", "c#/4", "d/4", "d#/4", "e/4", "f/4", "f#/4", "g/4", "g#/4", "a/4", "a#/4", "b/4",
             "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5"
         ];
@@ -14,6 +15,7 @@ class PartituraEditor {
         this.noteXPositions = [];
         this.persistentSelectedIndex = 0;
         this.highlightIndex = -1;
+        this.lastUsedPitch = "b/4";
 
         this.prepararIframe(this.editIframe, true);
         this.prepararIframe(this.viewIframe, false);
@@ -191,6 +193,7 @@ class PartituraEditor {
         let novoIndex = index + direcao;
         if (novoIndex >= 0 && novoIndex < this.basePitches.length) {
             this.currentData[this.persistentSelectedIndex].notes = [this.basePitches[novoIndex]];
+            this.lastUsedPitch = this.basePitches[novoIndex]; // <- adicionar
             this.draw(this.editIframe, true);
         }
     }
@@ -289,10 +292,14 @@ class PartituraEditor {
                 keys: data.rest ? ["b/4"] : data.notes,
                 duration: data.rest ? "qr" : "q"
             });
-            data.notes.forEach((keyName, i) => {
-                const match = keyName.match(/([a-g])([#b])\//i);
-                if (match) note.addModifier(new this.vf.Accidental(match[2]), i);
-            });
+
+            // Só adiciona acidentes se NÃO for pausa
+            if (!data.rest) {
+                data.notes.forEach((keyName, i) => {
+                    const match = keyName.match(/([a-g])([#b])\//i);
+                    if (match) note.addModifier(new this.vf.Accidental(match[2]), i);
+                });
+            }
             if (note.getStem()) note.getStem().hide = true;
             if (data.chord) note.addModifier(new this.vf.ChordSymbol().setFont('Arial', 12, 'bold').addText(data.chord), 0);
             if (data.lyric) {
@@ -322,9 +329,61 @@ class PartituraEditor {
         }
     }
 
+    transporVisualizacao(semitones) {
+        if (semitones === 0) return;
+
+        this.currentData = this.currentData.map(item => {
+            if (item.rest) return { ...item };
+
+            // Transpõe as notas via basePitches (cuida das oitavas)
+            const notes = item.notes.map(n => {
+                const idx = this.basePitches.indexOf(n);
+                if (idx === -1) return n;
+                const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
+                return this.basePitches[novoIdx];
+            });
+
+            // Transpõe a cifra harmônica (se houver)
+            let chord = item.chord;
+            if (chord) {
+                const partes = chord.split('/');
+                const principal = partes[0];
+
+                // Extrai só a tônica (ex: "Am7" -> "A", "C#m" -> "C#")
+                const match = principal.match(/^([A-G][#b]?)(.*)/);
+                if (match) {
+                    const tonica = match[1];
+                    const resto = match[2];
+                    const tonicaTransposta = this.musicTheory.transposeAcorde(tonica, semitones, null);
+                    chord = tonicaTransposta + resto;
+
+                    // Transpõe o baixo se houver (ex: "G/B")
+                    if (partes[1]) {
+                        const baixoMatch = partes[1].match(/^([A-G][#b]?)(.*)/);
+                        if (baixoMatch) {
+                            const baixoTransposto = this.musicTheory.transposeAcorde(baixoMatch[1], semitones, null);
+                            chord += '/' + baixoTransposto + baixoMatch[2];
+                        }
+                    }
+                }
+            }
+
+            return { ...item, notes, chord };
+        });
+
+        this.draw(this.viewIframe, false);
+        if (this.onViewDrawn) this.onViewDrawn();
+    }
+
     addNewNote() {
         this.commitInput();
-        this.currentData.splice(this.persistentSelectedIndex + 1, 0, { notes: ["b/4"], chord: "", lyric: "", bar: false });
+        this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
+            notes: [this.lastUsedPitch], // <- era "b/4" fixo
+            chord: "",
+            lyric: "",
+            bar: false,
+            rest: false
+        });
         this.persistentSelectedIndex++;
         this.draw(this.editIframe, true);
         this.centralizarNoCursor();

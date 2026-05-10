@@ -5,7 +5,7 @@ class App {
         this.musicTheory = new MusicTheory();
         this.uiController = new UIController(this.elements);
         this.localStorageManager = new LocalStorageManager();
-        this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame);
+        this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
         this.draggableController = new DraggableController(this.elements.draggableControls);
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
         this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor, this.BASE_URL);
@@ -98,6 +98,9 @@ class App {
         this.elements.darkModeToggle.addEventListener('change', this.uiController.toggleDarkMode.bind(this.uiController));
         this.elements.tocarButton.addEventListener('click', this.handleTocarClick.bind(this));
         this.elements.tomSelect.addEventListener('change', this.handleTomSelectChange.bind(this));
+        //this.elements.tomSelect.addEventListener('mousedown', () => { this.tomAnterior = this.elements.tomSelect.value; });
+        //this.elements.decreaseTom.addEventListener('mousedown', () => { this.tomAnterior = this.elements.tomSelect.value;});
+        //this.elements.increaseTom.addEventListener('mousedown', () => { this.tomAnterior = this.elements.tomSelect.value; });
         this.elements.decreaseTom.addEventListener('click', this.handleDecreaseTomClick.bind(this));
         this.elements.increaseTom.addEventListener('click', this.handleIncreaseTomClick.bind(this));
         this.elements.addButton.addEventListener('click', this.handleAddClick.bind(this));
@@ -129,6 +132,19 @@ class App {
             this.elements.bpmInput.value = (parseInt(this.elements.bpmInput.value, 10) || 0) + 5;
             this.setBPM(parseInt(this.elements.bpmInput.value, 10));
         });
+
+        ['mousedown', 'touchstart'].forEach(evento => {
+            this.elements.tomSelect.addEventListener(evento, () => {
+                this.tomAnterior = this.elements.tomSelect.value;
+            });
+            this.elements.decreaseTom.addEventListener(evento, () => {
+                this.tomAnterior = this.elements.tomSelect.value;
+            });
+            this.elements.increaseTom.addEventListener(evento, () => {
+                this.tomAnterior = this.elements.tomSelect.value;
+            });
+        });
+
         //document.getElementById('increment-bpm').addEventListener('click', () => {
         //    this.elements.bpmInput.value = (parseInt(this.elements.bpmInput.value, 10) || 0) + 1;
         //    this.setBPM(parseInt(this.elements.bpmInput.value, 10));
@@ -347,13 +363,23 @@ class App {
                 this.cifraPlayer.preencherAcordes(selectedTom);
             }
             else {
-                this.cifraPlayer.transposeCifra();
+                // Modo partitura visualização
+                if (!this.elements.partituraFrame.classList.contains('d-none')) {
+                    const tomOrigem = this.tomAnterior || selectedTom;
+                    const semitones = this.musicTheory.getTransposeSteps(tomOrigem, selectedTom);
+                    this.tomAnterior = selectedTom; // atualiza para a próxima mudança
+                    this.partituraEditor.transporVisualizacao(semitones);
+                    return;
+                }
+                else {
+                    this.cifraPlayer.transposeCifra();
 
-                if (!this.cifraPlayer.parado && this.cifraPlayer.acordeTocando) {
-                    const button = event.currentTarget;
-                    this.cifraPlayer.parado = false;
-                    this.cifraPlayer.tocarAcorde(button.value);
-                    button.classList.add('pressed');
+                    if (!this.cifraPlayer.parado && this.cifraPlayer.acordeTocando) {
+                        const button = event.currentTarget;
+                        this.cifraPlayer.parado = false;
+                        this.cifraPlayer.tocarAcorde(button.value);
+                        button.classList.add('pressed');
+                    }
                 }
             }
         }
@@ -635,11 +661,13 @@ class App {
         if (type === 'partitura') {
             const dataArray = saveData.chords.split('\n').filter(l => l.trim() !== '');
 
-            this.elements.partituraFrame.classList.remove('d-none'); // Mostra o frame de visualização
-            this.elements.iframeCifra.classList.add('d-none');       // Esconde a cifra de texto
+            this.elements.partituraFrame.classList.remove('d-none');
+            this.elements.iframeCifra.classList.add('d-none');
 
-            this.partituraEditor.renderizarVisualizacao(dataArray); // MANDA DESENHAR NO FRAME DE VIEW
+            this.partituraOriginalKey = saveData.key || 'C'; // <- guardar tom original
+            this.cifraPlayer.tomOriginal = this.partituraOriginalKey;
 
+            this.partituraEditor.renderizarVisualizacao(dataArray);
             this.uiController.exibirBotoesCifras();
         } else if (type === 'cifra') {
             this.elements.iframeCifra.removeAttribute('src'); // Limpa o modo partitura
@@ -1012,12 +1040,17 @@ class App {
                     let newSaves = {};
 
                     const padronizarItem = (conteudo) => {
+                        // Detecta tipo: usa o campo salvo, ou tenta inferir pelo conteúdo
+                        const type = conteudo.type
+                            || (conteudo.chords?.includes('@') ? 'partitura' : 'cifra');
+
                         return {
                             chords: conteudo.chords ?? '',
-                            tom: conteudo.chords ?? 'C',
+                            key: conteudo.key ?? 'C',
                             instrument: conteudo.instrument ?? 'orgao',
                             style: conteudo.style ?? '',
-                            bpm: conteudo.bpm ?? 90
+                            bpm: conteudo.bpm ?? 90,
+                            type: type,  // <- adicionar
                         };
                     };
 
@@ -1097,8 +1130,10 @@ class App {
                 titulo: titulo,
                 bpm: conteudoCifra.bpm,
                 chords: conteudoCifra.chords,
+                key: conteudoCifra.key,        // <- já existia mas faltava
                 instrument: conteudoCifra.instrument,
                 style: conteudoCifra.style,
+                type: conteudoCifra.type || 'cifra',  // <- adicionar
             };
         });
 

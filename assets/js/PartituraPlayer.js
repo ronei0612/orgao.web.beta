@@ -65,7 +65,7 @@ class PartituraPlayer {
         await Promise.all(loadPromises);
     }
 
-    playSound(instrumento, notaLimpa, oitava, volume = 1) {
+    playSound(instrumento, notaLimpa, oitava, volume = 1, attack = 0) {
         this.stop();
         const name = `${instrumento}_${notaLimpa}${oitava}`;
         const buffer = this.buffers.get(name);
@@ -81,28 +81,44 @@ class PartituraPlayer {
 
         const source = this.audioContext.createBufferSource();
         const gainNode = this.audioContext.createGain();
-        gainNode.gain.value = volume;
+
+        // Usa currentTime para agendamento preciso (igual ao MelodyMachine)
+        const now = this.audioContext.currentTime;
+
+        // Começa em 0 e rampa suavemente — elimina o tic
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(volume, now + attack);
 
         source.buffer = buffer;
         source.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-        source.start(0);
+        source.start(now);
 
-        // Guarda referência para poder parar depois
-        this.activeSources.push(source);
+        // Guarda source + gainNode juntos para stop suave (igual ao MelodyMachine)
+        const noteEntry = { source, gainNode };
+        this.activeSources.push(noteEntry);
+
         source.onended = () => {
-            this.activeSources = this.activeSources.filter(s => s !== source);
+            this.activeSources = this.activeSources.filter(item => item !== noteEntry);
+            source.disconnect();
+            gainNode.disconnect();
         };
+
+        return noteEntry;
     }
 
     stop() {
-        this.activeSources.forEach(source => {
-            try { source.stop(); } catch (e) { /* já terminou naturalmente */ }
+        // Fade-out suave em todas as notas ativas (igual ao MelodyMachine)
+        const now = this.audioContext.currentTime;
+        this.activeSources.forEach(({ source, gainNode }) => {
+            try {
+                gainNode.gain.cancelScheduledValues(now);
+                gainNode.gain.setTargetAtTime(0, now, 0.02);
+                source.stop(now + 0.1);
+            } catch (e) { }
         });
         this.activeSources = [];
         //this.partituraPlaybackIndex = -1;
-        //this.partituraEditor.highlightIndex = -1;
-        this.partituraEditor.draw(this.elements.partituraFrame, false);
     }
 
     tocarNotaAtualPartitura(volume = 1) {
