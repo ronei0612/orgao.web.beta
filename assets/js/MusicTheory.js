@@ -477,6 +477,15 @@ class MusicTheory {
         return novoTom;
     }
 
+    getTransposeSteps(tomOrigem, tomDestino) {
+        const tons = this.acordesSustenidos; // ['C','C#','D',...,'B']
+        const origem = tons.indexOf(this.acordesMap[tomOrigem] || tomOrigem);
+        const destino = tons.indexOf(this.acordesMap[tomDestino] || tomDestino);
+
+        if (origem === -1 || destino === -1) return 0;
+        return destino - origem;
+    }
+
     descobrirTom(cifras) {
         if (!cifras || cifras.length === 0) {
             return '';
