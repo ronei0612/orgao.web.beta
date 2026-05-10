@@ -4,12 +4,10 @@ class PartituraEditor {
         this.viewIframe = viewIframe;
         this.vf = Vex.Flow;
 
-        // 1. EXTENSÃO ATUALIZADA: G3 até G6 (Cromático)
         this.basePitches = [
-            "e/3", "f/3", "f#/3", "g/3", "g#/3", "a/3", "a#/3", "b/3",
+            "g/3", "g#/3", "a/3", "a#/3", "b/3",
             "c/4", "c#/4", "d/4", "d#/4", "e/4", "f/4", "f#/4", "g/4", "g#/4", "a/4", "a#/4", "b/4",
-            "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5", "g#/5", "a/5", "a#/5", "b/5",
-            "c/6", "c#/6", "d/6", "d#/6"
+            "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5"
         ];
 
         this.currentData = [];
@@ -206,14 +204,31 @@ class PartituraEditor {
     abrirEditor(dataArray = []) {
         this.currentData = (dataArray && dataArray.length > 0)
             ? dataArray.map(l => this.normalizeItem(l))
-            : [{ notes: ["b/4"], chord: "", lyric: "", bar: false }];
+            : [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false }];
         this.persistentSelectedIndex = this.currentData.length - 1;
+        this.onEditDrawn = () => this.bindClickNotasEditor();
         this.draw(this.editIframe, true);
+    }
+
+    bindClickNotasEditor() {
+        const doc = this.editIframe.contentDocument;
+        if (!doc) return;
+
+        const notas = doc.querySelectorAll('.vf-stavenote');
+        notas.forEach((el, index) => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', () => {
+                this.persistentSelectedIndex = index;
+                this.draw(this.editIframe, true);
+            });
+        });
     }
 
     renderizarVisualizacao(dataArray = []) {
         this.currentData = dataArray.map(l => this.normalizeItem(l));
         this.draw(this.viewIframe, false);
+        // Notifica quem quiser bindar cliques após o draw
+        if (this.onViewDrawn) this.onViewDrawn();
     }
 
     obterDadosParaSalvar() {
@@ -300,6 +315,10 @@ class PartituraEditor {
 
         if (isEditable) {
             this.noteXPositions = tickables.filter(t => t instanceof this.vf.StaveNote).map(n => n.getAbsoluteX());
+            // Notifica após desenhar no editor
+            if (this.onEditDrawn) this.onEditDrawn();
+        } else {
+            if (this.onViewDrawn) this.onViewDrawn();
         }
     }
 
