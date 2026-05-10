@@ -10,6 +10,12 @@ class App {
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
         this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor, this.BASE_URL);
 
+        // Em App.init(), após criar o partituraPlayer:
+        this.partituraPlayer.onNotaClicada = () => {
+            this.uiController.exibirBotaoStop();
+            this.uiController.exibirBotoesAvancarVoltarCifra();
+        };
+
         this.versionConfig = {
             version: '6.0.4',
             htmlMessage: `
@@ -496,11 +502,19 @@ class App {
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
         this.melodyUI.stop();
+        this.partituraPlayer.stop();
+        //this.partituraEditor.highlightIndex = -1;
+        //this.partituraEditor.draw(this.elements.partituraFrame, false);
     }
 
     handlePlayMousedown() {
         if (this.currentEditorType === 'partitura' || (!this.elements.partituraFrame.classList.contains('d-none'))) {
-            this.partituraPlayer.partituraPlaybackIndex = 0;
+            // Se houver nota selecionada, começa por ela; senão começa do início
+            const startIndex = this.partituraEditor.highlightIndex !== -1
+                ? this.partituraEditor.highlightIndex
+                : 0;
+
+            this.partituraPlayer.partituraPlaybackIndex = startIndex;
             this.partituraPlayer.tocarNotaAtualPartitura();
             this.uiController.exibirBotaoStop();
             this.uiController.exibirBotoesAvancarVoltarCifra();

@@ -8,11 +8,38 @@ class PartituraPlayer {
         this.partituraPlaybackIndex = -1;
         this.buffers = new Map();
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.activeSources = [];
         this.init();
     }
 
     async init() {
         await this.loadSounds();
+
+        // Registra callback para bindar cliques sempre que a visualização for redesenhada
+        this.partituraEditor.onViewDrawn = () => this.bindClickNotas();
+    }
+
+    bindClickNotas() {
+        const doc = this.elements.partituraFrame.contentDocument;
+        if (!doc) return;
+
+        const notas = doc.querySelectorAll('.vf-stavenote');
+        notas.forEach((el, index) => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', () => {
+                // Sempre seleciona
+                this.partituraEditor.highlightIndex = index;
+                this.partituraEditor.draw(this.elements.partituraFrame, false);
+                this.bindClickNotas();
+
+                // Se estiver tocando, também toca
+                if (this.partituraPlaybackIndex !== -1) {
+                    this.partituraPlaybackIndex = index;
+                    this.tocarNotaAtualPartitura();
+                    if (this.onNotaClicada) this.onNotaClicada();
+                }
+            });
+        });
     }
 
     async loadSounds() {
@@ -38,7 +65,8 @@ class PartituraPlayer {
         await Promise.all(loadPromises);
     }
 
-    playSound(instrumento, notaLimpa, oitava) {
+    playSound(instrumento, notaLimpa, oitava, volume = 1) {
+        this.stop();
         const name = `${instrumento}_${notaLimpa}${oitava}`;
         const buffer = this.buffers.get(name);
 
@@ -47,38 +75,56 @@ class PartituraPlayer {
             return;
         }
 
-        // Retoma o contexto se estiver suspenso (política de autoplay dos browsers)
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume();
         }
 
         const source = this.audioContext.createBufferSource();
+        const gainNode = this.audioContext.createGain();
+        gainNode.gain.value = volume;
+
         source.buffer = buffer;
-        source.connect(this.audioContext.destination);
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
         source.start(0);
+
+        // Guarda referência para poder parar depois
+        this.activeSources.push(source);
+        source.onended = () => {
+            this.activeSources = this.activeSources.filter(s => s !== source);
+        };
     }
 
-    tocarNotaAtualPartitura() {
+    stop() {
+        this.activeSources.forEach(source => {
+            try { source.stop(); } catch (e) { /* já terminou naturalmente */ }
+        });
+        this.activeSources = [];
+        //this.partituraPlaybackIndex = -1;
+        //this.partituraEditor.highlightIndex = -1;
+        this.partituraEditor.draw(this.elements.partituraFrame, false);
+    }
+
+    tocarNotaAtualPartitura(volume = 1) {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
-        // 1. Som da Nota Melódica (ignora se for pausa)
         if (!data.rest) {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
                 const notaLimpa = nota.toLowerCase().replace('#', '_');
-                this.playSound(this.instrumento, notaLimpa, oitava);
+                this.playSound(this.instrumento, notaLimpa, oitava, volume);
             });
         }
 
-        // 2. Som do Acorde (se houver [C] na nota)
         if (data.chord) {
             this.cifraPlayer.tocarAcorde(data.chord);
         }
 
-        // 3. Visual: Atualiza o destaque no Iframe
         this.partituraEditor.highlightIndex = this.partituraPlaybackIndex;
         this.partituraEditor.draw(this.elements.partituraFrame, false);
+        // Rebinda após redesenhar pois o SVG foi recriado
+        this.bindClickNotas();
     }
 
     avancarNotaAtualPartitura() {
