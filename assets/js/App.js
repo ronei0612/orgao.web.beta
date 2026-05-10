@@ -1012,12 +1012,17 @@ class App {
                     let newSaves = {};
 
                     const padronizarItem = (conteudo) => {
+                        // Detecta tipo: usa o campo salvo, ou tenta inferir pelo conteúdo
+                        const type = conteudo.type
+                            || (conteudo.chords?.includes('@') ? 'partitura' : 'cifra');
+
                         return {
                             chords: conteudo.chords ?? '',
-                            tom: conteudo.chords ?? 'C',
+                            key: conteudo.key ?? 'C',
                             instrument: conteudo.instrument ?? 'orgao',
                             style: conteudo.style ?? '',
-                            bpm: conteudo.bpm ?? 90
+                            bpm: conteudo.bpm ?? 90,
+                            type: type,  // <- adicionar
                         };
                     };
 
@@ -1097,8 +1102,10 @@ class App {
                 titulo: titulo,
                 bpm: conteudoCifra.bpm,
                 chords: conteudoCifra.chords,
+                key: conteudoCifra.key,        // <- já existia mas faltava
                 instrument: conteudoCifra.instrument,
                 style: conteudoCifra.style,
+                type: conteudoCifra.type || 'cifra',  // <- adicionar
             };
         });
 
