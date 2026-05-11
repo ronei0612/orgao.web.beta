@@ -297,7 +297,8 @@ class PartituraEditor {
         const isDark = document.body.classList.contains('dark-mode');
         doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
 
-        const width = Math.max(iframe.clientWidth - 80, this.currentData.length * 100);
+        const notaEspacamento = 80; 
+        const width = Math.max(iframe.clientWidth - 80, this.currentData.length * notaEspacamento);
         const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
 
         // 3. AJUSTE DE ALTURA DO RENDERER
