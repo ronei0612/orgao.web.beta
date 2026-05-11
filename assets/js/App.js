@@ -17,7 +17,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.5',
+            version: '6.0.6',
             htmlMessage: `
                 <p>Melhorias</p>
 
@@ -517,20 +517,13 @@ class App {
 
     handleStopMousedown() {
         this.uiController.esconderEditDeleteButtons();
-        if (this.elements.acorde1.classList.contains('d-none')) {
-            this.uiController.esconderBotoesAvancarVoltarCifra();
-        }
 
         this.partituraPlayer.partituraPlaybackIndex = -1;
-        this.partituraEditor.highlightIndex = -1;
-        this.partituraEditor.draw(this.elements.partituraFrame, false);
 
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
         this.melodyUI.stop();
         this.partituraPlayer.stop();
-        //this.partituraEditor.highlightIndex = -1;
-        //this.partituraEditor.draw(this.elements.partituraFrame, false);
     }
 
     handlePlayMousedown() {

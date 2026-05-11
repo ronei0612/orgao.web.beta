@@ -66,7 +66,6 @@ class PartituraPlayer {
     }
 
     playSound(instrumento, notaLimpa, oitava, volume = 1, attack = 0) {
-        this.stop();
         const name = `${instrumento}_${notaLimpa}${oitava}`;
         const buffer = this.buffers.get(name);
 
@@ -125,6 +124,7 @@ class PartituraPlayer {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
+        this.stop();
         if (!data.rest) {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
