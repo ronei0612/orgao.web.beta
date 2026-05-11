@@ -12,6 +12,7 @@ class UIController {
         this.elements.notesButton.classList.add('ml-3');
         this.elements.playButton.classList.add('mx-5');
         this.esconderBotoesAcordes();
+        this.exibirBotoesAvancarVoltarCifra();
     }
 
     esconderPartitura() {

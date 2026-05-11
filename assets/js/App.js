@@ -517,9 +517,6 @@ class App {
 
     handleStopMousedown() {
         this.uiController.esconderEditDeleteButtons();
-        if (this.elements.acorde1.classList.contains('d-none')) {
-            this.uiController.esconderBotoesAvancarVoltarCifra();
-        }
 
         this.partituraPlayer.partituraPlaybackIndex = -1;
 
