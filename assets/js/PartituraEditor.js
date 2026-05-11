@@ -199,9 +199,27 @@ class PartituraEditor {
     }
 
     centralizarNoCursor() {
-        const doc = this.editIframe.contentDocument;
-        const target = doc.querySelector('svg .vf-stavenote:nth-child(' + (this.persistentSelectedIndex + 1) + ')');
-        if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        this._centralizarEm(this.editIframe, this.noteXPositions[this.persistentSelectedIndex]);
+    }
+
+    centralizarDestaque() {
+        // No modo visualização, precisamos pegar a posição da nota pelo index do highlight
+        // Re-usa noteXPositions pois draw() sempre atualiza quando isEditable=true,
+        // então guardamos também as posições no modo view
+        this._centralizarEm(this.viewIframe, this.viewNoteXPositions?.[this.highlightIndex]);
+    }
+
+    _centralizarEm(iframe, noteX) {
+        if (noteX == null) return;
+        const win = iframe.contentWindow;
+        if (!win) return;
+
+        // Coloca a nota a ~35% da largura do iframe (levemente à esquerda do centro)
+        const offset = iframe.clientWidth * 0.35;
+        win.scrollTo({
+            left: noteX - offset,
+            behavior: 'smooth'
+        });
     }
 
     // Adicione este método na classe PartituraEditor
@@ -326,10 +344,12 @@ class PartituraEditor {
 
         if (isEditable) {
             this.noteXPositions = tickables.filter(t => t instanceof this.vf.StaveNote).map(n => n.getAbsoluteX());
-            // Notifica após desenhar no editor
             if (this.onEditDrawn) this.onEditDrawn();
+            setTimeout(() => this.centralizarNoCursor(), 50);
         } else {
+            this.viewNoteXPositions = tickables.filter(t => t instanceof this.vf.StaveNote).map(n => n.getAbsoluteX());
             if (this.onViewDrawn) this.onViewDrawn();
+            setTimeout(() => this.centralizarDestaque(), 50);
         }
     }
 
