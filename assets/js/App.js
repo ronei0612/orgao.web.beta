@@ -17,7 +17,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.4',
+            version: '6.0.5',
             htmlMessage: `
                 <p>Melhorias</p>
 
@@ -457,31 +457,24 @@ class App {
         const saveName = this.elements.savesSelect.value;
         if (!saveName) return;
 
-        // 1. Busca os dados salvos
         const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, saveName);
-
-        // 2. Identifica o tipo (se for dado antigo sem 'type', tenta adivinhar)
         const tipo = saveData.type || (saveData.chords?.includes('@') ? 'partitura' : 'cifra');
         this.currentEditorType = tipo;
 
         this.editing = true;
         this.elements.itemNameInput.value = saveName;
 
-        // 3. Prepara a UI correta
         this.uiController.editarMusica(tipo);
 
         if (tipo === 'partitura') {
-            const dataArray = saveData.chords.split('\n').filter(l => l.trim());
-            this.partituraEditor.abrirEditor(dataArray); // MANDA DESENHAR NO FRAME DE EDIT
+            this.partituraEditor.abrirEditor();
         } else {
-            // Preenche o editor de texto normal
             this.elements.editTextarea.value = saveData.chords || "";
         }
 
-        // 4. Ajustes de botões e transposição
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
-        this.cifraPlayer.preencherSelectCifras(saveData.key ?? 'C');
+        this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
         this.exibirInstrument(this.cifraPlayer.instrumento);
     }
 

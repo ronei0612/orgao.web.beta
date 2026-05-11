@@ -204,10 +204,14 @@ class PartituraEditor {
         if (target) target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
 
-    abrirEditor(dataArray = []) {
-        this.currentData = (dataArray && dataArray.length > 0)
-            ? dataArray.map(l => this.normalizeItem(l))
-            : [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false }];
+    // Adicione este método na classe PartituraEditor
+    abrirEditor() {
+        // Se não houver dados carregados, inicializa com um vazio
+        if (!this.currentData || this.currentData.length === 0) {
+            this.currentData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false }];
+        }
+
+        // Define o cursor na última nota
         this.persistentSelectedIndex = this.currentData.length - 1;
         this.onEditDrawn = () => this.bindClickNotasEditor();
         this.draw(this.editIframe, true);
