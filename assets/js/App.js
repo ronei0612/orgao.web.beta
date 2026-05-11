@@ -522,15 +522,11 @@ class App {
         }
 
         this.partituraPlayer.partituraPlaybackIndex = -1;
-        this.partituraEditor.highlightIndex = -1;
-        this.partituraEditor.draw(this.elements.partituraFrame, false);
 
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
         this.melodyUI.stop();
         this.partituraPlayer.stop();
-        //this.partituraEditor.highlightIndex = -1;
-        //this.partituraEditor.draw(this.elements.partituraFrame, false);
     }
 
     handlePlayMousedown() {
