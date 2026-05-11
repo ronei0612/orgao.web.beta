@@ -333,27 +333,32 @@ class PartituraEditor {
         if (semitones === 0) return;
 
         this.currentData = this.currentData.map(item => {
-            if (item.rest) return { ...item };
+            // Criamos uma cópia do item para não alterar o original diretamente
+            let newItem = { ...item };
 
-            // Transpõe as notas via basePitches (cuida das oitavas)
-            const notes = item.notes.map(n => {
+            // 1. Transpõe as notas melódicas APENAS se NÃO for pausa
+            if (!item.rest) {
+                newItem.notes = item.notes.map(n => {
                 const idx = this.basePitches.indexOf(n);
                 if (idx === -1) return n;
                 const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
                 return this.basePitches[novoIdx];
             });
+            }
 
-            // Transpõe a cifra harmônica (se houver)
+            // 2. Transpõe a cifra harmônica SEMPRE (mesmo se for rest: true)
+            if (item.chord) {
             let chord = item.chord;
-            if (chord) {
                 const partes = chord.split('/');
                 const principal = partes[0];
 
-                // Extrai só a tônica (ex: "Am7" -> "A", "C#m" -> "C#")
+                // Extrai a tônica (ex: "Am7" -> "A", "C#m" -> "C#")
                 const match = principal.match(/^([A-G][#b]?)(.*)/);
                 if (match) {
                     const tonica = match[1];
                     const resto = match[2];
+
+                    // Transpõe a tônica principal
                     const tonicaTransposta = this.musicTheory.transposeAcorde(tonica, semitones, null);
                     chord = tonicaTransposta + resto;
 
@@ -366,11 +371,13 @@ class PartituraEditor {
                         }
                     }
                 }
+                newItem.chord = chord;
             }
 
-            return { ...item, notes, chord };
+            return newItem;
         });
 
+        // Redesenha o iframe de visualização com os dados novos
         this.draw(this.viewIframe, false);
         if (this.onViewDrawn) this.onViewDrawn();
     }
