@@ -139,8 +139,7 @@ class PartituraPlayer {
 
         this.partituraEditor.highlightIndex = this.partituraPlaybackIndex;
         this.partituraEditor.draw(this.elements.partituraFrame, false);
-        // Rebinda após redesenhar pois o SVG foi recriado
-        this.bindClickNotas();
+        // bindClickNotas é chamado via onViewDrawn automaticamente pelo draw()
     }
 
     avancarNotaAtualPartitura() {
