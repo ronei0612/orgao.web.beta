@@ -1,9 +1,9 @@
 class DrumMachine {
-    constructor(baseUrl, cifraPlayer, musicTheory) {
+    constructor(baseUrl, cifraPlayer, musicTheory, audioManager) {
         this.baseUrl = baseUrl;
         this.cifraPlayer = cifraPlayer;
         this.musicTheory = musicTheory;
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioContext = audioManager.audioContext;
         this.buffers = new Map();
         this.audioPath = this.baseUrl + '/assets/audio/studio/Drums/';
 

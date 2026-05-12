@@ -2,13 +2,24 @@ class App {
     constructor(elements) {
         this.elements = elements;
         this.BASE_URL = location.origin.includes('file:') ? 'https://roneicostasoares.com.br/orgao.web.beta' : '.';
+
         this.musicTheory = new MusicTheory();
         this.uiController = new UIController(this.elements);
         this.localStorageManager = new LocalStorageManager();
+
+        // 1. Criar o gerenciador de áudio ÚNICO aqui
+        this.audioManager = new AudioContextManager();
+
+        // 2. Passar o audioManager para todos os players
         this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
+
+        // CifraPlayer agora recebe o audioManager pronto
+        this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL, this.audioManager);
+
+        // PartituraPlayer agora recebe o audioManager pronto
+        this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor, this.BASE_URL, this.audioManager);
+
         this.draggableController = new DraggableController(this.elements.draggableControls);
-        this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL);
-        this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor, this.BASE_URL);
 
         // Em App.init(), após criar o partituraPlayer:
         this.partituraPlayer.onNotaClicada = () => {
@@ -59,14 +70,14 @@ class App {
         this.getUrlParam();
         this.updateFillBlink(this.musicTheory.bpm);
 
-        const drumMachine = new DrumMachine(this.BASE_URL, this.cifraPlayer, this.musicTheory);
+        const drumMachine = new DrumMachine(this.BASE_URL, this.cifraPlayer, this.musicTheory, this.audioManager);
         if (typeof drumMachine.init === 'function')
             await drumMachine.init();
 
         this.bateriaUI = new BateriaUI(this.elements, drumMachine, this.uiController, this.cifraPlayer);
         await this.bateriaUI.init();
 
-        this.melodyMachine = new MelodyMachine(this.BASE_URL, this.musicTheory, this.cifraPlayer);
+        this.melodyMachine = new MelodyMachine(this.BASE_URL, this.musicTheory, this.cifraPlayer, this.audioManager);
 
         await this.melodyMachine.getStyles();
 

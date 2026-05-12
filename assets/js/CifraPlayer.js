@@ -1,9 +1,11 @@
+// No CifraPlayer.js
 class CifraPlayer {
-    constructor(elements, uiController, musicTheory, baseUrl) {
+    constructor(elements, uiController, musicTheory, baseUrl, audioManager) {
         this.audioPath = `${baseUrl}/assets/audio/`;
         this.uiController = uiController;
         this.musicTheory = musicTheory;
         this.elements = elements;
+        this.audioContextManager = audioManager;
 
         this.acordeGroup = [];
         this.epianoGroup = [];
@@ -38,7 +40,6 @@ class CifraPlayer {
             }
         };
 
-        this.audioContextManager = new AudioContextManager();
         this.carregarAcordes();
     }
 

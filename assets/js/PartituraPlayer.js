@@ -1,5 +1,5 @@
 class PartituraPlayer {
-    constructor(elements, cifraPlayer, partituraEditor, baseUrl) {
+    constructor(elements, cifraPlayer, partituraEditor, baseUrl, audioManager) {
         this.audioPath = `${baseUrl}/assets/audio/studio/Flauta`;
         this.instrumento = 'flauta';
         this.elements = elements;
@@ -7,7 +7,8 @@ class PartituraPlayer {
         this.partituraEditor = partituraEditor;
         this.partituraPlaybackIndex = -1;
         this.buffers = new Map();
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioContextManager = audioManager;
+        this.audioContext = audioManager.audioContext; 
         this.activeSources = [];
         this.init();
     }
@@ -23,23 +24,40 @@ class PartituraPlayer {
         const doc = this.elements.partituraFrame.contentDocument;
         if (!doc) return;
 
-        const notas = doc.querySelectorAll('.vf-stavenote');
-        notas.forEach((el, index) => {
-            el.style.cursor = 'pointer';
-            el.addEventListener('click', () => {
-                // Sempre seleciona
-                this.partituraEditor.highlightIndex = index;
-                this.partituraEditor.draw(this.elements.partituraFrame, false);
-                this.bindClickNotas();
+        // Remove listener anterior se existir
+        if (this._viewClickHandler) {
+            doc.removeEventListener('click', this._viewClickHandler);
+        }
 
-                // Se estiver tocando, também toca
-                if (this.partituraPlaybackIndex !== -1) {
-                    this.partituraPlaybackIndex = index;
-                    this.tocarNotaAtualPartitura();
-                    if (this.onNotaClicada) this.onNotaClicada();
-                }
-            });
-        });
+        this._viewClickHandler = (e) => {
+            const notaEl = e.target.closest('.vf-stavenote');
+            if (!notaEl) return;
+
+            const notas = Array.from(doc.querySelectorAll('.vf-stavenote'));
+            const index = notas.indexOf(notaEl);
+            if (index === -1) return;
+
+            // Sempre seleciona
+            this.partituraEditor.highlightIndex = index;
+            this.partituraEditor.draw(this.elements.partituraFrame, false);
+
+            // Se estiver tocando, também toca
+            if (this.partituraPlaybackIndex !== -1) {
+                this.partituraPlaybackIndex = index;
+                this.tocarNotaAtualPartitura();
+                if (this.onNotaClicada) this.onNotaClicada();
+            }
+        };
+
+        doc.addEventListener('click', this._viewClickHandler);
+
+        // Cursor pointer via CSS (só uma vez)
+        if (!doc.getElementById('nota-cursor-style')) {
+            const style = doc.createElement('style');
+            style.id = 'nota-cursor-style';
+            style.innerHTML = '.vf-stavenote { cursor: pointer; }';
+            doc.head.appendChild(style);
+        }
     }
 
     async loadSounds() {
