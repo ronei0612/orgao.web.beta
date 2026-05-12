@@ -239,14 +239,32 @@ class PartituraEditor {
         const doc = this.editIframe.contentDocument;
         if (!doc) return;
 
-        const notas = doc.querySelectorAll('.vf-stavenote');
-        notas.forEach((el, index) => {
-            el.style.cursor = 'pointer';
-            el.addEventListener('click', () => {
-                this.persistentSelectedIndex = index;
-                this.draw(this.editIframe, true);
-            });
-        });
+        // Remove listener anterior se existir
+        if (this._editClickHandler) {
+            doc.removeEventListener('click', this._editClickHandler);
+        }
+
+        this._editClickHandler = (e) => {
+            const notaEl = e.target.closest('.vf-stavenote');
+            if (!notaEl) return;
+
+            const notas = Array.from(doc.querySelectorAll('.vf-stavenote'));
+            const index = notas.indexOf(notaEl);
+            if (index === -1) return;
+
+            this.persistentSelectedIndex = index;
+            this.draw(this.editIframe, true);
+        };
+
+        doc.addEventListener('click', this._editClickHandler);
+
+        // Cursor pointer via CSS (só uma vez)
+        if (!doc.getElementById('nota-cursor-style')) {
+            const style = doc.createElement('style');
+            style.id = 'nota-cursor-style';
+            style.innerHTML = '.vf-stavenote { cursor: pointer; }';
+            doc.head.appendChild(style);
+        }
     }
 
     renderizarVisualizacao(dataArray = []) {
