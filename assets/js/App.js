@@ -28,7 +28,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.5',
+            version: '6.0.6',
             htmlMessage: `
                 <p>Melhorias</p>
 
@@ -478,7 +478,8 @@ class App {
         this.uiController.editarMusica(tipo);
 
         if (tipo === 'partitura') {
-            this.partituraEditor.abrirEditor();
+            const dataArray = saveData.chords.split('\n').filter(l => l.trim());
+            this.partituraEditor.abrirEditor(dataArray);
         } else {
             this.elements.editTextarea.value = saveData.chords || "";
         }
@@ -681,16 +682,18 @@ class App {
         this.preencherLayoutDoLocalStorage(saveData);
     }
 
-    salvarMetaDataNoLocalStorage(name, item) {
+    // salvarMetaDataNoLocalStorage recebe chords como parâmetro opcional
+    salvarMetaDataNoLocalStorage(name, item, chords = null) {
         const metaData = {
-            chords: this.elements.editTextarea.value,
+            chords: chords ?? this.elements.editTextarea.value,
             key: this.elements.tomSelect.value,
             instrument: this.cifraPlayer.instrumento,
-            style: this.cifraPlayer.instrumento === 'epiano' ? this.elements.drumStyleSelect.value : this.elements.melodyStyleSelect.value,
+            style: this.cifraPlayer.instrumento === 'epiano'
+                ? this.elements.drumStyleSelect.value
+                : this.elements.melodyStyleSelect.value,
             bpm: this.elements.bpmInput.value,
-            type: this.currentEditorType || 'cifra' // NOVO: salva se é cifra ou partitura
+            type: this.currentEditorType || 'cifra'
         };
-
         this.localStorageManager.saveJson(name, item, metaData);
     }
 
@@ -1270,7 +1273,7 @@ class App {
 
         // Importante: Atualizamos o valor do editTextarea com o conteúdo coletado, 
         // pois o método 'salvarMetaDataNoLocalStorage' lê os dados de lá.
-        this.elements.editTextarea.value = content;
+        this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, content);
 
         // 4. Lógica para identificar o Tom (Key)
         const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
