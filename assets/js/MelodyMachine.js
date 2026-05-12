@@ -1,5 +1,5 @@
 class MelodyMachine {
-    constructor(baseUrl, musicTheory, cifraPlayer) {
+    constructor(baseUrl, musicTheory, cifraPlayer, audioManager) {
         this.baseUrl = baseUrl;
         this.musicTheory = musicTheory;
         this.cifraPlayer = cifraPlayer;
@@ -7,7 +7,7 @@ class MelodyMachine {
         this.releaseTime = 0.1;
         this.defaultVol = 0.7;
         this.buffers = new Map();
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioContext = audioManager.audioContext;
         this.audioPath = this.baseUrl + '/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [

@@ -1,5 +1,5 @@
 class PartituraPlayer {
-    constructor(elements, cifraPlayer, partituraEditor, baseUrl) {
+    constructor(elements, cifraPlayer, partituraEditor, baseUrl, audioManager) {
         this.audioPath = `${baseUrl}/assets/audio/studio/Flauta`;
         this.instrumento = 'flauta';
         this.elements = elements;
@@ -7,7 +7,8 @@ class PartituraPlayer {
         this.partituraEditor = partituraEditor;
         this.partituraPlaybackIndex = -1;
         this.buffers = new Map();
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioContextManager = audioManager;
+        this.audioContext = audioManager.audioContext; 
         this.activeSources = [];
         this.init();
     }
