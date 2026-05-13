@@ -13,18 +13,17 @@ class BateriaUI {
         this.defaultStyle = 'Novo Estilo';
         this.copiedRhythmData = null;
         this.storageKey = 'drumStylesData';
-    }
 
-    getStorageData() {
-        const tem_styles_bateria = localStorage.getItem(this.storageKey);
-        if (tem_styles_bateria)
-            return JSON.parse(tem_styles_bateria);
-
-        return this.drumMachine.styles;
-    }
-
-    persistStorageData(obj) {
-        localStorage.setItem(this.storageKey, JSON.stringify(obj));
+        this.styleManager = new StyleManager(
+            this.storageKey,
+            this.elements.drumStyleSelect,
+            this.defaultStyle,
+            false, // hasBlankOption
+            (numSteps) => this.createEmptyRhythm(this.drumMachine.bpm, numSteps),
+            (newName) => {
+                this.loadRhythmForStyleAndRhythm(newName, this.selectedRhythm);
+            }
+        );
     }
 
     getStoredRhythm(styleName, rhythmKey) {
@@ -33,9 +32,7 @@ class BateriaUI {
     }
 
     async init() {
-        //this.ensureDefaultStyleExists();
-
-        this.loadStyles();
+        this.styleManager.loadStyles(this.drumMachine.styles);
         this.initializeTracks();
         this.bindEvents();
     }
@@ -50,32 +47,6 @@ class BateriaUI {
         const img = track.querySelector('label img');
         if (!img || !img.title) return null;
         return img.title.toLowerCase().replace(/ /g, '');
-    }
-
-    /**
-     * Garantir que o estilo padrão exista no localStorage (estrutura JSON)
-     */
-    ensureDefaultStyleExists() {
-        const storage = this.getStorageData();
-        if (!storage.styles || storage.styles.length === 0) {
-            storage.styles = [this.defaultStyle];
-        }
-        if (!storage.data) storage.data = {};
-        // garantir que a entrada do estilo exista e tenha A,B,C,D e fills
-        if (!storage.data[this.defaultStyle]) storage.data[this.defaultStyle] = {};
-        ['A', 'B', 'C', 'D'].forEach(r => {
-            const key = r;
-            const fillKey = `${r}-fill`;
-            if (!storage.data[this.defaultStyle][key]) {
-                const numSteps = parseInt(this.elements.numStepsInput.value, 10) || 4;
-                storage.data[this.defaultStyle][key] = this.createEmptyRhythm(this.bpm, numSteps);
-            }
-            if (!storage.data[this.defaultStyle][fillKey]) {
-                const numSteps = parseInt(this.elements.numStepsInput.value, 10) || 4;
-                storage.data[this.defaultStyle][fillKey] = this.createEmptyRhythm(this.bpm, numSteps);
-            }
-        });
-        this.persistStorageData(storage);
     }
 
     /**
@@ -95,157 +66,24 @@ class BateriaUI {
     }
 
     /**
-     * Carrega os estilos salvos do localStorage (estrutura JSON) e popula o seletor
-     */
-    loadStyles() {
-        const storage = this.getStorageData();
-        const styles = storage?.styles || [];
-        this.elements.drumStyleSelect.innerHTML = '';
-        if (!styles.length) {
-            const option = document.createElement('option');
-            option.value = this.defaultStyle;
-            option.textContent = this.defaultStyle;
-            this.elements.drumStyleSelect.appendChild(option);
-            this.elements.drumStyleSelect.value = this.defaultStyle;
-            return;
-        }
-        const sorted = styles.slice().sort((a, b) => a.localeCompare(b));
-        sorted.forEach(s => {
-            const option = document.createElement('option');
-            option.value = s;
-            option.textContent = s;
-            this.elements.drumStyleSelect.appendChild(option);
-        });
-        this.elements.drumStyleSelect.selectedIndex = 0;
-    }
-
-    saveStyles() {
-        const storage = this.getStorageData();
-        storage.styles = Array.from(this.elements.drumStyleSelect.options).map(o => o.value);
-        // preserve storage.data (do not clobber)
-        this.persistStorageData(storage);
-    }
-
-    /**
-     * Adiciona um novo estilo e cria ritmos vazios na estrutura JSON
-     */
-    addStyle() {
-        const newName = prompt('Digite o nome do novo estilo:');
-        if (!newName) return;
-        const storage = this.getStorageData();
-        if (storage.styles.includes(newName)) {
-            alert('Este nome de estilo já existe.');
-            return;
-        }
-        storage.styles.push(newName);
-        storage.data[newName] = {};
-        // create blank rhythms
-        const numSteps = parseInt(this.elements.numStepsInput.value, 10) || 4;
-        ['A', 'B', 'C', 'D'].forEach(r => {
-            storage.data[newName][r] = this.createEmptyRhythm(this.bpm, numSteps);
-            storage.data[newName][`${r}-fill`] = this.createEmptyRhythm(this.bpm, numSteps);
-        });
-        this.persistStorageData(storage);
-        this.loadStyles();
-        this.elements.drumStyleSelect.value = newName;
-    }
-
-    /**
-     * Edita (renomeia) um estilo na estrutura JSON
-     */
-    editStyle() {
-        const current = this.elements.drumStyleSelect.value;
-        const newName = prompt('Digite o novo nome para o estilo:', current);
-        if (!newName || newName === current) return;
-        const storage = this.getStorageData();
-        if (storage.styles.includes(newName)) {
-            alert('Este nome de estilo já existe.');
-            return;
-        }
-        const idx = storage.styles.indexOf(current);
-        if (idx !== -1) storage.styles[idx] = newName;
-        // rename data key
-        if (storage.data && storage.data[current]) {
-            storage.data[newName] = storage.data[current];
-            delete storage.data[current];
-        } else {
-            storage.data[newName] = {};
-        }
-        this.persistStorageData(storage);
-        this.loadStyles();
-        this.elements.drumStyleSelect.value = newName;
-    }
-
-    /**
-     * Exclui o estilo atualmente selecionado da estrutura JSON
-     */
-    deleteStyle() {
-        const current = this.elements.drumStyleSelect.value;
-        if (!confirm(`Tem certeza que deseja excluir o estilo "${current}"?`)) return;
-        const storage = this.getStorageData();
-        storage.styles = (storage.styles || []).filter(s => s !== current);
-        if (storage.data && storage.data[current]) delete storage.data[current];
-        this.persistStorageData(storage);
-        this.loadStyles();
-    }
-
-    /**
      * Salva o ritmo atual no estilo e chave de ritmo fornecidos (estrutura JSON)
      */
     saveRhythmToStyle(styleName, rhythmKey, rhythmData) {
-        const storage = this.getStorageData();
+        const storage = this.styleManager.getStorageData();
         if (!storage.data) storage.data = {};
         if (!storage.data[styleName]) storage.data[styleName] = {};
         storage.data[styleName][rhythmKey] = rhythmData;
-        this.persistStorageData(storage);
-    }
-
-    /**
-     * Salva o ritmo atual no localStorage para o estilo e ritmo selecionados.
-     */
-    saveRhythm() {
-        const styleName = this.elements.drumStyleSelect.value || this.defaultStyle;
-        let rhythmKey = this.selectedRhythm;
-        const selectedButton = document.getElementById(`rhythm-${this.selectedRhythm.toLowerCase()}`);
-        if (selectedButton && selectedButton.classList.contains('fill')) rhythmKey = `${rhythmKey}-fill`;
-
-        const rhythmData = {};
-        this.elements.tracksContainer.querySelectorAll('.track').forEach(track => {
-            const instKey = this.getInstrumentKeyFromTrack(track);
-            if (!instKey) return;
-            const steps = Array.from(track.querySelectorAll('.step')).map(s => parseInt(s.dataset.volume || '0', 10));
-            const isSelected = track.querySelector('.instrument-button')?.classList.contains('selected') || false;
-            rhythmData[instKey] = { steps, selected: isSelected };
-        });
-
-        rhythmData.numSteps = parseInt(this.elements.numStepsInput.value, 10) || 4;
-        this.saveRhythmToStyle(styleName, rhythmKey, rhythmData);
+        this.styleManager.persistStorageData(storage);
     }
 
     /**
      * Carrega o ritmo salvo para o estilo e ritmo fornecidos.
      */
     loadRhythmForStyleAndRhythm(styleName, rhythm) {
-        this.loadRhythm(`${styleName}-${rhythm}`);
-    }
-
-    /**
-     * Carrega o ritmo salvo do localStorage usando a chave fornecida.
-     * Aceita chave no formato "Style-Rhythm" ou apenas rhythm buscando no style atual.
-     */
-    loadRhythm(rhythmKey) {
-        // try parse "Style-Rhythm" format
         let data = null;
-        const storage = this.getStorageData();
-        if (rhythmKey && rhythmKey.indexOf('-') > 0) {
-            const idx = rhythmKey.indexOf('-');
-            const style = rhythmKey.substring(0, idx);
-            const rkey = rhythmKey.substring(idx + 1);
-            data = storage.data && storage.data[style] ? storage.data[style][rkey] : null;
-        } else {
-            const styleName = this.elements.drumStyleSelect.value || this.defaultStyle;
-            data = storage.data && storage.data[styleName] ? storage.data[styleName][rhythmKey] : null;
-        }
+        const storage = this.styleManager.getStorageData();
+
+        data = storage.data && storage.data[styleName] ? storage.data[styleName][rhythm] : null;
 
         if (!data) {
             this.clearSteps();
@@ -412,14 +250,14 @@ class BateriaUI {
         });
     }
 
-    selectFill(rhythmButton, rhythmKey, rhythmCode) {
+    selectFill(rhythmButton, styleName, rhythmKey, rhythmCode) {
         rhythmButton.classList.add('fill', 'pending');
 
         // Se estiver tocando: agendar revert para o fim da medida
         this.pendingRhythm = rhythmCode;
         this.pendingButton = rhythmButton;
 
-        this.loadRhythm(rhythmKey);
+        this.loadRhythmForStyleAndRhythm(styleName, rhythmKey);
 
         return;
     }
@@ -436,7 +274,7 @@ class BateriaUI {
 
         if (this.drumMachine.isPlaying && !rhythmButton.classList.contains('selected')) {
             rhythmButton.classList.add('selected');
-            this.selectFill(rhythmButton, `${styleName}-${rhythmCode}-fill`, rhythmCode);
+            this.selectFill(rhythmButton, styleName, `${rhythmCode}-fill`, rhythmCode);
             this.unSelectRhythmButtons(rhythmButton);
             this.fillLoaded = true;
         }
@@ -446,7 +284,7 @@ class BateriaUI {
                 this.fillLoaded = false;
             }
             else {
-                this.selectFill(rhythmButton, `${styleName}-${rhythmCode}-fill`, rhythmCode);
+                this.selectFill(rhythmButton, styleName, `${rhythmCode}-fill`, rhythmCode);
                 this.unSelectRhythmButtons(rhythmButton);
                 this.fillLoaded = true;
             }
@@ -454,7 +292,7 @@ class BateriaUI {
         else {
             rhythmButton.classList.remove('fill', 'pending');
             this.fillLoaded = false;
-            this.loadRhythm(`${styleName}-${rhythmCode}`);
+            this.loadRhythmForStyleAndRhythm(styleName, rhythmCode);
             this.unSelectRhythmButtons(rhythmButton);
 
             rhythmButton.classList.add('selected');
@@ -521,14 +359,14 @@ class BateriaUI {
             }
 
             if (!isFillSelected) {
-                this.loadRhythm(`${this.elements.drumStyleSelect.value}-${this.selectedRhythm}`);
+                this.loadRhythmForStyleAndRhythm(this.elements.drumStyleSelect.value, this.selectedRhythm);
                 this.fillLoaded = false;
 
                 // 2. Se o botão Clicado *está* no modo FILL
             } else {
                 // A medida terminou, então ele volta para o ritmo BASE (não importa o estado anterior de this.fillLoaded)
                 this.playPrato();
-                this.loadRhythm(`${this.elements.drumStyleSelect.value}-${this.selectedRhythm}`);
+                this.loadRhythmForStyleAndRhythm(this.elements.drumStyleSelect.value, this.selectedRhythm);
                 this.fillLoaded = false;
                 selectedButton.classList.remove('fill');
             }
@@ -615,9 +453,9 @@ class BateriaUI {
         this.elements.drumStyleSelect.addEventListener('change', () => {
             this.loadRhythmForStyleAndRhythm(this.elements.drumStyleSelect.value, this.selectedRhythm);
         });
-        this.elements.addStyleButton.addEventListener('click', () => this.addStyle());
-        this.elements.editStyleButton.addEventListener('click', () => this.editStyle());
-        this.elements.deleteStyleButton.addEventListener('click', () => this.deleteStyle());
+        this.elements.addStyleButton.addEventListener('click', () => this.styleManager.addStyle(parseInt(this.elements.numStepsInput.value, 10), ['A', 'B', 'C', 'D']));
+        this.elements.editStyleButton.addEventListener('click', () => this.styleManager.editStyle());
+        this.elements.deleteStyleButton.addEventListener('click', () => this.styleManager.deleteStyle());
 
         // Hook DrumMachine measure end to UI (if DrumMachine exposes onStepsEnd)
         if (typeof this.drumMachine.onStepsEnd === 'function') {
