@@ -71,14 +71,13 @@ class App {
         this.updateFillBlink(this.musicTheory.bpm);
 
         const drumMachine = new DrumMachine(this.BASE_URL, this.cifraPlayer, this.musicTheory, this.audioManager);
-        if (typeof drumMachine.init === 'function')
             await drumMachine.init();
 
         this.bateriaUI = new BateriaUI(this.elements, drumMachine, this.uiController, this.cifraPlayer);
         await this.bateriaUI.init();
 
         this.melodyMachine = new MelodyMachine(this.BASE_URL, this.musicTheory, this.cifraPlayer, this.audioManager);
-
+        await this.melodyMachine.init();
         await this.melodyMachine.getStyles();
 
         this.melodyUI = new MelodyUI(this.elements, this.melodyMachine, this.uiController);

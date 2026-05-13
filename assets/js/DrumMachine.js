@@ -37,8 +37,6 @@ class DrumMachine {
 
         // Cache para evitar ler o DOM a cada milissegundo (Performance Crítica)
         this.tracksCache = null;
-
-        this.init();
     }
 
     async init() {

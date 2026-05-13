@@ -105,8 +105,6 @@
         this.stepsPorTempo = null;
         this.tracksCache = null;
         this.activeSources = [];
-
-        this.init();
     }
 
     async loadSounds() {
