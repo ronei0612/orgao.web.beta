@@ -201,8 +201,6 @@ class DrumMachine {
     }
 
     fecharChimbal(instrument, volume) {
-        if (instrument !== 'chimbal') return;
-
         if (volume === 1 || volume === 2) {
             if (this.lastChimbalAbertoSource) {
                 try {
@@ -249,7 +247,9 @@ class DrumMachine {
                 const volume = parseInt(stepEl.dataset.volume || '0', 10);
                 if (volume <= 0) continue;
 
+                if (trackData.instrument === 'chimbal') {
                 this.fecharChimbal(trackData.instrument, volume);
+                }
                 this.scheduleNote(trackData.instrument, this.currentStep, this.nextNoteTime, volume);
 
                 // Feedback visual (apenas se necessário)
