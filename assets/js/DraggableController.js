@@ -1,4 +1,4 @@
-class DraggableController {
+ï»¿class DraggableController {
     constructor(element) {
         this.draggableControls = element;
         this.isDragging = false;
@@ -6,7 +6,7 @@ class DraggableController {
         this.currentX = 0;
         this.currentY = 0;
         this.DRAG_THRESHOLD = 5;
-        this.animationFrameId = null; // Controle da animação
+        this.animationFrameId = null; // Controle da animaÃ§Ã£o
 
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragMove = this.onDragMove.bind(this);
@@ -43,7 +43,7 @@ class DraggableController {
         const clientX = event.touches ? event.touches[0].clientX : event.clientX;
         const clientY = event.touches ? event.touches[0].clientY : event.clientY;
 
-        // Cache inicial das posições
+        // Cache inicial das posiÃ§Ãµes
         const currentLeft = parseFloat(this.draggableControls.style.left) || 0;
         const currentTop = parseFloat(this.draggableControls.style.top) || 0;
 
@@ -78,7 +78,7 @@ class DraggableController {
         this.currentX = clientX - this.offset.x;
         this.currentY = clientY - this.offset.y;
 
-        // Solicita o frame de animação se não houver um pendente
+        // Solicita o frame de animaÃ§Ã£o se nÃ£o houver um pendente
         if (!this.animationFrameId) {
             this.animationFrameId = requestAnimationFrame(this.updatePosition);
         }

@@ -1,4 +1,4 @@
-class MelodyMachine {
+Ôªøclass MelodyMachine {
     constructor(baseUrl, musicTheory, cifraPlayer, audioManager) {
         this.baseUrl = baseUrl;
         this.musicTheory = musicTheory;
@@ -191,14 +191,14 @@ class MelodyMachine {
             try {
                 const { source, gainNode } = item;
 
-                // Cancela agendamentos futuros para n„o haver conflito
+                // Cancela agendamentos futuros para n√£o haver conflito
                 gainNode.gain.cancelScheduledValues(time);
 
-                // setTargetAtTime È muito mais suave para evitar estalos
-                // 0.02 È a constante de tempo (quanto menor, mais r·pido o fade-out)
+                // setTargetAtTime √© muito mais suave para evitar estalos
+                // 0.02 √© a constante de tempo (quanto menor, mais r√°pido o fade-out)
                 gainNode.gain.setTargetAtTime(0, time, 0.02);
 
-                // Para o som um pouco depois do fade-out para garantir silÍncio
+                // Para o som um pouco depois do fade-out para garantir sil√™ncio
                 source.stop(time + 0.1);
             } catch (e) { }
         });
@@ -246,18 +246,18 @@ class MelodyMachine {
         const iniciouNovoAcorde = this.currentStep === 1;
         const acordePrincipal = this.cifraPlayer.acordeTocando;
 
-        // 1. Resolvemos as notas do acorde uma ˙nica vez para este passo (milissegundo)
+        // 1. Resolvemos as notas do acorde uma √∫nica vez para este passo (milissegundo)
         let notasAtuais = null;
         if (acordePrincipal) {
             const chaveAcorde = acordePrincipal + (this.cifraPlayer.acordeFull ? '1' : '');
             notasAtuais = this.getAcordeNotas(chaveAcorde);
         }
 
-        // 2. LÛgica de inÌcio de compasso (Tempo 1)
+        // 2. L√≥gica de in√≠cio de compasso (Tempo 1)
         if (iniciouNovoAcorde) {
             this.stopNotes(this.nextNoteTime);
 
-            // Toca a nota grave (pedaleira do Ûrg„o) automaticamente no inÌcio
+            // Toca a nota grave (pedaleira do √≥rg√£o) automaticamente no in√≠cio
             if (notasAtuais && notasAtuais[0]) {
                 const bufferGrave = this.buffers.get(`${this.instrument}_${notasAtuais[0]}`);
                 if (bufferGrave) {
@@ -266,14 +266,14 @@ class MelodyMachine {
             }
         }
 
-        // 3. Se n„o houver acorde tocando ou cache de trilhas, interrompemos o processamento
+        // 3. Se n√£o houver acorde tocando ou cache de trilhas, interrompemos o processamento
         if (!notasAtuais || !this.tracksCache) return;
 
-        // 4. Loop otimizado pelas trilhas (Vozes do ”rg„o)
+        // 4. Loop otimizado pelas trilhas (Vozes do √ìrg√£o)
         for (let i = 0; i < this.tracksCache.length; i++) {
             const trackData = this.tracksCache[i];
 
-            // Pula vozes que n„o est„o marcadas como selecionadas
+            // Pula vozes que n√£o est√£o marcadas como selecionadas
             if (!trackData.button.classList.contains('selected')) continue;
 
             const stepElement = trackData.steps[stepIndex];
@@ -287,7 +287,7 @@ class MelodyMachine {
 
             const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
             if (bufferNota) {
-                // Ajusta volume: se for o volume "mÈdio" (2), divide por 1.5
+                // Ajusta volume: se for o volume "m√©dio" (2), divide por 1.5
                 const volumeFinal = stepElementVol === 2 ? (this.defaultVol / 1.5) : this.defaultVol;
                 this.playSound(bufferNota, this.nextNoteTime, volumeFinal);
 
