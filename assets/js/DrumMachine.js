@@ -172,7 +172,7 @@ class DrumMachine {
             if (!this.playBass(instrument, time, volume) && !this.playViolao(instrument, time, volume)) {
                 const buffer = this.buffers.get(instrument);
                 if (buffer && volume > 0) {
-                    this.playSound(buffer, time, volume === 2 ? 0.3 : 1);
+                    this.playSound(buffer, time, volume === 2 ? 0.3 : 1, instrument === 'chimbal');
                 }
             }
         }
@@ -248,7 +248,7 @@ class DrumMachine {
                 if (volume <= 0) continue;
 
                 if (trackData.instrument === 'chimbal') {
-                this.fecharChimbal(trackData.instrument, volume);
+                    this.fecharChimbal(trackData.instrument, volume);
                 }
                 this.scheduleNote(trackData.instrument, this.currentStep, this.nextNoteTime, volume);
 
