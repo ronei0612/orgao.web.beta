@@ -1271,8 +1271,8 @@ class App {
         }
 
         // Importante: Atualizamos o valor do editTextarea com o conteúdo coletado, 
-        // pois o método 'salvarMetaDataNoLocalStorage' lê os dados de lá.
-        this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, content);
+        // pois o método 'salvarMetaDataNoLocalStorage' lê os dados de lá caso não sejam passados.
+        this.elements.editTextarea.value = content;
 
         // 4. Lógica para identificar o Tom (Key)
         const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
@@ -1294,7 +1294,7 @@ class App {
 
         // 6. Grava os dados finais no LocalStorage
         // Isso chama a função que monta o objeto com type, chords, bpm, instrument, style, etc.
-        this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName);
+        this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, content);
 
         // 7. Atualiza o Select principal para focar na música salva
         this.elements.savesSelect.value = newSaveName;
