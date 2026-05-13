@@ -1,29 +1,29 @@
-/**
+Ôªø/**
  * Classe AudioContextManager
- * Respons·vel por gerenciar o Web Audio API, carregar instrumentos e tocar acordes
+ * Respons√°vel por gerenciar o Web Audio API, carregar instrumentos e tocar acordes
  * com efeitos de loop, attack e release.
  */
 class AudioContextManager {
 	constructor() {
-		// Cria uma nova inst‚ncia do AudioContext
+		// Cria uma nova inst√¢ncia do AudioContext
 		this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-		this.buffers = {}; // Armazena os buffers de ·udio carregados (instrumentos)
+		this.buffers = {}; // Armazena os buffers de √°udio carregados (instrumentos)
 		this.instrumentSettings = {};
-		this.sources = []; // Armazena os nÛs de fonte de ·udio atualmente tocando
-		this.gainNodes = []; // Armazena os nÛs de ganho (volume) para controle de Attack/Release
+		this.sources = []; // Armazena os n√≥s de fonte de √°udio atualmente tocando
+		this.gainNodes = []; // Armazena os n√≥s de ganho (volume) para controle de Attack/Release
 		this.currentNotes = []; // Notas a serem tocadas (setadas pelo setNotes)
-		// O this.notesMap foi removido do construtor e ser· passado para loadInstruments()
+		// O this.notesMap foi removido do construtor e ser√° passado para loadInstruments()
 	}
 
 	/**
-	 * Carrega todos os instrumentos (arquivos de ·udio) na memÛria (buffers).
+	 * Carrega todos os instrumentos (arquivos de √°udio) na mem√≥ria (buffers).
 	 * @param {Object<string, {url: string, volume: number}>} urlsMap Um objeto mapeando o nome da nota para um objeto com a URL e o volume desejado (0.0 a 1.0).
-	 * @returns {Promise<void>} Uma Promise que resolve quando todos os arquivos s„o carregados.
+	 * @returns {Promise<void>} Uma Promise que resolve quando todos os arquivos s√£o carregados.
 	 */
 	async loadInstruments(urlsMap) {
 		const noteKeys = Object.keys(urlsMap);
 
-		// Limpa buffers e configuraÁıes anteriores
+		// Limpa buffers e configura√ß√µes anteriores
 		this.buffers = {};
 		this.instrumentSettings = {};
 
@@ -51,7 +51,7 @@ class AudioContextManager {
 	}
 
 	/**
-	 * Define as notas que ser„o tocadas no prÛximo mÈtodo play().
+	 * Define as notas que ser√£o tocadas no pr√≥ximo m√©todo play().
 	 * @param {string[]} notes Um array de strings com as notas, ex: ['c', 'e', 'g'].
 	 */
 	setNotes(notes) {
@@ -68,7 +68,7 @@ class AudioContextManager {
 
 	/**
 	 * Toca as notas definidas em currentNotes.
-	 * LÛgica alterada para diferenciar Loop de Strings e ”rg„o.
+	 * L√≥gica alterada para diferenciar Loop de Strings e √ìrg√£o.
 	 */
 	play(attackTime = 0.2) {
 		// Garante que o AudioContext esteja resumido
@@ -109,15 +109,15 @@ class AudioContextManager {
 	}
 
 	/**
-	 * Para as notas que est„o tocando com efeito Release.
-	 * @param {number} [releaseTime=0.2] DuraÁ„o do efeito Release em segundos (saÌda suave).
+	 * Para as notas que est√£o tocando com efeito Release.
+	 * @param {number} [releaseTime=0.2] Dura√ß√£o do efeito Release em segundos (sa√≠da suave).
 	 */
 	stop(releaseTime = 0.2) {
 		if (this.sources.length === 0) return;
 		const now = this.audioContext.currentTime;
 		const stopTime = now + releaseTime;
 
-		// Movemos os sources atuais para uma vari·vel local para limpar o array da classe
+		// Movemos os sources atuais para uma vari√°vel local para limpar o array da classe
 		const oldSources = [...this.sources];
 		this.sources = [];
 
@@ -131,8 +131,8 @@ class AudioContextManager {
 
 			source.stop(stopTime);
 
-			// GARANTIA DE LIMPEZA DE MEM”RIA:
-			// Agenda a desconex„o para quando o som terminar
+			// GARANTIA DE LIMPEZA DE MEM√ìRIA:
+			// Agenda a desconex√£o para quando o som terminar
 			setTimeout(() => {
 				source.disconnect();
 				gainNode.disconnect();

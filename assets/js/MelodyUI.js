@@ -1,4 +1,4 @@
-class MelodyUI {
+Ôªøclass MelodyUI {
     constructor(elements, melodyMachine, uiController) {
         this.elements = elements;
         this.melodyMachine = melodyMachine;
@@ -47,7 +47,7 @@ class MelodyUI {
         return patternData;
     }
 
-    // ALTERA«√O: Gera chave ˙nica baseada no Ìndice numÈrico e oitava
+    // ALTERA√á√ÉO: Gera chave √∫nica baseada no √≠ndice num√©rico e oitava
     getInstrumentKey(inst) {
         // Ex: orgao_0_baixo
         return `${inst.name}_${inst.note}`;
@@ -126,16 +126,16 @@ class MelodyUI {
         button.style.color = '#333';
         button.style.width = '100%';
 
-        // ALTERA«√O: Texto do bot„o agora mostra a Voz (Ìndice + 1)
+        // ALTERA√á√ÉO: Texto do bot√£o agora mostra a Voz (√≠ndice + 1)
         button.textContent = `Voz ${instrument.note + 1}`;
 
-        // ALTERA«√O CRÕTICA: Adiciona os datasets que o MelodyMachine.js lÍ no refreshTrackCache
+        // ALTERA√á√ÉO CR√çTICA: Adiciona os datasets que o MelodyMachine.js l√™ no refreshTrackCache
         button.dataset.noteIndex = instrument.note; // 0, 1, 2...
         button.dataset.name = instrument.name;      // orgao
 
         const dataSpan = document.createElement('span');
 
-        // ALTERA«√O: Chave ˙nica para persistÍncia (Save/Load)
+        // ALTERA√á√ÉO: Chave √∫nica para persist√™ncia (Save/Load)
         const storageKey = this.getInstrumentKey(instrument);
         dataSpan.dataset.instrument = storageKey;
 
@@ -269,7 +269,7 @@ class MelodyUI {
         if (name) {
             const storage = this.getStorageData();
             if (storage.styles.includes(name)) {
-                alert("Estilo j· existe!");
+                alert("Estilo j√° existe!");
                 return;
             }
             storage.styles.push(name);
