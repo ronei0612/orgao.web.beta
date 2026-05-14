@@ -286,17 +286,58 @@ class App {
 
     avancar() {
         if (!this.elements.partituraFrame.classList.contains('d-none')) {
-            this.partituraPlayer.avancarNotaAtualPartitura();
+            this._moverPartitura(1);
         } else {
-            this.cifraPlayer.avancarCifra();
+            this._moverCifra(1);
         }
     }
 
     retroceder() {
         if (!this.elements.partituraFrame.classList.contains('d-none')) {
-            this.partituraPlayer.retrocederNotaAtualPartitura();
+            this._moverPartitura(-1);
         } else {
-            this.cifraPlayer.retrocederCifra();
+            this._moverCifra(-1);
+        }
+    }
+
+    _moverPartitura(direcao) {
+        const total = this.partituraEditor.currentData.length - 1;
+        const atual = this.partituraEditor.highlightIndex === -1 ? 0 : this.partituraEditor.highlightIndex;
+        const novoIndex = Math.max(0, Math.min(atual + direcao, total));
+
+        this.partituraEditor.highlightIndex = novoIndex;
+
+        if (this.partituraPlayer.partituraPlaybackIndex !== -1) {
+            // Está tocando: toca a nota
+            this.partituraPlayer.partituraPlaybackIndex = novoIndex;
+            this.partituraPlayer.tocarNotaAtualPartitura();
+        } else {
+            // Parado: só destaca
+            this.partituraEditor.draw(this.elements.partituraFrame, false);
+        }
+    }
+
+    _moverCifra(direcao) {
+        // Garante que elements_b está inicializado
+        if (!this.cifraPlayer.elements_b) {
+            this.cifraPlayer.elements_b = this.elements.iframeCifra
+                .contentDocument.getElementsByTagName('b');
+        }
+
+        if (!this.cifraPlayer.parado) {
+            // Está tocando: usa o fluxo normal com som
+            if (direcao > 0) {
+                this.cifraPlayer.avancarCifra();
+            } else {
+                this.cifraPlayer.retrocederCifra();
+            }
+        } else {
+            // Parado: só destaca sem som
+            if (direcao > 0) {
+                this.cifraPlayer.avancarDestaque();
+            } else {
+                this.cifraPlayer.retrocederDestaque();
+            }
         }
     }
 
@@ -480,7 +521,19 @@ class App {
             const dataArray = saveData.chords.split('\n').filter(l => l.trim());
             this.partituraEditor.abrirEditor(dataArray);
         } else {
-            this.elements.editTextarea.value = saveData.chords || "";
+            // Pega o texto transposto do iframe em vez do original do localStorage
+            const iframeBody = this.elements.iframeCifra.contentDocument?.body;
+            const textoTransposto = iframeBody
+                ? this.cifraPlayer.removerTagsDaCifra('<pre>' + iframeBody.innerText + '</pre>')
+                : saveData.chords || "";
+
+            // Se o tom foi alterado, usa o texto do iframe; senão usa o salvo
+            const tomAtual = this.elements.tomSelect.value;
+            const tomOriginal = saveData.key || 'C';
+
+            this.elements.editTextarea.value = (tomAtual !== tomOriginal)
+                ? (iframeBody?.innerText || saveData.chords || "")
+                : (saveData.chords || "");
         }
 
         this.uiController.exibirBotoesTom();
@@ -523,18 +576,17 @@ class App {
         this.uiController.esconderEditDeleteButtons();
 
         this.partituraPlayer.partituraPlaybackIndex = -1;
+        this.partituraPlayer.stop(); // <- sempre, independente do melodyStyle
 
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
         if (this.elements.melodyStyleSelect.value) {
             this.melodyUI.stop();
-            this.partituraPlayer.stop();
         }
     }
 
     handlePlayMousedown() {
         if (this.currentEditorType === 'partitura' || (!this.elements.partituraFrame.classList.contains('d-none'))) {
-            // Se houver nota selecionada, começa por ela; senão começa do início
             const startIndex = this.partituraEditor.highlightIndex !== -1
                 ? this.partituraEditor.highlightIndex
                 : 0;
@@ -545,6 +597,11 @@ class App {
             this.uiController.exibirBotoesAvancarVoltarCifra();
         }
         else if (this.elements.acorde1.classList.contains('d-none')) {
+            // Modo cifra — começa do índice atual se houver destaque
+            if (this.cifraPlayer.indiceAcorde > 0) {
+                // Já há uma posição selecionada, retrocede um para retocar a atual
+                this.cifraPlayer.indiceAcorde--;
+            }
             this.cifraPlayer.iniciarReproducao();
         } else {
             this.bateriaUI.play();
