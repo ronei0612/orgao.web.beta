@@ -199,7 +199,8 @@ class DrumMachine {
     }
 
     fecharChimbal(instrument, volume) {
-        if (volume === 1 || volume === 2) {
+        // Adicionamos o "volume === undefined" para quando for chamado no fim do compasso
+        if (volume === undefined || volume === 1 || volume === 2) {
             if (this.lastChimbalAbertoSource) {
                 try {
                     this.lastChimbalAbertoSource.stop(0);

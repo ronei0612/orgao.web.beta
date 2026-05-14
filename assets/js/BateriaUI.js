@@ -33,7 +33,12 @@ class BateriaUI {
 
     async init() {
         this.styleManager.loadStyles(this.drumMachine.styles);
-        this.initializeTracks();
+        // Garante que o ritmo seja puxado pra tela na abertura do app
+        if (this.elements.drumStyleSelect.value) {
+            this.loadRhythmForStyleAndRhythm(this.elements.drumStyleSelect.value, this.selectedRhythm);
+        } else {
+            this.initializeTracks();
+        }
         this.bindEvents();
     }
 
@@ -86,13 +91,20 @@ class BateriaUI {
         data = storage.data && storage.data[styleName] ? storage.data[styleName][rhythm] : null;
 
         if (!data) {
-            this.clearSteps();
+            // Garante que as trilhas existam antes de limpar
+            if (this.elements.tracksContainer.children.length === 0) {
+                this.initializeTracks();
+            } else {
+                this.clearSteps();
+            }
             return;
         }
 
         if (typeof data.numSteps === 'number') {
             this.elements.numStepsInput.value = data.numSteps;
             this.drumMachine.setNumSteps(data.numSteps);
+            this.initializeTracks();
+        } else if (this.elements.tracksContainer.children.length === 0) {
             this.initializeTracks();
         }
         this.elements.tracksContainer.querySelectorAll('.track').forEach(track => {

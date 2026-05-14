@@ -30,10 +30,12 @@
 
     async init() {
         this.styleManager.loadStyles(this.melodyMachine.styles);
+        // Se tem um estilo selecionado, carrega. Senão, cria trilhas vazias.
         if (this.elements.melodyStyleSelect.value) {
             this.loadPattern(this.elements.melodyStyleSelect.value);
+        } else {
+            this.initializeTracks();
         }
-        this.initializeTracks();
         this.bindEvents();
     }
 
@@ -188,14 +190,17 @@
         const data = storage.data ? storage.data[styleName] : null;
 
         if (!data) {
-            this.clearSteps();
+            // Garante que as trilhas existam na tela antes de limpar
+            if (this.tracksContainer.children.length === 0) {
+                this.initializeTracks();
+            } else {
+                this.clearSteps();
+            }
             return;
         }
 
-        //if (data.numSteps && data.numSteps !== parseInt(this.numStepsInput.value)) {
-        this.numStepsInput.value = data.numSteps;
+        this.numStepsInput.value = data.numSteps || 8;
         this.initializeTracks();
-        //}
 
         const tracks = this.tracksContainer.querySelectorAll('.track');
         tracks.forEach(track => {
