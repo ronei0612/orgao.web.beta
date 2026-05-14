@@ -105,8 +105,6 @@
         this.stepsPorTempo = null;
         this.tracksCache = null;
         this.activeSources = [];
-
-        this.init();
     }
 
     async loadSounds() {
@@ -213,10 +211,10 @@
         this.currentStep++;
 
         if (this.currentStep > this.numSteps) {
-            this.stop();
             if (typeof this.onStepsEnd === 'function') {
                 this.onStepsEnd();
             }
+            this.stop();
         }
     }
 

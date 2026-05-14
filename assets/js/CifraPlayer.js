@@ -1,4 +1,3 @@
-// No CifraPlayer.js
 class CifraPlayer {
     constructor(elements, uiController, musicTheory, baseUrl, audioManager) {
         this.audioPath = `${baseUrl}/assets/audio/`;
@@ -172,7 +171,11 @@ class CifraPlayer {
             });
         });
 
-        this.audioContextManager.loadInstruments(urlsDict);
+        this.audioContextManager.loadInstruments(urlsDict).then(() => {
+            if (this.onInstrumentosCarregados) {
+                this.onInstrumentosCarregados();
+            }
+        });
     }
 
     transposeCifra() {
@@ -478,6 +481,51 @@ class CifraPlayer {
 
                     this.indiceAcorde++;
                 }
+            }
+        }
+    }
+
+    avancarDestaque() {
+        if (!this.elements_b) return;
+        const frameContent = this.elements.iframeCifra.contentDocument;
+
+        if (this.indiceAcorde === this.elements_b.length - 1) {
+            this.indiceAcorde = 0;
+        }
+
+        if (this.indiceAcorde < this.elements_b.length) {
+            this.removerClasseCifraSelecionada(frameContent);
+            const cifraElem = this.elements_b[this.indiceAcorde];
+            if (cifraElem) {
+                // Pula elementos vazios (marcadores de linha)
+                if (!cifraElem.innerHTML.trim()) {
+                    this.indiceAcorde++;
+                    this.avancarDestaque();
+                    return;
+                }
+                cifraElem.classList.add('cifraSelecionada');
+                cifraElem.scrollIntoView({ behavior: 'smooth' });
+                this.indiceAcorde++;
+            }
+        }
+    }
+
+    retrocederDestaque() {
+        if (!this.elements_b) return;
+        const frameContent = this.elements.iframeCifra.contentDocument;
+
+        if (this.indiceAcorde > 2) {
+            const cifraElem = this.elements_b[this.indiceAcorde - 2];
+            if (cifraElem.innerHTML === '')
+                this.indiceAcorde -= 4;
+            else
+                this.indiceAcorde -= 2;
+
+            this.removerClasseCifraSelecionada(frameContent);
+            const elem = this.elements_b[this.indiceAcorde - 1];
+            if (elem) {
+                elem.classList.add('cifraSelecionada');
+                elem.scrollIntoView({ behavior: 'smooth' });
             }
         }
     }

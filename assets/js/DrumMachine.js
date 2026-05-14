@@ -37,8 +37,6 @@ class DrumMachine {
 
         // Cache para evitar ler o DOM a cada milissegundo (Performance Crítica)
         this.tracksCache = null;
-
-        this.init();
     }
 
     async init() {
@@ -172,7 +170,7 @@ class DrumMachine {
             if (!this.playBass(instrument, time, volume) && !this.playViolao(instrument, time, volume)) {
                 const buffer = this.buffers.get(instrument);
                 if (buffer && volume > 0) {
-                    this.playSound(buffer, time, volume === 2 ? 0.3 : 1);
+                    this.playSound(buffer, time, volume === 2 ? 0.3 : 1, instrument === 'chimbal');
                 }
             }
         }
@@ -201,9 +199,8 @@ class DrumMachine {
     }
 
     fecharChimbal(instrument, volume) {
-        if (instrument !== 'chimbal') return;
-
-        if (volume === 1 || volume === 2) {
+        // Adicionamos o "volume === undefined" para quando for chamado no fim do compasso
+        if (volume === undefined || volume === 1 || volume === 2) {
             if (this.lastChimbalAbertoSource) {
                 try {
                     this.lastChimbalAbertoSource.stop(0);
@@ -249,7 +246,9 @@ class DrumMachine {
                 const volume = parseInt(stepEl.dataset.volume || '0', 10);
                 if (volume <= 0) continue;
 
-                this.fecharChimbal(trackData.instrument, volume);
+                if (trackData.instrument === 'chimbal') {
+                    this.fecharChimbal(trackData.instrument, volume);
+                }
                 this.scheduleNote(trackData.instrument, this.currentStep, this.nextNoteTime, volume);
 
                 // Feedback visual (apenas se necessário)
