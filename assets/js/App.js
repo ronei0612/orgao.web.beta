@@ -74,15 +74,11 @@ class App {
         this.getUrlParam();
         this.updateFillBlink(this.musicTheory.bpm);
 
-        const drumMachine = new DrumMachine(this.BASE_URL, this.cifraPlayer, this.musicTheory, this.audioManager);
-            await drumMachine.init();
-
-        this.bateriaUI = new BateriaUI(this.elements, drumMachine, this.uiController, this.cifraPlayer);
-        await this.bateriaUI.init();
+        this.drumMachine = new DrumMachine(this.BASE_URL, this.cifraPlayer, this.musicTheory, this.audioManager);
+        this.bateriaUI = new BateriaUI(this.elements, this.drumMachine, this.uiController, this.cifraPlayer);
 
         this.melodyMachine = new MelodyMachine(this.BASE_URL, this.musicTheory, this.cifraPlayer, this.audioManager);
         await this.melodyMachine.init();
-        await this.melodyMachine.getStyles();
 
         this.melodyUI = new MelodyUI(this.elements, this.melodyMachine, this.uiController);
         await this.melodyUI.init();
@@ -531,9 +527,9 @@ class App {
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
         if (this.elements.melodyStyleSelect.value) {
-        this.melodyUI.stop();
-        this.partituraPlayer.stop();
-    }
+            this.melodyUI.stop();
+            this.partituraPlayer.stop();
+        }
     }
 
     handlePlayMousedown() {
@@ -588,12 +584,16 @@ class App {
         }
     }
 
-    handleOrgaoInstrumentClick() {
+    async handleOrgaoInstrumentClick() {
         if (this.cifraPlayer.instrumento === 'orgao') {
             this.cifraPlayer.instrumento = 'epiano';
-            this.bateriaUI.drumMachine.loadSoundsIfNeeded();
-        }
-        else {
+
+            if (!this.bateriaUI._initialized) {
+                await this.drumMachine.init(); // carrega styles.json + sons
+                await this.bateriaUI.init();   // constrói UI + bindEvents
+                this.bateriaUI._initialized = true;
+            }
+        } else {
             this.cifraPlayer.instrumento = 'orgao';
         }
 
@@ -966,7 +966,7 @@ class App {
     }
 
     tocarBateriaMelody() {
-        if (this.cifraPlayer.instrumento === 'orgao') {
+        if (this.cifraPlayer.instrumento === 'orgao' && this.elements.melodyStyleSelect.value) {
             this.melodyUI.play();
             this.melodyMachine.currentStep = 1;
         }
