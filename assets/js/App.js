@@ -16,6 +16,10 @@ class App {
         // CifraPlayer agora recebe o audioManager pronto
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL, this.audioManager);
 
+        this.cifraPlayer.onInstrumentosCarregados = () => {
+            this.elements.orgaoInstrumentButton.removeAttribute('disabled');
+        };
+
         // PartituraPlayer agora recebe o audioManager pronto
         this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor, this.BASE_URL, this.audioManager);
 
@@ -526,8 +530,10 @@ class App {
 
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
+        if (this.elements.melodyStyleSelect.value) {
         this.melodyUI.stop();
         this.partituraPlayer.stop();
+    }
     }
 
     handlePlayMousedown() {

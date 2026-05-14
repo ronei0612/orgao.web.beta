@@ -1,4 +1,3 @@
-// No CifraPlayer.js
 class CifraPlayer {
     constructor(elements, uiController, musicTheory, baseUrl, audioManager) {
         this.audioPath = `${baseUrl}/assets/audio/`;
@@ -172,7 +171,11 @@ class CifraPlayer {
             });
         });
 
-        this.audioContextManager.loadInstruments(urlsDict);
+        this.audioContextManager.loadInstruments(urlsDict).then(() => {
+            if (this.onInstrumentosCarregados) {
+                this.onInstrumentosCarregados();
+            }
+        });
     }
 
     transposeCifra() {
