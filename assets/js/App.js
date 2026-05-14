@@ -591,6 +591,7 @@ class App {
     handleOrgaoInstrumentClick() {
         if (this.cifraPlayer.instrumento === 'orgao') {
             this.cifraPlayer.instrumento = 'epiano';
+            this.bateriaUI.drumMachine.loadSoundsIfNeeded();
         }
         else {
             this.cifraPlayer.instrumento = 'orgao';

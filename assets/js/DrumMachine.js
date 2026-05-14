@@ -40,8 +40,13 @@ class DrumMachine {
     }
 
     async init() {
-        await this.loadSounds();
         await this.getStyles();
+    }
+
+    async loadSoundsIfNeeded() {
+        if (this._soundsLoaded) return;
+        this._soundsLoaded = true;
+        await this.loadSounds();
     }
 
     async getStyles() {
