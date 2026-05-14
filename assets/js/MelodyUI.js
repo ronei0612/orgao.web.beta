@@ -167,7 +167,7 @@
             patternData[instKey] = { steps, selected: isSelected };
         });
 
-        const storage = this.styleManager.getStorageData();
+        const storage = this.styleManager.getStorageData(this.melodyMachine.styles);
         storage.data[styleName] = patternData;
         this.styleManager.persistStorageData(storage);
 
@@ -184,7 +184,7 @@
     }
 
     loadPattern(styleName) {
-        const storage = this.styleManager.getStorageData();
+        const storage = this.styleManager.getStorageData(this.melodyMachine.styles);
         const data = storage.data ? storage.data[styleName] : null;
 
         if (!data) {

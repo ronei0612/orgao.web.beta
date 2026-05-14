@@ -69,7 +69,7 @@ class BateriaUI {
      * Salva o ritmo atual no estilo e chave de ritmo fornecidos (estrutura JSON)
      */
     saveRhythmToStyle(styleName, rhythmKey, rhythmData) {
-        const storage = this.styleManager.getStorageData();
+        const storage = this.styleManager.getStorageData(this.drumMachine.styles);
         if (!storage.data) storage.data = {};
         if (!storage.data[styleName]) storage.data[styleName] = {};
         storage.data[styleName][rhythmKey] = rhythmData;
@@ -81,7 +81,7 @@ class BateriaUI {
      */
     loadRhythmForStyleAndRhythm(styleName, rhythm) {
         let data = null;
-        const storage = this.styleManager.getStorageData();
+        const storage = this.styleManager.getStorageData(this.drumMachine.styles);
 
         data = storage.data && storage.data[styleName] ? storage.data[styleName][rhythm] : null;
 
