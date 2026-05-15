@@ -725,8 +725,11 @@ class App {
             this.elements.partituraFrame.classList.remove('d-none');
             this.elements.iframeCifra.classList.add('d-none');
 
-            this.partituraOriginalKey = saveData.key || 'C'; // <- guardar tom original
+            this.partituraOriginalKey = saveData.key || 'C';
             this.cifraPlayer.tomOriginal = this.partituraOriginalKey;
+
+            // Atualiza o tomSelect com o tom salvo
+            this.elements.tomSelect.value = this.partituraOriginalKey;
 
             this.partituraEditor.renderizarVisualizacao(dataArray);
             this.uiController.exibirBotoesCifras();
@@ -1340,15 +1343,21 @@ class App {
 
         // 4. Lógica para identificar o Tom (Key)
         const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
+        // 4. Lógica para identificar o Tom (Key)
         let tom;
 
-        if (this.cifraPlayer.tomOriginal && this.cifraPlayer.tomOriginal !== this.elements.tomSelect.value) {
-            // Se o usuário mudou o tom manualmente no select durante a edição
-            tom = this.elements.tomSelect.value;
+        if (this.currentEditorType === 'partitura') {
+            // Para partitura usa direto o tomSelect — já foi transposto pelo usuário
+            tom = this.elements.tomSelect.value || 'C';
         } else {
-            // Tenta descobrir o tom automaticamente ou usa o que estiver no select
-            tom = this.cifraPlayer.descobrirTom(musicaCifrada) || this.elements.tomSelect.value || 'C';
+            const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
+            if (this.cifraPlayer.tomOriginal && this.cifraPlayer.tomOriginal !== this.elements.tomSelect.value) {
+                tom = this.elements.tomSelect.value;
+            } else {
+                tom = this.cifraPlayer.descobrirTom(musicaCifrada) || this.elements.tomSelect.value || 'C';
+            }
         }
+
         this.elements.tomSelect.value = tom;
 
         // 5. Se foi uma edição com troca de nome, remove o registro antigo
