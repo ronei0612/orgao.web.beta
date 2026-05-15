@@ -67,7 +67,7 @@
                             <img class="icon-svg dark-invert" src="./assets/icons/dash.svg">
                         </button>
                     </div>
-                    <input type="text" id="bpm-input" value="90" class="form-control text-center px-1" aria-label="BPM">
+                    <input type="number" id="bpm-input" value="90" class="form-control text-center px-1" aria-label="BPM">
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary" type="button" id="increment-bpm-5">+5</button>
                     </div>
@@ -82,7 +82,7 @@
                         <select class="form-control" id="savesSelect">
                         </select>
                     </div>
-                    <input type="text" class="form-control d-none" id="itemNameInput" placeholder="Nome da Música...">
+                    <input type="search" autocomplete="off" class="form-control d-none" id="itemNameInput" placeholder="Nome da Música...">
 
                     <button class="btn btn-primary btn-control-custom rounded-right d-none" id="saveButton">
                         <img class="icon-svg" src="./assets/icons/check.svg">
@@ -291,7 +291,7 @@
                     <p class="d-none"><a href="#" id="downloadStylesLink">Baixar Styles</a></p>
                     <p><a href="#" id="restoreLink">Restaurar</a></p>
                     <p><a href="#" id="about">Sobre este site</a></p>
-                    <p><input type="text" id="volumeOrgao" value="0.7" class="form-control text-center px-1"></p>
+                    <p><input type="number" id="volumeOrgao" value="0.7" class="form-control text-center px-1"></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">× Fechar</button>
@@ -312,8 +312,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="input-group">
-                        <input class="form-control" placeholder="Pesquisar no CifraClub..." aria-label="Pesquisar" aria-describedby="basic-addon1" id="searchInput">
-                        <button class="btn btn-danger btn-sm rounded-0" type="button" tabindex="-1" id="clearButton">
+                        <input type="search" autocomplete="off" class="form-control" placeholder="Pesquisar no CifraClub..." aria-label="Pesquisar" aria-describedby="basic-addon1" id="searchInput">
+                        <button class="btn btn-danger btn-sm rounded-0 d-none" type="button" tabindex="-1" id="clearButton">
                             <img class="icon-svg" src="./assets/icons/x-circle.svg">
                         </button>
                         <button class="btn btn-primary rounded-right-custom" type="button" id="searchButton">
