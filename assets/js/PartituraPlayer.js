@@ -9,7 +9,7 @@ class PartituraPlayer {
         this.buffers = new Map();
         this.audioContextManager = audioManager;
         this.audioContext = audioManager.audioContext; 
-        this.activeSources = [];
+        this.activeSources = new Set();
         this.init();
     }
 
@@ -113,10 +113,10 @@ class PartituraPlayer {
 
         // Guarda source + gainNode juntos para stop suave (igual ao MelodyMachine)
         const noteEntry = { source, gainNode };
-        this.activeSources.push(noteEntry);
+        this.activeSources.add(noteEntry);
 
         source.onended = () => {
-            this.activeSources = this.activeSources.filter(item => item !== noteEntry);
+            this.activeSources.delete(noteEntry); // O(1), super rápido e limpo
             source.disconnect();
             gainNode.disconnect();
         };
@@ -126,7 +126,7 @@ class PartituraPlayer {
 
     stop() {
         // Fade-out suave em todas as notas ativas (igual ao MelodyMachine)
-        const now = this.audioContext.currentTime;
+        const now = this.audioContext.currentTime;        
         this.activeSources.forEach(({ source, gainNode }) => {
             try {
                 gainNode.gain.cancelScheduledValues(now);
@@ -134,8 +134,7 @@ class PartituraPlayer {
                 source.stop(now + 0.1);
             } catch (e) { }
         });
-        this.activeSources = [];
-        //this.partituraPlaybackIndex = -1;
+        this.activeSources.clear();
     }
 
     tocarNotaAtualPartitura(volume = 1) {
@@ -143,6 +142,12 @@ class PartituraPlayer {
         if (!data) return;
 
         this.stop();
+
+        // Toca o acorde ANTES para compensar o attack do órgão
+        if (data.chord) {
+            this.cifraPlayer.tocarAcorde(data.chord);
+        }
+
         if (!data.rest) {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
@@ -151,13 +156,8 @@ class PartituraPlayer {
             });
         }
 
-        if (data.chord) {
-            this.cifraPlayer.tocarAcorde(data.chord);
-        }
-
         this.partituraEditor.highlightIndex = this.partituraPlaybackIndex;
         this.partituraEditor.draw(this.elements.partituraFrame, false);
-        // bindClickNotas é chamado via onViewDrawn automaticamente pelo draw()
     }
 
     avancarNotaAtualPartitura() {

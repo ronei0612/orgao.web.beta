@@ -104,7 +104,7 @@
         this.styles = null;
         this.stepsPorTempo = null;
         this.tracksCache = null;
-        this.activeSources = [];
+        this.activeSources = new Set();
     }
 
     async loadSounds() {
@@ -173,10 +173,10 @@
         source.start(time);
 
         const noteEntry = { source, gainNode };
-        this.activeSources.push(noteEntry);
+        this.activeSources.add(noteEntry);
 
         source.onended = () => {
-            this.activeSources = this.activeSources.filter(item => item !== noteEntry);
+            this.activeSources.delete(noteEntry); // O(1), super rápido e limpo
             source.disconnect();
             gainNode.disconnect();
         };
@@ -200,7 +200,7 @@
                 source.stop(time + 0.1);
             } catch (e) { }
         });
-        this.activeSources = [];
+        this.activeSources.clear();
     }
 
     nextNote() {

@@ -132,11 +132,10 @@ class AudioContextManager {
 			source.stop(stopTime);
 
 			// GARANTIA DE LIMPEZA DE MEMÓRIA:
-			// Agenda a desconexão para quando o som terminar
-			setTimeout(() => {
+			source.onended = () => {
 				source.disconnect();
 				gainNode.disconnect();
-			}, releaseTime * 1000 + 100);
+			};
 		});
 	}
 }
