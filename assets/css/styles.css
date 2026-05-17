@@ -292,20 +292,10 @@ body.dark-mode .select2-results__options > li {
     color: white;
 }
 
-    .btn-delete:hover {
-        background-color: #B71C1C;
-        color: white;
-    }
-
 .btn-add {
     background-color: var(--btn-dark-cyan);
     color: white;
 }
-
-    .btn-add:hover {
-        background-color: var(--btn-dark-cyan-hover);
-        color: white;
-    }
 
     .btn-add.pressed {
         background-color: var(--btn-dark-cyan-hover);
@@ -323,11 +313,6 @@ body.dark-mode .select2-results__options > li {
     background-color: var(--btn-dark-cyan);
     color: #fff;
 }
-
-    .btn-dark-cyan:hover {
-        background-color: var(--btn-dark-cyan-hover);
-        color: white;
-    }
 
     .btn-dark-cyan:focus {
         outline: none;
@@ -358,6 +343,15 @@ body.dark-mode .bpm-control span {
 
 .bpm-control input[type="range"] {
     flex: 1;
+}
+
+/* Adicione no seu styles.css */
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus,
+.btn-outline-secondary:active {
+    color: #6c757d !important;
+    background-color: transparent !important;
+    border-color: #6c757d !important;
 }
 
 .rounded-left-custom {
