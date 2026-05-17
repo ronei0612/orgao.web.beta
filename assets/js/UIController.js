@@ -76,6 +76,7 @@ class UIController {
 
     exibirBotoesAcordes() {
         this.exibirBotoesTom();
+        this.esconderBotoesAvancarVoltarCifra();
         this.elements.notesButton.classList.remove('d-none');
         this.elements.notesButton.classList.remove('ml-5');
         this.elements.playButton.classList.remove('mx-5');
@@ -314,6 +315,8 @@ class UIController {
         this.elements.oracoesFrame.classList.add('d-none');
         this.elements.santamissaFrame.classList.add('d-none');
         this.elements.liturgiaDiariaFrame.classList.add('d-none');
+        this.elements.partituraFrame.classList.add('d-none'); // <--- ADICIONADO
+        this.elements.partituraEditFrame.classList.add('d-none'); // <--- ADICIONADO
         this.elements.melodyStyleSelect.classList.remove('d-none');
         this.elements.drumStyleSelect.classList.add('d-none');
         this.elements.orgaoInstrumentButton.classList.remove('d-none');
@@ -373,6 +376,8 @@ class UIController {
         this.elements.santamissaFrame.classList.add('d-none');
         this.elements.iframeCifra.classList.add('d-none');
         this.elements.liturgiaDiariaFrame.classList.add('d-none');
+        this.elements.partituraFrame.classList.add('d-none'); // <--- ADICIONADO
+        this.elements.partituraEditFrame.classList.add('d-none'); // <--- ADICIONADO
 
         if (frameId) {
             const frame = this.elements[frameId];
