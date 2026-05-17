@@ -8,6 +8,7 @@
         this.defaultVol = 0.7;
         this.buffers = new Map();
         this.audioContext = audioManager.audioContext;
+        this.audioManager = audioManager;
         this.audioPath = this.baseUrl + '/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [
@@ -168,7 +169,7 @@
         gainNode.gain.linearRampToValueAtTime(volume, time + this.attackTime);
 
         source.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        gainNode.connect(this.audioManager.masterGain);
 
         source.start(time);
 
