@@ -76,12 +76,6 @@ body.dark-mode #bateriaWrapper .btn-outline-secondary {
     border-color: var(--drum-btn-border);
 }
 
-    body.dark-mode #bateriaWrapper .btn-outline-secondary:hover {
-        background-color: var(--drum-btn-hover);
-        color: white;
-    }
-
-/* �rea dos trilhos (Tracks) */
 .track {
     display: flex;
     align-items: center;
@@ -204,10 +198,6 @@ body.dark-mode #bateriaWrapper .btn-outline-secondary {
     align-items: center;
     justify-content: center;
 }
-
-    .instrument-button:hover {
-        background-color: var(--drum-btn-hover);
-    }
 
     .instrument-button img {
         max-width: 100%;

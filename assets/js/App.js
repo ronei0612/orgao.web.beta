@@ -32,7 +32,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.6',
+            version: '6.0.7',
             htmlMessage: `
                 <p>Melhorias</p>
 
@@ -578,6 +578,8 @@ class App {
         this.partituraPlayer.partituraPlaybackIndex = -1;
         this.partituraPlayer.stop(); // <- sempre, independente do melodyStyle
 
+        this.uiController.habilitarSelectSaves(); // Reabilita opções e edições ao parar partitura
+
         this.cifraPlayer.pararReproducao();
         this.bateriaUI.stop();
         if (this.elements.melodyStyleSelect.value) {
@@ -595,6 +597,8 @@ class App {
             this.partituraPlayer.tocarNotaAtualPartitura();
             this.uiController.exibirBotaoStop();
             this.uiController.exibirBotoesAvancarVoltarCifra();
+
+            this.uiController.desabilitarSelectSaves(); // Trava select e botão de mais (+/lápis) ao tocar
         }
         else if (this.elements.acorde1.classList.contains('d-none')) {
             // Modo cifra — começa do índice atual se houver destaque
