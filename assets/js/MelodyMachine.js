@@ -8,6 +8,7 @@
         this.defaultVol = 0.7;
         this.buffers = new Map();
         this.audioContext = audioManager.audioContext;
+        this.audioManager = audioManager;
         this.audioPath = this.baseUrl + '/assets/audio/studio/Orgao';
         this.instrument = 'orgao';
         this.instruments = [
@@ -104,7 +105,7 @@
         this.styles = null;
         this.stepsPorTempo = null;
         this.tracksCache = null;
-        this.activeSources = [];
+        this.activeSources = new Set();
     }
 
     async loadSounds() {
@@ -168,15 +169,15 @@
         gainNode.gain.linearRampToValueAtTime(volume, time + this.attackTime);
 
         source.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        gainNode.connect(this.audioManager.masterGain);
 
         source.start(time);
 
         const noteEntry = { source, gainNode };
-        this.activeSources.push(noteEntry);
+        this.activeSources.add(noteEntry);
 
         source.onended = () => {
-            this.activeSources = this.activeSources.filter(item => item !== noteEntry);
+            this.activeSources.delete(noteEntry); // O(1), super rápido e limpo
             source.disconnect();
             gainNode.disconnect();
         };
@@ -200,7 +201,7 @@
                 source.stop(time + 0.1);
             } catch (e) { }
         });
-        this.activeSources = [];
+        this.activeSources.clear();
     }
 
     nextNote() {
