@@ -32,7 +32,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.7',
+            version: '6.0.5',
             htmlMessage: `
                 <p>Melhorias</p>
 
