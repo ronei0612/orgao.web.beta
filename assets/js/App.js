@@ -228,9 +228,9 @@ class App {
             }
         });
 
-        $('#savesSelect').on('select2:select', function (e) {
+        $('#savesSelect').on('select2:select', async (e) => {
             var selectedValue = e.params.data.id;
-            appInstance.selectEscolhido(selectedValue);
+            await appInstance.selectEscolhido(selectedValue);
 
             if (selectedValue === 'acordes__') {
                 $(this).val(null).trigger('change');
@@ -691,9 +691,16 @@ class App {
         this.preencherLayoutDoLocalStorage(saveData);
     }
 
-    preencherLayoutDoLocalStorage(saveData) {
+    async preencherLayoutDoLocalStorage(saveData) {
         if (saveData && saveData.instrument) {
             this.cifraPlayer.instrumento = saveData.instrument;
+
+            if (saveData.instrument === 'epiano' && !this.bateriaUI._initialized) {
+                await this.drumMachine.init();
+                await this.bateriaUI.init();
+                this.bateriaUI._initialized = true;
+            }
+
             this.exibirInstrument(saveData.instrument);
             this.elements.bpmInput.value = saveData.bpm;
             this.setBPM(saveData.bpm);
@@ -711,7 +718,7 @@ class App {
         }
     }
 
-    showLetraCifra(saveData) {
+    async showLetraCifra(saveData) {
         // 1. Identifica o nome da música (chave usada no localStorage)
         const songName = this.elements.savesSelect.value;
 
@@ -749,7 +756,7 @@ class App {
         }
 
         // 4. Aplica as configurações de BPM, Instrumento e Estilo
-        this.preencherLayoutDoLocalStorage(saveData);
+        await this.preencherLayoutDoLocalStorage(saveData);
     }
 
     // salvarMetaDataNoLocalStorage recebe chords como parâmetro opcional
@@ -804,7 +811,7 @@ class App {
             if (saveData) {
                 if (saveData.key) {
                     tom = saveData.key;
-                    this.preencherLayoutDoLocalStorage(saveData);
+                    await this.preencherLayoutDoLocalStorage(saveData);
                 }
                 else if (saveData !== '')
                     tom = saveData;
