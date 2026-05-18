@@ -152,4 +152,91 @@ class AudioContextManager {
 			};
 		});
 	}
+
+	/**
+	 * Fábrica centralizada de sons. Cria o nó, conecta ao Compressor, previne "tics" e gerencia a memória.
+	 * 
+	 * @param {AudioBuffer} buffer O buffer de áudio a ser tocado.
+	 * @param {number} time O momento (AudioContext.currentTime) em que o som deve iniciar.
+	 * @param {number} volume O volume do som (0.0 a 1.0).
+	 * @param {number} attack O tempo de ataque em segundos.
+	 * @param {boolean} isLoop Se o som deve entrar em loop.
+	 * @returns {Object|null} Retorna um objeto { source, gainNode } ou null se não houver buffer.
+	 */
+	playNode(buffer, time, volume = 1, attack = 0.003, isLoop = false) {
+		if (!buffer) return null;
+		if (this.audioContext.state === 'suspended') this.audioContext.resume();
+
+		// Se time não for passado, usa o agora imediato
+		const startTime = time || this.audioContext.currentTime;
+
+		const source = this.audioContext.createBufferSource();
+		const gainNode = this.audioContext.createGain();
+
+		// Proteção contra "tics" iniciais (Bug #5)
+		const safeAttack = Math.max(attack, 0.003);
+		gainNode.gain.setValueAtTime(0, startTime);
+		gainNode.gain.linearRampToValueAtTime(volume, startTime + safeAttack);
+
+		source.buffer = buffer;
+		source.loop = isLoop;
+
+		source.connect(gainNode);
+		gainNode.connect(this.masterGain);
+
+		source.start(startTime);
+
+		// GARBAGE COLLECTION AUTOMÁTICO
+		source.onended = () => {
+			source.disconnect();
+			gainNode.disconnect();
+		};
+
+		return { source, gainNode };
+	}
+
+	/**
+	 * Para um nó de áudio suavemente (Fade-out exponencial natural)
+	 * 
+	 * @param {Object} nodeEntry O objeto { source, gainNode } retornado por playNode.
+	 * @param {number} time O momento (AudioContext.currentTime) em que o som deve começar a parar.
+	 * @param {number} release O tempo de cauda (fade-out) em segundos.
+	 */
+	stopNode(nodeEntry, time, release = 0.05) {
+		if (!nodeEntry || !nodeEntry.gainNode || !nodeEntry.source) return;
+		const stopTime = time || this.audioContext.currentTime;
+
+		try {
+			nodeEntry.gainNode.gain.cancelScheduledValues(stopTime);
+			// setTargetAtTime: Decaimento natural (Bug #3)
+			nodeEntry.gainNode.gain.setTargetAtTime(0, stopTime, release);
+
+			// Para o nó após o decaimento (release * 5 é o tempo seguro para setTarget chegar a ~0)
+			nodeEntry.source.stop(stopTime + (release * 5));
+		} catch (e) {
+			// Nó já estava parado
+		}
+	}
+
+	/**
+	 * Para um conjunto de notas (Set) de uma vez só.
+	 * 
+	 * @param {Set} nodesSet O Set contendo objetos { source, gainNode }.
+	 * @param {number} release O tempo de fade-out em segundos.
+	 */
+	stopAll(nodesSet, release = 0.05) {
+		// Se o Set estiver vazio ou não existir, não faz nada
+		if (!nodesSet || nodesSet.size === 0) return;
+
+		const now = this.audioContext.currentTime;
+
+		// Criamos um snapshot rápido do Set.
+		// Motivo (Bug #3 do PDF): Garante que estamos iterando sobre as notas que 
+		// estavam ativas no momento do clique, evitando erros de concorrência.
+		const toStop = [...nodesSet];
+
+		toStop.forEach(node => {
+			this.stopNode(node, now, release);
+		});
+	}
 }

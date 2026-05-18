@@ -403,7 +403,7 @@ class BateriaUI {
 
     stop() {
         if (this.drumMachine.isPlaying) {
-            this.drumMachine.stop();
+            this.audioContextManager.stopNode();
             this.uiController.exibirBotaoPlay();
         }
     }
@@ -414,7 +414,7 @@ class BateriaUI {
             this.elements.rhythmButtons.forEach(button => button.classList.remove('fill'));
             this.drumMachine.start();
         } else {
-            this.drumMachine.stop();
+            this.audioContextManager.stopNode();
         }
     }
 

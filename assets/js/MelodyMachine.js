@@ -155,52 +155,8 @@
         }
     }
 
-    playSound(buffer, time, volume = 1) {
-        if (!buffer) return null;
-
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-
-        source.buffer = buffer;
-        source.loop = false;
-
-        const atackSemTic = 0; // era 0.001
-        gainNode.gain.setValueAtTime(atackSemTic, time);
-        gainNode.gain.linearRampToValueAtTime(volume, time + this.attackTime);
-
-        source.connect(gainNode);
-        gainNode.connect(this.audioManager.masterGain);
-
-        source.start(time);
-
-        const noteEntry = { source, gainNode };
-        this.activeSources.add(noteEntry);
-
-        source.onended = () => {
-            this.activeSources.delete(noteEntry); // O(1), super rápido e limpo
-            source.disconnect();
-            gainNode.disconnect();
-        };
-
-        return noteEntry;
-    }
-
     stopNotes(time) {
-        this.activeSources.forEach(item => {
-            try {
-                const { source, gainNode } = item;
-
-                // Cancela agendamentos futuros para não haver conflito
-                gainNode.gain.cancelScheduledValues(time);
-
-                // setTargetAtTime é muito mais suave para evitar estalos
-                // 0.02 é a constante de tempo (quanto menor, mais rápido o fade-out)
-                gainNode.gain.setTargetAtTime(0, time, 0.02);
-
-                // Para o som um pouco depois do fade-out para garantir silêncio
-                source.stop(time + 0.1);
-            } catch (e) { }
-        });
+        this.audioContextManager.stopAll(this.activeSources, 0.1);
         this.activeSources.clear();
     }
 
@@ -260,7 +216,7 @@
             if (notasAtuais && notasAtuais[0]) {
                 const bufferGrave = this.buffers.get(`${this.instrument}_${notasAtuais[0]}`);
                 if (bufferGrave) {
-                    this.playSound(bufferGrave, this.nextNoteTime, this.defaultVol);
+                    this.audioManager.playNode(bufferGrave, this.nextNoteTime, this.defaultVol);
                 }
             }
         }
@@ -288,7 +244,7 @@
             if (bufferNota) {
                 // Ajusta volume: se for o volume "médio" (2), divide por 1.5
                 const volumeFinal = stepElementVol === 2 ? (this.defaultVol / 1.5) : this.defaultVol;
-                this.playSound(bufferNota, this.nextNoteTime, volumeFinal);
+                this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal);
 
                 // Efeito visual de "tocando" no quadradinho
                 stepElement.classList.add('playing');

@@ -83,65 +83,8 @@ class PartituraPlayer {
         await Promise.all(loadPromises);
     }
 
-    playSound(instrumento, notaLimpa, oitava, volume = 1, attack = 0) {
-        const name = `${instrumento}_${notaLimpa}${oitava}`;
-        const buffer = this.buffers.get(name);
-
-        if (!buffer) {
-            console.warn(`Buffer não encontrado: ${name}`);
-            return;
-        }
-
-        if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
-        }
-
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-
-        // Usa currentTime para agendamento preciso (igual ao MelodyMachine)
-        const now = this.audioContext.currentTime;
-
-        // --- CORREÇÃO BUG #5: Proteção contra TIC ---
-        // Mesmo que o ataque venha como 0, forçamos 0.003s para evitar estalos
-        const safeAttack = Math.max(attack, 0.003);
-
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(volume, now + safeAttack);
-
-        source.buffer = buffer;
-        source.connect(gainNode);
-
-        // --- CORREÇÃO ITEM 1: Roteamento ---
-        // De: gainNode.connect(this.audioContext.destination);
-        // Para: Conecta no masterGain (que vai para o compressor)
-        gainNode.connect(this.audioContextManager.masterGain);
-
-        source.start(now);
-
-        // Guarda source + gainNode juntos para stop suave (igual ao MelodyMachine)
-        const noteEntry = { source, gainNode };
-        this.activeSources.add(noteEntry); // Adiciona ao Set
-
-        source.onended = () => {
-            this.activeSources.delete(noteEntry); // Remoção rápida O(1)
-            source.disconnect();
-            gainNode.disconnect();
-        };
-
-        return noteEntry;
-    }
-
-    stop() {
-        // Fade-out suave em todas as notas ativas (igual ao MelodyMachine)
-        const now = this.audioContext.currentTime;        
-        this.activeSources.forEach(({ source, gainNode }) => {
-            try {
-                gainNode.gain.cancelScheduledValues(now);
-                gainNode.gain.setTargetAtTime(0, now, 0.02);
-                source.stop(now + 0.1);
-            } catch (e) { }
-        });
+    stopNotes() {
+        this.audioContextManager.stopAll(this.activeSources, 0.02);
         this.activeSources.clear();
     }
 
@@ -149,7 +92,7 @@ class PartituraPlayer {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
-        this.stop();
+        this.audioContextManager.stopNode();
 
         // Toca o acorde ANTES para compensar o attack do órgão
         if (data.chord) {
@@ -160,7 +103,7 @@ class PartituraPlayer {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
                 const notaLimpa = nota.toLowerCase().replace('#', '_');
-                this.playSound(this.instrumento, notaLimpa, oitava, volume);
+                this.audioContextManager.playNode(this.instrumento, notaLimpa, oitava, volume);
             });
         }
 

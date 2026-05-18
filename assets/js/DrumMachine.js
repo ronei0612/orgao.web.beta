@@ -134,46 +134,18 @@ class DrumMachine {
         await Promise.all(loadPromises);
     }
 
-    playSound(buffer, time, volume = 1, isChimbalAberto = false) {
-        if (!buffer) return;
-
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-
-        source.buffer = buffer;
-        gainNode.gain.value = volume;
-
-        source.connect(gainNode);
-        // IMPORTANTE: Conecte no masterGain do AudioManager para passar pelo compressor (Correção Item 1)
-        gainNode.connect(this.audioManager.masterGain);
-
-        source.start(time);
-
-        if (isChimbalAberto) {
-            this.lastChimbalAbertoSource = source;
-            this.lastChimbalAbertoGain = gainNode; // <--- Adicione esta linha
-        }
-
-        // PERFORMANCE: Desconectar nós após o uso para liberar memória do navegador
-        // Isso evita "estalos" quando há muitos sons (polifonia alta)
-        source.onended = () => {
-            source.disconnect();
-            gainNode.disconnect();
-        };
-    }
-
     scheduleNote(instrument, step, time, volume) {
         if (volume === 3) {
             const buffer = this.buffers.get(instrument + '-alt');
             if (buffer) {
-                this.playSound(buffer, time, 1, instrument === 'chimbal');
+                this.audioContextManager.playNode(buffer, time, 1, instrument === 'chimbal'); //CORRIGIR
             }
         }
         else {
             if (!this.playBass(instrument, time, volume) && !this.playViolao(instrument, time, volume)) {
                 const buffer = this.buffers.get(instrument);
                 if (buffer && volume > 0) {
-                    this.playSound(buffer, time, volume === 2 ? 0.3 : 1, instrument === 'chimbal');
+                    this.audioContextManager.playNode(buffer, time, volume === 2 ? 0.3 : 1, instrument === 'chimbal');
                 }
             }
         }
@@ -333,20 +305,6 @@ class DrumMachine {
         this.timerInterval = setInterval(() => this.scheduler(), this.lookahead);
     }
 
-    stop() {
-        this.isPlaying = false;
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
-        this.reset();
-    }
-
-    reset() {
-        this.currentStep = 1;
-        this.nextNoteTime = 0;
-    }
-
     setNumSteps(steps) {
         this.numSteps = steps;
         // Invalida o cache para ser recriado no próximo ciclo, já que o UI mudou o DOM
@@ -358,7 +316,7 @@ class DrumMachine {
             const bass = instrument + '_' + this.cifraPlayer.baixo;
             const buffer = this.buffers.get(bass);
             if (buffer && volume > 0) {
-                this.playSound(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioContextManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
                 return true;
             }
         }
@@ -370,7 +328,7 @@ class DrumMachine {
             const violao = instrument + '_' + this.cifraPlayer.acordeTocando;
             const buffer = this.buffers.get(violao);
             if (buffer && volume > 0) {
-                this.playSound(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioContextManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
                 return true;
             }
         }
