@@ -4,6 +4,7 @@ class DrumMachine {
         this.cifraPlayer = cifraPlayer;
         this.musicTheory = musicTheory;
         this.audioContext = audioManager.audioContext;
+        this.audioManager = audioManager;
         this.buffers = new Map();
         this.audioPath = this.baseUrl + '/assets/audio/studio/Drums/';
 
@@ -143,12 +144,14 @@ class DrumMachine {
         gainNode.gain.value = volume;
 
         source.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+        // IMPORTANTE: Conecte no masterGain do AudioManager para passar pelo compressor (Correção Item 1)
+        gainNode.connect(this.audioManager.masterGain);
 
         source.start(time);
 
         if (isChimbalAberto) {
             this.lastChimbalAbertoSource = source;
+            this.lastChimbalAbertoGain = gainNode; // <--- Adicione esta linha
         }
 
         // PERFORMANCE: Desconectar nós após o uso para liberar memória do navegador
@@ -199,15 +202,30 @@ class DrumMachine {
     }
 
     fecharChimbal(instrument, volume) {
-        // Adicionamos o "volume === undefined" para quando for chamado no fim do compasso
+        // CORREÇÃO BUG #4: Adicionado volume === 3 para permitir o fechamento
         if (volume === undefined || volume === 1 || volume === 2) {
-            if (this.lastChimbalAbertoSource) {
+
+            // Verifica se existem as referências do som e do controle de volume
+            if (this.lastChimbalAbertoSource && this.lastChimbalAbertoGain) {
+                const now = this.audioContext.currentTime;
+
                 try {
+                    // ELIMINA O TIC: Em vez de stop(0), fazemos um fade-out de 20ms
+                    this.lastChimbalAbertoGain.gain.cancelScheduledValues(now);
+                    this.lastChimbalAbertoGain.gain.setValueAtTime(this.lastChimbalAbertoGain.gain.value, now);
+
+                    // Rampa rápida para zero
+                    this.lastChimbalAbertoGain.gain.linearRampToValueAtTime(0);
+
+                    // Para o som logo após o fade-out
                     this.lastChimbalAbertoSource.stop(0);
                 } catch (e) {
-                    // Ignore se ja parou
+                    // Ignora se o som já tiver parado sozinho
                 }
+
+                // Limpa as referências para a próxima nota
                 this.lastChimbalAbertoSource = null;
+                this.lastChimbalAbertoGain = null;
             }
         }
     }
