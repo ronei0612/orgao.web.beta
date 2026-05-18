@@ -102,21 +102,29 @@ class PartituraPlayer {
         // Usa currentTime para agendamento preciso (igual ao MelodyMachine)
         const now = this.audioContext.currentTime;
 
-        // Começa em 0 e rampa suavemente — elimina o tic
+        // --- CORREÇÃO BUG #5: Proteção contra TIC ---
+        // Mesmo que o ataque venha como 0, forçamos 0.003s para evitar estalos
+        const safeAttack = Math.max(attack, 0.003);
+
         gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(volume, now + attack);
+        gainNode.gain.linearRampToValueAtTime(volume, now + safeAttack);
 
         source.buffer = buffer;
         source.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
+
+        // --- CORREÇÃO ITEM 1: Roteamento ---
+        // De: gainNode.connect(this.audioContext.destination);
+        // Para: Conecta no masterGain (que vai para o compressor)
+        gainNode.connect(this.audioContextManager.masterGain);
+
         source.start(now);
 
         // Guarda source + gainNode juntos para stop suave (igual ao MelodyMachine)
         const noteEntry = { source, gainNode };
-        this.activeSources.add(noteEntry);
+        this.activeSources.add(noteEntry); // Adiciona ao Set
 
         source.onended = () => {
-            this.activeSources.delete(noteEntry); // O(1), super rápido e limpo
+            this.activeSources.delete(noteEntry); // Remoção rápida O(1)
             source.disconnect();
             gainNode.disconnect();
         };
