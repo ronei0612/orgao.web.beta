@@ -82,6 +82,28 @@ class BateriaUI {
     }
 
     /**
+     * Salva o ritmo atual no localStorage para o estilo e ritmo selecionados.
+     */
+    saveRhythm() {
+        const styleName = this.elements.drumStyleSelect.value || this.defaultStyle;
+        let rhythmKey = this.selectedRhythm;
+        const selectedButton = document.getElementById(`rhythm-${this.selectedRhythm.toLowerCase()}`);
+        if (selectedButton && selectedButton.classList.contains('fill')) rhythmKey = `${rhythmKey}-fill`;
+
+        const rhythmData = {};
+        this.elements.tracksContainer.querySelectorAll('.track').forEach(track => {
+            const instKey = this.getInstrumentKeyFromTrack(track);
+            if (!instKey) return;
+            const steps = Array.from(track.querySelectorAll('.step')).map(s => parseInt(s.dataset.volume || '0', 10));
+            const isSelected = track.querySelector('.instrument-button')?.classList.contains('selected') || false;
+            rhythmData[instKey] = { steps, selected: isSelected };
+        });
+
+        rhythmData.numSteps = parseInt(this.elements.numStepsInput.value, 10) || 4;
+        this.saveRhythmToStyle(styleName, rhythmKey, rhythmData);
+    }
+
+    /**
      * Carrega o ritmo salvo para o estilo e ritmo fornecidos.
      */
     loadRhythmForStyleAndRhythm(styleName, rhythm) {
