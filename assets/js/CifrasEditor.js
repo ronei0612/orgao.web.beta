@@ -29,6 +29,7 @@ class CifrasEditor {
     }
 
     init() {
+        if (!this.elements.cifraSelect) return; //evitar problem
         this.loadCifras().then(() => {
             this.setupSelect2();
             this.bindEvents();

@@ -92,7 +92,7 @@ class PartituraPlayer {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
-        this.audioManager.stopNode();
+        this.stopNotes(); // Correção 1: Usa a função certa para limpar a nota anterior
 
         // Toca o acorde ANTES para compensar o attack do órgão
         if (data.chord) {
@@ -103,7 +103,14 @@ class PartituraPlayer {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
                 const notaLimpa = nota.toLowerCase().replace('#', '_');
-                this.audioManager.playNode(this.instrumento, notaLimpa, oitava, volume);
+
+                // Correção 2: Busca o buffer real da memória
+                const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
+                const buffer = this.buffers.get(bufferName);
+
+                if (buffer) {
+                    this.audioManager.playNode(buffer, this.audioContext.currentTime, volume, 0.02, false, this.activeSources);
+                }
             });
         }
 

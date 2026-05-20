@@ -198,15 +198,11 @@ class DrumMachine {
         }
     }
 
-    fecharChimbal(instrument, volume) {
-        // CORREÇÃO BUG #4: Inclui volume 3
-        if (volume === undefined || volume === 1 || volume === 2) {
-
+    fecharChimbal(instrument, volume, time) { // Adicione o 'time'
+        if (volume === undefined || volume === 1 || volume === 2 || volume === 3) {
             if (this.lastChimbalAbertoNode) {
-                // Chamamos o stop suave centralizado
-                // stopNode(nodeEntry, time, release)
-                this.audioManager.stopNode(this.lastChimbalAbertoNode, this.audioContext.currentTime, 0.02);
-
+                // Usa o time agendado, ou o momento atual como fallback
+                this.audioManager.stopNode(this.lastChimbalAbertoNode, time || this.audioContext.currentTime, 0.02);
                 this.lastChimbalAbertoNode = null;
             }
         }
@@ -247,7 +243,7 @@ class DrumMachine {
                 if (volume <= 0) continue;
 
                 if (trackData.instrument === 'chimbal') {
-                    this.fecharChimbal(trackData.instrument, volume);
+                    this.fecharChimbal(trackData.instrument, volume, this.nextNoteTime); // Envia o tempo futuro
                 }
                 this.scheduleNote(trackData.instrument, this.currentStep, this.nextNoteTime, volume);
 

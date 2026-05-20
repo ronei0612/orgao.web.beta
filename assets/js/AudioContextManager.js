@@ -119,6 +119,16 @@ class AudioContextManager {
 			source.start(now);
 			source.gainNodeRef = gainNode;
 			this.sources.push(source);
+
+			// CORREÇÃO: Limpeza automática para instrumentos sem loop (Epiano)
+			source.onended = () => {
+				const index = this.sources.indexOf(source);
+				if (index > -1) {
+					this.sources.splice(index, 1); // Remove do array para não vazar memória
+				}
+				source.disconnect();
+				gainNode.disconnect();
+			};
 		});
 	}
 
@@ -234,19 +244,15 @@ class AudioContextManager {
 	 * @param {Set} nodesSet O Set contendo objetos { source, gainNode }.
 	 * @param {number} release O tempo de fade-out em segundos.
 	 */
-	stopAll(nodesSet, release = 0.05) {
-		// Se o Set estiver vazio ou não existir, não faz nada
+	stopAll(nodesSet, release = 0.05, time = null) { // Adiciona parâmetro time
 		if (!nodesSet || nodesSet.size === 0) return;
 
-		const now = this.audioContext.currentTime;
-
-		// Criamos um snapshot rápido do Set.
-		// Motivo (Bug #3 do PDF): Garante que estamos iterando sobre as notas que 
-		// estavam ativas no momento do clique, evitando erros de concorrência.
+		// Se um tempo for fornecido, usa ele. Senão, usa o currentTime.
+		const stopTime = time || this.audioContext.currentTime;
 		const toStop = [...nodesSet];
 
 		toStop.forEach(node => {
-			this.stopNode(node, now, release);
+			this.stopNode(node, stopTime, release); // Passa o stopTime adiante
 		});
 	}
 }
