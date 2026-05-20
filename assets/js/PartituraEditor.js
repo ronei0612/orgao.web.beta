@@ -98,12 +98,58 @@ class PartituraEditor {
             doc.getElementById('btn-chord').onclick = () => this.showInlineInput('chord');
             doc.getElementById('btn-lyric').onclick = () => this.showInlineInput('lyric');
             doc.getElementById('btn-delete').onclick = () => this.deleteNoteAtCursor();
+
+            // ADICIONE ESTE BLOCO: Atalhos de teclado
+            doc.addEventListener('keydown', (e) => {
+                // Se estiver digitando num campo de texto (cifra/letra), ignora estes atalhos
+                if (e.target && e.target.tagName.toLowerCase() === 'input') return;
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        this.alterarAltura(1);
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        this.alterarAltura(-1);
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        this.navegarCursor(-1);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        this.navegarCursor(1);
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        this.addNewNote();
+                        break;
+                    case 'Backspace':
+                    case 'Delete':
+                        e.preventDefault();
+                        this.deleteNoteAtCursor();
+                        break;
+
+                    // --- ADICIONE ESTE BLOCO DEFAULT ---
+                    default:
+                        // Se pressionar qualquer caractere ou acento (Dead key), abre a edição de letra
+                        if ((e.key.length === 1 || e.key === 'Dead') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                            const isDead = e.key === 'Dead';
+                            if (!isDead) e.preventDefault(); // Evita scroll da página ao digitar
+
+                            // Abre a edição de "lyric" (letra) passando a tecla digitada
+                            this.showInlineInput('lyric', isDead ? '' : e.key);
+                        }
+                        break;
+                    // -----------------------------------
+                }
+            });
         }
     }
 
-    // ... (seu construtor e prepararIframe permanecem iguais)
-
-    showInlineInput(type) {
+    // 1. ADICIONE O PARÂMETRO initialKey = null
+    showInlineInput(type, initialKey = null) {
         this.commitInput();
 
         const doc = this.editIframe.contentDocument;
@@ -117,14 +163,22 @@ class PartituraEditor {
         input.style.top = (type === 'chord' ? '40px' : '230px');
         input.dataset.type = type;
         input.dataset.index = this.persistentSelectedIndex;
-        input.value = this.currentData[this.persistentSelectedIndex][type] || "";
+
+        // --- 2. ATUALIZE A DEFINIÇÃO DO VALOR AQUI ---
+        if (initialKey !== null) {
+            input.value = initialKey; // Se começou a digitar, substitui pela letra
+        } else {
+            input.value = this.currentData[this.persistentSelectedIndex][type] || ""; // Senão, puxa o que já estava escrito
+        }
+        // ---------------------------------------------
 
         doc.getElementById('score-container').appendChild(input);
 
         win.focus();
         setTimeout(() => {
             input.focus();
-            if (input.value) input.select();
+            // Só seleciona o texto se não estiver digitando uma letra nova agora
+            if (!initialKey && input.value) input.select();
         }, 50);
 
         input.onclick = (e) => e.stopPropagation();
@@ -132,47 +186,72 @@ class PartituraEditor {
         input.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === 'Tab') {
                 e.preventDefault();
-                input.blur(); // Apenas forçamos o blur. O onblur cuidará do commit e do draw.
-            }
-            if (e.key === 'Escape') {
-                input.dataset.cancel = "true"; // Marcamos que foi cancelado
+                // Avança se não estiver na última nota
+                if (this.persistentSelectedIndex < this.currentData.length - 1) {
+                    input.dataset.advance = "true";
+                }
+                input.blur();
+            } else if (e.key === 'Escape') {
+                input.dataset.cancel = "true";
                 input.blur();
             }
         };
 
         input.onblur = () => {
-            // Se não foi cancelado via ESC, salvamos
+            if (input.dataset.handled === "true") return; // Evita loop caso já tenha salvo
+
+            const advance = input.dataset.advance === "true";
+
             if (input.dataset.cancel !== "true") {
-                this.commitInput();
+                this.commitInput(input);
             } else {
-                input.remove(); // Se foi ESC, apenas removemos sem salvar
+                if (input.parentNode) input.parentNode.removeChild(input);
             }
-            this.draw(this.editIframe, true);
+
+            if (advance) {
+                // Pula para a próxima nota, redesenha e abre o input sozinho
+                this.persistentSelectedIndex++;
+                this.draw(this.editIframe, true);
+                this.centralizarNoCursor();
+
+                setTimeout(() => {
+                    this.showInlineInput(type);
+                }, 50);
+            } else {
+                this.draw(this.editIframe, true);
+            }
         };
     }
 
-    commitInput() {
+    commitInput(specificInput = null) {
         const doc = this.editIframe.contentDocument;
-        const input = doc.getElementById('inline-input');
+        const input = specificInput || (doc ? doc.getElementById('inline-input') : null);
 
-        // Verificamos se o input existe E se ele ainda está anexado ao DOM (parentNode)
         if (input && input.parentNode) {
             const { type, index } = input.dataset;
             if (this.currentData[index]) {
                 this.currentData[index][type] = input.value;
             }
 
-            // Usamos uma verificação extra para evitar o erro do remove
+            input.dataset.handled = "true"; // Sinaliza para o onblur que já foi salvo
             try {
                 input.parentNode.removeChild(input);
-            } catch (e) {
-                // Se por algum motivo o nó já sumiu, ignoramos silenciosamente
-                console.warn("Input já havia sido removido");
-            }
+            } catch (e) { }
         }
     }
 
-    // ... (o restante dos métodos draw, addNewNote, etc, permanecem iguais)
+    setChordToCurrentNote(chord) {
+        if (this.persistentSelectedIndex >= 0 && this.persistentSelectedIndex < this.currentData.length) {
+            this.commitInput(); // Força o salvamento de qualquer caixinha aberta
+
+            // Atualiza o acorde da nota selecionada
+            this.currentData[this.persistentSelectedIndex].chord = chord;
+            this.draw(this.editIframe, true);
+
+            // Reabre o input na partitura com foco, para você poder adicionar um baixo (ex: bater no 'C' e no teclado adicionar o '/E')
+            this.showInlineInput('chord');
+        }
+    }
 
     navegarCursor(direcao) {
         this.commitInput();

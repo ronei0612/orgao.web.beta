@@ -24,11 +24,7 @@ class AudioContextManager {
 
 		this.buffers = {};
 		this.instrumentSettings = {};
-
-		// CORREÇÃO ITEM 2: Garantindo inicialização para evitar erros no stop()
-		this.sources = [];
 		this.gainNodes = [];
-		this.currentNotes = [];
 	}
 
 	/**
@@ -67,89 +63,95 @@ class AudioContextManager {
 	}
 
 	/**
-	 * Define as notas que serão tocadas no próximo método play().
-	 * @param {string[]} notes Um array de strings com as notas, ex: ['c', 'e', 'g'].
+	 * Fábrica centralizada de sons. Cria o nó, conecta ao Compressor, previne "tics" e gerencia a memória.
+	 * 
+	 * @param {AudioBuffer} buffer O buffer de áudio a ser tocado.
+	 * @param {number} time O momento (AudioContext.currentTime) em que o som deve iniciar.
+	 * @param {number} volume O volume do som (0.0 a 1.0).
+	 * @param {number} attack O tempo de ataque em segundos.
+	 * @param {boolean} isLoop Se o som deve entrar em loop.
+	 * @returns {Object|null} Retorna um objeto { source, gainNode } ou null se não houver buffer.
+     * @param {Set} trackingSet (Opcional) Um Set onde a nota será adicionada e removida automaticamente.
 	 */
-	setNotes(notes) {
-		this.currentNotes = notes;
-	}
+	playNode(buffer, time, volume = 1, attack = 0.003, isLoop = false, trackingSet = null) {
+		if (!buffer) return null;
+		if (this.audioContext.state === 'suspended') this.audioContext.resume();
 
-	/**
-	 * Adiciona notas ao conjunto currentNotes.
-	 * @param {string[]} notes Um array de strings com as notas a serem adicionadas.
-	 */
-	addNotes(notes) {
-		this.currentNotes = Array.from(new Set([...this.currentNotes, ...notes]));
-	}
+		const startTime = time || this.audioContext.currentTime;
+		const source = this.audioContext.createBufferSource();
+		const gainNode = this.audioContext.createGain();
 
-	/**
-	 * Toca as notas definidas em currentNotes.
-	 * Lógica alterada para diferenciar Loop de Strings e Órgão.
-	 */
-	play(attackTime = 0.2) {
-		if (this.audioContext.state === 'suspended') {
-			this.audioContext.resume();
+		const safeAttack = Math.max(attack, 0.003);
+		gainNode.gain.setValueAtTime(0, startTime);
+		gainNode.gain.linearRampToValueAtTime(volume, startTime + safeAttack);
+
+		source.buffer = buffer;
+		source.loop = isLoop;
+		source.connect(gainNode);
+		gainNode.connect(this.masterGain);
+
+		const nodeEntry = { source, gainNode };
+
+		// Se um Set de rastreamento foi passado, adiciona a nota agora
+		if (trackingSet) {
+			trackingSet.add(nodeEntry);
 		}
 
-		this.stop(0.2);
+		source.start(startTime);
 
-		const now = this.audioContext.currentTime;
+		source.onended = () => {
+			// Lógica de limpeza centralizada:
+			// 1. Remove do Set de rastreamento (se existir)
+			if (trackingSet) {
+				trackingSet.delete(nodeEntry);
+			}
 
-		this.currentNotes.forEach(note => {
-			if (!this.buffers[note]) return;
+			// 2. Limpeza física do Web Audio
+			source.disconnect();
+			gainNode.disconnect();
+		};
 
-			const source = this.audioContext.createBufferSource();
-			const gainNode = this.audioContext.createGain();
-			const settings = this.instrumentSettings[note] || { volume: 1 };
-
-			source.buffer = this.buffers[note];
-			source.loop = !note.startsWith('epiano');
-
-			// CORREÇÃO ITEM 1: Roteamento correto
-			// De: gainNode.connect(this.audioContext.destination);
-			// Para:
-			source.connect(gainNode);
-			gainNode.connect(this.masterGain); // Agora passa pelo Compressor e Master!
-
-			gainNode.gain.setValueAtTime(0, now);
-			// Proteção contra "tic": garantindo um ataque mínimo de 3ms
-			const safeAttack = Math.max(attackTime, 0.003);
-			gainNode.gain.linearRampToValueAtTime(settings.volume, now + safeAttack);
-
-			source.start(now);
-			source.gainNodeRef = gainNode;
-			this.sources.push(source);
-		});
+		return nodeEntry;
 	}
 
 	/**
-	 * Para as notas que estão tocando com efeito Release.
-	 * @param {number} [releaseTime=0.2] Duração do efeito Release em segundos (saída suave).
+	 * Para um nó de áudio suavemente (Fade-out exponencial natural)
+	 * 
+	 * @param {Object} nodeEntry O objeto { source, gainNode } retornado por playNode.
+	 * @param {number} time O momento (AudioContext.currentTime) em que o som deve começar a parar.
+	 * @param {number} release O tempo de cauda (fade-out) em segundos.
 	 */
-	stop(releaseTime = 0.2) {
-		if (this.sources.length === 0) return;
-		const now = this.audioContext.currentTime;
-		const stopTime = now + releaseTime;
+	stopNode(nodeEntry, time, release = 0.05) {
+		if (!nodeEntry || !nodeEntry.gainNode || !nodeEntry.source) return;
+		const stopTime = time || this.audioContext.currentTime;
 
-		// Movemos os sources atuais para uma variável local para limpar o array da classe
-		const oldSources = [...this.sources];
-		this.sources = [];
+		try {
+			nodeEntry.gainNode.gain.cancelScheduledValues(stopTime);
+			// setTargetAtTime: Decaimento natural (Bug #3)
+			nodeEntry.gainNode.gain.setTargetAtTime(0, stopTime, release);
 
-		oldSources.forEach(source => {
-			const gainNode = source.gainNodeRef;
+			// Para o nó após o decaimento (release * 5 é o tempo seguro para setTarget chegar a ~0)
+			nodeEntry.source.stop(stopTime + (release * 5));
+		} catch (e) {
+			// Nó já estava parado
+		}
+	}
 
-			// Release suave
-			gainNode.gain.cancelScheduledValues(now);
-			gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-			gainNode.gain.linearRampToValueAtTime(0, stopTime);
+	/**
+	 * Para um conjunto de notas (Set) de uma vez só.
+	 * 
+	 * @param {Set} nodesSet O Set contendo objetos { source, gainNode }.
+	 * @param {number} release O tempo de fade-out em segundos.
+	 */
+	stopAll(nodesSet, release = 0.05, time = null) { // Adiciona parâmetro time
+		if (!nodesSet || nodesSet.size === 0) return;
 
-			source.stop(stopTime);
+		// Se um tempo for fornecido, usa ele. Senão, usa o currentTime.
+		const stopTime = time || this.audioContext.currentTime;
+		const toStop = [...nodesSet];
 
-			// GARANTIA DE LIMPEZA DE MEMÓRIA:
-			source.onended = () => {
-				source.disconnect();
-				gainNode.disconnect();
-			};
+		toStop.forEach(node => {
+			this.stopNode(node, stopTime, release); // Passa o stopTime adiante
 		});
 	}
 }

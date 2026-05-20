@@ -4,7 +4,8 @@ class CifraPlayer {
         this.uiController = uiController;
         this.musicTheory = musicTheory;
         this.elements = elements;
-        this.audioContextManager = audioManager;
+        this.audioManager = audioManager;
+        this.activeSources = new Set();
 
         this.acordeGroup = [];
         this.epianoGroup = [];
@@ -171,7 +172,7 @@ class CifraPlayer {
             });
         });
 
-        this.audioContextManager.loadInstruments(urlsDict).then(() => {
+        this.audioManager.loadInstruments(urlsDict).then(() => {
             if (this.onInstrumentosCarregados) {
                 this.onInstrumentosCarregados();
             }
@@ -310,18 +311,15 @@ class CifraPlayer {
             }
         });
 
-        this.audioContextManager.setNotes(this.epianoGroup);
-        this.audioContextManager.addNotes(this.acordeGroup);
-
         if (this.instrumento === 'orgao') {
-            this.audioContextManager.play(this.attack);
+            this.epianoPlay(); // Vamos usar epianoPlay como a função base unificada
         }
         else {
             if (!this.uiController.ritmoAtivo()) {
                 this.epianoPlay();
             }
             else {
-                this.tocarEpiano = true;
+                this.tocarEpiano = true; // Deixa para a DrumMachine acionar depois
             }
         }
 
@@ -331,7 +329,26 @@ class CifraPlayer {
     }
 
     epianoPlay() {
-        this.audioContextManager.play(this.attack);
+        // 1. Corta o som do acorde anterior suavemente (igual o stop antigo fazia)
+        this.audioManager.stopAll(this.activeSources, 0.2);
+        this.activeSources.clear();
+
+        // 2. Une os dois grupos (órgão, strings e epiano)
+        const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
+        const now = this.audioManager.audioContext.currentTime;
+
+        // 3. Toca cada nota enviando para o playNode unificado
+        notasParaTocar.forEach(note => {
+            const buffer = this.audioManager.buffers[note];
+            if (!buffer) return;
+
+            const isLoop = !note.startsWith('epiano'); // Epiano morre sozinho, órgão/strings faz loop
+            const volume = this.audioManager.instrumentSettings[note]?.volume || 1;
+
+            // Dispara o som e joga no Set activeSources para controle de memória
+            this.audioManager.playNode(buffer, now, volume, this.attack, isLoop, this.activeSources);
+        });
+
         this.tocarEpiano = false;
     }
 
@@ -347,8 +364,8 @@ class CifraPlayer {
 
     pararAcorde() {
         this.habilitarSelectSaves();
-
-        this.audioContextManager.stop(this.release);
+        this.audioManager.stopAll(this.activeSources, this.release);
+        this.activeSources.clear();
     }
 
     inversaoDeAcorde(acorde, baixo) {
@@ -599,22 +616,22 @@ class CifraPlayer {
     }
 
     atualizarVolumeStringsParaEpiano() {
-        Object.keys(this.audioContextManager.instrumentSettings).forEach(key => {
+        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
             if (key.startsWith('strings_')) {
-                this.audioContextManager.instrumentSettings[key].volume = 0.9;
+                this.audioManager.instrumentSettings[key].volume = 0.9;
             }
         });
     }
 
     atualizarVolumeStringsParaOrgao() {
-        Object.keys(this.audioContextManager.instrumentSettings).forEach(key => {
+        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
             if (key.startsWith('strings_')) {
                 if (key.includes('_grave')) {
-                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['grave']['strings'];
+                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['grave']['strings'];
                 } else if (key.includes('_baixo')) {
-                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['baixo']['strings'];
+                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['baixo']['strings'];
                 } else {
-                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['agudo']['strings'];
+                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['agudo']['strings'];
                 }
             }
         });

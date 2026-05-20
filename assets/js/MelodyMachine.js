@@ -155,52 +155,8 @@
         }
     }
 
-    playSound(buffer, time, volume = 1) {
-        if (!buffer) return null;
-
-        const source = this.audioContext.createBufferSource();
-        const gainNode = this.audioContext.createGain();
-
-        source.buffer = buffer;
-        source.loop = false;
-
-        const atackSemTic = 0; // era 0.001
-        gainNode.gain.setValueAtTime(atackSemTic, time);
-        gainNode.gain.linearRampToValueAtTime(volume, time + this.attackTime);
-
-        source.connect(gainNode);
-        gainNode.connect(this.audioManager.masterGain);
-
-        source.start(time);
-
-        const noteEntry = { source, gainNode };
-        this.activeSources.add(noteEntry);
-
-        source.onended = () => {
-            this.activeSources.delete(noteEntry); // O(1), super rápido e limpo
-            source.disconnect();
-            gainNode.disconnect();
-        };
-
-        return noteEntry;
-    }
-
     stopNotes(time) {
-        this.activeSources.forEach(item => {
-            try {
-                const { source, gainNode } = item;
-
-                // Cancela agendamentos futuros para não haver conflito
-                gainNode.gain.cancelScheduledValues(time);
-
-                // setTargetAtTime é muito mais suave para evitar estalos
-                // 0.02 é a constante de tempo (quanto menor, mais rápido o fade-out)
-                gainNode.gain.setTargetAtTime(0, time, 0.02);
-
-                // Para o som um pouco depois do fade-out para garantir silêncio
-                source.stop(time + 0.1);
-            } catch (e) { }
-        });
+        this.audioManager.stopAll(this.activeSources, 0.1);
         this.activeSources.clear();
     }
 
@@ -245,7 +201,7 @@
         const iniciouNovoAcorde = this.currentStep === 1;
         const acordePrincipal = this.cifraPlayer.acordeTocando;
 
-        // 1. Resolvemos as notas do acorde uma única vez para este passo (milissegundo)
+        // 1. Resolvemos as notas do acorde
         let notasAtuais = null;
         if (acordePrincipal) {
             const chaveAcorde = acordePrincipal + (this.cifraPlayer.acordeFull ? '1' : '');
@@ -254,31 +210,28 @@
 
         // 2. Lógica de início de compasso (Tempo 1)
         if (iniciouNovoAcorde) {
+            // Para as notas do compasso anterior com release
             this.stopNotes(this.nextNoteTime);
 
-            // Toca a nota grave (pedaleira do órgão) automaticamente no início
+            // Toca a nota grave (pedaleira)
             if (notasAtuais && notasAtuais[0]) {
                 const bufferGrave = this.buffers.get(`${this.instrument}_${notasAtuais[0]}`);
                 if (bufferGrave) {
-                    this.playSound(bufferGrave, this.nextNoteTime, this.defaultVol);
+                    // CORREÇÃO: Captura o nó retornado e adiciona ao Set
+                    this.audioManager.playNode(bufferGrave, this.nextNoteTime, this.defaultVol, 0.003, false, this.activeSources);
                 }
             }
         }
 
-        // 3. Se não houver acorde tocando ou cache de trilhas, interrompemos o processamento
         if (!notasAtuais || !this.tracksCache) return;
 
-        // 4. Loop otimizado pelas trilhas (Vozes do Órgão)
+        // 4. Loop das trilhas (Vozes do Órgão)
         for (let i = 0; i < this.tracksCache.length; i++) {
             const trackData = this.tracksCache[i];
-
-            // Pula vozes que não estão marcadas como selecionadas
             if (!trackData.button.classList.contains('selected')) continue;
 
             const stepElement = trackData.steps[stepIndex];
             const stepElementVol = parseInt(stepElement?.dataset.volume || '0', 10);
-
-            // Pula se o quadradinho (step) estiver mudo
             if (stepElementVol <= 0) continue;
 
             const nomeNota = notasAtuais[trackData.noteIndex];
@@ -286,11 +239,11 @@
 
             const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
             if (bufferNota) {
-                // Ajusta volume: se for o volume "médio" (2), divide por 1.5
                 const volumeFinal = stepElementVol === 2 ? (this.defaultVol / 1.5) : this.defaultVol;
-                this.playSound(bufferNota, this.nextNoteTime, volumeFinal);
 
-                // Efeito visual de "tocando" no quadradinho
+                // CORREÇÃO: Captura o nó e adiciona ao Set para controle de release
+                this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
+
                 stepElement.classList.add('playing');
                 setTimeout(() => stepElement.classList.remove('playing'), 100);
             }

@@ -96,9 +96,11 @@
         this.draggableControls.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
         // Nota: Mudei para transform/translate3d para melhor performance de GPU
         // Se precisar manter left/top por compatibilidade com o resto do app:
-        this.draggableControls.style.left = `${newX}px`;
-        this.draggableControls.style.top = `${newY}px`;
-        this.draggableControls.style.transform = 'none';
+
+        // VERIFICAR SE PRECISA CORRIGIR
+        this.draggableControls.style.left = `${newX}px`; // Causa reflow/repaint (pesado)
+        this.draggableControls.style.top = `${newY}px`; // Causa reflow/repaint (pesado)
+        this.draggableControls.style.transform = 'none'; // DESFAZ a aceleração da GPU
 
         this.animationFrameId = null;
     }

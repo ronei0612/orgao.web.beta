@@ -576,7 +576,7 @@ class App {
         this.uiController.esconderEditDeleteButtons();
 
         this.partituraPlayer.partituraPlaybackIndex = -1;
-        this.partituraPlayer.stop(); // <- sempre, independente do melodyStyle
+        this.partituraPlayer.stopNotes();
 
         this.uiController.habilitarSelectSaves(); // Reabilita opções e edições ao parar partitura
 
@@ -752,7 +752,6 @@ class App {
             this.verifyLetraOuCifra(textoMusica, saveData.chords ? saveData : null);
             this.uiController.esconderPartitura();
             this.uiController.exibirBotoesCifras();
-
         }
 
         // 4. Aplica as configurações de BPM, Instrumento e Estilo
@@ -835,7 +834,6 @@ class App {
         }
         else {
             this.elements.drumStyleSelect.value = style;
-
         }
     }
 
@@ -1014,6 +1012,11 @@ class App {
             if (action === 'acorde') {
                 this.cifraPlayer.parado = false;
                 this.cifraPlayer.tocarAcorde(button.value);
+
+                // --- NOVO: Adiciona a cifra na partitura se estiver no modo de edição ---
+                if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
+                    this.partituraEditor.setChordToCurrentNote(button.value);
+                }
             }
 
             document.querySelectorAll('button[data-action="acorde"]').forEach(btn => {
