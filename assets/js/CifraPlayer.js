@@ -4,7 +4,7 @@ class CifraPlayer {
         this.uiController = uiController;
         this.musicTheory = musicTheory;
         this.elements = elements;
-        this.audioContextManager = audioManager;
+        this.audioManager = audioManager;
 
         this.acordeGroup = [];
         this.epianoGroup = [];
@@ -171,7 +171,7 @@ class CifraPlayer {
             });
         });
 
-        this.audioContextManager.loadInstruments(urlsDict).then(() => {
+        this.audioManager.loadInstruments(urlsDict).then(() => {
             if (this.onInstrumentosCarregados) {
                 this.onInstrumentosCarregados();
             }
@@ -310,11 +310,11 @@ class CifraPlayer {
             }
         });
 
-        this.audioContextManager.setNotes(this.epianoGroup);
-        this.audioContextManager.addNotes(this.acordeGroup);
+        this.audioManager.setNotes(this.epianoGroup);
+        this.audioManager.addNotes(this.acordeGroup);
 
         if (this.instrumento === 'orgao') {
-            this.audioContextManager.play(this.attack);
+            this.audioManager.play(this.attack);
         }
         else {
             if (!this.uiController.ritmoAtivo()) {
@@ -331,7 +331,7 @@ class CifraPlayer {
     }
 
     epianoPlay() {
-        this.audioContextManager.play(this.attack);
+        this.audioManager.play(this.attack);
         this.tocarEpiano = false;
     }
 
@@ -348,7 +348,7 @@ class CifraPlayer {
     pararAcorde() {
         this.habilitarSelectSaves();
 
-        this.audioContextManager.stop(this.release);
+        this.audioManager.stop(this.release);
     }
 
     inversaoDeAcorde(acorde, baixo) {
@@ -599,22 +599,22 @@ class CifraPlayer {
     }
 
     atualizarVolumeStringsParaEpiano() {
-        Object.keys(this.audioContextManager.instrumentSettings).forEach(key => {
+        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
             if (key.startsWith('strings_')) {
-                this.audioContextManager.instrumentSettings[key].volume = 0.9;
+                this.audioManager.instrumentSettings[key].volume = 0.9;
             }
         });
     }
 
     atualizarVolumeStringsParaOrgao() {
-        Object.keys(this.audioContextManager.instrumentSettings).forEach(key => {
+        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
             if (key.startsWith('strings_')) {
                 if (key.includes('_grave')) {
-                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['grave']['strings'];
+                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['grave']['strings'];
                 } else if (key.includes('_baixo')) {
-                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['baixo']['strings'];
+                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['baixo']['strings'];
                 } else {
-                    this.audioContextManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['agudo']['strings'];
+                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['agudo']['strings'];
                 }
             }
         });

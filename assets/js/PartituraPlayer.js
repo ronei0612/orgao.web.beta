@@ -7,7 +7,7 @@ class PartituraPlayer {
         this.partituraEditor = partituraEditor;
         this.partituraPlaybackIndex = -1;
         this.buffers = new Map();
-        this.audioContextManager = audioManager;
+        this.audioManager = audioManager;
         this.audioContext = audioManager.audioContext; 
         this.activeSources = new Set();
         this.init();
@@ -84,7 +84,7 @@ class PartituraPlayer {
     }
 
     stopNotes() {
-        this.audioContextManager.stopAll(this.activeSources, 0.02);
+        this.audioManager.stopAll(this.activeSources, 0.02);
         this.activeSources.clear();
     }
 
@@ -92,7 +92,7 @@ class PartituraPlayer {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
-        this.audioContextManager.stopNode();
+        this.audioManager.stopNode();
 
         // Toca o acorde ANTES para compensar o attack do órgão
         if (data.chord) {
@@ -103,7 +103,7 @@ class PartituraPlayer {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
                 const notaLimpa = nota.toLowerCase().replace('#', '_');
-                this.audioContextManager.playNode(this.instrumento, notaLimpa, oitava, volume);
+                this.audioManager.playNode(this.instrumento, notaLimpa, oitava, volume);
             });
         }
 

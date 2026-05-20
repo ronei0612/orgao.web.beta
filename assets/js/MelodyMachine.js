@@ -156,7 +156,7 @@
     }
 
     stopNotes(time) {
-        this.audioContextManager.stopAll(this.activeSources, 0.1);
+        this.audioManager.stopAll(this.activeSources, 0.1);
         this.activeSources.clear();
     }
 
