@@ -1012,6 +1012,11 @@ class App {
             if (action === 'acorde') {
                 this.cifraPlayer.parado = false;
                 this.cifraPlayer.tocarAcorde(button.value);
+
+                // --- NOVO: Adiciona a cifra na partitura se estiver no modo de edição ---
+                if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
+                    this.partituraEditor.setChordToCurrentNote(button.value);
+                }
             }
 
             document.querySelectorAll('button[data-action="acorde"]').forEach(btn => {
