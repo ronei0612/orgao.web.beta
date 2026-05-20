@@ -24,11 +24,7 @@ class AudioContextManager {
 
 		this.buffers = {};
 		this.instrumentSettings = {};
-
-		// CORREÇÃO ITEM 2: Garantindo inicialização para evitar erros no stop()
-		this.sources = [];
 		this.gainNodes = [];
-		this.currentNotes = [];
 	}
 
 	/**
@@ -64,103 +60,6 @@ class AudioContextManager {
 		});
 
 		await Promise.all(loadingPromises);
-	}
-
-	/**
-	 * Define as notas que serão tocadas no próximo método play().
-	 * @param {string[]} notes Um array de strings com as notas, ex: ['c', 'e', 'g'].
-	 */
-	setNotes(notes) {
-		this.currentNotes = notes;
-	}
-
-	/**
-	 * Adiciona notas ao conjunto currentNotes.
-	 * @param {string[]} notes Um array de strings com as notas a serem adicionadas.
-	 */
-	addNotes(notes) {
-		this.currentNotes = Array.from(new Set([...this.currentNotes, ...notes]));
-	}
-
-	/**
-	 * Toca as notas definidas em currentNotes.
-	 * Lógica alterada para diferenciar Loop de Strings e Órgão.
-	 */
-	play(attackTime = 0.2) {
-		if (this.audioContext.state === 'suspended') {
-			this.audioContext.resume();
-		}
-
-		this.stop(0.2);
-
-		const now = this.audioContext.currentTime;
-
-		this.currentNotes.forEach(note => {
-			if (!this.buffers[note]) return;
-
-			const source = this.audioContext.createBufferSource();
-			const gainNode = this.audioContext.createGain();
-			const settings = this.instrumentSettings[note] || { volume: 1 };
-
-			source.buffer = this.buffers[note];
-			source.loop = !note.startsWith('epiano');
-
-			// CORREÇÃO ITEM 1: Roteamento correto
-			// De: gainNode.connect(this.audioContext.destination);
-			// Para:
-			source.connect(gainNode);
-			gainNode.connect(this.masterGain); // Agora passa pelo Compressor e Master!
-
-			gainNode.gain.setValueAtTime(0, now);
-			// Proteção contra "tic": garantindo um ataque mínimo de 3ms
-			const safeAttack = Math.max(attackTime, 0.003);
-			gainNode.gain.linearRampToValueAtTime(settings.volume, now + safeAttack);
-
-			source.start(now);
-			source.gainNodeRef = gainNode;
-			this.sources.push(source);
-
-			// CORREÇÃO: Limpeza automática para instrumentos sem loop (Epiano)
-			source.onended = () => {
-				const index = this.sources.indexOf(source);
-				if (index > -1) {
-					this.sources.splice(index, 1); // Remove do array para não vazar memória
-				}
-				source.disconnect();
-				gainNode.disconnect();
-			};
-		});
-	}
-
-	/**
-	 * Para as notas que estão tocando com efeito Release.
-	 * @param {number} [releaseTime=0.2] Duração do efeito Release em segundos (saída suave).
-	 */
-	stop(releaseTime = 0.2) {
-		if (this.sources.length === 0) return;
-		const now = this.audioContext.currentTime;
-		const stopTime = now + releaseTime;
-
-		// Movemos os sources atuais para uma variável local para limpar o array da classe
-		const oldSources = [...this.sources];
-		this.sources = [];
-
-		oldSources.forEach(source => {
-			const gainNode = source.gainNodeRef;
-
-			// Release suave
-			gainNode.gain.cancelScheduledValues(now);
-			gainNode.gain.setValueAtTime(gainNode.gain.value, now);
-			gainNode.gain.linearRampToValueAtTime(0, stopTime);
-
-			source.stop(stopTime);
-
-			// GARANTIA DE LIMPEZA DE MEMÓRIA:
-			source.onended = () => {
-				source.disconnect();
-				gainNode.disconnect();
-			};
-		});
 	}
 
 	/**
