@@ -184,8 +184,7 @@ class DrumMachine {
 
         if (this.currentStep > this.numSteps) {
             this.currentStep = 1;
-            if (this.onStepsEnd) {
-                this.fecharChimbal();
+            if (this.onStepsEnd) { 
                 this.onStepsEnd();
             }
         }
