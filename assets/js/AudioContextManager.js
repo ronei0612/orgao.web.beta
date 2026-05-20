@@ -162,37 +162,47 @@ class AudioContextManager {
 	 * @param {number} attack O tempo de ataque em segundos.
 	 * @param {boolean} isLoop Se o som deve entrar em loop.
 	 * @returns {Object|null} Retorna um objeto { source, gainNode } ou null se não houver buffer.
+     * @param {Set} trackingSet (Opcional) Um Set onde a nota será adicionada e removida automaticamente.
 	 */
-	playNode(buffer, time, volume = 1, attack = 0.003, isLoop = false) {
+	playNode(buffer, time, volume = 1, attack = 0.003, isLoop = false, trackingSet = null) {
 		if (!buffer) return null;
 		if (this.audioContext.state === 'suspended') this.audioContext.resume();
 
-		// Se time não for passado, usa o agora imediato
 		const startTime = time || this.audioContext.currentTime;
-
 		const source = this.audioContext.createBufferSource();
 		const gainNode = this.audioContext.createGain();
 
-		// Proteção contra "tics" iniciais (Bug #5)
 		const safeAttack = Math.max(attack, 0.003);
 		gainNode.gain.setValueAtTime(0, startTime);
 		gainNode.gain.linearRampToValueAtTime(volume, startTime + safeAttack);
 
 		source.buffer = buffer;
 		source.loop = isLoop;
-
 		source.connect(gainNode);
 		gainNode.connect(this.masterGain);
 
+		const nodeEntry = { source, gainNode };
+
+		// Se um Set de rastreamento foi passado, adiciona a nota agora
+		if (trackingSet) {
+			trackingSet.add(nodeEntry);
+		}
+
 		source.start(startTime);
 
-		// GARBAGE COLLECTION AUTOMÁTICO
 		source.onended = () => {
+			// Lógica de limpeza centralizada:
+			// 1. Remove do Set de rastreamento (se existir)
+			if (trackingSet) {
+				trackingSet.delete(nodeEntry);
+			}
+
+			// 2. Limpeza física do Web Audio
 			source.disconnect();
 			gainNode.disconnect();
 		};
 
-		return { source, gainNode };
+		return nodeEntry;
 	}
 
 	/**

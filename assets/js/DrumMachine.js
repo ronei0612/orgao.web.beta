@@ -134,18 +134,43 @@ class DrumMachine {
         await Promise.all(loadPromises);
     }
 
+    playSound(buffer, time, volume = 1, isChimbalAberto = false) {
+        if (!buffer) return;
+
+        const node = this.audioManager.playNode(buffer, time, volume, 0.003, false);
+
+        // Se for chimbal aberto, guardamos o objeto {source, gainNode} retornado
+        if (isChimbalAberto && node) {
+            this.lastChimbalAbertoNode = node;
+        }
+    }
+
+    stop() {
+        this.isPlaying = false;
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        this.reset();
+    }
+
+    reset() {
+        this.currentStep = 1;
+        this.nextNoteTime = 0;
+    }
+
     scheduleNote(instrument, step, time, volume) {
         if (volume === 3) {
             const buffer = this.buffers.get(instrument + '-alt');
             if (buffer) {
-                this.audioContextManager.playNode(buffer, time, 1, instrument === 'chimbal'); //CORRIGIR
+                this.playSound(buffer, time, 1, instrument === 'chimbal');
             }
-        }
-        else {
+        } else {
             if (!this.playBass(instrument, time, volume) && !this.playViolao(instrument, time, volume)) {
                 const buffer = this.buffers.get(instrument);
                 if (buffer && volume > 0) {
-                    this.audioContextManager.playNode(buffer, time, volume === 2 ? 0.3 : 1, instrument === 'chimbal');
+                    const vol = (volume === 2) ? 0.3 : 1;
+                    this.playSound(buffer, time, vol, instrument === 'chimbal');
                 }
             }
         }
@@ -174,30 +199,15 @@ class DrumMachine {
     }
 
     fecharChimbal(instrument, volume) {
-        // CORREÇÃO BUG #4: Adicionado volume === 3 para permitir o fechamento
+        // CORREÇÃO BUG #4: Inclui volume 3
         if (volume === undefined || volume === 1 || volume === 2) {
 
-            // Verifica se existem as referências do som e do controle de volume
-            if (this.lastChimbalAbertoSource && this.lastChimbalAbertoGain) {
-                const now = this.audioContext.currentTime;
+            if (this.lastChimbalAbertoNode) {
+                // Chamamos o stop suave centralizado
+                // stopNode(nodeEntry, time, release)
+                this.audioManager.stopNode(this.lastChimbalAbertoNode, this.audioContext.currentTime, 0.02);
 
-                try {
-                    // ELIMINA O TIC: Em vez de stop(0), fazemos um fade-out de 20ms
-                    this.lastChimbalAbertoGain.gain.cancelScheduledValues(now);
-                    this.lastChimbalAbertoGain.gain.setValueAtTime(this.lastChimbalAbertoGain.gain.value, now);
-
-                    // Rampa rápida para zero
-                    this.lastChimbalAbertoGain.gain.linearRampToValueAtTime(0);
-
-                    // Para o som logo após o fade-out
-                    this.lastChimbalAbertoSource.stop(0);
-                } catch (e) {
-                    // Ignora se o som já tiver parado sozinho
-                }
-
-                // Limpa as referências para a próxima nota
-                this.lastChimbalAbertoSource = null;
-                this.lastChimbalAbertoGain = null;
+                this.lastChimbalAbertoNode = null;
             }
         }
     }
@@ -258,7 +268,7 @@ class DrumMachine {
         if (!selectedButton) return;
 
         selectedButton.classList.remove('flash-accent', 'flash-weak');
-        void selectedButton.offsetWidth;
+        void selectedButton.offsetWidth; // PROBLEMA: Força Recálculo de Layout, USE O requestAnimationFrame
 
         if (beat === 1) {
             selectedButton.classList.add('flash-accent');
@@ -316,7 +326,7 @@ class DrumMachine {
             const bass = instrument + '_' + this.cifraPlayer.baixo;
             const buffer = this.buffers.get(bass);
             if (buffer && volume > 0) {
-                this.audioContextManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
                 return true;
             }
         }
@@ -328,7 +338,7 @@ class DrumMachine {
             const violao = instrument + '_' + this.cifraPlayer.acordeTocando;
             const buffer = this.buffers.get(violao);
             if (buffer && volume > 0) {
-                this.audioContextManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
                 return true;
             }
         }

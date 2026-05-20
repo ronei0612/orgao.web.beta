@@ -201,7 +201,7 @@
         const iniciouNovoAcorde = this.currentStep === 1;
         const acordePrincipal = this.cifraPlayer.acordeTocando;
 
-        // 1. Resolvemos as notas do acorde uma única vez para este passo (milissegundo)
+        // 1. Resolvemos as notas do acorde
         let notasAtuais = null;
         if (acordePrincipal) {
             const chaveAcorde = acordePrincipal + (this.cifraPlayer.acordeFull ? '1' : '');
@@ -210,31 +210,28 @@
 
         // 2. Lógica de início de compasso (Tempo 1)
         if (iniciouNovoAcorde) {
+            // Para as notas do compasso anterior com release
             this.stopNotes(this.nextNoteTime);
 
-            // Toca a nota grave (pedaleira do órgão) automaticamente no início
+            // Toca a nota grave (pedaleira)
             if (notasAtuais && notasAtuais[0]) {
                 const bufferGrave = this.buffers.get(`${this.instrument}_${notasAtuais[0]}`);
                 if (bufferGrave) {
-                    this.audioManager.playNode(bufferGrave, this.nextNoteTime, this.defaultVol);
+                    // CORREÇÃO: Captura o nó retornado e adiciona ao Set
+                    this.audioManager.playNode(bufferGrave, this.nextNoteTime, this.defaultVol, 0.003, false, this.activeSources);
                 }
             }
         }
 
-        // 3. Se não houver acorde tocando ou cache de trilhas, interrompemos o processamento
         if (!notasAtuais || !this.tracksCache) return;
 
-        // 4. Loop otimizado pelas trilhas (Vozes do Órgão)
+        // 4. Loop das trilhas (Vozes do Órgão)
         for (let i = 0; i < this.tracksCache.length; i++) {
             const trackData = this.tracksCache[i];
-
-            // Pula vozes que não estão marcadas como selecionadas
             if (!trackData.button.classList.contains('selected')) continue;
 
             const stepElement = trackData.steps[stepIndex];
             const stepElementVol = parseInt(stepElement?.dataset.volume || '0', 10);
-
-            // Pula se o quadradinho (step) estiver mudo
             if (stepElementVol <= 0) continue;
 
             const nomeNota = notasAtuais[trackData.noteIndex];
@@ -242,11 +239,11 @@
 
             const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
             if (bufferNota) {
-                // Ajusta volume: se for o volume "médio" (2), divide por 1.5
                 const volumeFinal = stepElementVol === 2 ? (this.defaultVol / 1.5) : this.defaultVol;
-                this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal);
 
-                // Efeito visual de "tocando" no quadradinho
+                // CORREÇÃO: Captura o nó e adiciona ao Set para controle de release
+                this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
+
                 stepElement.classList.add('playing');
                 setTimeout(() => stepElement.classList.remove('playing'), 100);
             }
