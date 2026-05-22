@@ -179,7 +179,7 @@ class UIController {
         if (saves && saves !== '{}') {
             saves = JSON.parse(saves);
 
-            let saveNames = Object.keys(saves).sort();
+            let saveNames = Object.keys(saves).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
             saveNames.forEach(saveName => {
                 const listItem = this.criarItemSelect(saveName, saves[saveName]);
