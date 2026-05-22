@@ -213,11 +213,21 @@
             // Para as notas do compasso anterior com release
             this.stopNotes(this.nextNoteTime);
 
-            // Toca a nota grave (pedaleira)
-            if (notasAtuais && notasAtuais[0]) {
-                const bufferGrave = this.buffers.get(`${this.instrument}_${notasAtuais[0]}`);
+            // Toca a nota grave (pedaleira) respeitando a inversão/baixo do acorde (ex: C/E -> toca E grave)
+            let notaGraveNome = null;
+
+            if (this.cifraPlayer.baixo) {
+                // Formata o baixo pegando da Cifra (ex: 'F_' vira 'f__grave')
+                notaGraveNome = `${this.cifraPlayer.baixo.toLowerCase()}_grave`;
+            } else if (notasAtuais && notasAtuais[0]) {
+                // Fallback para a tônica principal dicionário caso não identifique baixo
+                notaGraveNome = notasAtuais[0];
+            }
+
+            if (notaGraveNome) {
+                const bufferGrave = this.buffers.get(`${this.instrument}_${notaGraveNome}`);
                 if (bufferGrave) {
-                    // CORREÇÃO: Captura o nó retornado e adiciona ao Set
+                    // Captura o nó retornado e adiciona ao Set
                     this.audioManager.playNode(bufferGrave, this.nextNoteTime, this.defaultVol, 0.003, false, this.activeSources);
                 }
             }
