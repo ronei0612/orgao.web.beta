@@ -38,6 +38,8 @@ class DrumMachine {
 
         // Cache para evitar ler o DOM a cada milissegundo (Performance Crítica)
         this.tracksCache = null;
+        // Rastreio para evitar vazamento de memória e cortar sons ---
+        this.activeSources = new Set();
     }
 
     async init() {
@@ -137,7 +139,7 @@ class DrumMachine {
     playSound(buffer, time, volume = 1, isChimbalAberto = false) {
         if (!buffer) return;
 
-        const node = this.audioManager.playNode(buffer, time, volume, 0.003, false);
+        const node = this.audioManager.playNode(buffer, time, volume, 0.003, false, this.activeSources);
 
         // Se for chimbal aberto, guardamos o objeto {source, gainNode} retornado
         if (isChimbalAberto && node) {
@@ -321,7 +323,7 @@ class DrumMachine {
             const bass = instrument + '_' + this.cifraPlayer.baixo;
             const buffer = this.buffers.get(bass);
             if (buffer && volume > 0) {
-                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);
                 return true;
             }
         }
@@ -333,7 +335,7 @@ class DrumMachine {
             const violao = instrument + '_' + this.cifraPlayer.acordeTocando;
             const buffer = this.buffers.get(violao);
             if (buffer && volume > 0) {
-                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);
                 return true;
             }
         }
