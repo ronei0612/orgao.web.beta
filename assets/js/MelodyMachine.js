@@ -156,8 +156,8 @@
     }
 
     stopNotes(time) {
-        this.audioManager.stopAll(this.activeSources, 0.1);
-        this.activeSources.clear();
+        this.audioManager.stopAll(this.activeSources, 0.1, time); // <- passa time
+        //this.activeSources.clear(); // Não limpar o Set aqui — o onended de cada nó cuida disso
     }
 
     nextNote() {

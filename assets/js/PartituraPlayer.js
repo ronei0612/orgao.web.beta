@@ -85,7 +85,7 @@ class PartituraPlayer {
 
     stopNotes() {
         this.audioManager.stopAll(this.activeSources, 0.02);
-        this.activeSources.clear();
+        //this.activeSources.clear(); // Não limpar — o onended de cada nó remove do Set automaticamente
     }
 
     tocarNotaAtualPartitura(volume = 1) {

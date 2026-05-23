@@ -331,7 +331,7 @@ class CifraPlayer {
     epianoPlay() {
         // 1. Corta o som do acorde anterior suavemente (igual o stop antigo fazia)
         this.audioManager.stopAll(this.activeSources, 0.2);
-        this.activeSources.clear();
+        //this.activeSources.clear(); // Não limpar — onended cuida disso
 
         // 2. Une os dois grupos (órgão, strings e epiano)
         const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
