@@ -24,7 +24,6 @@ class AudioContextManager {
 
 		this.buffers = {};
 		this.instrumentSettings = {};
-		this.gainNodes = [];
 	}
 
 	/**
@@ -77,7 +76,7 @@ class AudioContextManager {
 		if (!buffer) return null;
 		if (this.audioContext.state === 'suspended') this.audioContext.resume();
 
-		const startTime = time || this.audioContext.currentTime;
+		const startTime = (time != null && time > 0) ? time : this.audioContext.currentTime;
 		const source = this.audioContext.createBufferSource();
 		const gainNode = this.audioContext.createGain();
 
