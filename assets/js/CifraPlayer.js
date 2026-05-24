@@ -153,30 +153,30 @@ class CifraPlayer {
         return this.musicTheory.notasAcordes.includes(acorde.split('/')[0]) ? `<b id="cifra${cifraNum}">${acorde}</b>` : palavra;
     }
 
-    carregarAcordes() {
-        const urlsDict = {};
+    async carregarAcordes() {
+        const urls = {};
         const instrumentos = ['orgao', 'strings', 'epiano'];
         const oitavas = ['grave', 'baixo', ''];
-        const notas = this.musicTheory.notas;
 
         instrumentos.forEach(instrumento => {
-            notas.forEach(nota => {
+            this.musicTheory.notas.forEach(nota => {
                 oitavas.forEach(oitava => {
                     const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
                     const path = `${this.audioPath}${instrumento.charAt(0).toUpperCase() + instrumento.slice(1)}/${key}.ogg`;
                     const oitavaKey = oitava === '' ? 'agudo' : oitava;
                     const volume = this.VOLUME_CONFIG[oitavaKey]?.[instrumento] ?? 1.0;
-
-                    urlsDict[key] = { url: path, volume: volume };
+                    urls[key] = { url: path, volume };
                 });
             });
         });
 
-        this.audioManager.loadInstruments(urlsDict).then(() => {
-            if (this.onInstrumentosCarregados) {
-                this.onInstrumentosCarregados();
-            }
-        });
+        // loadBuffers não carrega volume — precisa manter loadInstruments para o CifraPlayer
+        // pois ele usa audioManager.instrumentSettings para volumes por nota
+        await this.audioManager.loadInstruments(urls);
+
+        if (this.onInstrumentosCarregados) {
+            this.onInstrumentosCarregados();
+        }
     }
 
     transposeCifra() {
@@ -428,21 +428,16 @@ class CifraPlayer {
     pararReproducao() {
         this.pararAcorde();
         const frameContent = this.elements.iframeCifra.contentDocument;
-        const cifraElems = frameContent.getElementsByClassName('cifraSelecionada');
 
-        Array.from(cifraElems).forEach(elemento => {
-            elemento.classList.remove('cifraSelecionada');
-        });
-
+        // Remover o classList remove do cifraSelecionada — foco deve permanecer
+        // Array.from(cifraElems).forEach(elemento => { elemento.classList.remove('cifraSelecionada'); });
 
         const acordeButtons = document.querySelectorAll('button[data-action="acorde"]');
         acordeButtons.forEach(acordeButton => {
             acordeButton.classList.remove('pressed');
         });
 
-        if (this.indiceAcorde > 0) {
-            this.indiceAcorde--;
-        }
+        // REMOVIDO: this.indiceAcorde-- causava double-decrement com o handlePlayMousedown
 
         this.parado = true;
         this.acordeTocando = '';
@@ -502,7 +497,9 @@ class CifraPlayer {
         }
     }
 
-    avancarDestaque() {
+    avancarDestaque(tentativas = 0) {
+        if (tentativas > this.elements_b.length) return; // <- guarda
+
         if (!this.elements_b) return;
         const frameContent = this.elements.iframeCifra.contentDocument;
 
@@ -517,7 +514,7 @@ class CifraPlayer {
                 // Pula elementos vazios (marcadores de linha)
                 if (!cifraElem.innerHTML.trim()) {
                     this.indiceAcorde++;
-                    this.avancarDestaque();
+                    this.avancarDestaque(tentativas + 1); // Tenta avançar de novo, contando a tentativa para evitar loop infinito
                     return;
                 }
                 cifraElem.classList.add('cifraSelecionada');
@@ -532,12 +529,14 @@ class CifraPlayer {
         const frameContent = this.elements.iframeCifra.contentDocument;
 
         if (this.indiceAcorde > 2) {
-            const cifraElem = this.elements_b[this.indiceAcorde - 2];
-            if (cifraElem.innerHTML === '')
-                this.indiceAcorde -= 4;
-            else
-                this.indiceAcorde -= 2;
+            let novoIndex = this.indiceAcorde - 2;
 
+            // Pula elementos vazios para trás
+            while (novoIndex > 0 && !this.elements_b[novoIndex - 1]?.innerHTML.trim()) {
+                novoIndex -= 2;
+            }
+
+            this.indiceAcorde = novoIndex;
             this.removerClasseCifraSelecionada(frameContent);
             const elem = this.elements_b[this.indiceAcorde - 1];
             if (elem) {

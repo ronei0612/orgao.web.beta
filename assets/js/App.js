@@ -683,7 +683,7 @@ class App {
             this.cifraPlayer.addEventCifrasIframe(this.elements.iframeCifra);
         }
         else {
-            this.uiController.exibirBotoesAcordes();
+            this.uiController.exibirBotoesLetra();
             this.cifraPlayer.preencherSelectAcordes('C');
             this.cifraPlayer.preencherIframeCifra(texto);
         }

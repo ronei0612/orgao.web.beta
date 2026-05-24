@@ -109,31 +109,14 @@
     }
 
     async loadSounds() {
-        const notasUnicas = new Set(Object.values(this.acordes).flat());
-        //const notasUnicas = new Set();
-
-        //Object.values(this.acordes).flat().forEach(nota => {
-        //    notasUnicas.add(nota);
-        //    if (nota.endsWith('_baixo')) {
-        //        notasUnicas.add(nota.replace('_baixo', '_grave'));
-        //    }
-        //});
-
-        const loadPromises = [];
-
-        for (const nota of notasUnicas) {
-            const name = `${this.instrument}_${nota}`;
-            const url = `${this.audioPath}/${name}.ogg`;
-
-            loadPromises.push((async () => {
-                const response = await fetch(url);
-                const arrayBuffer = await response.arrayBuffer();
-                const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(name, audioBuffer);
-            })());
-        }
-
-        await Promise.all(loadPromises);
+        const notas = [...new Set(Object.values(this.acordes).flat())];
+        const urls = Object.fromEntries(
+            notas.map(n => [
+                `${this.instrument}_${n}`,
+                `${this.audioPath}/${this.instrument}_${n}.ogg`
+            ])
+        );
+        this.buffers = await this.audioManager.loadBuffers(urls);
     }
 
     async init() {
