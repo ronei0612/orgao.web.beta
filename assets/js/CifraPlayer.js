@@ -40,7 +40,7 @@ class CifraPlayer {
             }
         };
 
-        this.carregarAcordes();
+        this.loadSounds();
     }
 
     /**
@@ -153,7 +153,7 @@ class CifraPlayer {
         return this.musicTheory.notasAcordes.includes(acorde.split('/')[0]) ? `<b id="cifra${cifraNum}">${acorde}</b>` : palavra;
     }
 
-    async carregarAcordes() {
+    async loadSounds() {
         const urls = {};
         const instrumentos = ['orgao', 'strings', 'epiano'];
         const oitavas = ['grave', 'baixo', ''];
@@ -163,20 +163,30 @@ class CifraPlayer {
                 oitavas.forEach(oitava => {
                     const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
                     const path = `${this.audioPath}${instrumento.charAt(0).toUpperCase() + instrumento.slice(1)}/${key}.ogg`;
-                    const oitavaKey = oitava === '' ? 'agudo' : oitava;
-                    const volume = this.VOLUME_CONFIG[oitavaKey]?.[instrumento] ?? 1.0;
-                    urls[key] = { url: path, volume };
+
+                    // O loadBuffers aceita string direta
+                    urls[key] = path;
                 });
             });
         });
 
-        // loadBuffers não carrega volume — precisa manter loadInstruments para o CifraPlayer
-        // pois ele usa audioManager.instrumentSettings para volumes por nota
-        await this.audioManager.loadInstruments(urls);
+        // Agora o CifraPlayer gerencia seu próprio Map de buffers!
+        this.buffers = await this.audioManager.loadBuffers(urls);
 
         if (this.onInstrumentosCarregados) {
             this.onInstrumentosCarregados();
         }
+    }
+
+    getVolumeForNote(notaKey) {
+        // Ex de notaKey: "strings_c_baixo" ou "orgao_d"
+        const parts = notaKey.split('_');
+        const instrumento = parts[0];
+
+        // Se a nota não tem terceira parte, significa que é 'agudo' (vazio no array original)
+        const oitava = parts.length > 2 ? parts[2] : 'agudo';
+
+        return this.VOLUME_CONFIG[oitava]?.[instrumento] ?? 1.0;
     }
 
     transposeCifra() {
@@ -329,23 +339,22 @@ class CifraPlayer {
     }
 
     epianoPlay() {
-        // 1. Corta o som do acorde anterior suavemente (igual o stop antigo fazia)
+        // Corta o som do acorde anterior suavemente
         this.audioManager.stopAll(this.activeSources, 0.2);
-        //this.activeSources.clear(); // Não limpar — onended cuida disso
 
-        // 2. Une os dois grupos (órgão, strings e epiano)
+        // Une os dois grupos (órgão, strings e epiano)
         const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
         const now = this.audioManager.audioContext.currentTime;
 
-        // 3. Toca cada nota enviando para o playNode unificado
         notasParaTocar.forEach(note => {
-            const buffer = this.audioManager.buffers[note];
+            // Busca do Map de buffers da PRÓPRIA classe
+            const buffer = this.buffers.get(note);
             if (!buffer) return;
 
-            const isLoop = !note.startsWith('epiano'); // Epiano morre sozinho, órgão/strings faz loop
-            const volume = this.audioManager.instrumentSettings[note]?.volume || 1;
+            const isLoop = !note.startsWith('epiano');
+            const volume = this.getVolumeForNote(note); // Usando a lógica local
 
-            // Dispara o som e joga no Set activeSources para controle de memória
+            // Dispara o som
             this.audioManager.playNode(buffer, now, volume, this.attack, isLoop, this.activeSources);
         });
 
@@ -615,24 +624,16 @@ class CifraPlayer {
     }
 
     atualizarVolumeStringsParaEpiano() {
-        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
-            if (key.startsWith('strings_')) {
-                this.audioManager.instrumentSettings[key].volume = 0.9;
-            }
-        });
+        // Altera a fonte da verdade localmente
+        this.VOLUME_CONFIG['grave']['strings'] = 0.9;
+        this.VOLUME_CONFIG['baixo']['strings'] = 0.9;
+        this.VOLUME_CONFIG['agudo']['strings'] = 0.9;
     }
 
     atualizarVolumeStringsParaOrgao() {
-        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
-            if (key.startsWith('strings_')) {
-                if (key.includes('_grave')) {
-                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['grave']['strings'];
-                } else if (key.includes('_baixo')) {
-                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['baixo']['strings'];
-                } else {
-                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['agudo']['strings'];
-                }
-            }
-        });
+        // Restaura a fonte da verdade para o padrão do órgão
+        this.VOLUME_CONFIG['grave']['strings'] = 0.6;
+        this.VOLUME_CONFIG['baixo']['strings'] = 0.5;
+        this.VOLUME_CONFIG['agudo']['strings'] = 0.5;
     }
 }

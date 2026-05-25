@@ -27,41 +27,6 @@ class AudioContextManager {
 	}
 
 	/**
-	 * Carrega todos os instrumentos (arquivos de áudio) na memória (buffers).
-	 * @param {Object<string, {url: string, volume: number}>} urlsMap Um objeto mapeando o nome da nota para um objeto com a URL e o volume desejado (0.0 a 1.0).
-	 * @returns {Promise<void>} Uma Promise que resolve quando todos os arquivos são carregados.
-	 */
-	async loadInstruments(urlsMap) {
-		const noteKeys = Object.keys(urlsMap);
-
-		// Limpa buffers e configurações anteriores
-		this.buffers = {};
-		this.instrumentSettings = {};
-
-		const loadingPromises = noteKeys.map(key => {
-			const { url, volume = 1 } = urlsMap[key];
-			this.instrumentSettings[key] = { volume };
-
-			return fetch(url)
-				.then(response => {
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status} for ${url}`);
-					}
-					return response.arrayBuffer();
-				})
-				.then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
-				.then(audioBuffer => {
-					this.buffers[key] = audioBuffer;
-				})
-				.catch(error => {
-					console.error(`Erro ao carregar ${key} (URL: ${url}): ${error}`);
-				});
-		});
-
-		await Promise.all(loadingPromises);
-	}
-
-	/**
 	 * Fábrica centralizada de sons. Cria o nó, conecta ao Compressor, previne "tics" e gerencia a memória.
 	 * 
 	 * @param {AudioBuffer} buffer O buffer de áudio a ser tocado.
