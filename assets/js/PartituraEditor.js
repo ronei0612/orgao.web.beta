@@ -500,6 +500,8 @@ class PartituraEditor {
         stave.addClef("treble").setContext(context).draw();
 
         const staveNotesRef = [];
+        const temCifraNaPartitura = this.currentData.some(d => d.chord && d.chord.trim() !== "");
+        const lyricFontSize = (!isEditable && !temCifraNaPartitura) ? 15 : 12;
 
         const tickables = this.currentData.flatMap((data, index) => {
             const note = new this.vf.StaveNote({
@@ -516,9 +518,15 @@ class PartituraEditor {
                 });
             }
             if (note.getStem()) note.getStem().hide = true;
-            if (data.chord) note.addModifier(new this.vf.ChordSymbol().setFont('Arial', 12, 'bold').addText(data.chord), 0);
+
+            if (data.chord) {
+                note.addModifier(new this.vf.ChordSymbol().setFont('Arial', 12, 'bold').addText(data.chord), 0);
+            }
+
             if (data.lyric) {
-                note.addModifier(new this.vf.Annotation(data.lyric).setFont('Serif', 12, 'italic').setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
+                note.addModifier(new this.vf.Annotation(data.lyric)
+                    .setFont('Roboto', lyricFontSize, 'italic')
+                    .setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
             }
 
             // Renderiza Destaque Visual no Editor para intervalo de Seleção
@@ -530,10 +538,8 @@ class PartituraEditor {
 
                 if (index >= minSel && index <= maxSel) {
                     if (index === this.persistentSelectedIndex) {
-                        // Nota Foco/Cursor (Verde)
                         note.setStyle({ fillStyle: "green", strokeStyle: "green" });
                     } else {
-                        // Outras Notas do Intervalo Selecionado (Azul/Ciano)
                         note.setStyle({ fillStyle: "#17a2b8", strokeStyle: "#17a2b8" });
                     }
                 }
