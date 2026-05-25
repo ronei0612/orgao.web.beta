@@ -14,6 +14,12 @@ class PartituraEditor {
         this.currentData = [];
         this.noteXPositions = [];
         this.persistentSelectedIndex = 0;
+
+        // Controle de Seleção e Área de Transferência
+        this.selectionStart = 0;
+        this.selectionEnd = 0;
+        this.copiedNotesBuffer = null;
+
         this.highlightIndex = -1;
         this.lastUsedPitch = "b/4";
 
@@ -34,16 +40,22 @@ class PartituraEditor {
 
         let sideToolbarHtml = isEditable ? `
             <div class="side-toolbar">
-                <button class="tool-btn btn-add" id="btn-add">+♪</button>
+                <button class="tool-btn btn-add" id="btn-add" title="Adicionar Nota">+♪</button>
+                <button class="tool-btn btn-rest" id="btn-rest" title="Adicionar Pausa">𝄽</button>
+                <button class="tool-btn btn-tie" id="btn-tie" title="Ligar à próxima nota">‿</button>
                 <button class="tool-btn btn-bar" id="btn-bar" title="Compasso">|</button>
-                <button class="tool-btn btn-chord" id="btn-chord">C7</button>
-                <button class="tool-btn btn-lyric" id="btn-lyric">Abc</button>
-                <button class="tool-btn btn-delete" id="btn-delete">
+                <button class="tool-btn btn-delete" id="btn-delete" title="Apagar Nota">
                    <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M5.83 5.146a.5.5 0 0 0 0 .708L7.975 8l-2.147 2.146a.5.5 0 0 0 .707.708l2.147-2.147 2.146 2.147a.5.5 0 0 0 .707-.708L9.39 8l2.146-2.146a.5.5 0 0 0-.707-.708L8.683 7.293 6.536 5.146a.5.5 0 0 0-.707 0z"/><path d="M13.683 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7.08a2 2 0 0 1-1.519-.698L.241 8.65a1 1 0 0 1 0-1.302L5.084 1.7A2 2 0 0 1 6.603 1zm-7.08 1a1 1 0 0 0-.76.35L1 8l4.844 5.65a1 1 0 0 0 .759.35h7.08a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"/></svg>
                 </button>
             </div>` : '';
 
-        doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}`;
+        let bottomToolbarHtml = isEditable ? `
+            <div class="bottom-toolbar">
+                <button class="tool-btn btn-chord" id="btn-chord" title="Adicionar Cifra">C7</button>
+                <button class="tool-btn btn-lyric" id="btn-lyric" title="Adicionar Letra">Abc</button>
+            </div>` : '';
+
+        doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}${bottomToolbarHtml}`;
 
         const style = doc.createElement('style');
         style.innerHTML = `
@@ -53,21 +65,29 @@ class PartituraEditor {
                 overflow-x: auto; 
                 overflow-y: hidden; 
                 display: flex; 
-                /* 2. PARTITURA NO TOPO */
                 align-items: flex-start; 
                 padding-top: 60px; 
                 min-height: 100vh; 
                 background-color: transparent; 
             }
-            #score-container { min-width: max-content; padding: 20px; position: relative; }
-            .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            #score-container { min-width: max-content; padding: 20px; padding-bottom: 80px; position: relative; }
+            
+            .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+            .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 8px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
+            
             .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; outline: none; }
             .tool-btn:active { transform: scale(0.9); background: #f0f0f0; }
+            
             .btn-nav { color: green; font-size: 20px; border-radius: 8px; }
             .btn-bar { color: #333; font-size: 24px; border-width: 1px; }
             .btn-add { color: #2e7d32; font-size: 24px; }
+            .btn-rest { color: #333; font-size: 24px; }
+            .btn-tie { color: #1976d2; font-size: 28px; font-weight: normal; padding-bottom: 10px;}
             .btn-delete { color: #c62828; }
+            .btn-chord { color: #d32f2f; font-size: 16px; }
+            .btn-lyric { color: #000; font-size: 16px; }
+            
             .inline-input { 
                 position: absolute; 
                 transform: translateX(-50%); 
@@ -95,14 +115,26 @@ class PartituraEditor {
             doc.getElementById('btn-down').onclick = () => this.alterarAltura(-1);
             doc.getElementById('btn-bar').onclick = () => this.toggleBar();
             doc.getElementById('btn-add').onclick = () => this.addNewNote();
+            doc.getElementById('btn-rest').onclick = () => this.addRest();
+            doc.getElementById('btn-tie').onclick = () => this.toggleTie();
             doc.getElementById('btn-chord').onclick = () => this.showInlineInput('chord');
             doc.getElementById('btn-lyric').onclick = () => this.showInlineInput('lyric');
             doc.getElementById('btn-delete').onclick = () => this.deleteNoteAtCursor();
 
-            // ADICIONE ESTE BLOCO: Atalhos de teclado
             doc.addEventListener('keydown', (e) => {
-                // Se estiver digitando num campo de texto (cifra/letra), ignora estes atalhos
                 if (e.target && e.target.tagName.toLowerCase() === 'input') return;
+
+                // Atalhos Globais de Copiar/Colar (Ctrl+C / Ctrl+V) [Cmd+C / Cmd+V no Mac]
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+                    e.preventDefault();
+                    this.copySelectedRange();
+                    return;
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
+                    e.preventDefault();
+                    this.pasteCopiedRange();
+                    return;
+                }
 
                 switch (e.key) {
                     case 'ArrowUp':
@@ -115,11 +147,33 @@ class PartituraEditor {
                         break;
                     case 'ArrowLeft':
                         e.preventDefault();
-                        this.navegarCursor(-1);
+                        // Shift + Seta Esquerda seleciona no teclado
+                        if (e.shiftKey) {
+                            let novoIndex = this.persistentSelectedIndex - 1;
+                            if (novoIndex >= 0) {
+                                this.persistentSelectedIndex = novoIndex;
+                                this.selectionEnd = novoIndex;
+                                this.draw(this.editIframe, true);
+                                this.centralizarNoCursor();
+                            }
+                        } else {
+                            this.navegarCursor(-1);
+                        }
                         break;
                     case 'ArrowRight':
                         e.preventDefault();
-                        this.navegarCursor(1);
+                        // Shift + Seta Direita seleciona no teclado
+                        if (e.shiftKey) {
+                            let novoIndex = this.persistentSelectedIndex + 1;
+                            if (novoIndex < this.currentData.length) {
+                                this.persistentSelectedIndex = novoIndex;
+                                this.selectionEnd = novoIndex;
+                                this.draw(this.editIframe, true);
+                                this.centralizarNoCursor();
+                            }
+                        } else {
+                            this.navegarCursor(1);
+                        }
                         break;
                     case 'Enter':
                         e.preventDefault();
@@ -131,24 +185,18 @@ class PartituraEditor {
                         this.deleteNoteAtCursor();
                         break;
 
-                    // --- ADICIONE ESTE BLOCO DEFAULT ---
                     default:
-                        // Se pressionar qualquer caractere ou acento (Dead key), abre a edição de letra
                         if ((e.key.length === 1 || e.key === 'Dead') && !e.ctrlKey && !e.altKey && !e.metaKey) {
                             const isDead = e.key === 'Dead';
-                            if (!isDead) e.preventDefault(); // Evita scroll da página ao digitar
-
-                            // Abre a edição de "lyric" (letra) passando a tecla digitada
+                            if (!isDead) e.preventDefault();
                             this.showInlineInput('lyric', isDead ? '' : e.key);
                         }
                         break;
-                    // -----------------------------------
                 }
             });
         }
     }
 
-    // 1. ADICIONE O PARÂMETRO initialKey = null
     showInlineInput(type, initialKey = null) {
         this.commitInput();
 
@@ -164,20 +212,17 @@ class PartituraEditor {
         input.dataset.type = type;
         input.dataset.index = this.persistentSelectedIndex;
 
-        // --- 2. ATUALIZE A DEFINIÇÃO DO VALOR AQUI ---
         if (initialKey !== null) {
-            input.value = initialKey; // Se começou a digitar, substitui pela letra
+            input.value = initialKey;
         } else {
-            input.value = this.currentData[this.persistentSelectedIndex][type] || ""; // Senão, puxa o que já estava escrito
+            input.value = this.currentData[this.persistentSelectedIndex][type] || "";
         }
-        // ---------------------------------------------
 
         doc.getElementById('score-container').appendChild(input);
 
         win.focus();
         setTimeout(() => {
             input.focus();
-            // Só seleciona o texto se não estiver digitando uma letra nova agora
             if (!initialKey && input.value) input.select();
         }, 50);
 
@@ -186,7 +231,6 @@ class PartituraEditor {
         input.onkeydown = (e) => {
             if (e.key === 'Enter' || e.key === 'Tab') {
                 e.preventDefault();
-                // Avança se não estiver na última nota
                 if (this.persistentSelectedIndex < this.currentData.length - 1) {
                     input.dataset.advance = "true";
                 }
@@ -198,7 +242,7 @@ class PartituraEditor {
         };
 
         input.onblur = () => {
-            if (input.dataset.handled === "true") return; // Evita loop caso já tenha salvo
+            if (input.dataset.handled === "true") return;
 
             const advance = input.dataset.advance === "true";
 
@@ -209,7 +253,6 @@ class PartituraEditor {
             }
 
             if (advance) {
-                // Pula para a próxima nota, redesenha e abre o input sozinho
                 this.persistentSelectedIndex++;
                 this.draw(this.editIframe, true);
                 this.centralizarNoCursor();
@@ -233,7 +276,7 @@ class PartituraEditor {
                 this.currentData[index][type] = input.value;
             }
 
-            input.dataset.handled = "true"; // Sinaliza para o onblur que já foi salvo
+            input.dataset.handled = "true";
             try {
                 input.parentNode.removeChild(input);
             } catch (e) { }
@@ -242,13 +285,9 @@ class PartituraEditor {
 
     setChordToCurrentNote(chord) {
         if (this.persistentSelectedIndex >= 0 && this.persistentSelectedIndex < this.currentData.length) {
-            this.commitInput(); // Força o salvamento de qualquer caixinha aberta
-
-            // Atualiza o acorde da nota selecionada
+            this.commitInput();
             this.currentData[this.persistentSelectedIndex].chord = chord;
             this.draw(this.editIframe, true);
-
-            // Reabre o input na partitura com foco, para você poder adicionar um baixo (ex: bater no 'C' e no teclado adicionar o '/E')
             this.showInlineInput('chord');
         }
     }
@@ -258,6 +297,9 @@ class PartituraEditor {
         let novoIndex = this.persistentSelectedIndex + direcao;
         if (novoIndex >= 0 && novoIndex < this.currentData.length) {
             this.persistentSelectedIndex = novoIndex;
+            // Move a seleção junto com a navegação normal
+            this.selectionStart = novoIndex;
+            this.selectionEnd = novoIndex;
             this.draw(this.editIframe, true);
             this.centralizarNoCursor();
         }
@@ -272,7 +314,7 @@ class PartituraEditor {
         let novoIndex = index + direcao;
         if (novoIndex >= 0 && novoIndex < this.basePitches.length) {
             this.currentData[this.persistentSelectedIndex].notes = [this.basePitches[novoIndex]];
-            this.lastUsedPitch = this.basePitches[novoIndex]; // <- adicionar
+            this.lastUsedPitch = this.basePitches[novoIndex];
             this.draw(this.editIframe, true);
         }
     }
@@ -282,9 +324,6 @@ class PartituraEditor {
     }
 
     centralizarDestaque() {
-        // No modo visualização, precisamos pegar a posição da nota pelo index do highlight
-        // Re-usa noteXPositions pois draw() sempre atualiza quando isEditable=true,
-        // então guardamos também as posições no modo view
         this._centralizarEm(this.viewIframe, this.viewNoteXPositions?.[this.highlightIndex]);
     }
 
@@ -293,7 +332,6 @@ class PartituraEditor {
         const win = iframe.contentWindow;
         if (!win) return;
 
-        // Coloca a nota a ~35% da largura do iframe (levemente à esquerda do centro)
         const offset = iframe.clientWidth * 0.35;
         win.scrollTo({
             left: noteX - offset,
@@ -301,15 +339,17 @@ class PartituraEditor {
         });
     }
 
-    // Adicione este método na classe PartituraEditor
-    abrirEditor() {
-        // Se não houver dados carregados, inicializa com um vazio
-        if (!this.currentData || this.currentData.length === 0) {
-            this.currentData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false }];
+    abrirEditor(dataArray = []) {
+        if (!dataArray || dataArray.length === 0) {
+            this.currentData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false }];
+        } else {
+            this.currentData = dataArray.map(l => this.normalizeItem(l));
         }
 
-        // Define o cursor na última nota
         this.persistentSelectedIndex = this.currentData.length - 1;
+        this.selectionStart = this.persistentSelectedIndex;
+        this.selectionEnd = this.persistentSelectedIndex;
+
         this.onEditDrawn = () => this.bindClickNotasEditor();
         this.draw(this.editIframe, true);
     }
@@ -318,7 +358,6 @@ class PartituraEditor {
         const doc = this.editIframe.contentDocument;
         if (!doc) return;
 
-        // Remove listener anterior se existir
         if (this._editClickHandler) {
             doc.removeEventListener('click', this._editClickHandler);
         }
@@ -331,13 +370,20 @@ class PartituraEditor {
             const index = notas.indexOf(notaEl);
             if (index === -1) return;
 
+            // Shift + Clique: seleciona o intervalo do ponto inicial ao clicado
+            if (e.shiftKey) {
+                this.selectionEnd = index;
+            } else {
+                this.selectionStart = index;
+                this.selectionEnd = index;
+            }
+
             this.persistentSelectedIndex = index;
             this.draw(this.editIframe, true);
         };
 
         doc.addEventListener('click', this._editClickHandler);
 
-        // Cursor pointer via CSS (só uma vez)
         if (!doc.getElementById('nota-cursor-style')) {
             const style = doc.createElement('style');
             style.id = 'nota-cursor-style';
@@ -346,10 +392,53 @@ class PartituraEditor {
         }
     }
 
+    copySelectedRange() {
+        const start = this.selectionStart ?? this.persistentSelectedIndex ?? 0;
+        const end = this.selectionEnd ?? this.persistentSelectedIndex ?? 0;
+        const minSel = Math.min(start, end);
+        const maxSel = Math.max(start, end);
+
+        // Clona de forma profunda os objetos do intervalo selecionado
+        this.copiedNotesBuffer = this.currentData.slice(minSel, maxSel + 1).map(item => ({
+            notes: [...item.notes],
+            chord: item.chord,
+            lyric: item.lyric,
+            bar: item.bar,
+            rest: item.rest,
+            tie: item.tie
+        }));
+    }
+
+    pasteCopiedRange() {
+        if (!this.copiedNotesBuffer || this.copiedNotesBuffer.length === 0) return;
+        this.commitInput();
+
+        // Clona o buffer para que múltiplas colagens não interfiram uma na outra
+        const clonedPaste = this.copiedNotesBuffer.map(item => ({
+            notes: [...item.notes],
+            chord: item.chord,
+            lyric: item.lyric,
+            bar: item.bar,
+            rest: item.rest,
+            tie: item.tie
+        }));
+
+        const insertIndex = this.persistentSelectedIndex + 1;
+        // Insere o trecho copiado imediatamente após o cursor
+        this.currentData.splice(insertIndex, 0, ...clonedPaste);
+
+        // Desloca a seleção visual para o trecho recém-colado
+        this.selectionStart = insertIndex;
+        this.selectionEnd = insertIndex + clonedPaste.length - 1;
+        this.persistentSelectedIndex = this.selectionEnd;
+
+        this.draw(this.editIframe, true);
+        this.centralizarNoCursor();
+    }
+
     renderizarVisualizacao(dataArray = []) {
         this.currentData = dataArray.map(l => this.normalizeItem(l));
         this.draw(this.viewIframe, false);
-        // Notifica quem quiser bindar cliques após o draw
         if (this.onViewDrawn) this.onViewDrawn();
     }
 
@@ -358,8 +447,9 @@ class PartituraEditor {
         return this.currentData.map(d => {
             let s = d.chord ? `[${d.chord}]` : "";
             s += d.notes.join(",");
+            if (d.tie) s += '~';
             if (d.lyric) s += `@${d.lyric}`;
-            if (d.rest) s = 'R|' + s; // prefixo R indica pausa
+            if (d.rest) s = 'R|' + s;
             if (d.bar) s += `|`;
             return s;
         }).join('\n');
@@ -367,22 +457,27 @@ class PartituraEditor {
 
     normalizeItem(item) {
         let str = String(item).trim();
-        let chord = "", lyric = "", bar = false, rest = false;
-        // No normalizeItem, detectar o prefixo:
+        let chord = "", lyric = "", bar = false, rest = false, tie = false;
+
         if (str.startsWith('R|')) { rest = true; str = str.slice(2); }
-        if (str.startsWith('[')) {
-            let closeIdx = str.indexOf(']');
-            if (closeIdx !== -1) { chord = str.substring(1, closeIdx); str = str.substring(closeIdx + 1); }
-        }
         if (str.endsWith('|')) { bar = true; str = str.slice(0, -1); }
+
         if (str.includes('@')) {
             let parts = str.split('@');
             lyric = parts[1]; str = parts[0];
         }
+
+        if (str.endsWith('~')) { tie = true; str = str.slice(0, -1); }
+
+        if (str.startsWith('[')) {
+            let closeIdx = str.indexOf(']');
+            if (closeIdx !== -1) { chord = str.substring(1, closeIdx); str = str.substring(closeIdx + 1); }
+        }
+
         let notes = str.split(',').map(n => n.trim());
         if (notes.length === 1 && notes[0] === "") notes = ["b/4"];
-        // No normalizeItem, adicionar ao retorno:
-        return { notes, chord, lyric, bar, rest };
+
+        return { notes, chord, lyric, bar, rest, tie };
     }
 
     draw(iframe, isEditable) {
@@ -394,18 +489,17 @@ class PartituraEditor {
         const isDark = document.body.classList.contains('dark-mode');
         doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
 
-        const notaEspacamento = 80; 
+        const notaEspacamento = 80;
         const width = Math.max(iframe.clientWidth - 80, this.currentData.length * notaEspacamento);
         const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
 
-        // 3. AJUSTE DE ALTURA DO RENDERER
         renderer.resize(width, 400);
         const context = renderer.getContext();
 
-        // 4. POSIÇÃO DA PAUTA (Stave) NO IFRAME
-        // y: 20 para ficar bem no topo, mas deixar espaço para cifras
         const stave = new this.vf.Stave(10, 40, width - 20);
         stave.addClef("treble").setContext(context).draw();
+
+        const staveNotesRef = [];
 
         const tickables = this.currentData.flatMap((data, index) => {
             const note = new this.vf.StaveNote({
@@ -413,7 +507,8 @@ class PartituraEditor {
                 duration: data.rest ? "qr" : "q"
             });
 
-            // Só adiciona acidentes se NÃO for pausa
+            staveNotesRef.push({ noteObj: note, dataObj: data });
+
             if (!data.rest) {
                 data.notes.forEach((keyName, i) => {
                     const match = keyName.match(/([a-g])([#b])\//i);
@@ -425,20 +520,47 @@ class PartituraEditor {
             if (data.lyric) {
                 note.addModifier(new this.vf.Annotation(data.lyric).setFont('Serif', 12, 'italic').setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
             }
-            if (isEditable && index === this.persistentSelectedIndex) {
-                note.setStyle({ fillStyle: "green", strokeStyle: "green" });
-            }
-            // NOVO: Destaque de reprodução (Modo Visualização)
-            else if (!isEditable && index === this.highlightIndex) {
+
+            // Renderiza Destaque Visual no Editor para intervalo de Seleção
+            if (isEditable) {
+                const start = this.selectionStart ?? this.persistentSelectedIndex ?? 0;
+                const end = this.selectionEnd ?? this.persistentSelectedIndex ?? 0;
+                const minSel = Math.min(start, end);
+                const maxSel = Math.max(start, end);
+
+                if (index >= minSel && index <= maxSel) {
+                    if (index === this.persistentSelectedIndex) {
+                        // Nota Foco/Cursor (Verde)
+                        note.setStyle({ fillStyle: "green", strokeStyle: "green" });
+                    } else {
+                        // Outras Notas do Intervalo Selecionado (Azul/Ciano)
+                        note.setStyle({ fillStyle: "#17a2b8", strokeStyle: "#17a2b8" });
+                    }
+                }
+            } else if (!isEditable && index === this.highlightIndex) {
                 note.setStyle({ fillStyle: "#007bff", strokeStyle: "#007bff" });
             }
             return data.bar ? [note, new this.vf.BarNote()] : [note];
         });
 
+        const tiesToDraw = [];
+        for (let i = 0; i < staveNotesRef.length - 1; i++) {
+            if (staveNotesRef[i].dataObj.tie) {
+                tiesToDraw.push(new this.vf.StaveTie({
+                    first_note: staveNotesRef[i].noteObj,
+                    last_note: staveNotesRef[i + 1].noteObj,
+                    first_indices: [0],
+                    last_indices: [0]
+                }));
+            }
+        }
+
         const voice = new this.vf.Voice({ num_beats: this.currentData.length, beat_value: 4 }).setStrict(false);
         voice.addTickables(tickables);
         new this.vf.Formatter().joinVoices([voice]).format([voice], width - 100);
         voice.draw(context, stave);
+
+        tiesToDraw.forEach(t => t.setContext(context).draw());
 
         if (isEditable) {
             this.noteXPositions = tickables.filter(t => t instanceof this.vf.StaveNote).map(n => n.getAbsoluteX());
@@ -455,36 +577,30 @@ class PartituraEditor {
         if (semitones === 0) return;
 
         this.currentData = this.currentData.map(item => {
-            // Criamos uma cópia do item para não alterar o original diretamente
             let newItem = { ...item };
 
-            // 1. Transpõe as notas melódicas APENAS se NÃO for pausa
             if (!item.rest) {
                 newItem.notes = item.notes.map(n => {
-                const idx = this.basePitches.indexOf(n);
-                if (idx === -1) return n;
-                const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
-                return this.basePitches[novoIdx];
-            });
+                    const idx = this.basePitches.indexOf(n);
+                    if (idx === -1) return n;
+                    const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
+                    return this.basePitches[novoIdx];
+                });
             }
 
-            // 2. Transpõe a cifra harmônica SEMPRE (mesmo se for rest: true)
             if (item.chord) {
-            let chord = item.chord;
+                let chord = item.chord;
                 const partes = chord.split('/');
                 const principal = partes[0];
 
-                // Extrai a tônica (ex: "Am7" -> "A", "C#m" -> "C#")
                 const match = principal.match(/^([A-G][#b]?)(.*)/);
                 if (match) {
                     const tonica = match[1];
                     const resto = match[2];
 
-                    // Transpõe a tônica principal
                     const tonicaTransposta = this.musicTheory.transposeAcorde(tonica, semitones, null);
                     chord = tonicaTransposta + resto;
 
-                    // Transpõe o baixo se houver (ex: "G/B")
                     if (partes[1]) {
                         const baixoMatch = partes[1].match(/^([A-G][#b]?)(.*)/);
                         if (baixoMatch) {
@@ -499,7 +615,6 @@ class PartituraEditor {
             return newItem;
         });
 
-        // Redesenha o iframe de visualização com os dados novos
         this.draw(this.viewIframe, false);
         if (this.onViewDrawn) this.onViewDrawn();
     }
@@ -507,32 +622,59 @@ class PartituraEditor {
     addNewNote() {
         this.commitInput();
         this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
-            notes: [this.lastUsedPitch], // <- era "b/4" fixo
+            notes: [this.lastUsedPitch],
             chord: "",
             lyric: "",
             bar: false,
-            rest: false
+            rest: false,
+            tie: false
         });
         this.persistentSelectedIndex++;
+        
+        this.selectionStart = this.persistentSelectedIndex;
+        this.selectionEnd = this.persistentSelectedIndex;
+
         this.draw(this.editIframe, true);
         this.centralizarNoCursor();
     }
 
+    addRest() {
+        this.commitInput();
+        this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
+            notes: ["b/4"],
+            chord: "",
+            lyric: "",
+            bar: false,
+            rest: true,
+            tie: false
+        });
+        this.persistentSelectedIndex++;
+        
+        this.selectionStart = this.persistentSelectedIndex;
+        this.selectionEnd = this.persistentSelectedIndex;
+
+        this.draw(this.editIframe, true);
+        this.centralizarNoCursor();
+    }
+
+    toggleTie() {
+        if (this.persistentSelectedIndex === -1 || this.persistentSelectedIndex >= this.currentData.length - 1) return;
+        this.currentData[this.persistentSelectedIndex].tie = !this.currentData[this.persistentSelectedIndex].tie;
+        this.draw(this.editIframe, true);
+    }
+
     deleteNoteAtCursor() {
-        if (this.currentData.length < 1) return;
-
-        const nota = this.currentData[this.persistentSelectedIndex];
-
-        if (!nota.rest) {
-            // Primeiro clique: vira pausa
-            nota.rest = true;
+        if (this.currentData.length <= 1) {
+            this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false };
         } else {
-            // Segundo clique: deleta
             this.currentData.splice(this.persistentSelectedIndex, 1);
             if (this.persistentSelectedIndex >= this.currentData.length) {
                 this.persistentSelectedIndex = this.currentData.length - 1;
             }
         }
+        
+        this.selectionStart = this.persistentSelectedIndex;
+        this.selectionEnd = this.persistentSelectedIndex;
 
         this.draw(this.editIframe, true);
     }

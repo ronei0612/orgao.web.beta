@@ -84,12 +84,14 @@ class PartituraPlayer {
             this.cifraPlayer.tocarAcorde(data.chord);
         }
 
+        //const previousData = this.partituraEditor.currentData[this.partituraPlaybackIndex - 1];
+        //if (!data.rest && !(previousData && previousData.tie)) {
+        // TODO: verificar se a nota anterior tem ligadura e se é a mesma nota para não tocar a nota atual
         if (!data.rest) {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
                 const notaLimpa = nota.toLowerCase().replace('#', '_');
 
-                // Correção 2: Busca o buffer real da memória
                 const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
                 const buffer = this.buffers.get(bufferName);
 
