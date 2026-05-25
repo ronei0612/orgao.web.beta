@@ -73,16 +73,11 @@ class PartituraPlayer {
         this.buffers = await this.audioManager.loadBuffers(urls);
     }
 
-    stopNotes() {
-        this.audioManager.stopAll(this.activeSources, 0.02);
-        //this.activeSources.clear(); // Não limpar — o onended de cada nó remove do Set automaticamente
-    }
-
     tocarNotaAtualPartitura(volume = 1) {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
-        this.stopNotes(); // Correção 1: Usa a função certa para limpar a nota anterior
+        this.audioManager.stopAll(this.activeSources, 0.02);
 
         // Toca o acorde ANTES para compensar o attack do órgão
         if (data.chord) {

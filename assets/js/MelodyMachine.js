@@ -138,11 +138,6 @@
         }
     }
 
-    stopNotes(time) {
-        this.audioManager.stopAll(this.activeSources, 0.1, time); // <- passa time
-        //this.activeSources.clear(); // Não limpar o Set aqui — o onended de cada nó cuida disso
-    }
-
     nextNote() {
         const secondsPerQuarterNote = 60.0 / this.musicTheory.bpm;
         const secondsPerStep = secondsPerQuarterNote / 2;
@@ -194,7 +189,7 @@
         // 2. Lógica de início de compasso (Tempo 1)
         if (iniciouNovoAcorde) {
             // Para as notas do compasso anterior com release
-            this.stopNotes(this.nextNoteTime);
+            this.audioManager.stopAll(this.activeSources, 0.1, this.nextNoteTime);
 
             // Toca a nota grave (pedaleira) respeitando a inversão/baixo do acorde (ex: C/E -> toca E grave)
             let notaGraveNome = null;
@@ -273,7 +268,7 @@
         this.currentStep = 1;
         this.nextNoteTime = this.audioContext.currentTime;
 
-        this.stopNotes(this.nextNoteTime);
+        this.audioManager.stopAll(this.activeSources, 0.1, this.nextNoteTime);
 
         this.refreshTrackCache();
         if (this.timerInterval) clearInterval(this.timerInterval);
@@ -288,7 +283,7 @@
         }
 
         if (stopAll)
-            this.stopNotes(this.audioContext.currentTime);
+            this.audioManager.stopAll(this.activeSources, 0.1, this.audioContext.currentTime);
 
         this.reset();
     }

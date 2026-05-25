@@ -576,7 +576,7 @@ class App {
         this.uiController.esconderEditDeleteButtons();
 
         this.partituraPlayer.partituraPlaybackIndex = -1;
-        this.partituraPlayer.stopNotes();
+        this.audioManager.stopAll(this.activeSources, 0.02);
 
         this.uiController.habilitarSelectSaves(); // Reabilita opções e edições ao parar partitura
 
