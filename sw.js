@@ -1,4 +1,4 @@
-const version = '6.0.6';
+const version = '6.0.5';
 const CACHE_NAME = 'cifra-app-cache-' + version;
 
 const urlsToCache = [
@@ -37,6 +37,7 @@ const urlsToCache = [
     './assets/icons/v2/avancar.svg',
     './assets/icons/menu.svg',
     './assets/icons/dash-lg.svg',
+    './assets/icons/dash.svg',
     './assets/icons/plus-lg.svg',
     './assets/icons/plus.svg',
     './assets/icons/check.svg',

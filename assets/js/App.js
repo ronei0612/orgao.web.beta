@@ -32,7 +32,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.6',
+            version: '6.0.5',
             htmlMessage: `
                 <p>Melhorias</p>
 
@@ -1400,7 +1400,16 @@ class App {
     }
 
     setupServiceWorker() {
+        // Registrar Service Worker apenas em origens seguras (https) ou localhost.
         if ('serviceWorker' in navigator) {
+            const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            const isSecureProtocol = location.protocol === 'https:';
+
+            if (!isSecureProtocol && !isLocalhost) {
+                console.log('Service Worker registration skipped: insecure or unsupported origin', location.protocol, location.hostname, location.origin);
+                return;
+            }
+
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then(registration => {
