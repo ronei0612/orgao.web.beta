@@ -179,23 +179,21 @@ self.addEventListener('install', event => {
         caches.open(CACHE_NAME).then(async cache => {
             console.log('[SW] Iniciando cache de arquivos...');
 
-            // Adiciona um por um para sabermos qual falha
             for (const url of urlsToCache) {
                 try {
                     const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error(`Status ${response.status}`);
-                    }
+                    if (response.ok) {
                     await cache.put(url, response);
+                    } else {
+                        console.warn(`[SW AVISO] Arquivo não encontrado (Ignorado): ${url}`);
+                    }
                 } catch (error) {
-                    console.error(`[SW FALHA] Não foi possível cachear: ${url} - Erro: ${error.message}`);
-                    // Opcional: Se quiser que o app funcione mesmo faltando arquivos, 
-                    // remova o 'return Promise.reject' abaixo. 
-                    // Mas o ideal é manter para saber que algo está errado.
-                    return Promise.reject(error);
+                    // CORREÇÃO: Removemos o Promise.reject()
+                    // Se um falhar, apenas avisa e CONTINUA a instalar os outros!
+                    console.error(`[SW FALHA DE REDE] Erro ao buscar: ${url}`, error);
                 }
             }
-            console.log('[SW] Todos os arquivos foram cacheados com sucesso!');
+            console.log('[SW] Processo de cache inicial concluído!');
         })
     );
 });
@@ -214,7 +212,7 @@ self.addEventListener('activate', event => {
             );
         })
     );
-    return self.clients.claim(); // Sugestão: Assegura que o SW ativado controle os clientes imediatamente
+    return self.clients.claim();
 });
 
 // Evento de Fetch: Intercepta todas as requisições da página.
