@@ -217,31 +217,24 @@ self.addEventListener('activate', event => {
 
 // Evento de Fetch: Intercepta todas as requisições da página.
 self.addEventListener('fetch', event => {
+    // Apenas intercepta requisições GET
     if (event.request.method !== 'GET') return;
 
     event.respondWith(
-        caches.match(event.request).then(cachedResponse => {
-            // 1. Tem no cache? Retorna imediatamente (Funciona offline)
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-
-            // 2. Não tem? Busca na rede
-            return fetch(event.request).then(networkResponse => {
-                // CORREÇÃO: Se a busca deu certo, armazena no cache para a próxima vez!
-                // Isso garante que Flauta, Bateria e Epiano fiquem offline após o 1º uso
-                if (networkResponse && networkResponse.status === 200) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, responseToCache);
-                    });
+        caches.match(event.request)
+            .then(response => {
+                // Se encontrou no cache, retorna.
+                if (response) {
+                    return response;
                 }
 
-                return networkResponse;
-            }).catch(error => {
-                console.warn('[SW] Offline/Falha de rede para o recurso:', event.request.url);
-                // Como não tem alert() aqui, o app apenas não toca o som se não tiver internet e não estiver no cache
-            });
-        })
+                // Se não encontrou, vai para a internet buscar.
+                return fetch(event.request).catch(error => {
+                    // Sugestão: Trata a falha de rede (usuário offline tentando um recurso não cacheado)
+                    console.warn('[SW] Falha ao buscar recurso na rede:', event.request.url, error);
+                    // Opcional: Aqui você pode retornar uma página de fallback, se necessário.
+                    // Ex: return caches.match('/offline.html');
+                });
+            })
     );
 });
