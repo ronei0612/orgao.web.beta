@@ -1,4 +1,4 @@
-const version = '6.0.5';
+const version = '6.0.6';
 const CACHE_NAME = 'cifra-app-cache-' + version;
 
 const urlsToCache = [
@@ -169,6 +169,7 @@ self.addEventListener('install', event => {
                     }
                     await cache.put(url, response);
                 } catch (error) {
+                    alert(`[SW FALHA] Não foi possível cachear: ${url}\nErro: ${error.message}`);
                     console.error(`[SW FALHA] Não foi possível cachear: ${url} - Erro: ${error.message}`);
                     // Opcional: Se quiser que o app funcione mesmo faltando arquivos, 
                     // remova o 'return Promise.reject' abaixo. 
