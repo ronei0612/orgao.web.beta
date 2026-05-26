@@ -27,6 +27,9 @@ const urlsToCache = [
     './assets/js/CifrasEditor.js',
     './assets/lib/js/Jquery/3.5.1/jquery.min.js',
     './assets/lib/js/Bootstrap/4.6.2/bootstrap.min.js',
+    './assets/lib/js/Popper.js/1.14.7/popper.min.js',
+    './assets/lib/js/Select2/4.1.0-rc.0/select2.min.js',
+    './assets/lib/js/Vexflow/4.2.5/vexflow.js',
 
     './santamissa.html',
     './oracoes.html',

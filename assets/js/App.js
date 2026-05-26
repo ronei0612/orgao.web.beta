@@ -1430,9 +1430,13 @@ class App {
     }
 
     warmupApi() {
-        fetch(this.API_BASE_URL + '/')
-            .then(response => response.json())
-            .catch(() => console.log("API Warmup failed/ignored."));
+        try {
+            fetch(this.API_BASE_URL + '/')
+                .then(response => response.json())
+                .catch(() => console.log("API Warmup failed/ignored."));
+        } catch (err) {
+            console.log("API Warmup failed/ignored.", err.message);
+        }
     }
 
     setupDarkMode() {
