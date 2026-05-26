@@ -239,6 +239,7 @@ class App {
     }
 
     async exibirSobre() {
+        alert('Sobre');
         const logs = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || '[]');
 
         const logsHtml = logs.length > 0
