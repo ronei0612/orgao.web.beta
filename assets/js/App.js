@@ -649,6 +649,8 @@ class App {
         if (this.cifraPlayer.instrumento === 'orgao') {
             this.cifraPlayer.instrumento = 'epiano';
 
+            await this.cifraPlayer.loadEpianoSounds();
+
             if (!this.bateriaUI._initialized) {
                 await this.drumMachine.init(); // carrega styles.json + sons
                 await this.bateriaUI.init();   // constrói UI + bindEvents
@@ -697,6 +699,7 @@ class App {
 
             if (saveData.instrument === 'epiano' && !this.bateriaUI._initialized) {
                 await this.drumMachine.init();
+                await this.cifraPlayer.loadEpianoSounds();
                 await this.bateriaUI.init();
                 this.bateriaUI._initialized = true;
             }

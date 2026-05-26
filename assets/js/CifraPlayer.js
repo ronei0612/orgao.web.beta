@@ -41,6 +41,7 @@ class CifraPlayer {
         };
 
         this.loadSounds();
+        this.epianoLoaded = false;
     }
 
     /**
@@ -155,7 +156,7 @@ class CifraPlayer {
 
     async loadSounds() {
         const urls = {};
-        const instrumentos = ['orgao', 'strings', 'epiano'];
+        const instrumentos = ['orgao', 'strings'];
         const oitavas = ['grave', 'baixo', ''];
 
         instrumentos.forEach(instrumento => {
@@ -176,6 +177,27 @@ class CifraPlayer {
         if (this.onInstrumentosCarregados) {
             this.onInstrumentosCarregados();
         }
+    }
+
+    async loadEpianoSounds() {
+        if (this.epianoLoaded) return;
+
+        const urls = {};
+        const instrumento = 'epiano';
+        const oitavas = ['grave', 'baixo', ''];
+
+        this.musicTheory.notas.forEach(nota => {
+            oitavas.forEach(oitava => {
+                const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
+                const path = `${this.audioPath}${instrumento.charAt(0).toUpperCase() + instrumento.slice(1)}/${key}.ogg`;
+                urls[key] = path;
+            });
+        });
+
+        const epianoBuffers = await this.audioManager.loadBuffers(urls);
+        // Mescla no Map existente
+        epianoBuffers.forEach((buf, key) => this.buffers.set(key, buf));
+        this.epianoLoaded = true;
     }
 
     getVolumeForNote(notaKey) {
