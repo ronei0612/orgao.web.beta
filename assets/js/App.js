@@ -32,7 +32,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.4',
+            version: '6.0.5',
             htmlMessage: `
                 <p>Melhorias</p>
 
@@ -63,7 +63,7 @@ class App {
         this.showVersionAlert();
         this.setupServiceWorker();
         this.loadCifrasLocal();
-        this.warmupApi();
+        //this.warmupApi();
         this.setupDarkMode();
         this.migrateLocalStorageSaves();
         this.uiController.exibirListaSaves();
