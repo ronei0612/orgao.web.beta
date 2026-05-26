@@ -1,4 +1,4 @@
-const version = '6.0.3';
+const version = '6.0.4';
 const CACHE_NAME = 'cifra-app-cache-' + version;
 
 const urlsToCache = [
@@ -54,7 +54,6 @@ const urlsToCache = [
     './assets/icons/music-note-beamed.svg',
     './assets/icons/x-circle.svg',
     './assets/icons/search.svg',
-    './assets/icons/check.svg',
 
     './assets/audio/Orgao/orgao_a.ogg',
     './assets/audio/Orgao/orgao_a_.ogg',
