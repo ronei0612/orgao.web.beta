@@ -10,10 +10,11 @@ class PartituraPlayer {
         this.audioManager = audioManager;
         this.audioContext = audioManager.audioContext; 
         this.activeSources = new Set();
-        this.init();
+        this._initialized = false;
     }
 
     async init() {
+        if (this._initialized) return;
         await this.loadSounds();
 
         // Registra callback para bindar cliques sempre que a visualização for redesenhada

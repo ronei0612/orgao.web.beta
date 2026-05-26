@@ -239,7 +239,6 @@ class App {
     }
 
     async exibirSobre() {
-        alert('Sobre');
         const logs = JSON.parse(localStorage.getItem(LOG_STORAGE_KEY) || '[]');
 
         const logsHtml = logs.length > 0
@@ -487,8 +486,7 @@ class App {
             this.uiController.editarMusica(tipo);
 
             if (tipo === 'partitura') {
-                // 4. Inicializa o editor gráfico limpo
-                // Passamos um array vazio [] para o PartituraEditor colocar a nota padrão (b/4)
+                if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
                 this.partituraEditor.abrirEditor([]);
             } else {
                 // Limpa o editor de texto normal
@@ -519,6 +517,7 @@ class App {
         this.uiController.editarMusica(tipo);
 
         if (tipo === 'partitura') {
+            if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
             const dataArray = saveData.chords.split('\n').filter(l => l.trim());
             this.partituraEditor.abrirEditor(dataArray);
         } else {
@@ -742,9 +741,9 @@ class App {
 
             this.partituraOriginalKey = saveData.key || 'C';
             this.cifraPlayer.tomOriginal = this.partituraOriginalKey;
-
-            // Atualiza o tomSelect com o tom salvo
             this.elements.tomSelect.value = this.partituraOriginalKey;
+
+            if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
 
             this.partituraEditor.renderizarVisualizacao(dataArray);
             this.uiController.exibirBotoesCifras();
