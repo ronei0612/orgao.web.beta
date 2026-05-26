@@ -24,42 +24,6 @@ class AudioContextManager {
 
 		this.buffers = {};
 		this.instrumentSettings = {};
-		this.gainNodes = [];
-	}
-
-	/**
-	 * Carrega todos os instrumentos (arquivos de áudio) na memória (buffers).
-	 * @param {Object<string, {url: string, volume: number}>} urlsMap Um objeto mapeando o nome da nota para um objeto com a URL e o volume desejado (0.0 a 1.0).
-	 * @returns {Promise<void>} Uma Promise que resolve quando todos os arquivos são carregados.
-	 */
-	async loadInstruments(urlsMap) {
-		const noteKeys = Object.keys(urlsMap);
-
-		// Limpa buffers e configurações anteriores
-		this.buffers = {};
-		this.instrumentSettings = {};
-
-		const loadingPromises = noteKeys.map(key => {
-			const { url, volume = 1 } = urlsMap[key];
-			this.instrumentSettings[key] = { volume };
-
-			return fetch(url)
-				.then(response => {
-					if (!response.ok) {
-						throw new Error(`HTTP error! status: ${response.status} for ${url}`);
-					}
-					return response.arrayBuffer();
-				})
-				.then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
-				.then(audioBuffer => {
-					this.buffers[key] = audioBuffer;
-				})
-				.catch(error => {
-					console.error(`Erro ao carregar ${key} (URL: ${url}): ${error}`);
-				});
-		});
-
-		await Promise.all(loadingPromises);
 	}
 
 	/**
@@ -77,7 +41,7 @@ class AudioContextManager {
 		if (!buffer) return null;
 		if (this.audioContext.state === 'suspended') this.audioContext.resume();
 
-		const startTime = time || this.audioContext.currentTime;
+		const startTime = (time != null && time > 0) ? time : this.audioContext.currentTime;
 		const source = this.audioContext.createBufferSource();
 		const gainNode = this.audioContext.createGain();
 
@@ -153,5 +117,28 @@ class AudioContextManager {
 		toStop.forEach(node => {
 			this.stopNode(node, stopTime, release); // Passa o stopTime adiante
 		});
+	}
+
+    /**
+	 * Carrega múltiplos buffers de áudio a partir de um mapa de URLs paralelamente.
+	 * @param {Object<string, string|{url: string, volume: number}>} urlsMap Um objeto mapeando chaves para URLs ou objetos com URL e volume.
+	 * @return {Promise<Map<string, AudioBuffer>>} Uma Promise que resolve para um Map de chaves e seus respectivos AudioBuffers.
+	 * @see loadInstruments para um método mais específico de carregamento de instrumentos com configurações de volume.
+	 * @throws {Error} Se ocorrer um erro durante o carregamento ou decodificação de um buffer, ele será registrado no console, mas não interromperá o processo de carregamento dos outros buffers.
+	 * @returns {Promise<Map<string, AudioBuffer>>} Um Map contendo as chaves e seus respectivos AudioBuffers carregados com sucesso.
+	 * */
+	async loadBuffers(urlsMap) {
+		// urlsMap: { chave: url } ou { chave: { url, volume } }
+		const result = new Map();
+		const promises = Object.entries(urlsMap).map(([key, value]) => {
+			const url = typeof value === 'string' ? value : value.url;
+			return fetch(url)
+				.then(r => r.ok ? r.arrayBuffer() : null)
+				.then(ab => ab ? this.audioContext.decodeAudioData(ab) : null)
+				.then(buf => { if (buf) result.set(key, buf); })
+				.catch(() => console.warn(`Buffer não carregado: ${key}`));
+		});
+		await Promise.all(promises);
+		return result;
 	}
 }

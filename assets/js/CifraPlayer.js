@@ -40,7 +40,7 @@ class CifraPlayer {
             }
         };
 
-        this.carregarAcordes();
+        this.loadSounds();
     }
 
     /**
@@ -153,30 +153,40 @@ class CifraPlayer {
         return this.musicTheory.notasAcordes.includes(acorde.split('/')[0]) ? `<b id="cifra${cifraNum}">${acorde}</b>` : palavra;
     }
 
-    carregarAcordes() {
-        const urlsDict = {};
+    async loadSounds() {
+        const urls = {};
         const instrumentos = ['orgao', 'strings', 'epiano'];
         const oitavas = ['grave', 'baixo', ''];
-        const notas = this.musicTheory.notas;
 
         instrumentos.forEach(instrumento => {
-            notas.forEach(nota => {
+            this.musicTheory.notas.forEach(nota => {
                 oitavas.forEach(oitava => {
                     const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
                     const path = `${this.audioPath}${instrumento.charAt(0).toUpperCase() + instrumento.slice(1)}/${key}.ogg`;
-                    const oitavaKey = oitava === '' ? 'agudo' : oitava;
-                    const volume = this.VOLUME_CONFIG[oitavaKey]?.[instrumento] ?? 1.0;
 
-                    urlsDict[key] = { url: path, volume: volume };
+                    // O loadBuffers aceita string direta
+                    urls[key] = path;
                 });
             });
         });
 
-        this.audioManager.loadInstruments(urlsDict).then(() => {
-            if (this.onInstrumentosCarregados) {
-                this.onInstrumentosCarregados();
-            }
-        });
+        // Agora o CifraPlayer gerencia seu próprio Map de buffers!
+        this.buffers = await this.audioManager.loadBuffers(urls);
+
+        if (this.onInstrumentosCarregados) {
+            this.onInstrumentosCarregados();
+        }
+    }
+
+    getVolumeForNote(notaKey) {
+        // Ex de notaKey: "strings_c_baixo" ou "orgao_d"
+        const parts = notaKey.split('_');
+        const instrumento = parts[0];
+
+        // Se a nota não tem terceira parte, significa que é 'agudo' (vazio no array original)
+        const oitava = parts.length > 2 ? parts[2] : 'agudo';
+
+        return this.VOLUME_CONFIG[oitava]?.[instrumento] ?? 1.0;
     }
 
     transposeCifra() {
@@ -329,23 +339,22 @@ class CifraPlayer {
     }
 
     epianoPlay() {
-        // 1. Corta o som do acorde anterior suavemente (igual o stop antigo fazia)
+        // Corta o som do acorde anterior suavemente
         this.audioManager.stopAll(this.activeSources, 0.2);
-        this.activeSources.clear();
 
-        // 2. Une os dois grupos (órgão, strings e epiano)
+        // Une os dois grupos (órgão, strings e epiano)
         const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
         const now = this.audioManager.audioContext.currentTime;
 
-        // 3. Toca cada nota enviando para o playNode unificado
         notasParaTocar.forEach(note => {
-            const buffer = this.audioManager.buffers[note];
+            // Busca do Map de buffers da PRÓPRIA classe
+            const buffer = this.buffers.get(note);
             if (!buffer) return;
 
-            const isLoop = !note.startsWith('epiano'); // Epiano morre sozinho, órgão/strings faz loop
-            const volume = this.audioManager.instrumentSettings[note]?.volume || 1;
+            const isLoop = !note.startsWith('epiano');
+            const volume = this.getVolumeForNote(note); // Usando a lógica local
 
-            // Dispara o som e joga no Set activeSources para controle de memória
+            // Dispara o som
             this.audioManager.playNode(buffer, now, volume, this.attack, isLoop, this.activeSources);
         });
 
@@ -428,21 +437,16 @@ class CifraPlayer {
     pararReproducao() {
         this.pararAcorde();
         const frameContent = this.elements.iframeCifra.contentDocument;
-        const cifraElems = frameContent.getElementsByClassName('cifraSelecionada');
 
-        Array.from(cifraElems).forEach(elemento => {
-            elemento.classList.remove('cifraSelecionada');
-        });
-
+        // Remover o classList remove do cifraSelecionada — foco deve permanecer
+        // Array.from(cifraElems).forEach(elemento => { elemento.classList.remove('cifraSelecionada'); });
 
         const acordeButtons = document.querySelectorAll('button[data-action="acorde"]');
         acordeButtons.forEach(acordeButton => {
             acordeButton.classList.remove('pressed');
         });
 
-        if (this.indiceAcorde > 0) {
-            this.indiceAcorde--;
-        }
+        // REMOVIDO: this.indiceAcorde-- causava double-decrement com o handlePlayMousedown
 
         this.parado = true;
         this.acordeTocando = '';
@@ -502,7 +506,9 @@ class CifraPlayer {
         }
     }
 
-    avancarDestaque() {
+    avancarDestaque(tentativas = 0) {
+        if (tentativas > this.elements_b.length) return; // <- guarda
+
         if (!this.elements_b) return;
         const frameContent = this.elements.iframeCifra.contentDocument;
 
@@ -517,7 +523,7 @@ class CifraPlayer {
                 // Pula elementos vazios (marcadores de linha)
                 if (!cifraElem.innerHTML.trim()) {
                     this.indiceAcorde++;
-                    this.avancarDestaque();
+                    this.avancarDestaque(tentativas + 1); // Tenta avançar de novo, contando a tentativa para evitar loop infinito
                     return;
                 }
                 cifraElem.classList.add('cifraSelecionada');
@@ -532,12 +538,14 @@ class CifraPlayer {
         const frameContent = this.elements.iframeCifra.contentDocument;
 
         if (this.indiceAcorde > 2) {
-            const cifraElem = this.elements_b[this.indiceAcorde - 2];
-            if (cifraElem.innerHTML === '')
-                this.indiceAcorde -= 4;
-            else
-                this.indiceAcorde -= 2;
+            let novoIndex = this.indiceAcorde - 2;
 
+            // Pula elementos vazios para trás
+            while (novoIndex > 0 && !this.elements_b[novoIndex - 1]?.innerHTML.trim()) {
+                novoIndex -= 2;
+            }
+
+            this.indiceAcorde = novoIndex;
             this.removerClasseCifraSelecionada(frameContent);
             const elem = this.elements_b[this.indiceAcorde - 1];
             if (elem) {
@@ -616,24 +624,16 @@ class CifraPlayer {
     }
 
     atualizarVolumeStringsParaEpiano() {
-        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
-            if (key.startsWith('strings_')) {
-                this.audioManager.instrumentSettings[key].volume = 0.9;
-            }
-        });
+        // Altera a fonte da verdade localmente
+        this.VOLUME_CONFIG['grave']['strings'] = 0.9;
+        this.VOLUME_CONFIG['baixo']['strings'] = 0.9;
+        this.VOLUME_CONFIG['agudo']['strings'] = 0.9;
     }
 
     atualizarVolumeStringsParaOrgao() {
-        Object.keys(this.audioManager.instrumentSettings).forEach(key => {
-            if (key.startsWith('strings_')) {
-                if (key.includes('_grave')) {
-                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['grave']['strings'];
-                } else if (key.includes('_baixo')) {
-                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['baixo']['strings'];
-                } else {
-                    this.audioManager.instrumentSettings[key].volume = this.VOLUME_CONFIG['agudo']['strings'];
-                }
-            }
-        });
+        // Restaura a fonte da verdade para o padrão do órgão
+        this.VOLUME_CONFIG['grave']['strings'] = 0.6;
+        this.VOLUME_CONFIG['baixo']['strings'] = 0.5;
+        this.VOLUME_CONFIG['agudo']['strings'] = 0.5;
     }
 }

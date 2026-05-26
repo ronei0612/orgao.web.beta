@@ -38,6 +38,8 @@ class DrumMachine {
 
         // Cache para evitar ler o DOM a cada milissegundo (Performance Crítica)
         this.tracksCache = null;
+        // Rastreio para evitar vazamento de memória e cortar sons ---
+        this.activeSources = new Set();
     }
 
     async init() {
@@ -60,84 +62,36 @@ class DrumMachine {
     }
 
     async loadSounds() {
-        const loadPromises = [];
+        const urls = {};
 
-        this.instruments.forEach(instrument => {
-            if (!instrument.file) return;
-            loadPromises.push((async () => {
-                const response = await fetch(instrument.file);
-                const arrayBuffer = await response.arrayBuffer();
-                const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(instrument.name, audioBuffer);
-
-                if (instrument.somAlternativo) {
-                    const responseAlt = await fetch(instrument.somAlternativo);
-                    const arrayBufferAlt = await responseAlt.arrayBuffer();
-                    const audioBufferAlt = await this.audioContext.decodeAudioData(arrayBufferAlt);
-                    this.buffers.set(instrument.name + '-alt', audioBufferAlt);
-                }
-            })());
+        // Instrumentos principais e alternativos
+        this.instruments.forEach(inst => {
+            if (inst.file) urls[inst.name] = inst.file;
+            if (inst.somAlternativo?.endsWith('.ogg')) {
+                urls[inst.name + '-alt'] = inst.somAlternativo;
+            }
         });
 
-        const notas = this.musicTheory.notas;
-        notas.forEach(nota => {
-            var instrument = 'baixo';
-            const baixoFileName = `${this.audioPath}/${instrument}_${nota}.ogg`;
-            loadPromises.push((async () => {
-                const resp = await fetch(baixoFileName);
-                const arrayBuffer = await resp.arrayBuffer();
-                const buffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(`baixo_${nota}`, buffer);
-            })());
-
-            instrument = 'violao';
-            const violaoFileName = `${this.audioPath}/${instrument}_${nota}.ogg`;
-            loadPromises.push((async () => {
-                const resp = await fetch(violaoFileName);
-                const arrayBuffer = await resp.arrayBuffer();
-                const buffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(`${instrument}-baixo_${nota}`, buffer);
-            })());
-
-            const violao1FileName = `${this.audioPath}/${instrument}_${nota}1.ogg`;
-            loadPromises.push((async () => {
-                const resp = await fetch(violao1FileName);
-                const arrayBuffer = await resp.arrayBuffer();
-                const buffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(`${instrument}-cima_${nota}`, buffer);
-            })());
-
-            const violaoFileNameMenor = `${this.audioPath}/${instrument}_${nota}m.ogg`;
-            loadPromises.push((async () => {
-                const resp = await fetch(violaoFileNameMenor);
-                const arrayBuffer = await resp.arrayBuffer();
-                const buffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(`${instrument}-baixo_${nota}m`, buffer);
-            })());
-
-            const violao1FileNameMenor = `${this.audioPath}/${instrument}_${nota}m1.ogg`;
-            loadPromises.push((async () => {
-                const resp = await fetch(violao1FileNameMenor);
-                const arrayBuffer = await resp.arrayBuffer();
-                const buffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(`${instrument}-cima_${nota}m`, buffer);
-            })());
+        // Baixo, violão e variações
+        this.musicTheory.notas.forEach(nota => {
+            urls[`baixo_${nota}`] = `${this.audioPath}/baixo_${nota}.ogg`;
+            urls[`violao-baixo_${nota}`] = `${this.audioPath}/violao_${nota}.ogg`;
+            urls[`violao-cima_${nota}`] = `${this.audioPath}/violao_${nota}1.ogg`;
+            urls[`violao-baixo_${nota}m`] = `${this.audioPath}/violao_${nota}m.ogg`;
+            urls[`violao-cima_${nota}m`] = `${this.audioPath}/violao_${nota}m1.ogg`;
         });
 
-        const violaoAlt = `${this.audioPath}/violao_.ogg`;
-        const responseViolaoAlt = await fetch(violaoAlt);
-        const arrayBufferViolaoAlt = await responseViolaoAlt.arrayBuffer();
-        const audioBufferViolaoAlt = await this.audioContext.decodeAudioData(arrayBufferViolaoAlt);
-        this.buffers.set('violao-baixo-alt', audioBufferViolaoAlt);
-        this.buffers.set('violao-cima-alt', audioBufferViolaoAlt);
+        // Violão alternativo
+        urls['violao-baixo-alt'] = `${this.audioPath}/violao_.ogg`;
+        urls['violao-cima-alt'] = `${this.audioPath}/violao_.ogg`;
 
-        await Promise.all(loadPromises);
+        this.buffers = await this.audioManager.loadBuffers(urls);
     }
 
     playSound(buffer, time, volume = 1, isChimbalAberto = false) {
         if (!buffer) return;
 
-        const node = this.audioManager.playNode(buffer, time, volume, 0.003, false);
+        const node = this.audioManager.playNode(buffer, time, volume, 0.003, false, this.activeSources);
 
         // Se for chimbal aberto, guardamos o objeto {source, gainNode} retornado
         if (isChimbalAberto && node) {
@@ -151,6 +105,8 @@ class DrumMachine {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
+        this.audioManager.stopAll(this.activeSources, 0.02);
+        this.activeSources.clear();
         this.reset();
     }
 
@@ -321,7 +277,7 @@ class DrumMachine {
             const bass = instrument + '_' + this.cifraPlayer.baixo;
             const buffer = this.buffers.get(bass);
             if (buffer && volume > 0) {
-                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);
                 return true;
             }
         }
@@ -333,7 +289,7 @@ class DrumMachine {
             const violao = instrument + '_' + this.cifraPlayer.acordeTocando;
             const buffer = this.buffers.get(violao);
             if (buffer && volume > 0) {
-                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1);
+                this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);
                 return true;
             }
         }

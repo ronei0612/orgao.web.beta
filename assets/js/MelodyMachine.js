@@ -109,31 +109,14 @@
     }
 
     async loadSounds() {
-        const notasUnicas = new Set(Object.values(this.acordes).flat());
-        //const notasUnicas = new Set();
-
-        //Object.values(this.acordes).flat().forEach(nota => {
-        //    notasUnicas.add(nota);
-        //    if (nota.endsWith('_baixo')) {
-        //        notasUnicas.add(nota.replace('_baixo', '_grave'));
-        //    }
-        //});
-
-        const loadPromises = [];
-
-        for (const nota of notasUnicas) {
-            const name = `${this.instrument}_${nota}`;
-            const url = `${this.audioPath}/${name}.ogg`;
-
-            loadPromises.push((async () => {
-                const response = await fetch(url);
-                const arrayBuffer = await response.arrayBuffer();
-                const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                this.buffers.set(name, audioBuffer);
-            })());
-        }
-
-        await Promise.all(loadPromises);
+        const notas = [...new Set(Object.values(this.acordes).flat())];
+        const urls = Object.fromEntries(
+            notas.map(n => [
+                `${this.instrument}_${n}`,
+                `${this.audioPath}/${this.instrument}_${n}.ogg`
+            ])
+        );
+        this.buffers = await this.audioManager.loadBuffers(urls);
     }
 
     async init() {
@@ -153,11 +136,6 @@
         } catch (err) {
             this.styles = null;
         }
-    }
-
-    stopNotes(time) {
-        this.audioManager.stopAll(this.activeSources, 0.1);
-        this.activeSources.clear();
     }
 
     nextNote() {
@@ -211,7 +189,7 @@
         // 2. Lógica de início de compasso (Tempo 1)
         if (iniciouNovoAcorde) {
             // Para as notas do compasso anterior com release
-            this.stopNotes(this.nextNoteTime);
+            this.audioManager.stopAll(this.activeSources, 0.1, this.nextNoteTime);
 
             // Toca a nota grave (pedaleira) respeitando a inversão/baixo do acorde (ex: C/E -> toca E grave)
             let notaGraveNome = null;
@@ -290,7 +268,7 @@
         this.currentStep = 1;
         this.nextNoteTime = this.audioContext.currentTime;
 
-        this.stopNotes(this.nextNoteTime);
+        this.audioManager.stopAll(this.activeSources, 0.1, this.nextNoteTime);
 
         this.refreshTrackCache();
         if (this.timerInterval) clearInterval(this.timerInterval);
@@ -305,7 +283,7 @@
         }
 
         if (stopAll)
-            this.stopNotes(this.audioContext.currentTime);
+            this.audioManager.stopAll(this.activeSources, 0.1, this.audioContext.currentTime);
 
         this.reset();
     }

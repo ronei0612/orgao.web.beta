@@ -61,50 +61,37 @@ class PartituraPlayer {
     }
 
     async loadSounds() {
-        const loadPromises = [];
-
-        Object.values(this.partituraEditor.basePitches).flat().forEach(nota => {
-            const name = this.instrumento + '_' + nota.replace('/', '').replace('#', '_');
-            const url = `${this.audioPath}/${name}.ogg`;
-
-            loadPromises.push((async () => {
-                try {
-                    const response = await fetch(url);
-                    if (!response.ok) return; // arquivo não existe, ignora silenciosamente
-                    const arrayBuffer = await response.arrayBuffer();
-                    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-                    this.buffers.set(name, audioBuffer);
-                } catch (e) {
-                    console.warn(`Som não encontrado: ${name}`);
-                }
-            })());
-        });
-
-        await Promise.all(loadPromises);
-    }
-
-    stopNotes() {
-        this.audioManager.stopAll(this.activeSources, 0.02);
-        this.activeSources.clear();
+        const notas = [...new Set(
+            Object.values(this.partituraEditor.basePitches).flat()
+        )];
+        const urls = Object.fromEntries(
+            notas.map(nota => {
+                const name = `${this.instrumento}_${nota.replace('/', '').replace('#', '_')}`;
+                return [name, `${this.audioPath}/${name}.ogg`];
+            })
+        );
+        this.buffers = await this.audioManager.loadBuffers(urls);
     }
 
     tocarNotaAtualPartitura(volume = 1) {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
-        this.stopNotes(); // Correção 1: Usa a função certa para limpar a nota anterior
+        this.audioManager.stopAll(this.activeSources, 0.02);
 
         // Toca o acorde ANTES para compensar o attack do órgão
         if (data.chord) {
             this.cifraPlayer.tocarAcorde(data.chord);
         }
 
+        //const previousData = this.partituraEditor.currentData[this.partituraPlaybackIndex - 1];
+        //if (!data.rest && !(previousData && previousData.tie)) {
+        // TODO: verificar se a nota anterior tem ligadura e se é a mesma nota para não tocar a nota atual
         if (!data.rest) {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
                 const notaLimpa = nota.toLowerCase().replace('#', '_');
 
-                // Correção 2: Busca o buffer real da memória
                 const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
                 const buffer = this.buffers.get(bufferName);
 

@@ -32,7 +32,7 @@ class App {
         };
 
         this.versionConfig = {
-            version: '6.0.6',
+            version: '6.0.5',
             htmlMessage: `
                 <p>Melhorias</p>
 
@@ -576,7 +576,7 @@ class App {
         this.uiController.esconderEditDeleteButtons();
 
         this.partituraPlayer.partituraPlaybackIndex = -1;
-        this.partituraPlayer.stopNotes();
+        this.audioManager.stopAll(this.partituraPlayer.activeSources, 0.02);
 
         this.uiController.habilitarSelectSaves(); // Reabilita opções e edições ao parar partitura
 
