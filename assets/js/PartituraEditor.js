@@ -73,7 +73,7 @@ class PartituraEditor {
                 min-height: 100vh; 
                 background-color: transparent; 
             }
-            #score-container { min-width: max-content; padding: 0px; padding-bottom: 120px; position: relative; }
+            #score-container { min-width: max-content; padding: 20px; padding-bottom: 120px; position: relative; }
             
             .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
@@ -127,17 +127,32 @@ class PartituraEditor {
             doc.getElementById('btn-delete').onclick = () => this.deleteNoteAtCursor();
             doc.getElementById('btn-linebreak').onclick = () => this.toggleLineBreak();
 
+            // Intercepta a Colagem (Paste) direto do sistema operacional
+            doc.addEventListener('paste', (e) => {
+                // Deixa o input normal funcionar se estiver editando cifra ou letra
+                if (e.target && e.target.tagName.toLowerCase() === 'input') return;
+
+                e.preventDefault();
+                const pasteText = (e.clipboardData || iframe.contentWindow.clipboardData).getData('text');
+
+                if (!pasteText) return;
+
+                // Se o texto for a nossa flag de cópia interna, cola a seleção
+                if (pasteText === "VEXFLOW_INTERNAL_COPY") {
+                    this.pasteCopiedRange();
+                } else {
+                    // Caso contrário (copiou de outro site), executa o parser de ABC
+                    this.parseABC(pasteText);
+                }
+            });
+
             doc.addEventListener('keydown', (e) => {
                 if (e.target && e.target.tagName.toLowerCase() === 'input') return;
 
+                // Apenas a Cópia fica no keydown. O Colar foi movido para o evento 'paste' acima.
                 if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
                     e.preventDefault();
                     this.copySelectedRange();
-                    return;
-                }
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'v') {
-                    e.preventDefault();
-                    this.pasteCopiedRange();
                     return;
                 }
 
@@ -197,6 +212,160 @@ class PartituraEditor {
                         break;
                 }
             });
+        }
+    }
+
+    parseABC(abcText) {
+        const lines = abcText.split('\n');
+        let parsedData = [];
+        let currentLineNotes = [];
+        let currentChord = "";
+
+        // Regex para extrair: "Cifras", [AcordesMúltiplos], Notas(com acidentes e números), Pausas, Ligaduras e Barras
+        const tokenRegex = /\[[^\]]*\]|"[^"]*"|[\^_=]?[a-gA-GzZ][,']*[0-9]*\/*[0-9]*|-|\|/g;
+
+        const parsePitch = (abcPitch) => {
+            if (abcPitch.toLowerCase().startsWith('z')) return null; // Pausa
+
+            let accidental = '';
+            if (abcPitch.startsWith('^')) accidental = '#';
+            else if (abcPitch.startsWith('_')) accidental = 'b';
+
+            const cleanPitch = abcPitch.replace(/[\^_=0-9\/]/g, '');
+            if (!cleanPitch) return null;
+
+            const baseNote = cleanPitch[0];
+
+            let octave = 4;
+            if (baseNote >= 'a' && baseNote <= 'g') octave = 5;
+
+            for (let i = 1; i < cleanPitch.length; i++) {
+                if (cleanPitch[i] === ',') octave -= 1;
+                else if (cleanPitch[i] === "'") octave += 1;
+            }
+
+            const finalPitch = `${baseNote.toLowerCase()}${accidental}/${octave}`;
+
+            // Valor numérico para encontrar a mais aguda em acordes [CEG]
+            const noteValues = { 'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11 };
+            let numValue = octave * 12 + noteValues[baseNote.toLowerCase()];
+            if (accidental === '#') numValue += 1;
+            if (accidental === 'b') numValue -= 1;
+
+            return { vfPitch: finalPitch, value: numValue };
+        };
+
+        lines.forEach(line => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) return;
+
+            // Armadura de Clave
+            if (trimmedLine.startsWith('K:')) {
+                const key = trimmedLine.substring(2).trim().split(' ')[0];
+                const tomSelect = document.getElementById('tomSelect');
+                if (tomSelect) {
+                    tomSelect.value = key;
+                    tomSelect.dispatchEvent(new Event('change'));
+                }
+                return;
+            }
+
+            // Letra da música (Lyrics) mapeando para a última linha de notas processada
+            if (trimmedLine.startsWith('w:')) {
+                let lyricText = trimmedLine.substring(2).trim();
+                const syllables = lyricText.match(/\S+/g) || [];
+
+                let lyricIdx = 0;
+                for (let i = 0; i < currentLineNotes.length; i++) {
+                    if (lyricIdx >= syllables.length) break;
+                    if (!currentLineNotes[i].rest) {
+                        let syl = syllables[lyricIdx].replace(/_/g, '');
+                        if (syl) currentLineNotes[i].lyric = syl;
+                        lyricIdx++;
+                    }
+                }
+                return;
+            }
+
+            // Ignora outros cabeçalhos informativos do ABCJS
+            if (/^[A-Z]:/.test(trimmedLine)) return;
+
+            // Processa Linha Musical
+            currentLineNotes = [];
+            const tokens = trimmedLine.match(tokenRegex);
+            if (!tokens) return;
+
+            tokens.forEach(token => {
+                if (token.startsWith('"')) {
+                    currentChord = token.replace(/"/g, '');
+                }
+                else if (token === '|') {
+                    if (parsedData.length > 0) parsedData[parsedData.length - 1].bar = true;
+                }
+                else if (token === '-') {
+                    if (parsedData.length > 0) parsedData[parsedData.length - 1].tie = true;
+                }
+                else if (token.toLowerCase().startsWith('z')) {
+                    const noteObj = {
+                        notes: ["b/4"], chord: currentChord, lyric: "",
+                        bar: false, rest: true, tie: false, lineBreak: false
+                    };
+                    parsedData.push(noteObj);
+                    currentLineNotes.push(noteObj);
+                    currentChord = "";
+                }
+                else if (token.startsWith('[')) {
+                    // Extrai múltiplas notas e acha a MAIS AGUDA
+                    const innerPitches = token.replace(/[\[\]]/g, '').match(/[\^_=]?[a-gA-G][,']*/g);
+                    if (innerPitches) {
+                        let highestPitch = null;
+                        let maxVal = -999;
+                        innerPitches.forEach(p => {
+                            const pData = parsePitch(p);
+                            if (pData && pData.value > maxVal) {
+                                maxVal = pData.value;
+                                highestPitch = pData.vfPitch;
+                            }
+                        });
+                        if (highestPitch) {
+                            const noteObj = {
+                                notes: [highestPitch], chord: currentChord, lyric: "",
+                                bar: false, rest: false, tie: false, lineBreak: false
+                            };
+                            parsedData.push(noteObj);
+                            currentLineNotes.push(noteObj);
+                            currentChord = "";
+                        }
+                    }
+                }
+                else {
+                    // Nota Simples
+                    const pData = parsePitch(token);
+                    if (pData) {
+                        const noteObj = {
+                            notes: [pData.vfPitch], chord: currentChord, lyric: "",
+                            bar: false, rest: false, tie: false, lineBreak: false
+                        };
+                        parsedData.push(noteObj);
+                        currentLineNotes.push(noteObj);
+                        currentChord = "";
+                    }
+                }
+            });
+
+            // Respeita as quebras de linha do próprio ABC
+            if (currentLineNotes.length > 0) {
+                currentLineNotes[currentLineNotes.length - 1].lineBreak = true;
+            }
+        });
+
+        if (parsedData.length > 0) {
+            parsedData[parsedData.length - 1].lineBreak = false; // Remove quebra na última nota
+            this.currentData = parsedData;
+            this.persistentSelectedIndex = 0;
+            this.selectionStart = 0;
+            this.selectionEnd = 0;
+            this.draw(this.editIframe, true);
         }
     }
 
@@ -419,6 +588,19 @@ class PartituraEditor {
             tie: item.tie,
             lineBreak: item.lineBreak
         }));
+
+        // Injeta a flag para o sistema de colar reconhecer que é a cópia interna
+        try {
+            const doc = this.editIframe.contentDocument;
+            const temp = doc.createElement('textarea');
+            temp.value = "VEXFLOW_INTERNAL_COPY";
+            doc.body.appendChild(temp);
+            temp.select();
+            doc.execCommand('copy');
+            doc.body.removeChild(temp);
+        } catch (e) { }
+
+        console.log(`Sistema: Copiado ${this.copiedNotesBuffer.length} nota(s) da seleção.`);
     }
 
     pasteCopiedRange() {
@@ -514,7 +696,7 @@ class PartituraEditor {
         doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
 
         const staveHeight = 150;
-        const currentKey = this.getCurrentKey(); // Obtém a armadura de clave atual
+        const currentKey = this.getCurrentKey();
 
         const lines = [];
         let currentLine = [];
@@ -591,7 +773,6 @@ class PartituraEditor {
                 return data.bar ? [note, new this.vf.BarNote()] : [note];
             });
 
-            // Adiciona mais padding para caber a armadura de clave dinamicamente
             const calculatedWidth = spaceNeeded + 150;
             const finalWidth = Math.max(iframe.clientWidth - 80, calculatedWidth);
 
@@ -615,10 +796,8 @@ class PartituraEditor {
         lineDataObjects.forEach(obj => {
             const stave = new this.vf.Stave(10, currentY, obj.finalWidth);
 
-            // Adiciona a clave e a armadura de clave
             stave.addClef("treble").addKeySignature(currentKey).setContext(context).draw();
 
-            // O VEXFLOW CALCULA OS ACIDENTES AUTOMATICAMENTE BASEADO NA ARMADURA!
             this.vf.Accidental.applyAccidentals([obj.voice], currentKey);
 
             new this.vf.Formatter().joinVoices([obj.voice]).format([obj.voice], obj.finalWidth - 130);
