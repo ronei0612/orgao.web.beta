@@ -258,6 +258,8 @@ class PartituraEditor {
         lines.forEach(line => {
             const trimmedLine = line.trim();
             if (!trimmedLine) return;
+            // Ignora outros cabeçalhos e comentários
+            if (/^[A-Z]:/.test(trimmedLine) || trimmedLine.startsWith('%')) return;
 
             // Armadura de Clave
             if (trimmedLine.startsWith('K:')) {
@@ -273,14 +275,41 @@ class PartituraEditor {
             // Letra da música (Lyrics) mapeando para a última linha de notas processada
             if (trimmedLine.startsWith('w:')) {
                 let lyricText = trimmedLine.substring(2).trim();
-                const syllables = lyricText.match(/\S+/g) || [];
+
+                let syllables = [];
+                // Primeiro quebra por espaços
+                let tokensText = lyricText.split(/\s+/);
+
+                tokensText.forEach(token => {
+                    // Conta quantos '_' existem (extensões de notas no ABC)
+                    let melismaCount = (token.match(/_/g) || []).length;
+                    let cleanToken = token.replace(/_/g, '');
+
+                    if (cleanToken === '*') {
+                        syllables.push(""); // O asterisco pula uma nota no ABC
+                    } else if (cleanToken !== '') {
+                        // Divide a palavra pelos hifens
+                        let partes = cleanToken.split('-');
+                        for (let i = 0; i < partes.length; i++) {
+                            let syl = partes[i];
+                            if (i < partes.length - 1) syl += '-'; // Mantém o tracinho visualmente para a partitura
+                            syllables.push(syl);
+                        }
+                    }
+
+                    // Para cada underline, insere uma nota vazia para não dessincronizar
+                    for (let j = 0; j < melismaCount; j++) {
+                        syllables.push("");
+                    }
+                });
 
                 let lyricIdx = 0;
                 for (let i = 0; i < currentLineNotes.length; i++) {
                     if (lyricIdx >= syllables.length) break;
                     if (!currentLineNotes[i].rest) {
-                        let syl = syllables[lyricIdx].replace(/_/g, '');
-                        if (syl) currentLineNotes[i].lyric = syl;
+                        if (syllables[lyricIdx]) {
+                            currentLineNotes[i].lyric = syllables[lyricIdx];
+                        }
                         lyricIdx++;
                     }
                 }
