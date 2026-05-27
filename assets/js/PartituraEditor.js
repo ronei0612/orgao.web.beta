@@ -62,7 +62,6 @@ class PartituraEditor {
 
         const style = doc.createElement('style');
         style.innerHTML = `
-            /* IMPORTAÇÃO DO GOOGLE FONTS ROBOTO DENTRO DO IFRAME */
             @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
             body { 
@@ -504,10 +503,9 @@ class PartituraEditor {
         const isDark = document.body.classList.contains('dark-mode');
         doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
 
-        const notaEspacamento = 80;
-        const staveHeight = 150; // Altura que cada linha (sistema) ocupa verticalmente
+        const staveHeight = 150;
 
-        // Divide os dados globais em Sistemas (Linhas separadas)
+        // 1. Divide a partitura em linhas
         const lines = [];
         let currentLine = [];
         this.currentData.forEach((data, index) => {
@@ -521,32 +519,32 @@ class PartituraEditor {
             lines.push(currentLine);
         }
 
-        // Calcula a largura máxima necessária para garantir que a imagem SVG não corte
-        let maxWidth = 0;
-        lines.forEach(line => {
-            const w = Math.max(iframe.clientWidth - 80, line.length * notaEspacamento);
-            if (w > maxWidth) maxWidth = w;
-        });
-
-        const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
-        // Redimensiona o canvas para caber na largura e todas as linhas na vertical
-        renderer.resize(maxWidth + 50, (lines.length * staveHeight) + 50);
-        const context = renderer.getContext();
-
         const staveNotesRef = [];
         const tickablesByIndex = new Array(this.currentData.length);
         const temCifraNaPartitura = this.currentData.some(d => d.chord && d.chord.trim() !== "");
         const lyricFontSize = (!isEditable && !temCifraNaPartitura) ? 15 : 12;
 
-        let currentY = 40; // Posição Y inicial da primeira pauta
-
-        lines.forEach(line => {
-            const width = Math.max(iframe.clientWidth - 80, line.length * notaEspacamento);
-            const stave = new this.vf.Stave(10, currentY, width);
-            stave.addClef("treble").setContext(context).draw();
+        // 2. Prepara as notas e calcula o ESPAÇAMENTO AUTOMÁTICO (Heurística)
+        const lineDataObjects = lines.map(line => {
+            let spaceNeeded = 0; // Quantidade de espaço que esta linha vai precisar
 
             const tickables = line.flatMap(item => {
                 const { data, index } = item;
+
+                // --- CÁLCULO DE LARGURA DINÂMICA DA NOTA ---
+                let noteWidth = 60; // Espaço base padrão
+                if (data.lyric) {
+                    noteWidth = Math.max(noteWidth, data.lyric.length * (lyricFontSize * 0.7));
+                }
+                if (data.chord) {
+                    noteWidth = Math.max(noteWidth, data.chord.length * 10);
+                }
+                // Adiciona espaço extra para a Barra de compasso (se existir)
+                if (data.bar) noteWidth += 20;
+
+                spaceNeeded += noteWidth;
+                // ---------------------------------------------
+
                 const note = new this.vf.StaveNote({
                     keys: data.rest ? ["b/4"] : data.notes,
                     duration: data.rest ? "qr" : "q"
@@ -589,17 +587,46 @@ class PartituraEditor {
                 } else if (!isEditable && index === this.highlightIndex) {
                     note.setStyle({ fillStyle: "#007bff", strokeStyle: "#007bff" });
                 }
+
                 return data.bar ? [note, new this.vf.BarNote()] : [note];
             });
 
+            // Largura calculada: usa o spaceNeeded + padding para clave
+            const calculatedWidth = spaceNeeded + 100;
+            // Se a largura da tela for maior, estica. Se a tela for menor, usa a largura calculada (gerando scroll)
+            const finalWidth = Math.max(iframe.clientWidth - 80, calculatedWidth);
+
             const voice = new this.vf.Voice({ num_beats: line.length, beat_value: 4 }).setStrict(false);
             voice.addTickables(tickables);
-            new this.vf.Formatter().joinVoices([voice]).format([voice], width - 100);
-            voice.draw(context, stave);
 
-            currentY += staveHeight; // Avança o Y para o próximo sistema
+            return { voice, finalWidth };
         });
 
+        // 3. Define a largura global baseada na maior linha
+        let maxWidth = 0;
+        lineDataObjects.forEach(obj => {
+            if (obj.finalWidth > maxWidth) maxWidth = obj.finalWidth;
+        });
+
+        const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
+        renderer.resize(maxWidth + 50, (lines.length * staveHeight) + 50);
+        const context = renderer.getContext();
+
+        let currentY = 40;
+
+        // 4. Desenha as linhas perfeitamente espaçadas
+        lineDataObjects.forEach(obj => {
+            const stave = new this.vf.Stave(10, currentY, obj.finalWidth);
+            stave.addClef("treble").setContext(context).draw();
+
+            // O VexFlow vai justificar o espaço baseado no finalWidth que calculamos
+            new this.vf.Formatter().joinVoices([obj.voice]).format([obj.voice], obj.finalWidth - 100);
+            obj.voice.draw(context, stave);
+
+            currentY += staveHeight;
+        });
+
+        // 5. Desenha as Ligaduras
         const tiesToDraw = [];
         for (let i = 0; i < staveNotesRef.length - 1; i++) {
             if (staveNotesRef[i].dataObj.tie) {
@@ -618,7 +645,7 @@ class PartituraEditor {
         }
         tiesToDraw.forEach(t => t.setContext(context).draw());
 
-        // Coleta coordenadas físicas para Auto-Scroll Horizontal E Vertical
+        // 6. Atualiza posições físicas para Câmera/Scroll
         if (isEditable) {
             this.noteXPositions = tickablesByIndex.map(n => n ? n.getAbsoluteX() : 0);
             this.noteYPositions = tickablesByIndex.map(n => n ? n.getStave().getYForLine(0) : 0);
