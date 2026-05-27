@@ -13,6 +13,7 @@ class PartituraEditor {
 
         this.currentData = [];
         this.noteXPositions = [];
+        this.noteYPositions = [];
         this.persistentSelectedIndex = 0;
 
         // Controle de Seleção e Área de Transferência
@@ -53,28 +54,33 @@ class PartituraEditor {
             <div class="bottom-toolbar">
                 <button class="tool-btn btn-chord" id="btn-chord" title="Adicionar Cifra">C7</button>
                 <button class="tool-btn btn-lyric" id="btn-lyric" title="Adicionar Letra">Abc</button>
+                <div style="width: 2px; background: #ccc; margin: 0 5px;"></div>
+                <button class="tool-btn btn-linebreak" id="btn-linebreak" title="Quebrar Linha Após a Nota Atual">↲</button>
             </div>` : '';
 
         doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}${bottomToolbarHtml}`;
 
         const style = doc.createElement('style');
         style.innerHTML = `
+            /* IMPORTAÇÃO DO GOOGLE FONTS ROBOTO DENTRO DO IFRAME */
+            @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
             body { 
-                font-family: sans-serif; 
+                font-family: 'Roboto', sans-serif; 
                 margin: 0; 
                 overflow-x: auto; 
-                overflow-y: hidden; 
+                overflow-y: auto; 
                 display: flex; 
                 align-items: flex-start; 
                 padding-top: 60px; 
                 min-height: 100vh; 
                 background-color: transparent; 
             }
-            #score-container { min-width: max-content; padding: 20px; padding-bottom: 80px; position: relative; }
+            #score-container { min-width: max-content; padding: 0px; padding-bottom: 120px; position: relative; }
             
-            .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-            .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 8px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
+            .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 30px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
             
             .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; outline: none; }
             .tool-btn:active { transform: scale(0.9); background: #f0f0f0; }
@@ -85,8 +91,9 @@ class PartituraEditor {
             .btn-rest { color: #333; font-size: 24px; }
             .btn-tie { color: #1976d2; font-size: 28px; font-weight: normal; padding-bottom: 10px;}
             .btn-delete { color: #c62828; }
-            .btn-chord { color: #d32f2f; font-size: 16px; }
-            .btn-lyric { color: #000; font-size: 16px; }
+            .btn-chord { color: #d32f2f; font-size: 16px; font-family: 'Roboto', sans-serif; }
+            .btn-lyric { color: #000; font-size: 16px; font-family: 'Roboto', sans-serif; }
+            .btn-linebreak { color: #555; font-size: 24px; }
             
             .inline-input { 
                 position: absolute; 
@@ -95,6 +102,7 @@ class PartituraEditor {
                 text-align: center; 
                 font-size: 16px;
                 font-weight: bold; 
+                font-family: 'Roboto', sans-serif;
                 border: 2px solid #2196F3; 
                 border-radius: 4px; 
                 z-index: 1200; 
@@ -120,11 +128,11 @@ class PartituraEditor {
             doc.getElementById('btn-chord').onclick = () => this.showInlineInput('chord');
             doc.getElementById('btn-lyric').onclick = () => this.showInlineInput('lyric');
             doc.getElementById('btn-delete').onclick = () => this.deleteNoteAtCursor();
+            doc.getElementById('btn-linebreak').onclick = () => this.toggleLineBreak();
 
             doc.addEventListener('keydown', (e) => {
                 if (e.target && e.target.tagName.toLowerCase() === 'input') return;
 
-                // Atalhos Globais de Copiar/Colar (Ctrl+C / Ctrl+V) [Cmd+C / Cmd+V no Mac]
                 if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
                     e.preventDefault();
                     this.copySelectedRange();
@@ -147,7 +155,6 @@ class PartituraEditor {
                         break;
                     case 'ArrowLeft':
                         e.preventDefault();
-                        // Shift + Seta Esquerda seleciona no teclado
                         if (e.shiftKey) {
                             let novoIndex = this.persistentSelectedIndex - 1;
                             if (novoIndex >= 0) {
@@ -162,7 +169,6 @@ class PartituraEditor {
                         break;
                     case 'ArrowRight':
                         e.preventDefault();
-                        // Shift + Seta Direita seleciona no teclado
                         if (e.shiftKey) {
                             let novoIndex = this.persistentSelectedIndex + 1;
                             if (novoIndex < this.currentData.length) {
@@ -203,12 +209,13 @@ class PartituraEditor {
         const doc = this.editIframe.contentDocument;
         const win = this.editIframe.contentWindow;
         const xPos = this.noteXPositions[this.persistentSelectedIndex];
+        const yBase = this.noteYPositions[this.persistentSelectedIndex] || 40;
 
         const input = doc.createElement('input');
         input.id = 'inline-input';
         input.className = 'inline-input';
         input.style.left = xPos + 'px';
-        input.style.top = (type === 'chord' ? '40px' : '230px');
+        input.style.top = (type === 'chord' ? (yBase) + 'px' : (yBase + 190) + 'px');
         input.dataset.type = type;
         input.dataset.index = this.persistentSelectedIndex;
 
@@ -297,7 +304,6 @@ class PartituraEditor {
         let novoIndex = this.persistentSelectedIndex + direcao;
         if (novoIndex >= 0 && novoIndex < this.currentData.length) {
             this.persistentSelectedIndex = novoIndex;
-            // Move a seleção junto com a navegação normal
             this.selectionStart = novoIndex;
             this.selectionEnd = novoIndex;
             this.draw(this.editIframe, true);
@@ -320,28 +326,38 @@ class PartituraEditor {
     }
 
     centralizarNoCursor() {
-        this._centralizarEm(this.editIframe, this.noteXPositions[this.persistentSelectedIndex]);
+        this._centralizarEm(
+            this.editIframe,
+            this.noteXPositions[this.persistentSelectedIndex],
+            this.noteYPositions[this.persistentSelectedIndex]
+        );
     }
 
     centralizarDestaque() {
-        this._centralizarEm(this.viewIframe, this.viewNoteXPositions?.[this.highlightIndex]);
+        this._centralizarEm(
+            this.viewIframe,
+            this.viewNoteXPositions?.[this.highlightIndex],
+            this.viewNoteYPositions?.[this.highlightIndex]
+        );
     }
 
-    _centralizarEm(iframe, noteX) {
-        if (noteX == null) return;
+    _centralizarEm(iframe, noteX, noteY) {
+        if (noteX == null || noteY == null) return;
         const win = iframe.contentWindow;
         if (!win) return;
 
-        const offset = iframe.clientWidth * 0.35;
+        const offsetX = iframe.clientWidth * 0.35;
+        const offsetY = iframe.clientHeight * 0.35;
         win.scrollTo({
-            left: noteX - offset,
+            left: Math.max(0, noteX - offsetX),
+            top: Math.max(0, noteY - offsetY),
             behavior: 'smooth'
         });
     }
 
     abrirEditor(dataArray = []) {
         if (!dataArray || dataArray.length === 0) {
-            this.currentData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false }];
+            this.currentData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false }];
         } else {
             this.currentData = dataArray.map(l => this.normalizeItem(l));
         }
@@ -370,7 +386,6 @@ class PartituraEditor {
             const index = notas.indexOf(notaEl);
             if (index === -1) return;
 
-            // Shift + Clique: seleciona o intervalo do ponto inicial ao clicado
             if (e.shiftKey) {
                 this.selectionEnd = index;
             } else {
@@ -398,14 +413,14 @@ class PartituraEditor {
         const minSel = Math.min(start, end);
         const maxSel = Math.max(start, end);
 
-        // Clona de forma profunda os objetos do intervalo selecionado
         this.copiedNotesBuffer = this.currentData.slice(minSel, maxSel + 1).map(item => ({
             notes: [...item.notes],
             chord: item.chord,
             lyric: item.lyric,
             bar: item.bar,
             rest: item.rest,
-            tie: item.tie
+            tie: item.tie,
+            lineBreak: item.lineBreak
         }));
     }
 
@@ -413,21 +428,19 @@ class PartituraEditor {
         if (!this.copiedNotesBuffer || this.copiedNotesBuffer.length === 0) return;
         this.commitInput();
 
-        // Clona o buffer para que múltiplas colagens não interfiram uma na outra
         const clonedPaste = this.copiedNotesBuffer.map(item => ({
             notes: [...item.notes],
             chord: item.chord,
             lyric: item.lyric,
             bar: item.bar,
             rest: item.rest,
-            tie: item.tie
+            tie: item.tie,
+            lineBreak: item.lineBreak
         }));
 
         const insertIndex = this.persistentSelectedIndex + 1;
-        // Insere o trecho copiado imediatamente após o cursor
         this.currentData.splice(insertIndex, 0, ...clonedPaste);
 
-        // Desloca a seleção visual para o trecho recém-colado
         this.selectionStart = insertIndex;
         this.selectionEnd = insertIndex + clonedPaste.length - 1;
         this.persistentSelectedIndex = this.selectionEnd;
@@ -450,6 +463,7 @@ class PartituraEditor {
             if (d.tie) s += '~';
             if (d.lyric) s += `@${d.lyric}`;
             if (d.rest) s = 'R|' + s;
+            if (d.lineBreak) s = 'L|' + s;
             if (d.bar) s += `|`;
             return s;
         }).join('\n');
@@ -457,8 +471,9 @@ class PartituraEditor {
 
     normalizeItem(item) {
         let str = String(item).trim();
-        let chord = "", lyric = "", bar = false, rest = false, tie = false;
+        let chord = "", lyric = "", bar = false, rest = false, tie = false, lineBreak = false;
 
+        if (str.startsWith('L|')) { lineBreak = true; str = str.slice(2); }
         if (str.startsWith('R|')) { rest = true; str = str.slice(2); }
         if (str.endsWith('|')) { bar = true; str = str.slice(0, -1); }
 
@@ -477,7 +492,7 @@ class PartituraEditor {
         let notes = str.split(',').map(n => n.trim());
         if (notes.length === 1 && notes[0] === "") notes = ["b/4"];
 
-        return { notes, chord, lyric, bar, rest, tie };
+        return { notes, chord, lyric, bar, rest, tie, lineBreak };
     }
 
     draw(iframe, isEditable) {
@@ -490,90 +505,128 @@ class PartituraEditor {
         doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
 
         const notaEspacamento = 80;
-        const width = Math.max(iframe.clientWidth - 80, this.currentData.length * notaEspacamento);
-        const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
+        const staveHeight = 150; // Altura que cada linha (sistema) ocupa verticalmente
 
-        renderer.resize(width, 400);
+        // Divide os dados globais em Sistemas (Linhas separadas)
+        const lines = [];
+        let currentLine = [];
+        this.currentData.forEach((data, index) => {
+            currentLine.push({ data, index });
+            if (data.lineBreak && index !== this.currentData.length - 1) {
+                lines.push(currentLine);
+                currentLine = [];
+            }
+        });
+        if (currentLine.length > 0) {
+            lines.push(currentLine);
+        }
+
+        // Calcula a largura máxima necessária para garantir que a imagem SVG não corte
+        let maxWidth = 0;
+        lines.forEach(line => {
+            const w = Math.max(iframe.clientWidth - 80, line.length * notaEspacamento);
+            if (w > maxWidth) maxWidth = w;
+        });
+
+        const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
+        // Redimensiona o canvas para caber na largura e todas as linhas na vertical
+        renderer.resize(maxWidth + 50, (lines.length * staveHeight) + 50);
         const context = renderer.getContext();
 
-        const stave = new this.vf.Stave(10, 40, width - 20);
-        stave.addClef("treble").setContext(context).draw();
-
         const staveNotesRef = [];
+        const tickablesByIndex = new Array(this.currentData.length);
         const temCifraNaPartitura = this.currentData.some(d => d.chord && d.chord.trim() !== "");
         const lyricFontSize = (!isEditable && !temCifraNaPartitura) ? 15 : 12;
 
-        const tickables = this.currentData.flatMap((data, index) => {
-            const note = new this.vf.StaveNote({
-                keys: data.rest ? ["b/4"] : data.notes,
-                duration: data.rest ? "qr" : "q"
+        let currentY = 40; // Posição Y inicial da primeira pauta
+
+        lines.forEach(line => {
+            const width = Math.max(iframe.clientWidth - 80, line.length * notaEspacamento);
+            const stave = new this.vf.Stave(10, currentY, width);
+            stave.addClef("treble").setContext(context).draw();
+
+            const tickables = line.flatMap(item => {
+                const { data, index } = item;
+                const note = new this.vf.StaveNote({
+                    keys: data.rest ? ["b/4"] : data.notes,
+                    duration: data.rest ? "qr" : "q"
+                });
+
+                staveNotesRef.push({ noteObj: note, dataObj: data });
+                tickablesByIndex[index] = note;
+
+                if (!data.rest) {
+                    data.notes.forEach((keyName, i) => {
+                        const match = keyName.match(/([a-g])([#b])\//i);
+                        if (match) note.addModifier(new this.vf.Accidental(match[2]), i);
+                    });
+                }
+                if (note.getStem()) note.getStem().hide = true;
+
+                if (data.chord) {
+                    note.addModifier(new this.vf.ChordSymbol().setFont('Roboto', 14, 'bold').addText(data.chord), 0);
+                }
+
+                if (data.lyric) {
+                    note.addModifier(new this.vf.Annotation(data.lyric)
+                        .setFont('Roboto', lyricFontSize, 'italic')
+                        .setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
+                }
+
+                if (isEditable) {
+                    const start = this.selectionStart ?? this.persistentSelectedIndex ?? 0;
+                    const end = this.selectionEnd ?? this.persistentSelectedIndex ?? 0;
+                    const minSel = Math.min(start, end);
+                    const maxSel = Math.max(start, end);
+
+                    if (index >= minSel && index <= maxSel) {
+                        if (index === this.persistentSelectedIndex) {
+                            note.setStyle({ fillStyle: "green", strokeStyle: "green" });
+                        } else {
+                            note.setStyle({ fillStyle: "#17a2b8", strokeStyle: "#17a2b8" });
+                        }
+                    }
+                } else if (!isEditable && index === this.highlightIndex) {
+                    note.setStyle({ fillStyle: "#007bff", strokeStyle: "#007bff" });
+                }
+                return data.bar ? [note, new this.vf.BarNote()] : [note];
             });
 
-            staveNotesRef.push({ noteObj: note, dataObj: data });
+            const voice = new this.vf.Voice({ num_beats: line.length, beat_value: 4 }).setStrict(false);
+            voice.addTickables(tickables);
+            new this.vf.Formatter().joinVoices([voice]).format([voice], width - 100);
+            voice.draw(context, stave);
 
-            if (!data.rest) {
-                data.notes.forEach((keyName, i) => {
-                    const match = keyName.match(/([a-g])([#b])\//i);
-                    if (match) note.addModifier(new this.vf.Accidental(match[2]), i);
-                });
-            }
-            if (note.getStem()) note.getStem().hide = true;
-
-            if (data.chord) {
-                note.addModifier(new this.vf.ChordSymbol().setFont('Arial', 12, 'bold').addText(data.chord), 0);
-            }
-
-            if (data.lyric) {
-                note.addModifier(new this.vf.Annotation(data.lyric)
-                    .setFont('Roboto', lyricFontSize, 'italic')
-                    .setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
-            }
-
-            // Renderiza Destaque Visual no Editor para intervalo de Seleção
-            if (isEditable) {
-                const start = this.selectionStart ?? this.persistentSelectedIndex ?? 0;
-                const end = this.selectionEnd ?? this.persistentSelectedIndex ?? 0;
-                const minSel = Math.min(start, end);
-                const maxSel = Math.max(start, end);
-
-                if (index >= minSel && index <= maxSel) {
-                    if (index === this.persistentSelectedIndex) {
-                        note.setStyle({ fillStyle: "green", strokeStyle: "green" });
-                    } else {
-                        note.setStyle({ fillStyle: "#17a2b8", strokeStyle: "#17a2b8" });
-                    }
-                }
-            } else if (!isEditable && index === this.highlightIndex) {
-                note.setStyle({ fillStyle: "#007bff", strokeStyle: "#007bff" });
-            }
-            return data.bar ? [note, new this.vf.BarNote()] : [note];
+            currentY += staveHeight; // Avança o Y para o próximo sistema
         });
 
         const tiesToDraw = [];
         for (let i = 0; i < staveNotesRef.length - 1; i++) {
             if (staveNotesRef[i].dataObj.tie) {
-                tiesToDraw.push(new this.vf.StaveTie({
-                    first_note: staveNotesRef[i].noteObj,
-                    last_note: staveNotesRef[i + 1].noteObj,
-                    first_indices: [0],
-                    last_indices: [0]
-                }));
+                const firstNote = staveNotesRef[i].noteObj;
+                const lastNote = staveNotesRef[i + 1].noteObj;
+
+                if (firstNote.getStave() === lastNote.getStave()) {
+                    tiesToDraw.push(new this.vf.StaveTie({
+                        first_note: firstNote,
+                        last_note: lastNote,
+                        first_indices: [0],
+                        last_indices: [0]
+                    }));
+                }
             }
         }
-
-        const voice = new this.vf.Voice({ num_beats: this.currentData.length, beat_value: 4 }).setStrict(false);
-        voice.addTickables(tickables);
-        new this.vf.Formatter().joinVoices([voice]).format([voice], width - 100);
-        voice.draw(context, stave);
-
         tiesToDraw.forEach(t => t.setContext(context).draw());
 
+        // Coleta coordenadas físicas para Auto-Scroll Horizontal E Vertical
         if (isEditable) {
-            this.noteXPositions = tickables.filter(t => t instanceof this.vf.StaveNote).map(n => n.getAbsoluteX());
+            this.noteXPositions = tickablesByIndex.map(n => n ? n.getAbsoluteX() : 0);
+            this.noteYPositions = tickablesByIndex.map(n => n ? n.getStave().getYForLine(0) : 0);
             if (this.onEditDrawn) this.onEditDrawn();
             setTimeout(() => this.centralizarNoCursor(), 50);
         } else {
-            this.viewNoteXPositions = tickables.filter(t => t instanceof this.vf.StaveNote).map(n => n.getAbsoluteX());
+            this.viewNoteXPositions = tickablesByIndex.map(n => n ? n.getAbsoluteX() : 0);
+            this.viewNoteYPositions = tickablesByIndex.map(n => n ? n.getStave().getYForLine(0) : 0);
             if (this.onViewDrawn) this.onViewDrawn();
             setTimeout(() => this.centralizarDestaque(), 50);
         }
@@ -633,10 +686,10 @@ class PartituraEditor {
             lyric: "",
             bar: false,
             rest: false,
-            tie: false
+            tie: false,
+            lineBreak: false
         });
         this.persistentSelectedIndex++;
-        
         this.selectionStart = this.persistentSelectedIndex;
         this.selectionEnd = this.persistentSelectedIndex;
 
@@ -652,10 +705,10 @@ class PartituraEditor {
             lyric: "",
             bar: false,
             rest: true,
-            tie: false
+            tie: false,
+            lineBreak: false
         });
         this.persistentSelectedIndex++;
-        
         this.selectionStart = this.persistentSelectedIndex;
         this.selectionEnd = this.persistentSelectedIndex;
 
@@ -669,16 +722,31 @@ class PartituraEditor {
         this.draw(this.editIframe, true);
     }
 
+    toggleLineBreak() {
+        if (this.persistentSelectedIndex === -1 || this.persistentSelectedIndex >= this.currentData.length) return;
+
+        const currentNote = this.currentData[this.persistentSelectedIndex];
+        const isLastNote = this.persistentSelectedIndex === this.currentData.length - 1;
+
+        currentNote.lineBreak = !currentNote.lineBreak;
+
+        if (currentNote.lineBreak && isLastNote) {
+            this.addNewNote();
+        } else {
+            this.draw(this.editIframe, true);
+        }
+    }
+
     deleteNoteAtCursor() {
         if (this.currentData.length <= 1) {
-            this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false };
+            this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false };
         } else {
             this.currentData.splice(this.persistentSelectedIndex, 1);
             if (this.persistentSelectedIndex >= this.currentData.length) {
                 this.persistentSelectedIndex = this.currentData.length - 1;
             }
         }
-        
+
         this.selectionStart = this.persistentSelectedIndex;
         this.selectionEnd = this.persistentSelectedIndex;
 
