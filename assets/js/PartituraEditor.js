@@ -15,8 +15,6 @@ class PartituraEditor {
         this.noteXPositions = [];
         this.noteYPositions = [];
         this.persistentSelectedIndex = 0;
-
-        // Controle de Seleção e Área de Transferência
         this.selectionStart = 0;
         this.selectionEnd = 0;
         this.copiedNotesBuffer = null;
@@ -494,6 +492,18 @@ class PartituraEditor {
         return { notes, chord, lyric, bar, rest, tie, lineBreak };
     }
 
+    getCurrentKey() {
+        const tomSelect = document.getElementById('tomSelect');
+        let key = tomSelect ? tomSelect.value : 'C';
+        if (!key || key === '') key = 'C';
+
+        if (this.musicTheory && this.musicTheory.acordesTomMap[key]) {
+            key = this.musicTheory.acordesTomMap[key];
+        }
+
+        return key;
+    }
+
     draw(iframe, isEditable) {
         const doc = iframe.contentDocument;
         const target = doc.getElementById('vexflow-target');
@@ -504,8 +514,8 @@ class PartituraEditor {
         doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
 
         const staveHeight = 150;
+        const currentKey = this.getCurrentKey(); // Obtém a armadura de clave atual
 
-        // 1. Divide a partitura em linhas
         const lines = [];
         let currentLine = [];
         this.currentData.forEach((data, index) => {
@@ -524,26 +534,22 @@ class PartituraEditor {
         const temCifraNaPartitura = this.currentData.some(d => d.chord && d.chord.trim() !== "");
         const lyricFontSize = (!isEditable && !temCifraNaPartitura) ? 15 : 12;
 
-        // 2. Prepara as notas e calcula o ESPAÇAMENTO AUTOMÁTICO (Heurística)
         const lineDataObjects = lines.map(line => {
-            let spaceNeeded = 0; // Quantidade de espaço que esta linha vai precisar
+            let spaceNeeded = 0;
 
             const tickables = line.flatMap(item => {
                 const { data, index } = item;
 
-                // --- CÁLCULO DE LARGURA DINÂMICA DA NOTA ---
-                let noteWidth = 60; // Espaço base padrão
+                let noteWidth = 60;
                 if (data.lyric) {
                     noteWidth = Math.max(noteWidth, data.lyric.length * (lyricFontSize * 0.7));
                 }
                 if (data.chord) {
                     noteWidth = Math.max(noteWidth, data.chord.length * 10);
                 }
-                // Adiciona espaço extra para a Barra de compasso (se existir)
                 if (data.bar) noteWidth += 20;
 
                 spaceNeeded += noteWidth;
-                // ---------------------------------------------
 
                 const note = new this.vf.StaveNote({
                     keys: data.rest ? ["b/4"] : data.notes,
@@ -553,12 +559,6 @@ class PartituraEditor {
                 staveNotesRef.push({ noteObj: note, dataObj: data });
                 tickablesByIndex[index] = note;
 
-                if (!data.rest) {
-                    data.notes.forEach((keyName, i) => {
-                        const match = keyName.match(/([a-g])([#b])\//i);
-                        if (match) note.addModifier(new this.vf.Accidental(match[2]), i);
-                    });
-                }
                 if (note.getStem()) note.getStem().hide = true;
 
                 if (data.chord) {
@@ -591,9 +591,8 @@ class PartituraEditor {
                 return data.bar ? [note, new this.vf.BarNote()] : [note];
             });
 
-            // Largura calculada: usa o spaceNeeded + padding para clave
-            const calculatedWidth = spaceNeeded + 100;
-            // Se a largura da tela for maior, estica. Se a tela for menor, usa a largura calculada (gerando scroll)
+            // Adiciona mais padding para caber a armadura de clave dinamicamente
+            const calculatedWidth = spaceNeeded + 150;
             const finalWidth = Math.max(iframe.clientWidth - 80, calculatedWidth);
 
             const voice = new this.vf.Voice({ num_beats: line.length, beat_value: 4 }).setStrict(false);
@@ -602,7 +601,6 @@ class PartituraEditor {
             return { voice, finalWidth };
         });
 
-        // 3. Define a largura global baseada na maior linha
         let maxWidth = 0;
         lineDataObjects.forEach(obj => {
             if (obj.finalWidth > maxWidth) maxWidth = obj.finalWidth;
@@ -614,19 +612,21 @@ class PartituraEditor {
 
         let currentY = 40;
 
-        // 4. Desenha as linhas perfeitamente espaçadas
         lineDataObjects.forEach(obj => {
             const stave = new this.vf.Stave(10, currentY, obj.finalWidth);
-            stave.addClef("treble").setContext(context).draw();
 
-            // O VexFlow vai justificar o espaço baseado no finalWidth que calculamos
-            new this.vf.Formatter().joinVoices([obj.voice]).format([obj.voice], obj.finalWidth - 100);
+            // Adiciona a clave e a armadura de clave
+            stave.addClef("treble").addKeySignature(currentKey).setContext(context).draw();
+
+            // O VEXFLOW CALCULA OS ACIDENTES AUTOMATICAMENTE BASEADO NA ARMADURA!
+            this.vf.Accidental.applyAccidentals([obj.voice], currentKey);
+
+            new this.vf.Formatter().joinVoices([obj.voice]).format([obj.voice], obj.finalWidth - 130);
             obj.voice.draw(context, stave);
 
             currentY += staveHeight;
         });
 
-        // 5. Desenha as Ligaduras
         const tiesToDraw = [];
         for (let i = 0; i < staveNotesRef.length - 1; i++) {
             if (staveNotesRef[i].dataObj.tie) {
@@ -645,7 +645,6 @@ class PartituraEditor {
         }
         tiesToDraw.forEach(t => t.setContext(context).draw());
 
-        // 6. Atualiza posições físicas para Câmera/Scroll
         if (isEditable) {
             this.noteXPositions = tickablesByIndex.map(n => n ? n.getAbsoluteX() : 0);
             this.noteYPositions = tickablesByIndex.map(n => n ? n.getStave().getYForLine(0) : 0);
