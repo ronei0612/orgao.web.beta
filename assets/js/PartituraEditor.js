@@ -721,8 +721,7 @@ class PartituraEditor {
         if (!target) return;
         target.innerHTML = "";
 
-        const isDark = document.body.classList.contains('dark-mode');
-        doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
+        doc.getElementById('score-container').className = '';
 
         const staveHeight = 150;
         const currentKey = this.getCurrentKey();

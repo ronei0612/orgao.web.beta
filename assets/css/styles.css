@@ -76,7 +76,7 @@ iframe {
 }
 
 .dark-mode iframe {
-    filter: invert(1);
+    filter: invert(1) hue-rotate(180deg);
 }
 
 #cifraDisplay {
