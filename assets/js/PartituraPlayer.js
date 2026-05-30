@@ -80,30 +80,29 @@ class PartituraPlayer {
 
         this.audioManager.stopAll(this.activeSources, 0.02);
 
-        // Toca o acorde ANTES para compensar o attack do órgão
         if (data.chord) {
             this.cifraPlayer.tocarAcorde(data.chord);
         }
 
-        //const previousData = this.partituraEditor.currentData[this.partituraPlaybackIndex - 1];
-        //if (!data.rest && !(previousData && previousData.tie)) {
-        // TODO: verificar se a nota anterior tem ligadura e se é a mesma nota para não tocar a nota atual
         if (!data.rest) {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
                 const notaLimpa = nota.toLowerCase().replace('#', '_');
-
                 const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
                 const buffer = this.buffers.get(bufferName);
-
                 if (buffer) {
                     this.audioManager.playNode(buffer, this.audioContext.currentTime, volume, 0.02, false, this.activeSources);
                 }
             });
         }
 
+        // CORREÇÃO: Identifica qual iframe deve ser redesenhado com o destaque azul
+        const frameParaDesenhar = !this.elements.partituraEditFrame.classList.contains('d-none')
+            ? this.elements.partituraEditFrame
+            : this.elements.partituraFrame;
+
         this.partituraEditor.highlightIndex = this.partituraPlaybackIndex;
-        this.partituraEditor.draw(this.elements.partituraFrame, false);
+        this.partituraEditor.draw(frameParaDesenhar, frameParaDesenhar === this.elements.partituraEditFrame);
     }
 
     avancarNotaAtualPartitura() {

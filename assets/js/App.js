@@ -471,33 +471,32 @@ class App {
         this.elements.addButton.classList.add('pressed');
         setTimeout(() => this.elements.addButton.classList.remove('pressed'), 100);
 
-        // Verifica se o menu de edição (lápis/lixeira) está ativo
+        // Se o menu lateral (lápis/lixeira) estiver aberto
         if (!this.elements.deleteSavesSelect.classList.contains('d-none')) {
-
-            // 1. Pergunta o tipo (Cifra ou Partitura)
             const tipo = await this.uiController.chooseEditorType();
             this.currentEditorType = tipo;
 
-            // 2. Limpa o nome da música e o select
             this.elements.itemNameInput.value = '';
             $('#savesSelect').val('').trigger('change');
 
-            // 3. Prepara a visualização (Mostra o Iframe de edição ou o Textarea)
+            // 1. Entra no modo de edição (isso esconde os botões de editar/excluir)
             this.uiController.editarMusica(tipo);
 
             if (tipo === 'partitura') {
                 if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
                 this.partituraEditor.abrirEditor([]);
             } else {
-                // Limpa o editor de texto normal
                 this.elements.editTextarea.value = '';
             }
 
-            // 5. Configurações padrão de UI
             this.uiController.exibirBotoesTom();
             this.uiController.exibirBotoesAcordes();
             this.cifraPlayer.preencherSelectCifras('C');
             this.elements.itemNameInput.focus();
+
+            // CORREÇÃO: Não chamamos toggleEditDeleteButtons aqui se entramos no editor, 
+            // pois o editarMusica já limpou a interface corretamente.
+            return;
         }
 
         this.uiController.toggleEditDeleteButtons();
@@ -787,20 +786,20 @@ class App {
         }
     }
 
+    // App.js - Método selectEscolhido
     async selectEscolhido(selectItem) {
         this.selectItemAntes = selectItem;
-
-        // 1. SEMPRE garante que os editores (texto e gráfico) sejam escondidos ao trocar de música
         this.uiController.resetInterface();
         this.elements.partituraEditFrame.classList.add('d-none');
-        this.editing = false; // Desliga a flag de edição
+        this.editing = false;
 
         if (selectItem && selectItem !== 'acordes__') {
             const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, selectItem);
 
-            // 2. O showLetraCifra vai cuidar de carregar o partitura.html ou o HTML da cifra
-            this.showLetraCifra(saveData);
+            // CORREÇÃO: Atualiza o tipo atual para evitar que o Play toque partitura em uma cifra
+            this.currentEditorType = saveData.type || (saveData.chords?.includes('@') ? 'partitura' : 'cifra');
 
+            this.showLetraCifra(saveData);
             this.escolherStyle(saveData.style);
             this.uiController.rolarIframeParaTopo(this.elements.iframeCifra);
         }
