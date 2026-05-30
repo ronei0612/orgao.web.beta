@@ -1399,13 +1399,12 @@ class App {
     }
 
     setupServiceWorker() {
-        // Registrar Service Worker apenas em origens seguras (https) ou localhost.
         if ('serviceWorker' in navigator) {
             const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
             const isSecureProtocol = location.protocol === 'https:';
 
             if (!isSecureProtocol && !isLocalhost) {
-                console.log('Service Worker registration skipped: insecure or unsupported origin', location.protocol, location.hostname, location.origin);
+                console.log('Service Worker registration skipped: insecure or unsupported origin');
                 return;
             }
 
@@ -1413,10 +1412,43 @@ class App {
                 navigator.serviceWorker.register('./sw.js')
                     .then(registration => {
                         console.log('Service Worker registrado com sucesso:', registration.scope);
+
+                        // 1. Força a verificação de atualizações no servidor TODA VEZ que abrir o app
+                        registration.update();
+
+                        // 2. Escuta quando um sw.js novo (diferente) for encontrado no servidor
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                // Se a nova versão terminou de baixar os novos caches e está "esperando"
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+
+                                    // 3. Avisa o usuário e pergunta se quer atualizar a tela
+                                    this.uiController.customConfirm(
+                                        "Uma nova versão do Órgão.Web foi encontrada! Deseja recarregar o aplicativo para atualizar?",
+                                        "Atualização Disponível"
+                                    ).then(confirmed => {
+                                        if (confirmed) {
+                                            // Envia uma mensagem para o sw.js novo assumir o controle imediatamente
+                                            newWorker.postMessage({ action: 'skipWaiting' });
+                                        }
+                                    });
+                                }
+                            });
+                        });
                     })
                     .catch(registrationError => {
                         console.log('Falha ao registrar o Service Worker:', registrationError);
                     });
+            });
+
+            // 4. Recarrega a página automaticamente assim que o novo Service Worker assumir o controle
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
             });
         }
     }

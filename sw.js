@@ -173,7 +173,7 @@ const urlsToCache = [
 
 // Evento de Instalação: Salva todos os arquivos listados no cache.
 self.addEventListener('install', event => {
-    self.skipWaiting();
+    //self.skipWaiting();
 
     event.waitUntil(
         caches.open(CACHE_NAME).then(async cache => {
@@ -244,4 +244,11 @@ self.addEventListener('fetch', event => {
             });
         })
     );
+});
+
+// Escuta a mensagem enviada pelo App.js para atualizar a versão
+self.addEventListener('message', event => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
