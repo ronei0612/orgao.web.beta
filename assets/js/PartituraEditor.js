@@ -75,9 +75,9 @@ class PartituraEditor {
             }
             #score-container { min-width: max-content; padding: 20px; padding-bottom: 120px; position: relative; }
             
-            .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-            .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 30px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
+            .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 8px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
             
             .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; outline: none; }
             .tool-btn:active { transform: scale(0.9); background: #f0f0f0; }
@@ -721,8 +721,7 @@ class PartituraEditor {
         if (!target) return;
         target.innerHTML = "";
 
-        const isDark = document.body.classList.contains('dark-mode');
-        doc.getElementById('score-container').className = isDark ? 'dark-mode-svg' : '';
+        doc.getElementById('score-container').className = '';
 
         const staveHeight = 150;
         const currentKey = this.getCurrentKey();
@@ -957,25 +956,37 @@ class PartituraEditor {
     }
 
     toggleLineBreak() {
-        if (this.persistentSelectedIndex === -1 || this.persistentSelectedIndex >= this.currentData.length) return;
+        if (this.persistentSelectedIndex === -1) return;
 
-        const currentNote = this.currentData[this.persistentSelectedIndex];
-        const isLastNote = this.persistentSelectedIndex === this.currentData.length - 1;
+        // CORREÇÃO: Se quisermos que a nota atual comece uma nova linha, 
+        // a quebra deve ocorrer na nota ANTERIOR (index - 1).
+        const indexParaQuebrar = this.persistentSelectedIndex - 1;
 
-        currentNote.lineBreak = !currentNote.lineBreak;
-
-        if (currentNote.lineBreak && isLastNote) {
-            this.addNewNote();
+        if (indexParaQuebrar >= 0) {
+            this.currentData[indexParaQuebrar].lineBreak = !this.currentData[indexParaQuebrar].lineBreak;
+            this.draw(this.editIframe, true);
         } else {
+            // Se for a primeira nota, não faz sentido quebrar antes dela, 
+            // mas podemos apenas redesenhar.
             this.draw(this.editIframe, true);
         }
     }
 
     deleteNoteAtCursor() {
         if (this.currentData.length <= 1) {
+            // Se só tem uma nota, apenas reseta ela
             this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false };
         } else {
+            // CORREÇÃO: Se a nota a ser deletada for a primeira da nova linha (a anterior tem lineBreak = true)
+            // Removemos a quebra de linha da nota anterior para que as pautas se unam novamente.
+            if (this.persistentSelectedIndex > 0 && this.currentData[this.persistentSelectedIndex - 1].lineBreak) {
+                this.currentData[this.persistentSelectedIndex - 1].lineBreak = false;
+            }
+
+            // Deleta a nota
             this.currentData.splice(this.persistentSelectedIndex, 1);
+
+            // Evita que o cursor saia dos limites do array
             if (this.persistentSelectedIndex >= this.currentData.length) {
                 this.persistentSelectedIndex = this.currentData.length - 1;
             }
