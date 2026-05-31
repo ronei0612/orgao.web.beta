@@ -835,19 +835,30 @@ class PartituraEditor {
         });
 
         const tiesToDraw = [];
-        for (let i = 0; i < staveNotesRef.length - 1; i++) {
+        for (let i = 0; i < staveNotesRef.length; i++) {
             if (staveNotesRef[i].dataObj.tie) {
                 const firstNote = staveNotesRef[i].noteObj;
-                const lastNote = staveNotesRef[i + 1].noteObj;
 
-                if (firstNote.getStave() === lastNote.getStave()) {
-                    tiesToDraw.push(new this.vf.StaveTie({
-                        first_note: firstNote,
-                        last_note: lastNote,
-                        first_indices: [0],
-                        last_indices: [0]
-                    }));
-                }
+                const tie = new this.vf.StaveTie({
+                    first_note: firstNote,
+                    last_note: null, // Força a não grudar na próxima nota
+                    first_indices: [0]
+                });
+
+                const firstX = firstNote.getTieRightX();
+                const staveEndX = firstNote.getStave().getTieEndX();
+
+                // 1. Move o ponto inicial da ligadura para a esquerda (mais "grudado" na nota)
+                tie.render_options.first_x_shift = -8;
+
+                // 2. Controla o ponto final (ajustado para dar um tamanho total de ~23px)
+                tie.render_options.last_x_shift = (firstX + 25) - staveEndX;
+
+                // 3. Ajusta a curvatura para ficar sutil e delicada junto à nota
+                tie.render_options.cp1 = 4;
+                tie.render_options.cp2 = 8; // Um pouquinho menor para acompanhar o recuo
+
+                tiesToDraw.push(tie);
             }
         }
         tiesToDraw.forEach(t => t.setContext(context).draw());
@@ -950,7 +961,9 @@ class PartituraEditor {
     }
 
     toggleTie() {
-        if (this.persistentSelectedIndex === -1 || this.persistentSelectedIndex >= this.currentData.length - 1) return;
+        // Removido o bloqueio que impedia ativar ligadura na última nota
+        if (this.persistentSelectedIndex === -1) return;
+
         this.currentData[this.persistentSelectedIndex].tie = !this.currentData[this.persistentSelectedIndex].tie;
         this.draw(this.editIframe, true);
     }
