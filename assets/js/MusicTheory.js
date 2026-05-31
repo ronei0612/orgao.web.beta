@@ -483,7 +483,13 @@ class MusicTheory {
         const destino = tons.indexOf(this.acordesMap[tomDestino] || tomDestino);
 
         if (origem === -1 || destino === -1) return 0;
-        return destino - origem;
+        let diff = destino - origem;
+
+        // Escolhe o menor caminho de transposição (evita saltos absurdos de oitava)
+        if (diff > 6) diff -= 12;
+        if (diff < -6) diff += 12;
+
+        return diff;
     }
 
     descobrirTom(cifras) {

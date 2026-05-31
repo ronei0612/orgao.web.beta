@@ -884,7 +884,15 @@ class PartituraEditor {
 
             if (!item.rest) {
                 newItem.notes = item.notes.map(n => {
-                    const idx = this.basePitches.indexOf(n);
+                    let idx = this.basePitches.indexOf(n);
+                    if (idx === -1) {
+                        // Mapeia bemóis para sustenidos para encontrar no basePitches
+                        const flatToSharp = { 'db': 'c#', 'eb': 'd#', 'gb': 'f#', 'ab': 'g#', 'bb': 'a#' };
+                        const parts = n.split('/');
+                        if (parts.length === 2 && flatToSharp[parts[0]]) {
+                            idx = this.basePitches.indexOf(flatToSharp[parts[0]] + '/' + parts[1]);
+                        }
+                    }
                     if (idx === -1) return n;
                     const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
                     return this.basePitches[novoIdx];
@@ -901,13 +909,16 @@ class PartituraEditor {
                     const tonica = match[1];
                     const resto = match[2];
 
-                    const tonicaTransposta = this.musicTheory.transposeAcorde(tonica, semitones, null);
+                    const tomSelect = document.getElementById('tomSelect');
+                    const targetTom = tomSelect ? tomSelect.value : null;
+
+                    const tonicaTransposta = this.musicTheory.transposeAcorde(tonica, semitones, targetTom);
                     chord = tonicaTransposta + resto;
 
                     if (partes[1]) {
                         const baixoMatch = partes[1].match(/^([A-G][#b]?)(.*)/);
                         if (baixoMatch) {
-                            const baixoTransposto = this.musicTheory.transposeAcorde(baixoMatch[1], semitones, null);
+                            const baixoTransposto = this.musicTheory.transposeAcorde(baixoMatch[1], semitones, targetTom);
                             chord += '/' + baixoTransposto + baixoMatch[2];
                         }
                     }
@@ -919,7 +930,9 @@ class PartituraEditor {
         });
 
         this.draw(this.viewIframe, false);
+        this.draw(this.editIframe, true);
         if (this.onViewDrawn) this.onViewDrawn();
+        if (this.onEditDrawn) this.onEditDrawn();
     }
 
     addNewNote() {

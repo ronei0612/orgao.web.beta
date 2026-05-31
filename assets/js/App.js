@@ -414,8 +414,8 @@ class App {
                 this.cifraPlayer.preencherAcordes(selectedTom);
             }
             else {
-                // Modo partitura visualização
-                if (!this.elements.partituraFrame.classList.contains('d-none')) {
+                // Modo partitura visualização e edição
+                if (!this.elements.partituraFrame.classList.contains('d-none') || !this.elements.partituraEditFrame.classList.contains('d-none')) {
                     const tomOrigem = this.tomAnterior || selectedTom;
                     const semitones = this.musicTheory.getTransposeSteps(tomOrigem, selectedTom);
                     this.tomAnterior = selectedTom; // atualiza para a próxima mudança
@@ -492,6 +492,7 @@ class App {
             this.uiController.exibirBotoesTom();
             this.uiController.exibirBotoesAcordes();
             this.cifraPlayer.preencherSelectCifras('C');
+            this.tomAnterior = 'C';
             this.elements.itemNameInput.focus();
 
             // CORREÇÃO: Não chamamos toggleEditDeleteButtons aqui se entramos no editor, 
@@ -517,7 +518,11 @@ class App {
 
         if (tipo === 'partitura') {
             if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
-            const dataArray = saveData.chords.split('\n').filter(l => l.trim());
+
+            // Pega exatamente o estado atualizado e transposto da visualização
+            const dadosAtuaisSerializados = this.partituraEditor.obterDadosParaSalvar();
+            const dataArray = dadosAtuaisSerializados.split('\n').filter(l => l.trim());
+
             this.partituraEditor.abrirEditor(dataArray);
         } else {
             // Pega o texto transposto do iframe em vez do original do localStorage
@@ -538,6 +543,7 @@ class App {
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
         this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
+        this.tomAnterior = this.elements.tomSelect.value ?? 'C';
         this.exibirInstrument(this.cifraPlayer.instrumento);
     }
 
@@ -741,6 +747,7 @@ class App {
             this.partituraOriginalKey = saveData.key || 'C';
             this.cifraPlayer.tomOriginal = this.partituraOriginalKey;
             this.elements.tomSelect.value = this.partituraOriginalKey;
+            this.tomAnterior = this.partituraOriginalKey;
 
             if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
 
