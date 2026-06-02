@@ -171,15 +171,14 @@ const urlsToCache = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css'
 ];
 
-// Evento de Instalação: Salva todos os arquivos listados no cache.
+// Evento de Instalação Otimizado (Baixa em paralelo)
 self.addEventListener('install', event => {
-    //self.skipWaiting();
-
     event.waitUntil(
         caches.open(CACHE_NAME).then(async cache => {
-            console.log('[SW] Iniciando cache de arquivos...');
+            console.log('[SW] Iniciando cache de arquivos em paralelo...');
 
-            for (const url of urlsToCache) {
+            // Cria um array de "Promessas" de download
+            const cachePromises = urlsToCache.map(async (url) => {
                 try {
                     const response = await fetch(url);
                     if (response.ok) {
@@ -188,11 +187,13 @@ self.addEventListener('install', event => {
                         console.warn(`[SW AVISO] Arquivo não encontrado (Ignorado): ${url}`);
                     }
                 } catch (error) {
-                    // CORREÇÃO: Removemos o Promise.reject()
-                    // Se um falhar, apenas avisa e CONTINUA a instalar os outros!
                     console.error(`[SW FALHA DE REDE] Erro ao buscar: ${url}`, error);
                 }
-            }
+            });
+
+            // Executa todos os downloads ao mesmo tempo
+            await Promise.all(cachePromises);
+
             console.log('[SW] Processo de cache inicial concluído!');
         })
     );
