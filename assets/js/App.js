@@ -1520,16 +1520,8 @@ class App {
                                 // Se a nova versão terminou de baixar os novos caches e está "esperando"
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
 
-                                    // 3. Avisa o usuário e pergunta se quer atualizar a tela
-                                    this.uiController.customConfirm(
-                                        "Uma nova versão do Órgão.Web foi encontrada! Deseja recarregar o aplicativo para atualizar?",
-                                        "Atualização Disponível"
-                                    ).then(confirmed => {
-                                        if (confirmed) {
-                                            // Envia uma mensagem para o sw.js novo assumir o controle imediatamente
-                                            newWorker.postMessage({ action: 'skipWaiting' });
-                                        }
-                                    });
+                                    console.log('Nova versão encontrada! Atualizando automaticamente...');
+                                    newWorker.postMessage({ action: 'skipWaiting' });
                                 }
                             });
                         });
