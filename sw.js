@@ -171,41 +171,84 @@ const urlsToCache = [
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css'
 ];
 
-// Evento de instalação do Service Worker - Baixa os arquivos e coloca no cache
+// Evento de Instalação: Salva todos os arquivos listados no cache.
 self.addEventListener('install', event => {
+    //self.skipWaiting();
+
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Armazenando arquivos no cache...');
-                return cache.addAll(urlsToCache);
-            })
-            .then(() => self.skipWaiting())
+        caches.open(CACHE_NAME).then(async cache => {
+            console.log('[SW] Iniciando cache de arquivos...');
+
+            for (const url of urlsToCache) {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        await cache.put(url, response);
+                    } else {
+                        console.warn(`[SW AVISO] Arquivo não encontrado (Ignorado): ${url}`);
+                    }
+                } catch (error) {
+                    // CORREÇÃO: Removemos o Promise.reject()
+                    // Se um falhar, apenas avisa e CONTINUA a instalar os outros!
+                    console.error(`[SW FALHA DE REDE] Erro ao buscar: ${url}`, error);
+                }
+            }
+            console.log('[SW] Processo de cache inicial concluído!');
+        })
     );
 });
 
-// Evento de ativação - Limpa caches antigos de versões anteriores, se houver
+// Evento de Ativação: Limpeza de Caches Antigos
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
-                cacheNames.map(cache => {
-                    if (cache !== CACHE_NAME) {
-                        console.log('Limpando cache antigo:', cache);
-                        return caches.delete(cache);
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('[SW] Cache antigo encontrado. Deletando:', cacheName);
+                        return caches.delete(cacheName);
                     }
                 })
             );
-        }).then(() => self.clients.claim())
+        })
+    );
+    return self.clients.claim();
+});
+
+// Evento de Fetch: Intercepta todas as requisições da página.
+self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') return;
+
+    event.respondWith(
+        caches.match(event.request).then(cachedResponse => {
+            // 1. Tem no cache? Retorna imediatamente (Funciona offline)
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+
+            // 2. Não tem? Busca na rede
+            return fetch(event.request).then(networkResponse => {
+                // CORREÇÃO: Se a busca deu certo, armazena no cache para a próxima vez!
+                // Isso garante que Flauta, Bateria e Epiano fiquem offline após o 1º uso
+                if (networkResponse && networkResponse.status === 200) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, responseToCache);
+                    });
+                }
+
+                return networkResponse;
+            }).catch(error => {
+                console.warn('[SW] Offline/Falha de rede para o recurso:', event.request.url);
+                // Como não tem alert() aqui, o app apenas não toca o som se não tiver internet e não estiver no cache
+            });
+        })
     );
 });
 
-// Evento de busca (Fetch) - Intercepta requisições e serve os arquivos salvos no cache primeiro
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(cachedResponse => {
-                // Se o arquivo estiver no cache, retorna ele. Senão, busca na rede.
-                return cachedResponse || fetch(event.request);
-            })
-    );
+// Escuta a mensagem enviada pelo App.js para atualizar a versão
+self.addEventListener('message', event => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
