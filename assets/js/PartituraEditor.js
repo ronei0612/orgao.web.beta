@@ -924,6 +924,33 @@ class PartituraEditor {
 
     addNewNote() {
         this.commitInput();
+
+        let repassarQuebraDeLinha = false;
+
+        // Valores padrão caso algo dê errado
+        let notasParaCopiar = ["b/4"];
+        let isRest = false;
+
+        // Verifica se existe uma nota selecionada atualmente
+        if (this.persistentSelectedIndex >= 0) {
+            const notaAtual = this.currentData[this.persistentSelectedIndex];
+
+            // Lógica 1: Repassa a quebra de linha (que fizemos agora pouco)
+            if (notaAtual.lineBreak) {
+                notaAtual.lineBreak = false;
+            repassarQuebraDeLinha = true;
+        }
+
+            // Lógica 2: Clona as notas e o estado de pausa da nota atual
+            // O [...array] cria uma cópia independente das notas
+            notasParaCopiar = [...notaAtual.notes];
+            isRest = notaAtual.rest;
+        } else {
+            // Fallback: se o editor estiver vazio, tenta usar o lastUsedPitch
+            notasParaCopiar = [this.lastUsedPitch || "b/4"];
+        }
+
+        // Insere a nova nota clonando os dados
         this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
             notes: [this.lastUsedPitch],
             chord: "",
@@ -931,8 +958,9 @@ class PartituraEditor {
             bar: false,
             rest: false,
             tie: false,
-            lineBreak: false
+            lineBreak: repassarQuebraDeLinha // A nova nota herda a quebra, se houver
         });
+
         this.persistentSelectedIndex++;
         this.selectionStart = this.persistentSelectedIndex;
         this.selectionEnd = this.persistentSelectedIndex;
@@ -943,6 +971,15 @@ class PartituraEditor {
 
     addRest() {
         this.commitInput();
+
+        let repassarQuebraDeLinha = false;
+
+        // Mesma lógica da nota normal: rouba a quebra se existir
+        if (this.persistentSelectedIndex >= 0 && this.currentData[this.persistentSelectedIndex].lineBreak) {
+            this.currentData[this.persistentSelectedIndex].lineBreak = false;
+            repassarQuebraDeLinha = true;
+        }
+
         this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
             notes: ["b/4"],
             chord: "",
@@ -950,8 +987,9 @@ class PartituraEditor {
             bar: false,
             rest: true,
             tie: false,
-            lineBreak: false
+            lineBreak: repassarQuebraDeLinha // A nova pausa herda a quebra
         });
+
         this.persistentSelectedIndex++;
         this.selectionStart = this.persistentSelectedIndex;
         this.selectionEnd = this.persistentSelectedIndex;
@@ -990,18 +1028,23 @@ class PartituraEditor {
             // Se só tem uma nota, apenas reseta ela
             this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false };
         } else {
-            // CORREÇÃO: Se a nota a ser deletada for a primeira da nova linha (a anterior tem lineBreak = true)
-            // Removemos a quebra de linha da nota anterior para que as pautas se unam novamente.
+            // VERIFICA SE A NOTA ANTERIOR TEM QUEBRA DE LINHA
             if (this.persistentSelectedIndex > 0 && this.currentData[this.persistentSelectedIndex - 1].lineBreak) {
+
+                // Apenas remove a quebra de linha (unindo as pautas)
                 this.currentData[this.persistentSelectedIndex - 1].lineBreak = false;
-            }
 
-            // Deleta a nota
-            this.currentData.splice(this.persistentSelectedIndex, 1);
+                // Opcional, mas dá uma UX ótima: move o cursor para a nota que tinha a quebra
+                this.persistentSelectedIndex--;
 
-            // Evita que o cursor saia dos limites do array
-            if (this.persistentSelectedIndex >= this.currentData.length) {
-                this.persistentSelectedIndex = this.currentData.length - 1;
+            } else {
+                // Comportamento normal: Deleta a nota atual
+                this.currentData.splice(this.persistentSelectedIndex, 1);
+
+                // Evita que o cursor saia dos limites do array
+                if (this.persistentSelectedIndex >= this.currentData.length) {
+                    this.persistentSelectedIndex = this.currentData.length - 1;
+                }
             }
         }
 
