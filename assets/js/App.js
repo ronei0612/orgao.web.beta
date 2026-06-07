@@ -405,39 +405,66 @@ class App {
 
     handleTomSelectChange(event) {
         const selectedTom = this.elements.tomSelect.value;
-        if (selectedTom) {
-            const acordesMode = !this.elements.acorde1.classList.contains('d-none');
 
-            if (acordesMode) {
-                const localStorageSalvar = this.getIframeStorageName();
-                this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
-                this.cifraPlayer.preencherAcordes(selectedTom);
-            }
-            else {
-                // Modo partitura visualização
-                if (!this.elements.partituraFrame.classList.contains('d-none')) {
-                    const tomOrigem = this.tomAnterior || selectedTom;
-                    const semitones = this.musicTheory.getTransposeSteps(tomOrigem, selectedTom);
-                    this.tomAnterior = selectedTom; // atualiza para a próxima mudança
-                    this.partituraEditor.transporVisualizacao(semitones);
-                    return;
-                }
-                else {
-                    this.cifraPlayer.transposeCifra();
-
-                    if (!this.cifraPlayer.parado && this.cifraPlayer.acordeTocando) {
-                        const button = event.currentTarget;
-                        this.cifraPlayer.parado = false;
-                        this.cifraPlayer.tocarAcorde(button.value);
-                        button.classList.add('pressed');
-                    }
-                }
-            }
-        }
-        else { // Selecionou Letra
+        // Se o tom selecionado for nulo/vazio (Selecionou "Letra")
+        if (!selectedTom) {
             this.cifraPlayer.removeCifras(this.elements.iframeCifra.contentDocument.body.innerHTML);
             this.uiController.exibirBotoesAcordes();
             this.cifraPlayer.preencherSelectAcordes('C');
+            return;
+        }
+
+        // -------------------------------------------------------------
+        // CENÁRIO 1: MODO PARTITURA (EDIÇÃO OU VISUALIZAÇÃO)
+        // -------------------------------------------------------------
+
+        // 1.1: Editando Partitura
+        if (!this.elements.partituraEditFrame.classList.contains('d-none')) {
+            this.cifraPlayer.preencherAcordes(selectedTom); // Atualiza os botões de atalho
+            this.partituraEditor.draw(this.elements.partituraEditFrame, true); // Redesenha pauta
+            return;
+        }
+
+        // 1.2: Visualizando Partitura
+        if (!this.elements.partituraFrame.classList.contains('d-none')) {
+            const tomOrigem = this.tomAnterior || selectedTom;
+            const semitones = this.musicTheory.getTransposeSteps(tomOrigem, selectedTom);
+            this.tomAnterior = selectedTom;
+            this.partituraEditor.transporVisualizacao(semitones);
+            return;
+        }
+
+        // -------------------------------------------------------------
+        // CENÁRIO 2: MODO SOLO DE ACORDES / AUXILIARES DE MISSA
+        // (Selecionou "Acordes", ou está lendo Liturgia/Missa/Orações)
+        // -------------------------------------------------------------
+        const noSoloDeAcordes = !this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__';
+        const lendoTextosMissa = !this.elements.liturgiaDiariaFrame.classList.contains('d-none') ||
+            !this.elements.santamissaFrame.classList.contains('d-none') ||
+            !this.elements.oracoesFrame.classList.contains('d-none');
+
+        if (noSoloDeAcordes || lendoTextosMissa) {
+            // Salva as configurações de metadados para lembrar o tom daquela tela específica
+            const localStorageSalvar = this.getIframeStorageName();
+            this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
+
+            // Atualiza os botões de acordes na tela
+            this.cifraPlayer.preencherAcordes(selectedTom);
+            return;
+        }
+
+        // -------------------------------------------------------------
+        // CENÁRIO 3: MODO CIFRA (Música cifrada carregada no iframe)
+        // -------------------------------------------------------------
+        if (!this.elements.iframeCifra.classList.contains('d-none')) {
+            this.cifraPlayer.transposeCifra();
+
+            if (!this.cifraPlayer.parado && this.cifraPlayer.acordeTocando) {
+                const button = event.currentTarget;
+                this.cifraPlayer.parado = false;
+                this.cifraPlayer.tocarAcorde(button.value);
+                button.classList.add('pressed');
+            }
         }
     }
 
