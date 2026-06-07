@@ -62,6 +62,7 @@ class PartituraPlayer {
     }
 
     async loadSounds() {
+        try {
         const notas = [...new Set(
             Object.values(this.partituraEditor.basePitches).flat()
         )];
@@ -71,8 +72,9 @@ class PartituraPlayer {
                 return [name, `${this.audioPath}/${name}.ogg`];
             })
         );
-        this.buffers = await this.audioManager.loadBuffers(urls);
-    }
+            this.buffers = await this.audioManager.loadBuffers(urls);
+        } catch { }
+        }
 
     tocarNotaAtualPartitura(volume = 1) {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
@@ -87,7 +89,14 @@ class PartituraPlayer {
         if (!data.rest) {
             data.notes.forEach(n => {
                 const [nota, oitava] = n.split('/');
-                const notaLimpa = nota.toLowerCase().replace('#', '_');
+                let notaConvertida = nota.toLowerCase();
+
+                const mapBemolParaSustenido = { 'db': 'c#', 'eb': 'd#', 'gb': 'f#', 'ab': 'g#', 'bb': 'a#' };
+                if (mapBemolParaSustenido[notaConvertida]) {
+                    notaConvertida = mapBemolParaSustenido[notaConvertida];
+                }
+
+                const notaLimpa = notaConvertida.replace('#', '_');
                 const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
                 const buffer = this.buffers.get(bufferName);
                 if (buffer) {

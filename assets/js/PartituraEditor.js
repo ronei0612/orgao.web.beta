@@ -6,9 +6,10 @@ class PartituraEditor {
         this.vf = Vex.Flow;
 
         this.basePitches = [
-            "g#/3", "a/3", "a#/3", "b/3",
+            "f/3", "f#/3", "g/3", "g#/3", "a/3", "a#/3", "b/3",
             "c/4", "c#/4", "d/4", "d#/4", "e/4", "f/4", "f#/4", "g/4", "g#/4", "a/4", "a#/4", "b/4",
-            "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5"
+            "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5", "g#/5", "a/5", "a#/5", "b/5",
+            "c/6", "c#/6", "d/6", "d#/6", "e/6"
         ];
 
         this.currentData = [];
@@ -48,6 +49,14 @@ class PartituraEditor {
                 </button>
             </div>` : '';
 
+        // NOVO: Criado o painel do lado esquerdo para as oitavas
+        let leftToolbarHtml = isEditable ? `
+            <div class="left-toolbar">
+                <button class="tool-btn btn-octave" id="btn-octave-up" title="Subir Oitava (Toda Partitura)">↑8ª</button>
+                <button class="tool-btn btn-octave" id="btn-octave-down" title="Descer Oitava (Toda Partitura)">↓8ª</button>
+            </div>` : '';
+
+        // Os botões de oitava foram removidos do painel inferior
         let bottomToolbarHtml = isEditable ? `
             <div class="bottom-toolbar">
                 <button class="tool-btn btn-chord" id="btn-chord" title="Adicionar Cifra">C7</button>
@@ -56,7 +65,7 @@ class PartituraEditor {
                 <button class="tool-btn btn-linebreak" id="btn-linebreak" title="Quebrar Linha Após a Nota Atual">↲</button>
             </div>` : '';
 
-        doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}${bottomToolbarHtml}`;
+        doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}${leftToolbarHtml}${bottomToolbarHtml}`;
 
         const style = doc.createElement('style');
         style.innerHTML = `
@@ -77,6 +86,7 @@ class PartituraEditor {
             
             .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+            .left-toolbar { position: fixed; left: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
             .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 8px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
             
             .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; outline: none; }
@@ -91,6 +101,7 @@ class PartituraEditor {
             .btn-chord { color: #d32f2f; font-size: 16px; font-family: 'Roboto', sans-serif; }
             .btn-lyric { color: #000; font-size: 16px; font-family: 'Roboto', sans-serif; }
             .btn-linebreak { color: #555; font-size: 24px; }
+            .btn-octave { color: #8E44AD; font-size: 16px; font-family: 'Roboto', sans-serif; }
             
             .inline-input { 
                 position: absolute; 
@@ -126,6 +137,8 @@ class PartituraEditor {
             doc.getElementById('btn-lyric').onclick = () => this.showInlineInput('lyric');
             doc.getElementById('btn-delete').onclick = () => this.deleteNoteAtCursor();
             doc.getElementById('btn-linebreak').onclick = () => this.toggleLineBreak();
+            doc.getElementById('btn-octave-up').onclick = () => this.shiftOctaveAll(1);
+            doc.getElementById('btn-octave-down').onclick = () => this.shiftOctaveAll(-1);
 
             // Intercepta a Colagem (Paste) direto do sistema operacional
             doc.addEventListener('paste', (e) => {
@@ -485,6 +498,96 @@ class PartituraEditor {
         }
     }
 
+    shiftOctaveAll(direction) {
+        this.commitInput();
+        let changed = false;
+
+        this.currentData.forEach(item => {
+            if (!item.rest) {
+                item.notes = item.notes.map(note => {
+                    const partes = note.split('/');
+                    if (partes.length === 2) {
+                        const pitch = partes[0];
+                        let octave = parseInt(partes[1], 10);
+                        octave += direction;
+
+                        if (octave < 2) octave = 2;
+                        if (octave > 6) octave = 6;
+
+                        changed = true;
+                        return `${pitch}/${octave}`;
+                    }
+                    return note;
+                });
+            }
+        });
+
+        if (changed) {
+            this.draw(this.editIframe, true);
+            this.centralizarNoCursor();
+        }
+    }
+
+    getEnarmonicPitch(pitchStr) {
+        const currentKey = this.getCurrentKey();
+
+        let prefereBemol = false;
+        if (currentKey.endsWith('b') || currentKey.endsWith('bm')) {
+            prefereBemol = true;
+        } else if (['F', 'Dm', 'Gm', 'Cm', 'Fm'].includes(currentKey)) {
+            prefereBemol = true;
+        } else if (this.musicTheory.tonsPreferemBemol.has(currentKey) && currentKey !== 'C' && currentKey !== 'Am') {
+            prefereBemol = true;
+        }
+
+        if (!prefereBemol) return pitchStr;
+
+        const partes = pitchStr.split('/');
+        if (partes.length !== 2) return pitchStr;
+
+        const nota = partes[0].toLowerCase();
+        const oitava = partes[1];
+
+        const mapSustenidoParaBemol = {
+            'c#': 'db',
+            'd#': 'eb',
+            'f#': 'gb',
+            'g#': 'ab',
+            'a#': 'bb'
+        };
+
+        if (mapSustenidoParaBemol[nota]) {
+            return mapSustenidoParaBemol[nota] + '/' + oitava;
+        }
+
+        return pitchStr;
+    }
+
+    convertAccidentalsToKey() {
+        let changed = false;
+        this.currentData.forEach(item => {
+            if (!item.rest) {
+                const newNotes = item.notes.map(n => {
+                    const partes = n.split('/');
+                    if (partes.length !== 2) return n;
+                    const mapBemolParaSustenido = { 'db': 'c#', 'eb': 'd#', 'gb': 'f#', 'ab': 'g#', 'bb': 'a#' };
+                    const notaBase = partes[0].toLowerCase();
+
+                    let sustenido = n;
+                    if (mapBemolParaSustenido[notaBase]) {
+                        sustenido = mapBemolParaSustenido[notaBase] + '/' + partes[1];
+                    }
+
+                    const enarmonico = this.getEnarmonicPitch(sustenido);
+                    if (enarmonico !== n) changed = true;
+                    return enarmonico;
+                });
+                item.notes = newNotes;
+            }
+        });
+        return changed;
+    }
+
     setChordToCurrentNote(chord) {
         if (this.persistentSelectedIndex >= 0 && this.persistentSelectedIndex < this.currentData.length) {
             this.commitInput();
@@ -509,13 +612,34 @@ class PartituraEditor {
     alterarAltura(direcao) {
         if (this.persistentSelectedIndex === -1) return;
         const notaAtual = this.currentData[this.persistentSelectedIndex].notes[0];
-        let index = this.basePitches.indexOf(notaAtual);
-        if (index === -1) index = this.basePitches.indexOf(notaAtual.replace(/[#b]/g, ''));
+
+        const mapBemolParaSustenido = {
+            'db': 'c#',
+            'eb': 'd#',
+            'gb': 'f#',
+            'ab': 'g#',
+            'bb': 'a#'
+        };
+
+        const partes = notaAtual.split('/');
+        let notaSustenido = notaAtual;
+        if (partes.length === 2) {
+            const notaLower = partes[0].toLowerCase();
+            if (mapBemolParaSustenido[notaLower]) {
+                notaSustenido = mapBemolParaSustenido[notaLower] + '/' + partes[1];
+            }
+        }
+
+        let index = this.basePitches.indexOf(notaSustenido);
+        if (index === -1) index = this.basePitches.indexOf(notaSustenido.replace(/[#b]/g, ''));
 
         let novoIndex = index + direcao;
         if (novoIndex >= 0 && novoIndex < this.basePitches.length) {
-            this.currentData[this.persistentSelectedIndex].notes = [this.basePitches[novoIndex]];
-            this.lastUsedPitch = this.basePitches[novoIndex];
+            const pitchSustenido = this.basePitches[novoIndex];
+            const pitchFinal = this.getEnarmonicPitch(pitchSustenido);
+
+            this.currentData[this.persistentSelectedIndex].notes = [pitchFinal];
+            this.lastUsedPitch = pitchFinal;
             this.draw(this.editIframe, true);
         }
     }
@@ -716,6 +840,7 @@ class PartituraEditor {
     }
 
     draw(iframe, isEditable) {
+        this.convertAccidentalsToKey();
         const doc = iframe.contentDocument;
         const target = doc.getElementById('vexflow-target');
         if (!target) return;
@@ -884,7 +1009,14 @@ class PartituraEditor {
 
             if (!item.rest) {
                 newItem.notes = item.notes.map(n => {
-                    const idx = this.basePitches.indexOf(n);
+                    const mapBemolParaSustenido = { 'db': 'c#', 'eb': 'd#', 'gb': 'f#', 'ab': 'g#', 'bb': 'a#' };
+                    const partes = n.split('/');
+                    let notaSustenido = n;
+                    if (partes.length === 2 && mapBemolParaSustenido[partes[0].toLowerCase()]) {
+                        notaSustenido = mapBemolParaSustenido[partes[0].toLowerCase()] + '/' + partes[1];
+                    }
+
+                    const idx = this.basePitches.indexOf(notaSustenido);
                     if (idx === -1) return n;
                     const novoIdx = Math.max(0, Math.min(this.basePitches.length - 1, idx + semitones));
                     return this.basePitches[novoIdx];
@@ -938,8 +1070,8 @@ class PartituraEditor {
             // Lógica 1: Repassa a quebra de linha (que fizemos agora pouco)
             if (notaAtual.lineBreak) {
                 notaAtual.lineBreak = false;
-            repassarQuebraDeLinha = true;
-        }
+                repassarQuebraDeLinha = true;
+            }
 
             // Lógica 2: Clona as notas e o estado de pausa da nota atual
             // O [...array] cria uma cópia independente das notas
@@ -952,11 +1084,11 @@ class PartituraEditor {
 
         // Insere a nova nota clonando os dados
         this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
-            notes: [this.lastUsedPitch],
+            notes: notasParaCopiar,
             chord: "",
             lyric: "",
             bar: false,
-            rest: false,
+            rest: isRest,
             tie: false,
             lineBreak: repassarQuebraDeLinha // A nova nota herda a quebra, se houver
         });
