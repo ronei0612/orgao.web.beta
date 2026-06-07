@@ -330,6 +330,7 @@ class UIController {
         this.elements.bpmContainer.classList.remove('d-none');
         this.elements.tomContainer.classList.remove('d-none');
         this.elements.draggableControls.classList.remove('d-none');
+        this.elements.bottomSpacer.classList.add('d-none');
 
         if (ocultarBateria)
             this.elements.rhythmButtonsControl.classList.add('d-none');

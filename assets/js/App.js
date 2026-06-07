@@ -699,7 +699,8 @@ class App {
             // Garante que os elementos fiquem visíveis caso viéssemos de uma Letra
             this.elements.bpmContainer.classList.remove('d-none');
             this.elements.draggableControls.classList.remove('d-none');
-            this.elements.instrumentsWrapper.classList.remove('d-none'); // <-- RESTAURA
+            this.elements.instrumentsWrapper.classList.remove('d-none');
+            this.elements.bottomSpacer.classList.add('d-none');
 
             let tom = 'C';
             if (saveData && saveData.key && saveData.key !== '') {
@@ -722,7 +723,8 @@ class App {
 
             this.elements.bpmContainer.classList.add('d-none'); // Oculta os controles de BPM
             this.elements.draggableControls.classList.add('d-none'); // Oculta o painel flutuante de play/stop/notes
-            this.elements.instrumentsWrapper.classList.add('d-none'); // <-- OCULTA
+            this.elements.instrumentsWrapper.classList.add('d-none');
+            this.elements.bottomSpacer.classList.remove('d-none');
 
             this.cifraPlayer.preencherIframeCifra(texto); // Insere apenas o texto da letra no iframe
         }
@@ -771,7 +773,8 @@ class App {
         // Garante a restauração visual caso viéssemos de uma Letra anterior
         this.elements.bpmContainer.classList.remove('d-none');
         this.elements.draggableControls.classList.remove('d-none');
-        this.elements.instrumentsWrapper.classList.remove('d-none'); // <-- RESTAURA
+        this.elements.instrumentsWrapper.classList.remove('d-none');
+        this.elements.bottomSpacer.classList.add('d-none');
 
         // 3. Lógica de renderização por tipo
         if (type === 'partitura') {
@@ -1707,6 +1710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bateriaWrapper: document.getElementById('bateriaWrapper'),
         melodyWrapper: document.getElementById('melodyWrapper'),
         instrumentsWrapper: document.getElementById('instrumentsWrapper'),
+        bottomSpacer: document.getElementById('bottomSpacer'),
         rhythmButtonsControl: document.getElementById('rhythm-buttons'),
         musicNoteIcon: document.getElementById('music-note'),
         musicNoteBeamedIcon: document.getElementById('music-note-beamed'),
