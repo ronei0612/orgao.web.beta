@@ -62,6 +62,7 @@ class PartituraPlayer {
     }
 
     async loadSounds() {
+        try {
         const notas = [...new Set(
             Object.values(this.partituraEditor.basePitches).flat()
         )];
@@ -72,6 +73,7 @@ class PartituraPlayer {
             })
         );
             this.buffers = await this.audioManager.loadBuffers(urls);
+        } catch { }
         }
 
     tocarNotaAtualPartitura(volume = 1) {
