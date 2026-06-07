@@ -696,6 +696,11 @@ class App {
 
     verifyLetraOuCifra(texto, saveData) {
         if (texto.includes('<pre class="cifra">')) {
+            // Garante que os elementos fiquem visíveis caso viéssemos de uma Letra
+            this.elements.bpmContainer.classList.remove('d-none');
+            this.elements.draggableControls.classList.remove('d-none');
+            this.elements.instrumentsWrapper.classList.remove('d-none'); // <-- RESTAURA
+
             let tom = 'C';
             if (saveData && saveData.key && saveData.key !== '') {
                 tom = saveData.key;
@@ -711,11 +716,16 @@ class App {
             this.cifraPlayer.addEventCifrasIframe(this.elements.iframeCifra);
         }
         else {
-            this.uiController.exibirBotoesAcordes();
-            this.cifraPlayer.preencherSelectAcordes('C');
-            this.cifraPlayer.preencherIframeCifra(texto);
-        }
+            // MODO LETRA APENAS (Interface de Leitura Limpa):
+            this.uiController.esconderBotoesTom(); // Reduz o tomSelect para "Letra" e oculta o tomContainer
+            this.uiController.esconderBotoesAcordes(); // Oculta os botões de acorde do rodapé
 
+            this.elements.bpmContainer.classList.add('d-none'); // Oculta os controles de BPM
+            this.elements.draggableControls.classList.add('d-none'); // Oculta o painel flutuante de play/stop/notes
+            this.elements.instrumentsWrapper.classList.add('d-none'); // <-- OCULTA
+
+            this.cifraPlayer.preencherIframeCifra(texto); // Insere apenas o texto da letra no iframe
+        }
         this.preencherLayoutDoLocalStorage(saveData);
     }
 
@@ -757,6 +767,11 @@ class App {
         this.uiController.exibirIframeCifra();
         this.uiController.exibirBotoesTom();
         this.cifraPlayer.indiceAcorde = 0;
+
+        // Garante a restauração visual caso viéssemos de uma Letra anterior
+        this.elements.bpmContainer.classList.remove('d-none');
+        this.elements.draggableControls.classList.remove('d-none');
+        this.elements.instrumentsWrapper.classList.remove('d-none'); // <-- RESTAURA
 
         // 3. Lógica de renderização por tipo
         if (type === 'partitura') {
@@ -1691,9 +1706,11 @@ document.addEventListener('DOMContentLoaded', () => {
         pasteRhythmButton: document.getElementById('paste-rhythm'),
         bateriaWrapper: document.getElementById('bateriaWrapper'),
         melodyWrapper: document.getElementById('melodyWrapper'),
+        instrumentsWrapper: document.getElementById('instrumentsWrapper'),
         rhythmButtonsControl: document.getElementById('rhythm-buttons'),
         musicNoteIcon: document.getElementById('music-note'),
-        musicNoteBeamedIcon: document.getElementById('music-note-beamed')
+        musicNoteBeamedIcon: document.getElementById('music-note-beamed'),
+        bpmContainer: document.getElementById('bpm-container')
     };
 
     const app = new App(elements);

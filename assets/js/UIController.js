@@ -315,13 +315,21 @@ class UIController {
         this.elements.oracoesFrame.classList.add('d-none');
         this.elements.santamissaFrame.classList.add('d-none');
         this.elements.liturgiaDiariaFrame.classList.add('d-none');
-        this.elements.partituraFrame.classList.add('d-none'); // <--- ADICIONADO
-        this.elements.partituraEditFrame.classList.add('d-none'); // <--- ADICIONADO
+        this.elements.partituraFrame.classList.add('d-none');
+        this.elements.partituraEditFrame.classList.add('d-none');
         this.elements.melodyStyleSelect.classList.remove('d-none');
         this.elements.drumStyleSelect.classList.add('d-none');
         this.elements.orgaoInstrumentButton.classList.remove('d-none');
-        this.elements.melodyWrapper.classList.remove('d-none');
+
+        // Exibe o contêiner pai de instrumentos
+        this.elements.instrumentsWrapper.classList.remove('d-none'); // <-- ADICIONADO AQUI
+
         this.elements.bateriaInstrumentButton.classList.add('d-none');
+
+        // RESTAURA OS ELEMENTOS OCULTADOS PELO MODO LETRA:
+        this.elements.bpmContainer.classList.remove('d-none');
+        this.elements.tomContainer.classList.remove('d-none');
+        this.elements.draggableControls.classList.remove('d-none');
 
         if (ocultarBateria)
             this.elements.rhythmButtonsControl.classList.add('d-none');

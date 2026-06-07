@@ -115,90 +115,92 @@
             <textarea class="modal-textarea d-none" id="editTextarea" placeholder="Editar Cifra..."></textarea>
         </div>
 
-        <!-- Bateria -->
-        <div id="bateriaWrapper" class="d-none">
+        <div id="instrumentsWrapper">
+            <!-- Bateria -->
+            <div id="bateriaWrapper" class="d-none">
 
-            <div class="d-flex align-items-center mb-1">
-                <div class="input-group flex-grow-1 mr-1">
-                    <select class="form-control" id="drumStyleSelect">
-                    </select>
-                    <div class="input-group-append d-none" id="styleButtons">
-                        <button class="btn btn-outline-secondary" type="button" id="addStyle" title="Adicionar"><i class="bi bi-plus-lg"></i></button>
-                        <button class="btn btn-outline-secondary" type="button" id="editStyle" title="Editar"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-outline-secondary" type="button" id="deleteStyle" title="Excluir"><i class="bi bi-trash"></i></button>
+                <div class="d-flex align-items-center mb-1">
+                    <div class="input-group flex-grow-1 mr-1">
+                        <select class="form-control" id="drumStyleSelect">
+                        </select>
+                        <div class="input-group-append d-none" id="styleButtons">
+                            <button class="btn btn-outline-secondary" type="button" id="addStyle" title="Adicionar"><i class="bi bi-plus-lg"></i></button>
+                            <button class="btn btn-outline-secondary" type="button" id="editStyle" title="Editar"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-outline-secondary" type="button" id="deleteStyle" title="Excluir"><i class="bi bi-trash"></i></button>
+                        </div>
                     </div>
+
+                    <button class="btn btn-outline-secondary mx-1 font-weight-bold" id="bateriaInstrumentButton" aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
+                        Bateria
+                    </button>
                 </div>
 
-                <button class="btn btn-outline-secondary mx-1 font-weight-bold" id="bateriaInstrumentButton" aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
-                    Bateria
-                </button>
+                <div id="drumEditor" class="d-none">
+                    <div class="d-flex justify-content-between align-items-center mb-2 border-top pt-2" style="border-color: var(--drum-border) !important;">
+                        <div class="input-group input-group-sm drum-unified-group" style="width: 150px;">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-outline-secondary decrement-steps" type="button"><i class="bi bi-dash"></i></button>
+                            </div>
+                            <input type="text" id="num-steps" value="4" class="form-control text-center px-1" aria-label="Steps">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary increment-steps" type="button"><i class="bi bi-plus"></i></button>
+                                <span class="input-group-text px-1"><small>Steps</small></span>
+                            </div>
+                        </div>
+
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button id="save-rhythm" class="btn btn-primary" title="Salvar Ritmo">
+                                <i class="bi bi-save"></i> Salvar
+                            </button>
+                            <button id="copy-rhythm" class="btn btn-info" title="Copiar Ritmo">
+                                <i class="bi bi-files"></i> Copiar
+                            </button>
+                            <button id="paste-rhythm" class="btn btn-warning" title="Colar Ritmo">
+                                <i class="bi bi-clipboard"></i> Colar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="tracks">
+                    </div>
+                </div>
             </div>
 
-            <div id="drumEditor" class="d-none">
-                <div class="d-flex justify-content-between align-items-center mb-2 border-top pt-2" style="border-color: var(--drum-border) !important;">
-                    <div class="input-group input-group-sm drum-unified-group" style="width: 150px;">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-outline-secondary decrement-steps" type="button"><i class="bi bi-dash"></i></button>
+            <!-- Melody Wrapper -->
+            <div id="melodyWrapper">
+                <div class="d-flex align-items-center mb-1">
+                    <div class="input-group flex-grow-1 mr-1">
+                        <select class="form-control" id="melodyStyleSelect">
+                        </select>
+                        <div class="input-group-append d-none" id="melodySaveControl">
+                            <button class="btn btn-outline-secondary" type="button" id="addMelodyStyle" title="Adicionar"><i class="bi bi-plus-lg"></i></button>
+                            <button class="btn btn-outline-secondary" type="button" id="editMelodyStyle" title="Editar"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-outline-secondary" type="button" id="deleteMelodyStyle" title="Excluir"><i class="bi bi-trash"></i></button>
                         </div>
-                        <input type="text" id="num-steps" value="4" class="form-control text-center px-1" aria-label="Steps">
+
+                        <button class="btn btn-outline-secondary mx-1 font-weight-bold" id="orgaoInstrumentButton" disabled aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
+                            Órgão
+                        </button>
+                    </div>
+
+                    <div class="input-group input-group-sm drum-unified-group d-none" id="stepsMelody" style="width: 150px;">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-outline-secondary" type="button" id="melody-decrement-steps"><i class="bi bi-dash"></i></button>
+                        </div>
+                        <input type="text" id="melody-num-steps" value="8" class="form-control text-center px-1" aria-label="Steps">
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary increment-steps" type="button"><i class="bi bi-plus"></i></button>
+                            <button class="btn btn-outline-secondary" type="button" id="melody-increment-steps"><i class="bi bi-plus"></i></button>
                             <span class="input-group-text px-1"><small>Steps</small></span>
                         </div>
                     </div>
 
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button id="save-rhythm" class="btn btn-primary" title="Salvar Ritmo">
-                            <i class="bi bi-save"></i> Salvar
-                        </button>
-                        <button id="copy-rhythm" class="btn btn-info" title="Copiar Ritmo">
-                            <i class="bi bi-files"></i> Copiar
-                        </button>
-                        <button id="paste-rhythm" class="btn btn-warning" title="Colar Ritmo">
-                            <i class="bi bi-clipboard"></i> Colar
-                        </button>
-                    </div>
-                </div>
-
-                <div id="tracks">
-                </div>
-            </div>
-        </div>
-
-        <!-- Melody Wrapper -->
-        <div id="melodyWrapper">
-            <div class="d-flex align-items-center mb-1">
-                <div class="input-group flex-grow-1 mr-1">
-                    <select class="form-control" id="melodyStyleSelect">
-                    </select>
-                    <div class="input-group-append d-none" id="melodySaveControl">
-                        <button class="btn btn-outline-secondary" type="button" id="addMelodyStyle" title="Adicionar"><i class="bi bi-plus-lg"></i></button>
-                        <button class="btn btn-outline-secondary" type="button" id="editMelodyStyle" title="Editar"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-outline-secondary" type="button" id="deleteMelodyStyle" title="Excluir"><i class="bi bi-trash"></i></button>
-                    </div>
-
-                    <button class="btn btn-outline-secondary mx-1 font-weight-bold" id="orgaoInstrumentButton" disabled aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
-                        Órgão
+                    <button id="save-melody" class="btn btn-primary btn-sm ml-1 d-none" title="Salvar Melodia">
+                        <i class="bi bi-save"></i>
                     </button>
                 </div>
 
-                <div class="input-group input-group-sm drum-unified-group d-none" id="stepsMelody" style="width: 150px;">
-                    <div class="input-group-prepend">
-                        <button class="btn btn-outline-secondary" type="button" id="melody-decrement-steps"><i class="bi bi-dash"></i></button>
-                    </div>
-                    <input type="text" id="melody-num-steps" value="8" class="form-control text-center px-1" aria-label="Steps">
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-secondary" type="button" id="melody-increment-steps"><i class="bi bi-plus"></i></button>
-                        <span class="input-group-text px-1"><small>Steps</small></span>
-                    </div>
+                <div id="melodyTracks" class="tracks-container d-none">
                 </div>
-
-                <button id="save-melody" class="btn btn-primary btn-sm ml-1 d-none" title="Salvar Melodia">
-                    <i class="bi bi-save"></i>
-                </button>
-            </div>
-
-            <div id="melodyTracks" class="tracks-container d-none">
             </div>
         </div>
 
