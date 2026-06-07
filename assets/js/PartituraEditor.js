@@ -49,18 +49,23 @@ class PartituraEditor {
                 </button>
             </div>` : '';
 
+        // NOVO: Criado o painel do lado esquerdo para as oitavas
+        let leftToolbarHtml = isEditable ? `
+            <div class="left-toolbar">
+                <button class="tool-btn btn-octave" id="btn-octave-up" title="Subir Oitava (Toda Partitura)">↑8ª</button>
+                <button class="tool-btn btn-octave" id="btn-octave-down" title="Descer Oitava (Toda Partitura)">↓8ª</button>
+            </div>` : '';
+
+        // Os botões de oitava foram removidos do painel inferior
         let bottomToolbarHtml = isEditable ? `
             <div class="bottom-toolbar">
                 <button class="tool-btn btn-chord" id="btn-chord" title="Adicionar Cifra">C7</button>
                 <button class="tool-btn btn-lyric" id="btn-lyric" title="Adicionar Letra">Abc</button>
                 <div style="width: 2px; background: #ccc; margin: 0 5px;"></div>
                 <button class="tool-btn btn-linebreak" id="btn-linebreak" title="Quebrar Linha Após a Nota Atual">↲</button>
-                <div style="width: 2px; background: #ccc; margin: 0 5px;"></div>
-                <button class="tool-btn btn-octave" id="btn-octave-up" title="Subir Oitava (Toda Partitura)">↑8ª</button>
-                <button class="tool-btn btn-octave" id="btn-octave-down" title="Descer Oitava (Toda Partitura)">↓8ª</button>
             </div>` : '';
 
-        doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}${bottomToolbarHtml}`;
+        doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}${leftToolbarHtml}${bottomToolbarHtml}`;
 
         const style = doc.createElement('style');
         style.innerHTML = `
@@ -81,6 +86,7 @@ class PartituraEditor {
             
             .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+            .left-toolbar { position: fixed; left: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
             .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 8px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
             
             .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; outline: none; }
@@ -1064,8 +1070,8 @@ class PartituraEditor {
             // Lógica 1: Repassa a quebra de linha (que fizemos agora pouco)
             if (notaAtual.lineBreak) {
                 notaAtual.lineBreak = false;
-            repassarQuebraDeLinha = true;
-        }
+                repassarQuebraDeLinha = true;
+            }
 
             // Lógica 2: Clona as notas e o estado de pausa da nota atual
             // O [...array] cria uma cópia independente das notas
@@ -1078,11 +1084,11 @@ class PartituraEditor {
 
         // Insere a nova nota clonando os dados
         this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
-            notes: [this.lastUsedPitch],
+            notes: notasParaCopiar,
             chord: "",
             lyric: "",
             bar: false,
-            rest: false,
+            rest: isRest,
             tie: false,
             lineBreak: repassarQuebraDeLinha // A nova nota herda a quebra, se houver
         });
