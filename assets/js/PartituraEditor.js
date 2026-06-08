@@ -49,23 +49,25 @@ class PartituraEditor {
                 </button>
             </div>` : '';
 
-        // NOVO: Criado o painel do lado esquerdo para as oitavas
-        let leftToolbarHtml = isEditable ? `
-            <div class="left-toolbar">
-                <button class="tool-btn btn-octave" id="btn-octave-up" title="Subir Oitava (Toda Partitura)">↑8ª</button>
-                <button class="tool-btn btn-octave" id="btn-octave-down" title="Descer Oitava (Toda Partitura)">↓8ª</button>
-            </div>` : '';
-
-        // Os botões de oitava foram removidos do painel inferior
+        // Quebra de linha agora mora na esquerda com as oitavas!
         let bottomToolbarHtml = isEditable ? `
             <div class="bottom-toolbar">
-                <button class="tool-btn btn-chord" id="btn-chord" title="Adicionar Cifra">C7</button>
-                <button class="tool-btn btn-lyric" id="btn-lyric" title="Adicionar Letra">Abc</button>
+                <button class="tool-btn btn-octave" id="btn-octave-up" title="Subir Oitava (Toda Partitura)">↑8ª</button>
+                <button class="tool-btn btn-octave" id="btn-octave-down" title="Descer Oitava (Toda Partitura)">↓8ª</button>
                 <div style="width: 2px; background: #ccc; margin: 0 5px;"></div>
                 <button class="tool-btn btn-linebreak" id="btn-linebreak" title="Quebrar Linha Após a Nota Atual">↲</button>
             </div>` : '';
 
-        doc.body.innerHTML = `${topToolbarHtml}<div id="score-container"><div id="vexflow-target"></div></div>${sideToolbarHtml}${leftToolbarHtml}${bottomToolbarHtml}`;
+        doc.body.innerHTML = `${topToolbarHtml}
+            <div id="score-container">
+                <div id="vexflow-target"></div>
+                ${isEditable ? `
+                <div id="floating-inputs-container" style="display:none; position:absolute; top:0; left:0; pointer-events:none; z-index:1200;">
+                    <input type="text" id="floating-chord" class="floating-input chord-input" placeholder="Cifra" autocomplete="off" />
+                    <input type="text" id="floating-lyric" class="floating-input lyric-input" placeholder="Letra" autocomplete="off" />
+                </div>` : ''}
+            </div>
+            ${sideToolbarHtml}${bottomToolbarHtml}`;
 
         const style = doc.createElement('style');
         style.innerHTML = `
@@ -86,7 +88,6 @@ class PartituraEditor {
             
             .top-toolbar { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
             .side-toolbar { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-            .left-toolbar { position: fixed; left: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 1000; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
             .bottom-toolbar { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1100; background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 8px; box-shadow: 0 -4px 12px rgba(0,0,0,0.15); }
             
             .tool-btn { width: 45px; height: 45px; background: #fff; border: 1px solid #333; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: all 0.1s; outline: none; }
@@ -98,28 +99,27 @@ class PartituraEditor {
             .btn-rest { color: #333; font-size: 24px; }
             .btn-tie { color: #1976d2; font-size: 28px; font-weight: normal; padding-bottom: 10px;}
             .btn-delete { color: #c62828; }
-            .btn-chord { color: #d32f2f; font-size: 16px; font-family: 'Roboto', sans-serif; }
-            .btn-lyric { color: #000; font-size: 16px; font-family: 'Roboto', sans-serif; }
             .btn-linebreak { color: #555; font-size: 24px; }
             .btn-octave { color: #8E44AD; font-size: 16px; font-family: 'Roboto', sans-serif; }
             
-            .inline-input { 
+            .floating-input { 
                 position: absolute; 
                 transform: translateX(-50%); 
                 width: 80px; 
                 text-align: center; 
                 font-size: 16px;
-                font-weight: bold; 
                 font-family: 'Roboto', sans-serif;
                 border: 2px solid #2196F3; 
                 border-radius: 4px; 
-                z-index: 1200; 
                 background: white; 
                 color: black;
                 padding: 5px;
                 outline: none;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                pointer-events: auto; /* Permite o clique do mouse nas caixas */
             }
+            .chord-input { font-weight: bold; color: #d32f2f; }
+            .lyric-input { font-weight: normal; font-style: italic; color: #000; font-size: 14px; }
             .dark-mode-svg { filter: invert(1) hue-rotate(180deg); }
         `;
         doc.head.appendChild(style);
@@ -133,16 +133,58 @@ class PartituraEditor {
             doc.getElementById('btn-add').onclick = () => this.addNewNote();
             doc.getElementById('btn-rest').onclick = () => this.addRest();
             doc.getElementById('btn-tie').onclick = () => this.toggleTie();
-            doc.getElementById('btn-chord').onclick = () => this.showInlineInput('chord');
-            doc.getElementById('btn-lyric').onclick = () => this.showInlineInput('lyric');
             doc.getElementById('btn-delete').onclick = () => this.deleteNoteAtCursor();
             doc.getElementById('btn-linebreak').onclick = () => this.toggleLineBreak();
             doc.getElementById('btn-octave-up').onclick = () => this.shiftOctaveAll(1);
             doc.getElementById('btn-octave-down').onclick = () => this.shiftOctaveAll(-1);
 
-            // Intercepta a Colagem (Paste) direto do sistema operacional
+            const chordInput = doc.getElementById('floating-chord');
+            const lyricInput = doc.getElementById('floating-lyric');
+
+            // Salva no objeto atual assim que o usuário digita (Tempo Real)
+            const handleFloatingInput = (e, type) => {
+                if (this.persistentSelectedIndex >= 0) {
+                    this.currentData[this.persistentSelectedIndex][type] = e.target.value;
+                }
+            };
+
+            const handleFloatingKeydown = (e) => {
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    this.navegarCursor(1);
+                    // Retoma foco no input seguinte
+                    setTimeout(() => {
+                        const nextInput = doc.getElementById(e.target.id);
+                        if (nextInput) { nextInput.focus(); nextInput.select(); }
+                    }, 50);
+                } else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) {
+                    e.preventDefault();
+                    this.navegarCursor(1);
+                    setTimeout(() => {
+                        const nextInput = doc.getElementById(e.target.id);
+                        if (nextInput) { nextInput.focus(); nextInput.select(); }
+                    }, 50);
+                } else if (e.key === 'ArrowLeft' && e.target.selectionEnd === 0) {
+                    e.preventDefault();
+                    this.navegarCursor(-1);
+                    setTimeout(() => {
+                        const prevInput = doc.getElementById(e.target.id);
+                        if (prevInput) { prevInput.focus(); prevInput.select(); }
+                    }, 50);
+                } else if (e.key === 'Escape') {
+                    e.target.blur();
+                    doc.body.focus();
+                }
+            };
+
+            if (chordInput && lyricInput) {
+                chordInput.addEventListener('input', (e) => handleFloatingInput(e, 'chord'));
+                chordInput.addEventListener('keydown', handleFloatingKeydown);
+                lyricInput.addEventListener('input', (e) => handleFloatingInput(e, 'lyric'));
+                lyricInput.addEventListener('keydown', handleFloatingKeydown);
+            }
+
             doc.addEventListener('paste', (e) => {
-                // Deixa o input normal funcionar se estiver editando cifra ou letra
                 if (e.target && e.target.tagName.toLowerCase() === 'input') return;
 
                 e.preventDefault();
@@ -150,11 +192,9 @@ class PartituraEditor {
 
                 if (!pasteText) return;
 
-                // Se o texto for a nossa flag de cópia interna, cola a seleção
                 if (pasteText === "VEXFLOW_INTERNAL_COPY") {
                     this.pasteCopiedRange();
                 } else {
-                    // Caso contrário (copiou de outro site), executa o parser de ABC
                     this.parseABC(pasteText);
                 }
             });
@@ -162,7 +202,6 @@ class PartituraEditor {
             doc.addEventListener('keydown', (e) => {
                 if (e.target && e.target.tagName.toLowerCase() === 'input') return;
 
-                // Apenas a Cópia fica no keydown. O Colar foi movido para o evento 'paste' acima.
                 if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
                     e.preventDefault();
                     this.copySelectedRange();
@@ -220,7 +259,12 @@ class PartituraEditor {
                         if ((e.key.length === 1 || e.key === 'Dead') && !e.ctrlKey && !e.altKey && !e.metaKey) {
                             const isDead = e.key === 'Dead';
                             if (!isDead) e.preventDefault();
-                            this.showInlineInput('lyric', isDead ? '' : e.key);
+                            if (lyricInput) {
+                                lyricInput.focus();
+                                if (!isDead) lyricInput.value = e.key;
+                                else lyricInput.value = '';
+                                this.currentData[this.persistentSelectedIndex].lyric = lyricInput.value;
+                            }
                         }
                         break;
                 }
@@ -234,11 +278,10 @@ class PartituraEditor {
         let currentLineNotes = [];
         let currentChord = "";
 
-        // Regex para extrair: "Cifras", [AcordesMúltiplos], Notas(com acidentes e números), Pausas, Ligaduras e Barras
         const tokenRegex = /\[[^\]]*\]|"[^"]*"|[\^_=]?[a-gA-GzZ][,']*[0-9]*\/*[0-9]*|-|\|/g;
 
         const parsePitch = (abcPitch) => {
-            if (abcPitch.toLowerCase().startsWith('z')) return null; // Pausa
+            if (abcPitch.toLowerCase().startsWith('z')) return null;
 
             let accidental = '';
             if (abcPitch.startsWith('^')) accidental = '#';
@@ -259,7 +302,6 @@ class PartituraEditor {
 
             const finalPitch = `${baseNote.toLowerCase()}${accidental}/${octave}`;
 
-            // Valor numérico para encontrar a mais aguda em acordes [CEG]
             const noteValues = { 'c': 0, 'd': 2, 'e': 4, 'f': 5, 'g': 7, 'a': 9, 'b': 11 };
             let numValue = octave * 12 + noteValues[baseNote.toLowerCase()];
             if (accidental === '#') numValue += 1;
@@ -271,10 +313,8 @@ class PartituraEditor {
         lines.forEach(line => {
             const trimmedLine = line.trim();
             if (!trimmedLine) return;
-            // Ignora outros cabeçalhos e comentários
             if (/^[A-Z]:/.test(trimmedLine) || trimmedLine.startsWith('%')) return;
 
-            // Armadura de Clave
             if (trimmedLine.startsWith('K:')) {
                 const key = trimmedLine.substring(2).trim().split(' ')[0];
                 const tomSelect = document.getElementById('tomSelect');
@@ -285,32 +325,27 @@ class PartituraEditor {
                 return;
             }
 
-            // Letra da música (Lyrics) mapeando para a última linha de notas processada
             if (trimmedLine.startsWith('w:')) {
                 let lyricText = trimmedLine.substring(2).trim();
 
                 let syllables = [];
-                // Primeiro quebra por espaços
                 let tokensText = lyricText.split(/\s+/);
 
                 tokensText.forEach(token => {
-                    // Conta quantos '_' existem (extensões de notas no ABC)
                     let melismaCount = (token.match(/_/g) || []).length;
                     let cleanToken = token.replace(/_/g, '');
 
                     if (cleanToken === '*') {
-                        syllables.push(""); // O asterisco pula uma nota no ABC
+                        syllables.push("");
                     } else if (cleanToken !== '') {
-                        // Divide a palavra pelos hifens
                         let partes = cleanToken.split('-');
                         for (let i = 0; i < partes.length; i++) {
                             let syl = partes[i];
-                            if (i < partes.length - 1) syl += '-'; // Mantém o tracinho visualmente para a partitura
+                            if (i < partes.length - 1) syl += '-';
                             syllables.push(syl);
                         }
                     }
 
-                    // Para cada underline, insere uma nota vazia para não dessincronizar
                     for (let j = 0; j < melismaCount; j++) {
                         syllables.push("");
                     }
@@ -329,10 +364,8 @@ class PartituraEditor {
                 return;
             }
 
-            // Ignora outros cabeçalhos informativos do ABCJS
             if (/^[A-Z]:/.test(trimmedLine)) return;
 
-            // Processa Linha Musical
             currentLineNotes = [];
             const tokens = trimmedLine.match(tokenRegex);
             if (!tokens) return;
@@ -357,7 +390,6 @@ class PartituraEditor {
                     currentChord = "";
                 }
                 else if (token.startsWith('[')) {
-                    // Extrai múltiplas notas e acha a MAIS AGUDA
                     const innerPitches = token.replace(/[\[\]]/g, '').match(/[\^_=]?[a-gA-G][,']*/g);
                     if (innerPitches) {
                         let highestPitch = null;
@@ -381,7 +413,6 @@ class PartituraEditor {
                     }
                 }
                 else {
-                    // Nota Simples
                     const pData = parsePitch(token);
                     if (pData) {
                         const noteObj = {
@@ -395,14 +426,13 @@ class PartituraEditor {
                 }
             });
 
-            // Respeita as quebras de linha do próprio ABC
             if (currentLineNotes.length > 0) {
                 currentLineNotes[currentLineNotes.length - 1].lineBreak = true;
             }
         });
 
         if (parsedData.length > 0) {
-            parsedData[parsedData.length - 1].lineBreak = false; // Remove quebra na última nota
+            parsedData[parsedData.length - 1].lineBreak = false;
             this.currentData = parsedData;
             this.persistentSelectedIndex = 0;
             this.selectionStart = 0;
@@ -411,95 +441,39 @@ class PartituraEditor {
         }
     }
 
-    showInlineInput(type, initialKey = null) {
-        this.commitInput();
-
+    updateFloatingInputs() {
         const doc = this.editIframe.contentDocument;
-        const win = this.editIframe.contentWindow;
-        const xPos = this.noteXPositions[this.persistentSelectedIndex];
-        const yBase = this.noteYPositions[this.persistentSelectedIndex] || 40;
+        if (!doc) return;
+        const container = doc.getElementById('floating-inputs-container');
+        const chordInput = doc.getElementById('floating-chord');
+        const lyricInput = doc.getElementById('floating-lyric');
 
-        const input = doc.createElement('input');
-        input.id = 'inline-input';
-        input.className = 'inline-input';
-        input.style.left = xPos + 'px';
-        input.style.top = (type === 'chord' ? (yBase) + 'px' : (yBase + 190) + 'px');
-        input.dataset.type = type;
-        input.dataset.index = this.persistentSelectedIndex;
+        if (!container || !chordInput || !lyricInput) return;
 
-        if (initialKey !== null) {
-            input.value = initialKey;
+        if (this.persistentSelectedIndex >= 0 && this.persistentSelectedIndex < this.currentData.length) {
+            const xPos = this.noteXPositions[this.persistentSelectedIndex] || 0;
+            const yBase = this.noteYPositions[this.persistentSelectedIndex] || 40;
+
+            container.style.display = 'block';
+
+            // Ajustado: Cifra sobe mais (yBase - 45) e Letra sobe para ficar perto da pauta (yBase + 110)
+            chordInput.style.left = (xPos + 25) + 'px';
+            chordInput.style.top = (yBase - 45) + 'px';
+
+            lyricInput.style.left = (xPos + 25) + 'px';
+            lyricInput.style.top = (yBase + 110) + 'px';
+
+            const currentNote = this.currentData[this.persistentSelectedIndex];
+
+            // Só atualiza os valores se o usuário não estiver focado ativamente digitando nele (evita o cursor pular)
+            if (doc.activeElement !== chordInput) chordInput.value = currentNote.chord || '';
+            if (doc.activeElement !== lyricInput) lyricInput.value = currentNote.lyric || '';
         } else {
-            input.value = this.currentData[this.persistentSelectedIndex][type] || "";
-        }
-
-        doc.getElementById('score-container').appendChild(input);
-
-        win.focus();
-        setTimeout(() => {
-            input.focus();
-            if (!initialKey && input.value) input.select();
-        }, 50);
-
-        input.onclick = (e) => e.stopPropagation();
-
-        input.onkeydown = (e) => {
-            if (e.key === 'Enter' || e.key === 'Tab') {
-                e.preventDefault();
-                if (this.persistentSelectedIndex < this.currentData.length - 1) {
-                    input.dataset.advance = "true";
-                }
-                input.blur();
-            } else if (e.key === 'Escape') {
-                input.dataset.cancel = "true";
-                input.blur();
-            }
-        };
-
-        input.onblur = () => {
-            if (input.dataset.handled === "true") return;
-
-            const advance = input.dataset.advance === "true";
-
-            if (input.dataset.cancel !== "true") {
-                this.commitInput(input);
-            } else {
-                if (input.parentNode) input.parentNode.removeChild(input);
-            }
-
-            if (advance) {
-                this.persistentSelectedIndex++;
-                this.draw(this.editIframe, true);
-                this.centralizarNoCursor();
-
-                setTimeout(() => {
-                    this.showInlineInput(type);
-                }, 50);
-            } else {
-                this.draw(this.editIframe, true);
-            }
-        };
-    }
-
-    commitInput(specificInput = null) {
-        const doc = this.editIframe.contentDocument;
-        const input = specificInput || (doc ? doc.getElementById('inline-input') : null);
-
-        if (input && input.parentNode) {
-            const { type, index } = input.dataset;
-            if (this.currentData[index]) {
-                this.currentData[index][type] = input.value;
-            }
-
-            input.dataset.handled = "true";
-            try {
-                input.parentNode.removeChild(input);
-            } catch (e) { }
+            container.style.display = 'none';
         }
     }
 
     shiftOctaveAll(direction) {
-        this.commitInput();
         let changed = false;
 
         this.currentData.forEach(item => {
@@ -590,15 +564,20 @@ class PartituraEditor {
 
     setChordToCurrentNote(chord) {
         if (this.persistentSelectedIndex >= 0 && this.persistentSelectedIndex < this.currentData.length) {
-            this.commitInput();
             this.currentData[this.persistentSelectedIndex].chord = chord;
             this.draw(this.editIframe, true);
-            this.showInlineInput('chord');
+
+            // Coloca o foco novamente no input para garantir fluidez entre botões do app
+            const doc = this.editIframe.contentDocument;
+            const chordInput = doc?.getElementById('floating-chord');
+            if (chordInput) {
+                chordInput.focus();
+                chordInput.select();
+            }
         }
     }
 
     navegarCursor(direcao) {
-        this.commitInput();
         let novoIndex = this.persistentSelectedIndex + direcao;
         if (novoIndex >= 0 && novoIndex < this.currentData.length) {
             this.persistentSelectedIndex = novoIndex;
@@ -742,7 +721,6 @@ class PartituraEditor {
             lineBreak: item.lineBreak
         }));
 
-        // Injeta a flag para o sistema de colar reconhecer que é a cópia interna
         try {
             const doc = this.editIframe.contentDocument;
             const temp = doc.createElement('textarea');
@@ -758,7 +736,6 @@ class PartituraEditor {
 
     pasteCopiedRange() {
         if (!this.copiedNotesBuffer || this.copiedNotesBuffer.length === 0) return;
-        this.commitInput();
 
         const clonedPaste = this.copiedNotesBuffer.map(item => ({
             notes: [...item.notes],
@@ -788,7 +765,6 @@ class PartituraEditor {
     }
 
     obterDadosParaSalvar() {
-        this.commitInput();
         return this.currentData.map(d => {
             let s = d.chord ? `[${d.chord}]` : "";
             s += d.notes.join(",");
@@ -896,11 +872,12 @@ class PartituraEditor {
 
                 if (note.getStem()) note.getStem().hide = true;
 
-                if (data.chord) {
+                // Oculta o texto estático do Vexflow para a nota selecionada (para não poluir visualmente com as caixinhas)
+                if (data.chord && !(isEditable && index === this.persistentSelectedIndex)) {
                     note.addModifier(new this.vf.ChordSymbol().setFont('Roboto', 14, 'bold').addText(data.chord), 0);
                 }
 
-                if (data.lyric) {
+                if (data.lyric && !(isEditable && index === this.persistentSelectedIndex)) {
                     note.addModifier(new this.vf.Annotation(data.lyric)
                         .setFont('Roboto', lyricFontSize, 'italic')
                         .setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
@@ -966,36 +943,45 @@ class PartituraEditor {
 
                 const tie = new this.vf.StaveTie({
                     first_note: firstNote,
-                    last_note: null, // Força a não grudar na próxima nota
+                    last_note: null,
                     first_indices: [0]
                 });
 
-                const firstX = firstNote.getTieRightX();
-                const staveEndX = firstNote.getStave().getTieEndX();
-
-                // 1. Move o ponto inicial da ligadura para a esquerda (mais "grudado" na nota)
-                tie.render_options.first_x_shift = -8;
-
-                // 2. Controla o ponto final (ajustado para dar um tamanho total de ~23px)
-                tie.render_options.last_x_shift = (firstX + 25) - staveEndX;
-
-                // 3. Ajusta a curvatura para ficar sutil e delicada junto à nota
-                tie.render_options.cp1 = 4;
-                tie.render_options.cp2 = 8; // Um pouquinho menor para acompanhar o recuo
-
-                tiesToDraw.push(tie);
+                try {
+                    if (firstNote && firstNote.getTickContext()) {
+                        const firstX = firstNote.getTieRightX();
+                        const staveEndX = firstNote.getStave().getTieEndX();
+                        tie.render_options.first_x_shift = -8;
+                        tie.render_options.last_x_shift = (firstX + 25) - staveEndX;
+                        tie.render_options.cp1 = 4;
+                        tie.render_options.cp2 = 8;
+                        tiesToDraw.push(tie);
+                    }
+                } catch (e) { }
             }
         }
         tiesToDraw.forEach(t => t.setContext(context).draw());
 
+        // FUNÇÕES SEGURAS para evitar o erro do "NoTickContext" no VexFlow
+        const getSafeX = (n) => {
+            try { return (n && n.getTickContext()) ? n.getAbsoluteX() : 0; } catch (e) { return 0; }
+        };
+
+        const getSafeY = (n) => {
+            try { return (n && n.getStave()) ? n.getStave().getYForLine(0) : 0; } catch (e) { return 0; }
+        };
+
         if (isEditable) {
-            this.noteXPositions = tickablesByIndex.map(n => n ? n.getAbsoluteX() : 0);
-            this.noteYPositions = tickablesByIndex.map(n => n ? n.getStave().getYForLine(0) : 0);
+            this.noteXPositions = tickablesByIndex.map(getSafeX);
+            this.noteYPositions = tickablesByIndex.map(getSafeY);
+
+            this.updateFloatingInputs(); // Aplica os botões flutuantes logo após o redesenho
+
             if (this.onEditDrawn) this.onEditDrawn();
             setTimeout(() => this.centralizarNoCursor(), 50);
         } else {
-            this.viewNoteXPositions = tickablesByIndex.map(n => n ? n.getAbsoluteX() : 0);
-            this.viewNoteYPositions = tickablesByIndex.map(n => n ? n.getStave().getYForLine(0) : 0);
+            this.viewNoteXPositions = tickablesByIndex.map(getSafeX);
+            this.viewNoteYPositions = tickablesByIndex.map(getSafeY);
             if (this.onViewDrawn) this.onViewDrawn();
             setTimeout(() => this.centralizarDestaque(), 50);
         }
@@ -1055,34 +1041,22 @@ class PartituraEditor {
     }
 
     addNewNote() {
-        this.commitInput();
-
         let repassarQuebraDeLinha = false;
-
-        // Valores padrão caso algo dê errado
         let notasParaCopiar = ["b/4"];
         let isRest = false;
 
-        // Verifica se existe uma nota selecionada atualmente
         if (this.persistentSelectedIndex >= 0) {
             const notaAtual = this.currentData[this.persistentSelectedIndex];
-
-            // Lógica 1: Repassa a quebra de linha (que fizemos agora pouco)
             if (notaAtual.lineBreak) {
                 notaAtual.lineBreak = false;
                 repassarQuebraDeLinha = true;
             }
-
-            // Lógica 2: Clona as notas e o estado de pausa da nota atual
-            // O [...array] cria uma cópia independente das notas
             notasParaCopiar = [...notaAtual.notes];
             isRest = notaAtual.rest;
         } else {
-            // Fallback: se o editor estiver vazio, tenta usar o lastUsedPitch
             notasParaCopiar = [this.lastUsedPitch || "b/4"];
         }
 
-        // Insere a nova nota clonando os dados
         this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
             notes: notasParaCopiar,
             chord: "",
@@ -1090,7 +1064,7 @@ class PartituraEditor {
             bar: false,
             rest: isRest,
             tie: false,
-            lineBreak: repassarQuebraDeLinha // A nova nota herda a quebra, se houver
+            lineBreak: repassarQuebraDeLinha
         });
 
         this.persistentSelectedIndex++;
@@ -1102,11 +1076,8 @@ class PartituraEditor {
     }
 
     addRest() {
-        this.commitInput();
-
         let repassarQuebraDeLinha = false;
 
-        // Mesma lógica da nota normal: rouba a quebra se existir
         if (this.persistentSelectedIndex >= 0 && this.currentData[this.persistentSelectedIndex].lineBreak) {
             this.currentData[this.persistentSelectedIndex].lineBreak = false;
             repassarQuebraDeLinha = true;
@@ -1119,7 +1090,7 @@ class PartituraEditor {
             bar: false,
             rest: true,
             tie: false,
-            lineBreak: repassarQuebraDeLinha // A nova pausa herda a quebra
+            lineBreak: repassarQuebraDeLinha
         });
 
         this.persistentSelectedIndex++;
@@ -1131,49 +1102,32 @@ class PartituraEditor {
     }
 
     toggleTie() {
-        // Removido o bloqueio que impedia ativar ligadura na última nota
         if (this.persistentSelectedIndex === -1) return;
-
         this.currentData[this.persistentSelectedIndex].tie = !this.currentData[this.persistentSelectedIndex].tie;
         this.draw(this.editIframe, true);
     }
 
     toggleLineBreak() {
         if (this.persistentSelectedIndex === -1) return;
-
-        // CORREÇÃO: Se quisermos que a nota atual comece uma nova linha, 
-        // a quebra deve ocorrer na nota ANTERIOR (index - 1).
         const indexParaQuebrar = this.persistentSelectedIndex - 1;
 
         if (indexParaQuebrar >= 0) {
             this.currentData[indexParaQuebrar].lineBreak = !this.currentData[indexParaQuebrar].lineBreak;
             this.draw(this.editIframe, true);
         } else {
-            // Se for a primeira nota, não faz sentido quebrar antes dela, 
-            // mas podemos apenas redesenhar.
             this.draw(this.editIframe, true);
         }
     }
 
     deleteNoteAtCursor() {
         if (this.currentData.length <= 1) {
-            // Se só tem uma nota, apenas reseta ela
             this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false };
         } else {
-            // VERIFICA SE A NOTA ANTERIOR TEM QUEBRA DE LINHA
             if (this.persistentSelectedIndex > 0 && this.currentData[this.persistentSelectedIndex - 1].lineBreak) {
-
-                // Apenas remove a quebra de linha (unindo as pautas)
                 this.currentData[this.persistentSelectedIndex - 1].lineBreak = false;
-
-                // Opcional, mas dá uma UX ótima: move o cursor para a nota que tinha a quebra
                 this.persistentSelectedIndex--;
-
             } else {
-                // Comportamento normal: Deleta a nota atual
                 this.currentData.splice(this.persistentSelectedIndex, 1);
-
-                // Evita que o cursor saia dos limites do array
                 if (this.persistentSelectedIndex >= this.currentData.length) {
                     this.persistentSelectedIndex = this.currentData.length - 1;
                 }
@@ -1182,7 +1136,6 @@ class PartituraEditor {
 
         this.selectionStart = this.persistentSelectedIndex;
         this.selectionEnd = this.persistentSelectedIndex;
-
         this.draw(this.editIframe, true);
     }
 
