@@ -461,7 +461,7 @@ class PartituraEditor {
             chordInput.style.top = (yBase - 45) + 'px';
 
             lyricInput.style.left = (xPos + 25) + 'px';
-            lyricInput.style.top = (yBase + 110) + 'px';
+            lyricInput.style.top = (yBase + 100) + 'px';
 
             const currentNote = this.currentData[this.persistentSelectedIndex];
 
@@ -592,35 +592,35 @@ class PartituraEditor {
         if (this.persistentSelectedIndex === -1) return;
         const notaAtual = this.currentData[this.persistentSelectedIndex].notes[0];
 
-        const mapBemolParaSustenido = {
-            'db': 'c#',
-            'eb': 'd#',
-            'gb': 'f#',
-            'ab': 'g#',
-            'bb': 'a#'
-        };
-
+        // 1. Extrair nota, acidente e oitava (Ex: "c#/4" -> "c#", 4)
         const partes = notaAtual.split('/');
-        let notaSustenido = notaAtual;
-        if (partes.length === 2) {
-            const notaLower = partes[0].toLowerCase();
-            if (mapBemolParaSustenido[notaLower]) {
-                notaSustenido = mapBemolParaSustenido[notaLower] + '/' + partes[1];
-            }
-        }
+        if (partes.length !== 2) return;
 
-        let index = this.basePitches.indexOf(notaSustenido);
-        if (index === -1) index = this.basePitches.indexOf(notaSustenido.replace(/[#b]/g, ''));
+        const notaLimpa = partes[0].toLowerCase();
+        const oitava = parseInt(partes[1], 10);
 
-        let novoIndex = index + direcao;
-        if (novoIndex >= 0 && novoIndex < this.basePitches.length) {
-            const pitchSustenido = this.basePitches[novoIndex];
-            const pitchFinal = this.getEnarmonicPitch(pitchSustenido);
+        // 2. Mapear para um sistema de valores (ex: dó=0, dó#=1 ... si=11)
+        const valoresNotas = { 'c': 0, 'c#': 1, 'db': 1, 'd': 2, 'd#': 3, 'eb': 3, 'e': 4, 'f': 5, 'f#': 6, 'gb': 6, 'g': 7, 'g#': 8, 'ab': 8, 'a': 9, 'a#': 10, 'bb': 10, 'b': 11 };
 
-            this.currentData[this.persistentSelectedIndex].notes = [pitchFinal];
-            this.lastUsedPitch = pitchFinal;
-            this.draw(this.editIframe, true);
-        }
+        // Calcula o valor absoluto (semitones desde C0)
+        let valorAbsoluto = (oitava * 12) + valoresNotas[notaLimpa];
+
+        // Aplica a direção (para cima +1, para baixo -1)
+        valorAbsoluto += direcao;
+
+        // 3. Converte o valor absoluto de volta para nota
+        const novaOitava = Math.floor(valorAbsoluto / 12);
+        const indiceNota = valorAbsoluto % 12;
+
+        // Array padrão de sustenidos (a sua função getEnarmonicPitch decide se vira bemol depois)
+        const arrayNotasSustenidas = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+
+        const pitchBase = arrayNotasSustenidas[indiceNota] + '/' + novaOitava;
+        const pitchFinal = this.getEnarmonicPitch(pitchBase);
+
+        this.currentData[this.persistentSelectedIndex].notes = [pitchFinal];
+        this.lastUsedPitch = pitchFinal;
+        this.draw(this.editIframe, true);
     }
 
     centralizarNoCursor() {
