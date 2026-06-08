@@ -60,9 +60,11 @@ class UIController {
         if (tipo === 'cifra') {
             this.elements.editTextarea.classList.remove('d-none');
             this.elements.partituraEditFrame.classList.add('d-none');
+            this.elements.pianoWrapper.classList.add('d-none');
         } else {
             this.elements.editTextarea.classList.add('d-none');
             this.elements.partituraEditFrame.classList.remove('d-none');
+            this.elements.pianoWrapper.classList.remove('d-none');
         }
 
         this.elements.selectContainer.classList.add('d-none');
@@ -317,6 +319,7 @@ class UIController {
         this.elements.liturgiaDiariaFrame.classList.add('d-none');
         this.elements.partituraFrame.classList.add('d-none');
         this.elements.partituraEditFrame.classList.add('d-none');
+        this.elements.pianoWrapper.classList.add('d-none');
         this.elements.melodyStyleSelect.classList.remove('d-none');
         this.elements.drumStyleSelect.classList.add('d-none');
         this.elements.orgaoInstrumentButton.classList.remove('d-none');

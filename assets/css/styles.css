@@ -287,6 +287,71 @@ body.dark-mode .select2-results__options > li {
             box-shadow: 0 0 20px 5px rgba(255, 69, 0, .7);
         }
 
+/* --- TECLADO DE PIANO VIRTUAL --- */
+#pianoWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.piano-keyboard {
+    display: flex;
+    overflow-x: auto;
+    padding: 10px 15px;
+    background: #2b2b2b;
+    border-radius: 8px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    scrollbar-width: none;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+    .piano-keyboard::-webkit-scrollbar {
+        display: none; /* Esconde scrollbar no Chrome/Safari */
+    }
+
+.white-key {
+    position: relative;
+    width: 48px;
+    height: 150px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 0 0 5px 5px;
+    margin-right: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    transition: background 0.1s, transform 0.1s;
+    touch-action: pan-x; /* Permite rolar horizontalmente deslizando pelos botões brancos */
+}
+
+    .white-key.active-key {
+        background: #e0e0e0;
+        transform: translateY(2px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+.black-key {
+    position: absolute;
+    top: 0;
+    right: -17px;
+    width: 32px;
+    height: 90px;
+    background: #111;
+    border-radius: 0 0 4px 4px;
+    z-index: 2;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.5);
+    transition: background 0.1s, transform 0.1s;
+}
+
+    .black-key.active-key {
+        background: #444;
+        transform: translateY(2px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
 .btn-delete {
     background-color: #ff4500;
     color: white;

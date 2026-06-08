@@ -1040,6 +1040,36 @@ class PartituraEditor {
         if (this.onViewDrawn) this.onViewDrawn();
     }
 
+    applyPianoNote(pitchStr) {
+        this.commitInput();
+        const pitch = this.getEnarmonicPitch(pitchStr);
+
+        if (this.persistentSelectedIndex >= 0 && this.persistentSelectedIndex < this.currentData.length) {
+
+            // 1. Sobrescreve a altura (pitch) da nota selecionada atual
+            this.currentData[this.persistentSelectedIndex].notes = [pitch];
+            this.currentData[this.persistentSelectedIndex].rest = false;
+            this.lastUsedPitch = pitch;
+
+            // 2. Avança o cursor. Se estiver na última nota, cria um novo "espaço" (pausa)
+            if (this.persistentSelectedIndex === this.currentData.length - 1) {
+                this.currentData.push({
+                    notes: ["b/4"], // Apenas placeholder visual
+                    chord: "", lyric: "", bar: false, rest: true, tie: false, lineBreak: false
+                });
+                this.persistentSelectedIndex++;
+            } else {
+                this.persistentSelectedIndex++;
+            }
+
+            // 3. Atualiza interface e redesenha a partitura
+            this.selectionStart = this.persistentSelectedIndex;
+            this.selectionEnd = this.persistentSelectedIndex;
+            this.draw(this.editIframe, true);
+            this.centralizarNoCursor();
+        }
+    }
+
     addNewNote() {
         let repassarQuebraDeLinha = false;
         let notasParaCopiar = ["b/4"];

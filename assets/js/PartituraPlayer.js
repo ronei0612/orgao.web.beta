@@ -63,18 +63,18 @@ class PartituraPlayer {
 
     async loadSounds() {
         try {
-        const notas = [...new Set(
-            Object.values(this.partituraEditor.basePitches).flat()
-        )];
-        const urls = Object.fromEntries(
-            notas.map(nota => {
-                const name = `${this.instrumento}_${nota.replace('/', '').replace('#', '_')}`;
-                return [name, `${this.audioPath}/${name}.ogg`];
-            })
-        );
+            const notas = [...new Set(
+                Object.values(this.partituraEditor.basePitches).flat()
+            )];
+            const urls = Object.fromEntries(
+                notas.map(nota => {
+                    const name = `${this.instrumento}_${nota.replace('/', '').replace('#', '_')}`;
+                    return [name, `${this.audioPath}/${name}.ogg`];
+                })
+            );
             this.buffers = await this.audioManager.loadBuffers(urls);
         } catch { }
-        }
+    }
 
     tocarNotaAtualPartitura(volume = 1) {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
@@ -112,6 +112,26 @@ class PartituraPlayer {
 
         this.partituraEditor.highlightIndex = this.partituraPlaybackIndex;
         this.partituraEditor.draw(frameParaDesenhar, frameParaDesenhar === this.elements.partituraEditFrame);
+    }
+
+    playSingleNote(pitch) {
+        if (!pitch) return;
+        const [nota, oitava] = pitch.split('/');
+        let notaConvertida = nota.toLowerCase();
+
+        const mapBemolParaSustenido = { 'db': 'c#', 'eb': 'd#', 'gb': 'f#', 'ab': 'g#', 'bb': 'a#' };
+        if (mapBemolParaSustenido[notaConvertida]) {
+            notaConvertida = mapBemolParaSustenido[notaConvertida];
+        }
+
+        const notaLimpa = notaConvertida.replace('#', '_');
+        const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
+        const buffer = this.buffers.get(bufferName);
+
+        if (buffer) {
+            // Volume=1, tempo curto de release para ser um toque ágil de "digitação" de piano
+            this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.01, false);
+        }
     }
 
     avancarNotaAtualPartitura() {

@@ -190,6 +190,41 @@ class App {
                 button.addEventListener(event, this.togglePressedState.bind(this));
             });
         });
+
+        // Eventos do Teclado de Piano Virtual
+        const pianoKeys = document.querySelectorAll('.piano-key');
+        pianoKeys.forEach(key => {
+            ['mousedown', 'touchstart'].forEach(eventType => {
+                key.addEventListener(eventType, (e) => {
+                    e.stopPropagation(); // Evita que a preta clique na branca embaixo dela
+
+                    // Previne duplicação de eventos em mobile (touch + mouse)
+                    if (e.type === 'touchstart') key.dataset.touched = "true";
+                    if (e.type === 'mousedown' && key.dataset.touched === "true") {
+                        key.dataset.touched = "false";
+                        return;
+                    }
+
+                    this.handlePianoKeyClick(key.dataset.pitch, key);
+                }, { passive: true }); // passive: true permite que o scroll nativo (arrastar pro lado) ainda funcione.
+            });
+        });
+    }
+
+    handlePianoKeyClick(pitch, keyElement) {
+        if (!pitch) return;
+
+        // Efeito visual de apertar a tecla
+        keyElement.classList.add('active-key');
+        setTimeout(() => keyElement.classList.remove('active-key'), 100);
+
+        // Dispara o som
+        this.partituraPlayer.playSingleNote(pitch);
+
+        // Aplica na partitura (se estiver editando)
+        if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
+            this.partituraEditor.applyPianoNote(pitch);
+        }
     }
 
     setupSelect2() {
@@ -1711,6 +1746,7 @@ document.addEventListener('DOMContentLoaded', () => {
         melodyWrapper: document.getElementById('melodyWrapper'),
         instrumentsWrapper: document.getElementById('instrumentsWrapper'),
         bottomSpacer: document.getElementById('bottomSpacer'),
+        pianoWrapper: document.getElementById('pianoWrapper'),
         rhythmButtonsControl: document.getElementById('rhythm-buttons'),
         musicNoteIcon: document.getElementById('music-note'),
         musicNoteBeamedIcon: document.getElementById('music-note-beamed'),
