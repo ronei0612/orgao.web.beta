@@ -100,6 +100,8 @@ class App {
         //}
     }
 
+    // ATENÇÃO: COPIE APENAS OS MÉTODOS BINDEvents e handlePianoKeyClick do APP.JS
+
     bindEvents() {
         this.elements.santamissaFrame.addEventListener('load', this.handleSantaMissaLoad.bind(this));
         this.elements.selectedButton.addEventListener("click", this.handleSelectedButtonClick.bind(this));
@@ -108,9 +110,6 @@ class App {
         this.elements.darkModeToggle.addEventListener('change', this.uiController.toggleDarkMode.bind(this.uiController));
         this.elements.tocarButton.addEventListener('click', this.handleTocarClick.bind(this));
         this.elements.tomSelect.addEventListener('change', this.handleTomSelectChange.bind(this));
-        //this.elements.tomSelect.addEventListener('mousedown', () => { this.tomAnterior = this.elements.tomSelect.value; });
-        //this.elements.decreaseTom.addEventListener('mousedown', () => { this.tomAnterior = this.elements.tomSelect.value;});
-        //this.elements.increaseTom.addEventListener('mousedown', () => { this.tomAnterior = this.elements.tomSelect.value; });
         this.elements.decreaseTom.addEventListener('click', this.handleDecreaseTomClick.bind(this));
         this.elements.increaseTom.addEventListener('click', this.handleIncreaseTomClick.bind(this));
         this.elements.addButton.addEventListener('click', this.handleAddClick.bind(this));
@@ -155,10 +154,6 @@ class App {
             });
         });
 
-        //document.getElementById('increment-bpm').addEventListener('click', () => {
-        //    this.elements.bpmInput.value = (parseInt(this.elements.bpmInput.value, 10) || 0) + 1;
-        //    this.setBPM(parseInt(this.elements.bpmInput.value, 10));
-        //}); //Não remover
         document.getElementById('decrement-bpm').addEventListener('click', () => {
             this.elements.bpmInput.value = (parseInt(this.elements.bpmInput.value, 10) || 0) - 1;
             this.setBPM(parseInt(this.elements.bpmInput.value, 10));
@@ -191,23 +186,70 @@ class App {
             });
         });
 
-        // Eventos do Teclado de Piano Virtual
-        const pianoKeys = document.querySelectorAll('.piano-key');
-        pianoKeys.forEach(key => {
-            ['mousedown', 'touchstart'].forEach(eventType => {
-                key.addEventListener(eventType, (e) => {
-                    e.stopPropagation(); // Evita que a preta clique na branca embaixo dela
+        // ==========================================
+        // EVENTOS DO TECLADO DE PIANO (Com "Arrastar")
+        // ==========================================
+        const pianoWrapper = this.elements.pianoWrapper;
+        let isDraggingPiano = false;
 
-                    // Previne duplicação de eventos em mobile (touch + mouse)
-                    if (e.type === 'touchstart') key.dataset.touched = "true";
-                    if (e.type === 'mousedown' && key.dataset.touched === "true") {
-                        key.dataset.touched = "false";
-                        return;
-                    }
+        // Se estiver no computador (não for mobile), esconde o piano
+        if (!this.isMobileDevice()) {
+            pianoWrapper.style.display = 'none';
+        }
 
-                    this.handlePianoKeyClick(key.dataset.pitch, key);
-                }, { passive: true }); // passive: true permite que o scroll nativo (arrastar pro lado) ainda funcione.
-            });
+        const handlePianoInput = (e) => {
+            let x, y;
+            if (e.touches && e.touches.length > 0) {
+                x = e.touches[0].clientX;
+                y = e.touches[0].clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+
+            const elem = document.elementFromPoint(x, y);
+            if (elem && elem.classList.contains('piano-key')) {
+                const pitch = elem.dataset.pitch;
+                if (pitch && elem !== this._lastPlayedPianoKey) {
+                    this._lastPlayedPianoKey = elem;
+                    this.handlePianoKeyClick(pitch, elem);
+                }
+            }
+        };
+
+        // Mouse Events
+        pianoWrapper.addEventListener('mousedown', (e) => {
+            isDraggingPiano = true;
+            this._lastPlayedPianoKey = null;
+            handlePianoInput(e);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isDraggingPiano) handlePianoInput(e);
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingPiano = false;
+            this._lastPlayedPianoKey = null;
+        });
+
+        // Touch Events (Celular/Tablet)
+        pianoWrapper.addEventListener('touchstart', (e) => {
+            isDraggingPiano = true;
+            this._lastPlayedPianoKey = null;
+            handlePianoInput(e);
+        }, { passive: true });
+
+        // REMOVIDO o preventDefault. Agora o scroll nativo do navegador funciona!
+        pianoWrapper.addEventListener('touchmove', (e) => {
+            if (isDraggingPiano) {
+                handlePianoInput(e);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            isDraggingPiano = false;
+            this._lastPlayedPianoKey = null;
         });
     }
 
@@ -220,6 +262,10 @@ class App {
 
         // Dispara o som
         this.partituraPlayer.playSingleNote(pitch);
+
+        // Alternar visual do Play para Stop ao tocar no piano
+        this.uiController.exibirBotaoStop();
+        this.uiController.exibirBotoesAvancarVoltarCifra();
 
         // Aplica na partitura (se estiver editando)
         if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {

@@ -314,7 +314,7 @@ body.dark-mode .select2-results__options > li {
 .white-key {
     position: relative;
     width: 48px;
-    height: 150px;
+    height: 110px; /* Reduzido de 150px */
     background: #fff;
     border: 1px solid #ccc;
     border-radius: 0 0 5px 5px;
@@ -323,7 +323,15 @@ body.dark-mode .select2-results__options > li {
     cursor: pointer;
     box-shadow: 0 3px 5px rgba(0,0,0,0.2);
     transition: background 0.1s, transform 0.1s;
-    touch-action: pan-x; /* Permite rolar horizontalmente deslizando pelos botões brancos */
+    touch-action: pan-x;
+    /* Configuração para o texto (Dó, Ré, Mi...) */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #666;
 }
 
     .white-key.active-key {
@@ -337,13 +345,21 @@ body.dark-mode .select2-results__options > li {
     top: 0;
     right: -17px;
     width: 32px;
-    height: 90px;
+    height: 65px; /* Reduzido de 90px */
     background: #111;
     border-radius: 0 0 4px 4px;
     z-index: 2;
     cursor: pointer;
     box-shadow: 0 3px 5px rgba(0,0,0,0.5);
     transition: background 0.1s, transform 0.1s;
+    /* Configuração para o texto */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 4px;
+    font-size: 9px;
+    font-weight: normal;
+    color: #ddd;
 }
 
     .black-key.active-key {
@@ -351,6 +367,11 @@ body.dark-mode .select2-results__options > li {
         transform: translateY(2px);
         box-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }
+
+/* O span não deve interceptar o mouse, senão o "arrastar" pensa que você tocou num texto ao invés da tecla */
+.piano-key span {
+    pointer-events: none;
+}
 
 .btn-delete {
     background-color: #ff4500;

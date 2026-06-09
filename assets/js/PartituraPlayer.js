@@ -129,8 +129,8 @@ class PartituraPlayer {
         const buffer = this.buffers.get(bufferName);
 
         if (buffer) {
-            // Volume=1, tempo curto de release para ser um toque ágil de "digitação" de piano
-            this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.01, false);
+            // Foi adicionado 'this.activeSources' no final dessa linha:
+            this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.01, false, this.activeSources);
         }
     }
 
