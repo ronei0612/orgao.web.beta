@@ -25,17 +25,17 @@ class CifraPlayer {
         this.VOLUME_CONFIG = {
             'grave': {
                 'orgao': 1.0,
-                'strings': 0.6,
+                'strings': 0.8,
                 'epiano': 1.0
             },
             'baixo': {
                 'orgao': 1.0,
-                'strings': 0.5,
+                'strings': 0.7,
                 'epiano': 1.0
             },
             'agudo': {
-                'orgao': 0.6,
-                'strings': 0.5,
+                'orgao': 0.8,
+                'strings': 0.7,
                 'epiano': 1.0
             }
         };
@@ -647,15 +647,15 @@ class CifraPlayer {
 
     atualizarVolumeStringsParaEpiano() {
         // Altera a fonte da verdade localmente
-        this.VOLUME_CONFIG['grave']['strings'] = 0.9;
-        this.VOLUME_CONFIG['baixo']['strings'] = 0.9;
-        this.VOLUME_CONFIG['agudo']['strings'] = 0.9;
+        this.VOLUME_CONFIG['grave']['strings'] = 1.0;
+        this.VOLUME_CONFIG['baixo']['strings'] = 1.0;
+        this.VOLUME_CONFIG['agudo']['strings'] = 1.0;
     }
 
     atualizarVolumeStringsParaOrgao() {
         // Restaura a fonte da verdade para o padrão do órgão
-        this.VOLUME_CONFIG['grave']['strings'] = 0.6;
-        this.VOLUME_CONFIG['baixo']['strings'] = 0.5;
-        this.VOLUME_CONFIG['agudo']['strings'] = 0.5;
+        this.VOLUME_CONFIG['grave']['strings'] = 0.8;
+        this.VOLUME_CONFIG['baixo']['strings'] = 0.7;
+        this.VOLUME_CONFIG['agudo']['strings'] = 0.7;
     }
 }
