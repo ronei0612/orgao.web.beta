@@ -105,8 +105,6 @@ class DrumMachine {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
-        this.audioManager.stopAll(this.activeSources, 0.02);
-        this.activeSources.clear();
         this.reset();
     }
 
