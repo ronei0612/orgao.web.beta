@@ -1,7 +1,9 @@
 class PianoSynthesizer {
     constructor(audioContext) {
         this.ctx = audioContext;
-        this.instrument = 'flauta'; // Som padrão
+        // Você pode mudar manualmente aqui no código para: 'piano', 'epiano' ou 'flauta'
+        this.instrument = 'flauta';
+        this.volume = 0.5;
     }
 
     setInstrument(inst) {
@@ -33,16 +35,13 @@ class PianoSynthesizer {
         const freq = this.getFrequency(pitch);
         const t = this.ctx.currentTime;
 
-        // Escolhe o gerador de som com base no instrumento selecionado
+        // Roteamento baseado na escolha do instrumento
         switch (this.instrument) {
             case 'epiano':
                 this.playEPiano(freq, t);
                 break;
             case 'flauta':
-                this.playFlauta(freq, t);
-                break;
-            case 'violao':
-                this.playViolao(freq, t);
+                this.playFlautaDoce(freq, t);
                 break;
             case 'piano':
             default:
@@ -51,7 +50,7 @@ class PianoSynthesizer {
         }
     }
 
-    // 1. PIANO ACÚSTICO (Onda Triângulo + Seno com Filtro Abafador)
+    // 1. PIANO ACÚSTICO
     playAcousticPiano(freq, t) {
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'lowpass';
@@ -83,26 +82,26 @@ class PianoSynthesizer {
         osc2.stop(t + 3);
     }
 
-    // 2. PIANO ELÉTRICO (Rhodes-like: Seno pura + Harmônico oitavado suave)
+    // 2. PIANO ELÉTRICO
     playEPiano(freq, t) {
         const gainNode = this.ctx.createGain();
         gainNode.gain.setValueAtTime(0, t);
-        gainNode.gain.linearRampToValueAtTime(0.8, t + 0.02); // Ataque pouca coisa mais macio
-        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 2); // Sustain longo que morre
+        gainNode.gain.linearRampToValueAtTime(0.8, t + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 3);
 
         gainNode.connect(this.ctx.destination);
 
         const osc1 = this.ctx.createOscillator();
-        osc1.type = 'sine'; // Corpo principal bem redondo
+        osc1.type = 'sine';
         osc1.frequency.value = freq;
         osc1.connect(gainNode);
 
         const osc2 = this.ctx.createOscillator();
         osc2.type = 'triangle';
-        osc2.frequency.value = freq * 2; // Harmônico (1 oitava acima) para dar brilho
+        osc2.frequency.value = freq * 2;
 
         const gain2 = this.ctx.createGain();
-        gain2.gain.value = 0.15; // Bem baixo, só para colorir
+        gain2.gain.value = 0.15;
         osc2.connect(gain2);
         gain2.connect(gainNode);
 
@@ -112,60 +111,36 @@ class PianoSynthesizer {
         osc2.stop(t + 3.5);
     }
 
-    // 3. FLAUTA CURTA (Seno + Vibrato leve + Corta rápido)
-    playFlauta(freq, t) {
+    // 3. FLAUTA DOCE (Som puro, doce e sem oco prolongado)
+    playFlautaDoce(freq, t) {
         const gainNode = this.ctx.createGain();
         gainNode.gain.setValueAtTime(0, t);
-        gainNode.gain.linearRampToValueAtTime(0.7, t + 0.05); // Sopra (ataque mais lento)
-        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 1.2); // Morre rápido (pouco fôlego)
+        // Sopra suavemente, mas rápido
+        gainNode.gain.linearRampToValueAtTime(this.volume, t + 0.1);
+        // Morre de forma natural e rápida
+        gainNode.gain.setTargetAtTime(0, t + 0.2, 0.2);
 
         gainNode.connect(this.ctx.destination);
 
+        // Onda principal (Seno puro)
         const osc1 = this.ctx.createOscillator();
         osc1.type = 'sine';
         osc1.frequency.value = freq;
-
-        // Criando Vibrato (LFO - Low Frequency Oscillator)
-        const lfo = this.ctx.createOscillator();
-        lfo.type = 'sine';
-        lfo.frequency.value = 5; // Oscila 5 vezes por segundo
-
-        const lfoGain = this.ctx.createGain();
-        lfoGain.gain.value = freq * 0.015; // Profundidade do vibrato
-
-        lfo.connect(lfoGain);
-        lfoGain.connect(osc1.frequency); // Conecta o LFO na afinação do oscilador 1
-
         osc1.connect(gainNode);
 
+        // Onda secundária (Triângulo bem fraquinho uma oitava acima simula a ressonância do tubo)
+        const osc2 = this.ctx.createOscillator();
+        osc2.type = 'triangle';
+        osc2.frequency.value = freq * 2;
+
+        const gain2 = this.ctx.createGain();
+        gain2.gain.value = 0.05; // Bem sutil
+        osc2.connect(gain2);
+        gain2.connect(gainNode);
+
         osc1.start(t);
-        lfo.start(t);
-        osc1.stop(t + 1.5);
-        lfo.stop(t + 1.5);
-    }
-
-    // 4. VIOLÃO / CORDAS DEDILHADAS (Onda Serra + Filtro Pluck)
-    playViolao(freq, t) {
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        // Começa com bastante harmônico (som da palheta) e corta bruscamente (som da corda)
-        filter.frequency.setValueAtTime(freq * 4, t);
-        filter.frequency.exponentialRampToValueAtTime(freq, t + 0.5);
-
-        const gainNode = this.ctx.createGain();
-        gainNode.gain.setValueAtTime(0, t);
-        gainNode.gain.linearRampToValueAtTime(0.9, t + 0.01); // Ataque imediato
-        gainNode.gain.exponentialRampToValueAtTime(0.001, t + 2); // Abafa rápido
-
-        filter.connect(gainNode);
-        gainNode.connect(this.ctx.destination);
-
-        const osc = this.ctx.createOscillator();
-        osc.type = 'sawtooth'; // Onda dente de serra dá o tom vibrante da corda
-        osc.frequency.value = freq;
-        osc.connect(filter);
-
-        osc.start(t);
-        osc.stop(t + 2.5);
+        osc2.start(t);
+        osc1.stop(t + 1.0);
+        osc2.stop(t + 1.0);
     }
 }
