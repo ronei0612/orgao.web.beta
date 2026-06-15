@@ -488,11 +488,18 @@ class PartituraEditor {
     abrirEditor(dataArray = []) {
         if (!dataArray || dataArray.length === 0) {
             this.currentData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false }];
+            this.persistentSelectedIndex = 0;
         } else {
             this.currentData = dataArray.map(l => this.normalizeItem(l));
+
+            // CORREÇÃO: Focar na nota que eu estava tocando/visualizando no modo view
+            if (this.highlightIndex >= 0 && this.highlightIndex < this.currentData.length) {
+                this.persistentSelectedIndex = this.highlightIndex;
+            } else {
+                this.persistentSelectedIndex = 0;
+            }
         }
 
-        this.persistentSelectedIndex = this.currentData.length - 1;
         this.selectionStart = this.persistentSelectedIndex;
         this.selectionEnd = this.persistentSelectedIndex;
 
@@ -592,6 +599,10 @@ class PartituraEditor {
 
     renderizarVisualizacao(dataArray = []) {
         this.currentData = dataArray.map(l => this.normalizeItem(l));
+
+        // CORREÇÃO: Ao carregar a partitura já deixa selecionada a primeira nota/pausa (índice 0)
+        this.highlightIndex = 0;
+
         this.draw(this.viewIframe, false);
         if (this.onViewDrawn) this.onViewDrawn();
     }
@@ -840,8 +851,15 @@ class PartituraEditor {
                 notaAtual.lineBreak = false;
                 repassarQuebraDeLinha = true;
             }
-            notasParaCopiar = [...notaAtual.notes];
-            isRest = notaAtual.rest;
+
+            // CORREÇÃO: Se for pausa, não copia a pausa, insere nota padrão
+            if (notaAtual.rest) {
+                notasParaCopiar = [this.lastUsedPitch || "b/4"];
+                isRest = false;
+            } else {
+                notasParaCopiar = [...notaAtual.notes];
+                isRest = false; // Força false pois addNewNote deve sempre adicionar nota
+            }
         } else {
             notasParaCopiar = [this.lastUsedPitch || "b/4"];
         }
@@ -927,9 +945,11 @@ class PartituraEditor {
                 this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false };
             } else {
                 const indexAnterior = this.persistentSelectedIndex - 1;
+
                 if (this.persistentSelectedIndex > 0 && this.currentData[indexAnterior].lineBreak) {
                     this.currentData[indexAnterior].lineBreak = false;
-                    this.persistentSelectedIndex--;
+                    // CORREÇÃO: Removi 'this.persistentSelectedIndex--;' daqui. 
+                    // O foco fica exatamente na nota que você estava antes de apertar Delete/Backspace
                 } else {
                     this.currentData.splice(this.persistentSelectedIndex, 1);
                     if (this.persistentSelectedIndex >= this.currentData.length) {

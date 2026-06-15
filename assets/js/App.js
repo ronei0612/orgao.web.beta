@@ -381,7 +381,15 @@ class App {
     _moverPartitura(direcao) {
         const total = this.partituraEditor.currentData.length - 1;
         const atual = this.partituraEditor.highlightIndex === -1 ? 0 : this.partituraEditor.highlightIndex;
-        const novoIndex = Math.max(0, Math.min(atual + direcao, total));
+
+        let novoIndex = atual + direcao;
+
+        // CORREÇÃO: Fazer o loop (se passar do limite, volta pro início, se voltar do zero, vai pro final)
+        if (novoIndex > total) {
+            novoIndex = 0;
+        } else if (novoIndex < 0) {
+            novoIndex = total;
+        }
 
         this.partituraEditor.highlightIndex = novoIndex;
 
@@ -774,7 +782,6 @@ class App {
 
     verifyLetraOuCifra(texto, saveData) {
         if (texto.includes('<pre class="cifra">')) {
-            // Garante que os elementos fiquem visíveis caso viéssemos de uma Letra
             this.elements.bpmContainer.classList.remove('d-none');
             this.elements.draggableControls.classList.remove('d-none');
             this.elements.instrumentsWrapper.classList.remove('d-none');
@@ -783,8 +790,7 @@ class App {
             let tom = 'C';
             if (saveData && saveData.key && saveData.key !== '') {
                 tom = saveData.key;
-            }
-            else {
+            } else {
                 tom = this.cifraPlayer.descobrirTom(texto);
             }
             const musicaCifrada = this.cifraPlayer.destacarCifras(texto, tom);
@@ -793,18 +799,21 @@ class App {
             this.elements.tomSelect.dispatchEvent(new Event('change'));
             this.cifraPlayer.preencherIframeCifra(musicaCifrada);
             this.cifraPlayer.addEventCifrasIframe(this.elements.iframeCifra);
-        }
-        else {
-            // MODO LETRA APENAS (Interface de Leitura Limpa):
-            this.uiController.esconderBotoesTom(); // Reduz o tomSelect para "Letra" e oculta o tomContainer
-            this.uiController.esconderBotoesAcordes(); // Oculta os botões de acorde do rodapé
 
-            this.elements.bpmContainer.classList.add('d-none'); // Oculta os controles de BPM
-            this.elements.draggableControls.classList.add('d-none'); // Oculta o painel flutuante de play/stop/notes
+            // CORREÇÃO: Destacar a primeira cifra logo ao carregar
+            setTimeout(() => {
+                this.cifraPlayer.selecionarPrimeiraCifra();
+            }, 100);
+
+        } else {
+            this.uiController.esconderBotoesTom();
+            this.uiController.esconderBotoesAcordes();
+            this.elements.bpmContainer.classList.add('d-none');
+            this.elements.draggableControls.classList.add('d-none');
             this.elements.instrumentsWrapper.classList.add('d-none');
             this.elements.bottomSpacer.classList.remove('d-none');
 
-            this.cifraPlayer.preencherIframeCifra(texto); // Insere apenas o texto da letra no iframe
+            this.cifraPlayer.preencherIframeCifra(texto);
         }
         this.preencherLayoutDoLocalStorage(saveData);
     }

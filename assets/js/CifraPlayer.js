@@ -446,6 +446,17 @@ class CifraPlayer {
         this.avancarCifra();
     }
 
+    selecionarPrimeiraCifra() {
+        const doc = this.elements.iframeCifra.contentDocument;
+        if (!doc) return;
+
+        this.elements_b = doc.getElementsByTagName('b');
+        if (this.elements_b && this.elements_b.length > 0) {
+            this.indiceAcorde = 0;
+            this.avancarDestaque();
+        }
+    }
+
     alternarNotas() {
         if (this.indiceAcorde > 0) {
             this.indiceAcorde--;
