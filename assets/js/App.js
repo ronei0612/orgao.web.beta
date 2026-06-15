@@ -10,6 +10,9 @@ class App {
         // 1. Criar o gerenciador de áudio ÚNICO aqui
         this.audioManager = new AudioContextManager();
 
+        // NOVO: Adiciona o Sintetizador de Piano
+        this.pianoSynthesizer = new PianoSynthesizer(this.audioManager.audioContext);
+
         // 2. Passar o audioManager para todos os players
         this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
 
@@ -255,12 +258,11 @@ class App {
         keyElement.classList.add('active-key');
         setTimeout(() => keyElement.classList.remove('active-key'), 100);
 
-        // Dispara o som
-        this.partituraPlayer.playSingleNote(pitch);
+        // CORREÇÃO: Dispara o som gerado localmente pelo Sintetizador
+        this.pianoSynthesizer.playNote(pitch);
 
-        // Alternar visual do Play para Stop ao tocar no piano
-        this.uiController.exibirBotaoStop();
-        this.uiController.exibirBotoesAvancarVoltarCifra();
+        // CORREÇÃO: Removidas as chamadas de UI que mudavam o Play para Stop.
+        // Assim, você pode tocar o piano sem interromper o fluxo da interface principal.
 
         // Aplica na partitura (se estiver editando)
         if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
