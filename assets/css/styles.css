@@ -292,7 +292,7 @@ body.dark-mode .select2-results__options > li {
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    /*margin-bottom: 20px;*/
 }
 
 .piano-keyboard {
