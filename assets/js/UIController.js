@@ -60,7 +60,8 @@ class UIController {
         if (tipo === 'cifra') {
             this.elements.editTextarea.classList.remove('d-none');
             this.elements.partituraEditFrame.classList.add('d-none');
-            this.elements.pianoWrapper.classList.add('d-none');
+            // CORREÇÃO: Piano visível também na edição de cifra
+            this.elements.pianoWrapper.classList.remove('d-none');
         } else {
             this.elements.editTextarea.classList.add('d-none');
             this.elements.partituraEditFrame.classList.remove('d-none');
@@ -319,13 +320,16 @@ class UIController {
         this.elements.liturgiaDiariaFrame.classList.add('d-none');
         this.elements.partituraFrame.classList.add('d-none');
         this.elements.partituraEditFrame.classList.add('d-none');
-        this.elements.pianoWrapper.classList.add('d-none');
+
+        // CORREÇÃO: Agora o piano se mantém visível na tela padrão
+        this.elements.pianoWrapper.classList.remove('d-none');
+
         this.elements.melodyStyleSelect.classList.remove('d-none');
         this.elements.drumStyleSelect.classList.add('d-none');
         this.elements.orgaoInstrumentButton.classList.remove('d-none');
 
         // Exibe o contêiner pai de instrumentos
-        this.elements.instrumentsWrapper.classList.remove('d-none'); // <-- ADICIONADO AQUI
+        this.elements.instrumentsWrapper.classList.remove('d-none');
 
         this.elements.bateriaInstrumentButton.classList.add('d-none');
 

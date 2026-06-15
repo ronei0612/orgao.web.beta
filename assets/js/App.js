@@ -192,11 +192,6 @@ class App {
         const pianoWrapper = this.elements.pianoWrapper;
         let isDraggingPiano = false;
 
-        // Se estiver no computador (não for mobile), esconde o piano
-        if (!this.isMobileDevice()) {
-            pianoWrapper.style.display = 'none';
-        }
-
         const handlePianoInput = (e) => {
             let x, y;
             if (e.touches && e.touches.length > 0) {
