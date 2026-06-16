@@ -314,7 +314,7 @@ body.dark-mode .select2-results__options > li {
 .white-key {
     position: relative;
     width: 48px;
-    height: 110px; /* Reduzido de 150px */
+    height: 110px;
     background: #fff;
     border: 1px solid #ccc;
     border-radius: 0 0 5px 5px;
@@ -324,7 +324,6 @@ body.dark-mode .select2-results__options > li {
     box-shadow: 0 3px 5px rgba(0,0,0,0.2);
     transition: background 0.1s, transform 0.1s;
     touch-action: pan-x;
-    /* Configuração para o texto (Dó, Ré, Mi...) */
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -332,6 +331,10 @@ body.dark-mode .select2-results__options > li {
     font-size: 11px;
     font-weight: bold;
     color: #666;
+    /* CORREÇÃO: Impede a seleção de texto indesejada */
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
     .white-key.active-key {
@@ -345,14 +348,13 @@ body.dark-mode .select2-results__options > li {
     top: 0;
     right: -17px;
     width: 32px;
-    height: 65px; /* Reduzido de 90px */
+    height: 65px;
     background: #111;
     border-radius: 0 0 4px 4px;
     z-index: 2;
     cursor: pointer;
     box-shadow: 0 3px 5px rgba(0,0,0,0.5);
     transition: background 0.1s, transform 0.1s;
-    /* Configuração para o texto */
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -360,6 +362,10 @@ body.dark-mode .select2-results__options > li {
     font-size: 9px;
     font-weight: normal;
     color: #ddd;
+    /* CORREÇÃO: Impede a seleção de texto indesejada */
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
     .black-key.active-key {
