@@ -190,7 +190,7 @@ class App {
         });
 
         // ==========================================
-        // EVENTOS DO TECLADO DE PIANO (Com "Arrastar")
+        // EVENTOS DO TECLADO DE PIANO (Com "Arrastar", "Sustain" e "Filtro de Toque Rápido")
         // ==========================================
         const pianoWrapper = this.elements.pianoWrapper;
         let isDraggingPiano = false;
@@ -206,11 +206,43 @@ class App {
             }
 
             const elem = document.elementFromPoint(x, y);
-            if (elem && elem.classList.contains('piano-key')) {
+            const isKey = elem && elem.classList.contains('piano-key');
+
+            if (isKey) {
                 const pitch = elem.dataset.pitch;
                 if (pitch && elem !== this._lastPlayedPianoKey) {
+
+                    // CORREÇÃO: Se escorregou muito rápido antes de dar o tempo, cancela a nota!
+                    if (this._pianoKeyTimeout) {
+                        clearTimeout(this._pianoKeyTimeout);
+                        this._pianoKeyTimeout = null;
+                    }
+
+                    // Se mudou para uma tecla nova (após tempo da anterior), solta a que já estava tocando
+                    if (this._lastPlayedPianoKey) {
+                        this.releasePianoKey(this._lastPlayedPianoKey);
+                    }
+
                     this._lastPlayedPianoKey = elem;
-                    this.handlePianoKeyClick(pitch, elem);
+
+                    // CORREÇÃO: Aguarda 70ms antes de confirmar o toque. 
+                    // Se você soltar ou arrastar antes disso, o som é ignorado.
+                    this._pianoKeyTimeout = setTimeout(() => {
+                        this.pressPianoKey(pitch, elem);
+                        this._pianoKeyTimeout = null;
+                    }, 70);
+                }
+            } else {
+                // Se arrastou o dedo para FORA do teclado...
+                // 1. Cancela se estava prestes a tocar (esbarrão)
+                if (this._pianoKeyTimeout) {
+                    clearTimeout(this._pianoKeyTimeout);
+                    this._pianoKeyTimeout = null;
+                }
+                // 2. Solta a nota se já estivesse tocando
+                if (this._lastPlayedPianoKey) {
+                    this.releasePianoKey(this._lastPlayedPianoKey);
+                    this._lastPlayedPianoKey = null;
                 }
             }
         };
@@ -228,7 +260,15 @@ class App {
 
         window.addEventListener('mouseup', () => {
             isDraggingPiano = false;
-            this._lastPlayedPianoKey = null;
+            // Cancela se soltou rápido demais
+            if (this._pianoKeyTimeout) {
+                clearTimeout(this._pianoKeyTimeout);
+                this._pianoKeyTimeout = null;
+            }
+            if (this._lastPlayedPianoKey) {
+                this.releasePianoKey(this._lastPlayedPianoKey);
+                this._lastPlayedPianoKey = null;
+            }
         });
 
         // Touch Events (Celular/Tablet)
@@ -238,7 +278,6 @@ class App {
             handlePianoInput(e);
         }, { passive: true });
 
-        // REMOVIDO o preventDefault. Agora o scroll nativo do navegador funciona!
         pianoWrapper.addEventListener('touchmove', (e) => {
             if (isDraggingPiano) {
                 handlePianoInput(e);
@@ -247,27 +286,46 @@ class App {
 
         window.addEventListener('touchend', () => {
             isDraggingPiano = false;
-            this._lastPlayedPianoKey = null;
+            // Cancela se soltou rápido demais
+            if (this._pianoKeyTimeout) {
+                clearTimeout(this._pianoKeyTimeout);
+                this._pianoKeyTimeout = null;
+            }
+            if (this._lastPlayedPianoKey) {
+                this.releasePianoKey(this._lastPlayedPianoKey);
+                this._lastPlayedPianoKey = null;
+            }
         });
     }
 
-    handlePianoKeyClick(pitch, keyElement) {
+    pressPianoKey(pitch, keyElement) {
         if (!pitch) return;
 
-        // Efeito visual de apertar a tecla
+        // Limpa visualmente outras teclas
+        document.querySelectorAll('.piano-key').forEach(key => {
+            key.classList.remove('active-key');
+        });
+
+        // Efeito visual de tecla abaixada (FICA ABAIXADA ATÉ SOLTAR)
         keyElement.classList.add('active-key');
-        setTimeout(() => keyElement.classList.remove('active-key'), 100);
 
-        // CORREÇÃO: Dispara o som gerado localmente pelo Sintetizador
-        this.pianoSynthesizer.playNote(pitch);
-
-        // CORREÇÃO: Removidas as chamadas de UI que mudavam o Play para Stop.
-        // Assim, você pode tocar o piano sem interromper o fluxo da interface principal.
+        // CORREÇÃO: Dispara o som dos samples OGG da flauta
+        this.partituraPlayer.startPianoNote(pitch);
 
         // Aplica na partitura (se estiver editando)
         if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
             this.partituraEditor.applyPianoNote(pitch);
         }
+    }
+
+    releasePianoKey(keyElement) {
+        // Levanta a tecla visualmente
+        if (keyElement) {
+            keyElement.classList.remove('active-key');
+        }
+
+        // CORREÇÃO: Manda o som da flauta OGG morrer suavemente
+        this.partituraPlayer.stopPianoNote();
     }
 
     setupSelect2() {

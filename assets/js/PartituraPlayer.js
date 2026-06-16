@@ -114,8 +114,12 @@ class PartituraPlayer {
         this.partituraEditor.draw(frameParaDesenhar, frameParaDesenhar === this.elements.partituraEditFrame);
     }
 
-    playSingleNote(pitch) {
+    // Inicia a nota OGG (Note On)
+    startPianoNote(pitch) {
+        this.stopPianoNote(); // Corta qualquer nota que já estivesse tocando
+
         if (!pitch) return;
+
         const [nota, oitava] = pitch.split('/');
         let notaConvertida = nota.toLowerCase();
 
@@ -129,8 +133,19 @@ class PartituraPlayer {
         const buffer = this.buffers.get(bufferName);
 
         if (buffer) {
-            // Foi adicionado 'this.activeSources' no final dessa linha:
-            this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.01, false, this.activeSources);
+            // Toca o áudio OGG com um leve ataque (0.02) e o armazena para poder interromper depois
+            // Nota: Se quiser que o áudio fique em LOOP infinito enquanto segura, mude o 'false' para 'true'. 
+            // Mas cuidado: samples comuns podem "estalar" em loop.
+            this.activePianoNode = this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.02, false, this.activeSources);
+        }
+    }
+
+    // Interrompe a nota OGG suavemente (Note Off)
+    stopPianoNote() {
+        if (this.activePianoNode) {
+            // Faz um fade-out suave (0.15s) para o som da flauta não cortar seco
+            this.audioManager.stopNode(this.activePianoNode, this.audioContext.currentTime, 0.15);
+            this.activePianoNode = null;
         }
     }
 
