@@ -15,6 +15,10 @@ class PartituraPlayer {
 
     async init() {
         if (this._initialized) return;
+
+        // CORREÇÃO: Marca como inicializado para não baixar os sons duas vezes
+        this._initialized = true;
+
         await this.loadSounds();
 
         // Registra callback para bindar cliques sempre que a visualização for redesenhada

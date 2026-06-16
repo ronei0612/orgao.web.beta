@@ -77,6 +77,9 @@ class App {
         this.getUrlParam();
         this.updateFillBlink(this.musicTheory.bpm);
 
+        // --- ADICIONE ESTA LINHA AQUI ---
+        this.partituraPlayer.init();
+
         this.drumMachine = new DrumMachine(this.BASE_URL, this.cifraPlayer, this.musicTheory, this.audioManager);
         this.bateriaUI = new BateriaUI(this.elements, this.drumMachine, this.uiController, this.cifraPlayer);
 
