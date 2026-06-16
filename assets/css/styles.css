@@ -322,7 +322,7 @@ body.dark-mode .select2-results__options > li {
     flex-shrink: 0;
     cursor: pointer;
     box-shadow: 0 3px 5px rgba(0,0,0,0.2);
-    transition: background 0.1s, transform 0.1s;
+    transition: background 0.1s;
     touch-action: pan-x;
     display: flex;
     justify-content: center;
@@ -331,7 +331,6 @@ body.dark-mode .select2-results__options > li {
     font-size: 11px;
     font-weight: bold;
     color: #666;
-    /* CORREÇÃO: Impede a seleção de texto indesejada */
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -339,7 +338,7 @@ body.dark-mode .select2-results__options > li {
 
     .white-key.active-key {
         background: #e0e0e0;
-        transform: translateY(2px);
+        top: 2px; /* MOVER PARA BAIXO SEM QUEBRAR O Z-INDEX */
         box-shadow: 0 1px 2px rgba(0,0,0,0.2);
     }
 
@@ -354,7 +353,7 @@ body.dark-mode .select2-results__options > li {
     z-index: 2;
     cursor: pointer;
     box-shadow: 0 3px 5px rgba(0,0,0,0.5);
-    transition: background 0.1s, transform 0.1s;
+    transition: background 0.1s;
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -362,7 +361,7 @@ body.dark-mode .select2-results__options > li {
     font-size: 9px;
     font-weight: normal;
     color: #ddd;
-    /* CORREÇÃO: Impede a seleção de texto indesejada */
+    /* CORREÇÃO 2: Evita a letra ficar selecionada em azul */
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -370,9 +369,13 @@ body.dark-mode .select2-results__options > li {
 
     .black-key.active-key {
         background: #444;
-        transform: translateY(2px);
+        top: 2px; /* MOVER PARA BAIXO SEM QUEBRAR O Z-INDEX */
         box-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }
+
+.white-key.active-key .black-key {
+    top: -2px;
+}
 
 /* O span não deve interceptar o mouse, senão o "arrastar" pensa que você tocou num texto ao invés da tecla */
 .piano-key span {
