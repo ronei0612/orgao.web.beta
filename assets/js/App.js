@@ -807,37 +807,47 @@ class App {
     }
 
     async changeInstrumentMode(mode) {
-        this.currentInstrumentMode = mode;
+        // 1. BLOQUEIA A TELA
+        this.uiController.bloquearInstrumentos();
 
-        if (mode === 'orgao') {
-            this.cifraPlayer.instrumento = 'orgao';
-            this.cifraPlayer.attack = 0.2;
-            this.cifraPlayer.atualizarVolumeStringsParaOrgao();
-            await this.melodyMachine.setInstrument('orgao');
-            this.uiController.exibirInstrumento(mode);
-        } else if (mode === 'piano') {
-            this.cifraPlayer.instrumento = 'epiano';
-            await this.cifraPlayer.loadEpianoSounds();
-            this.cifraPlayer.attack = 0;
-            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
-            await this.melodyMachine.setInstrument('piano');
-            this.uiController.exibirInstrumento(mode);
-        } else if (mode === 'bateria') {
-            this.cifraPlayer.instrumento = 'epiano';
-            await this.cifraPlayer.loadEpianoSounds();
-            this.cifraPlayer.attack = 0;
-            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
-            if (!this.bateriaUI._initialized) {
-                await this.drumMachine.init();
-                await this.bateriaUI.init();
-                this.bateriaUI._initialized = true;
+        try {
+            this.currentInstrumentMode = mode;
+
+            if (mode === 'orgao') {
+                this.cifraPlayer.instrumento = 'orgao';
+                this.cifraPlayer.attack = 0.2;
+                this.cifraPlayer.atualizarVolumeStringsParaOrgao();
+                await this.melodyMachine.setInstrument('orgao');
+                this.uiController.exibirInstrumento(mode);
+            } else if (mode === 'piano') {
+                this.cifraPlayer.instrumento = 'epiano';
+                await this.cifraPlayer.loadEpianoSounds();
+                this.cifraPlayer.attack = 0;
+                this.cifraPlayer.atualizarVolumeStringsParaEpiano();
+                await this.melodyMachine.setInstrument('piano');
+                this.uiController.exibirInstrumento(mode);
+            } else if (mode === 'bateria') {
+                this.cifraPlayer.instrumento = 'epiano';
+                await this.cifraPlayer.loadEpianoSounds();
+                this.cifraPlayer.attack = 0;
+                this.cifraPlayer.atualizarVolumeStringsParaEpiano();
+                if (!this.bateriaUI._initialized) {
+                    await this.drumMachine.init();
+                    await this.bateriaUI.init();
+                    this.bateriaUI._initialized = true;
+                }
+                this.uiController.exibirInstrumento(mode);
             }
-            this.uiController.exibirInstrumento(mode);
-        }
 
-        if (!this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__') {
-            const localStorageSalvar = this.getIframeStorageName();
-            this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
+            if (!this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__') {
+                const localStorageSalvar = this.getIframeStorageName();
+                this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
+            }
+        } catch (error) {
+            console.error("Erro ao trocar de instrumento:", error);
+        } finally {
+            // 2. DESBLOQUEIA A TELA DEPOIS QUE TUDO TERMINAR
+            this.uiController.desbloquearInstrumentos();
         }
     }
 

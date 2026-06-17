@@ -340,6 +340,14 @@ class UIController {
         });
     }
 
+    bloquearInstrumentos() {
+        this.elements.instrumentsWrapper.classList.add('locked-wrapper');
+    }
+
+    desbloquearInstrumentos() {
+        this.elements.instrumentsWrapper.classList.remove('locked-wrapper');
+    }
+
     exibirIframeCifra() {
         //this.resetInterface();
         this.elements.iframeCifra.classList.remove('d-none');

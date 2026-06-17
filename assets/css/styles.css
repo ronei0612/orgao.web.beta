@@ -382,6 +382,13 @@ body.dark-mode .select2-results__options > li {
     pointer-events: none;
 }
 
+/* Classe para bloquear a área de instrumentos enquanto carrega */
+.locked-wrapper {
+    pointer-events: none; /* Impede qualquer clique */
+    opacity: 0.5; /* Deixa meio transparente para dar aspecto de inativo */
+    transition: opacity 0.2s ease;
+}
+
 .btn-delete {
     background-color: #ff4500;
     color: white;
