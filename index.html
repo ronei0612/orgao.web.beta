@@ -169,7 +169,7 @@
             <!-- Melody Wrapper -->
             <div id="melodyWrapper">
                 <div class="d-flex align-items-center mb-1">
-                    <div class="input-group flex-grow-1 mr-1">
+                    <div class="input-group flex-grow-1">
                         <select class="form-control" id="melodyStyleSelect">
                         </select>
                         <div class="input-group-append d-none" id="melodySaveControl">
@@ -447,6 +447,23 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
                     <button type="button" class="btn btn-success" id="btnConfirmImport">Importar Selecionadas</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Seleção de Instrumento -->
+    <div class="modal fade" id="instrumentSelectionModal" tabindex="-1" role="dialog" aria-labelledby="instrumentSelectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instrumentSelectionModalLabel">Escolha o Instrumento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center" id="instrumentSelectionBody">
+                    <!-- Os botões serão injetados dinamicamente via JS -->
                 </div>
             </div>
         </div>
