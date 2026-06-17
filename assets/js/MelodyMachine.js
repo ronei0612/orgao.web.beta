@@ -116,12 +116,27 @@
                 `${this.audioPath}/${this.instrument}_${n}.ogg`
             ])
         );
-        this.buffers = await this.audioManager.loadBuffers(urls);
+        const novosBuffers = await this.audioManager.loadBuffers(urls);
+        novosBuffers.forEach((buf, key) => this.buffers.set(key, buf));
     }
 
     async init() {
         await this.loadSounds();
         await this.getStyles();
+    }
+
+    async setInstrument(inst) {
+        if (this.instrument === inst) return;
+
+        this.instrument = inst; // 'orgao' ou 'piano'
+        this.audioPath = this.baseUrl + '/assets/audio/studio/' + (inst === 'piano' ? 'Piano' : 'Orgao');
+
+        // Carrega os sons do novo instrumento caso ainda não estejam na memória
+        if (!this.buffers.has(`${this.instrument}_c_baixo`)) {
+            await this.loadSounds();
+        }
+
+        this.refreshTrackCache(); // Atualiza o nome nas trilhas da memória
     }
 
     async getStyles() {
@@ -252,7 +267,7 @@
 
             return {
                 noteIndex: parseInt(button.dataset.noteIndex),
-                name: button.dataset.name,
+                name: this.instrument, // CORREÇÃO: Agora lê o instrumento atual da classe
                 button,
                 steps
             };

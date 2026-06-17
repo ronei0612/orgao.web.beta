@@ -1,6 +1,7 @@
 class App {
     constructor(elements) {
         this.elements = elements;
+        this.currentInstrumentMode = 'orgao';
         this.BASE_URL = location.origin.includes('file:') ? 'https://roneicostasoares.com.br/orgao.web.beta' : '.';
 
         this.musicTheory = new MusicTheory();
@@ -90,7 +91,7 @@ class App {
         await this.melodyUI.init();
 
         this.cifraPlayer.onChordChange = () => {
-            if (this.cifraPlayer.instrumento === 'orgao' && this.elements.melodyStyleSelect.value !== '') {
+            if ((this.currentInstrumentMode === 'orgao' || this.currentInstrumentMode === 'piano') && this.elements.melodyStyleSelect.value !== '') {
                 this.melodyUI.play();
             }
         };
@@ -137,8 +138,8 @@ class App {
         this.elements.playButton.addEventListener('mousedown', this.handlePlayMousedown.bind(this));
         this.elements.avancarButton.addEventListener('mousedown', () => this.avancar());
         this.elements.retrocederButton.addEventListener('mousedown', () => this.retroceder());
-        this.elements.orgaoInstrumentButton.addEventListener('click', () => this.handleOrgaoInstrumentClick());
-        this.elements.bateriaInstrumentButton.addEventListener('click', () => this.handleOrgaoInstrumentClick());
+        this.elements.orgaoInstrumentButton.addEventListener('click', () => this.openInstrumentModal());
+        this.elements.bateriaInstrumentButton.addEventListener('click', () => this.openInstrumentModal());
         document.addEventListener('mousedown', this.fullScreen.bind(this));
         document.addEventListener('click', this.handleDocumentClick.bind(this));
         $('#searchModal').on('shown.bs.modal', this.handleSearchModalShown.bind(this));
@@ -712,7 +713,7 @@ class App {
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
         this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
-        this.exibirInstrument(this.cifraPlayer.instrumento);
+        this.uiController.exibirInstrumento(this.currentInstrumentMode);
     }
 
     async handleDeleteSaveClick() {
@@ -805,40 +806,67 @@ class App {
         }
     }
 
-    exibirInstrument(instrument) {
-        if (instrument === 'orgao') {
+    async changeInstrumentMode(mode) {
+        this.currentInstrumentMode = mode;
+
+        if (mode === 'orgao') {
+            this.cifraPlayer.instrumento = 'orgao';
             this.cifraPlayer.attack = 0.2;
-            this.uiController.esconderElementosBateria();
             this.cifraPlayer.atualizarVolumeStringsParaOrgao();
-        }
-        else {
-            this.cifraPlayer.attack = 0;
-            this.uiController.exibirElementosBateria();
-            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
-        }
-    }
-
-    async handleOrgaoInstrumentClick() {
-        if (this.cifraPlayer.instrumento === 'orgao') {
+            await this.melodyMachine.setInstrument('orgao');
+            this.uiController.exibirInstrumento(mode);
+        } else if (mode === 'piano') {
             this.cifraPlayer.instrumento = 'epiano';
-
             await this.cifraPlayer.loadEpianoSounds();
-
+            this.cifraPlayer.attack = 0;
+            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
+            await this.melodyMachine.setInstrument('piano');
+            this.uiController.exibirInstrumento(mode);
+        } else if (mode === 'bateria') {
+            this.cifraPlayer.instrumento = 'epiano';
+            await this.cifraPlayer.loadEpianoSounds();
+            this.cifraPlayer.attack = 0;
+            this.cifraPlayer.atualizarVolumeStringsParaEpiano();
             if (!this.bateriaUI._initialized) {
-                await this.drumMachine.init(); // carrega styles.json + sons
-                await this.bateriaUI.init();   // constrói UI + bindEvents
+                await this.drumMachine.init();
+                await this.bateriaUI.init();
                 this.bateriaUI._initialized = true;
             }
-        } else {
-            this.cifraPlayer.instrumento = 'orgao';
+            this.uiController.exibirInstrumento(mode);
         }
-
-        this.exibirInstrument(this.cifraPlayer.instrumento);
 
         if (!this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__') {
             const localStorageSalvar = this.getIframeStorageName();
             this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
         }
+    }
+
+    openInstrumentModal() {
+        const modalBody = document.getElementById('instrumentSelectionBody');
+        if (!modalBody) return;
+        modalBody.innerHTML = '';
+
+        const instruments = [
+            { id: 'orgao', label: '🎶 Órgão' },
+            { id: 'piano', label: '🎹 Piano' },
+            { id: 'bateria', label: '🥁 Bateria' }
+        ];
+
+        // Injeta apenas os botões que não estão ativos
+        instruments.forEach(inst => {
+            if (inst.id !== this.currentInstrumentMode) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-outline-primary btn-block py-3 mb-2 font-weight-bold';
+                btn.innerHTML = inst.label;
+                btn.onclick = () => {
+                    $('#instrumentSelectionModal').modal('hide');
+                    this.changeInstrumentMode(inst.id);
+                };
+                modalBody.appendChild(btn);
+            }
+        });
+
+        $('#instrumentSelectionModal').modal('show');
     }
 
     verifyLetraOuCifra(texto, saveData) {
@@ -881,28 +909,22 @@ class App {
 
     async preencherLayoutDoLocalStorage(saveData) {
         if (saveData && saveData.instrument) {
-            this.cifraPlayer.instrumento = saveData.instrument;
-
-            if (saveData.instrument === 'epiano' && !this.bateriaUI._initialized) {
-                await this.drumMachine.init();
-                await this.cifraPlayer.loadEpianoSounds();
-                await this.bateriaUI.init();
-                this.bateriaUI._initialized = true;
+            // Retrocompatibilidade para músicas salvas antes do update
+            let mode = saveData.instrumentMode;
+            if (!mode) {
+                mode = saveData.instrument === 'orgao' ? 'orgao' : 'bateria';
             }
+            await this.changeInstrumentMode(mode);
 
-            this.exibirInstrument(saveData.instrument);
             this.elements.bpmInput.value = saveData.bpm;
             this.setBPM(saveData.bpm);
 
-            if (saveData.instrument === 'orgao') {
+            if (mode === 'orgao' || mode === 'piano') {
                 this.elements.melodyStyleSelect.value = saveData.style;
                 this.elements.melodyStyleSelect.dispatchEvent(new Event('change'));
-                this.uiController.esconderElementosBateria();
-            }
-            else {
+            } else if (mode === 'bateria') {
                 this.elements.drumStyleSelect.value = saveData.style;
                 this.elements.drumStyleSelect.dispatchEvent(new Event('change'));
-                this.uiController.exibirElementosBateria();
             }
         }
     }
@@ -953,13 +975,13 @@ class App {
         await this.preencherLayoutDoLocalStorage(saveData);
     }
 
-    // salvarMetaDataNoLocalStorage recebe chords como parâmetro opcional
     salvarMetaDataNoLocalStorage(name, item, chords = null) {
         const metaData = {
             chords: chords ?? this.elements.editTextarea.value,
             key: this.elements.tomSelect.value,
             instrument: this.cifraPlayer.instrumento,
-            style: this.cifraPlayer.instrumento === 'epiano'
+            instrumentMode: this.currentInstrumentMode, // NOVO CAMPO PARA SABER SE É PIANO
+            style: (this.currentInstrumentMode === 'bateria')
                 ? this.elements.drumStyleSelect.value
                 : this.elements.melodyStyleSelect.value,
             bpm: this.elements.bpmInput.value,
@@ -1024,10 +1046,9 @@ class App {
     }
 
     escolherStyle(style) {
-        if (this.cifraPlayer.instrumento === 'orgao') {
+        if (this.currentInstrumentMode === 'orgao' || this.currentInstrumentMode === 'piano') {
             this.elements.melodyStyleSelect.value = style;
-        }
-        else {
+        } else {
             this.elements.drumStyleSelect.value = style;
         }
     }
@@ -1235,13 +1256,11 @@ class App {
     }
 
     tocarBateriaMelody() {
-        if (this.cifraPlayer.instrumento === 'orgao' && this.elements.melodyStyleSelect.value) {
+        if ((this.currentInstrumentMode === 'orgao' || this.currentInstrumentMode === 'piano') && this.elements.melodyStyleSelect.value) {
             this.melodyUI.play();
             this.melodyMachine.currentStep = 1;
-        }
-        else {
-            if (this.bateriaUI)
-                this.bateriaUI.play();
+        } else {
+            if (this.bateriaUI) this.bateriaUI.play();
         }
     }
 

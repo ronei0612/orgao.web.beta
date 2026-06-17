@@ -1,6 +1,7 @@
 class UIController {
     constructor(elements) {
         this.elements = elements;
+        this.currentInstrumentMode = 'orgao'; // Inicia com o Órgão
     }
 
     exibirBotoesCifras() {
@@ -196,43 +197,38 @@ class UIController {
         }
     }
 
-    esconderElementosBateria() {
-        this.elements.orgaoInstrumentButton.classList.remove('d-none');
-        this.elements.bateriaInstrumentButton.classList.add('d-none');
-        this.elements.bateriaWrapper.classList.add('d-none');
-        this.elements.rhythmButtonsControl.classList.add('d-none');
-        this.elements.drumStyleSelect.classList.add('d-none');
+    exibirInstrumento(mode) {
+        this.currentInstrumentMode = mode;
+        if (mode === 'orgao' || mode === 'piano') {
+            this.elements.bateriaWrapper.classList.add('d-none');
+            this.elements.rhythmButtonsControl.classList.add('d-none');
+            this.elements.drumStyleSelect.classList.add('d-none');
+
+            this.elements.melodyWrapper.classList.remove('d-none');
+            this.elements.melodyStyleSelect.classList.remove('d-none');
+
+            // Troca o texto do botão
+            this.elements.orgaoInstrumentButton.textContent = mode === 'piano' ? 'Piano' : 'Órgão';
+        } else if (mode === 'bateria') {
+            this.elements.melodyWrapper.classList.add('d-none');
+            this.elements.melodyStyleSelect.classList.add('d-none');
+
+            this.elements.bateriaWrapper.classList.remove('d-none');
+            this.elements.rhythmButtonsControl.classList.remove('d-none');
+            this.elements.drumStyleSelect.classList.remove('d-none');
+        }
         this.piscarPlayButton();
-        this.exibirElementosMelody();
     }
 
     piscarPlayButton() {
         const temRitmo = this.elements.melodyStyleSelect.value !== '' && !this.elements.melodyStyleSelect.value.startsWith(1);
-        const orgao = !this.elements.orgaoInstrumentButton.classList.contains('d-none');
-        if (orgao && temRitmo) {
+        const orgaoOuPiano = (this.currentInstrumentMode === 'orgao' || this.currentInstrumentMode === 'piano');
+
+        if (orgaoOuPiano && temRitmo) {
             this.elements.playButton.classList.add('blinking');
         } else {
             this.elements.playButton.classList.remove('blinking');
         }
-    }
-
-    exibirElementosBateria() {
-        this.elements.orgaoInstrumentButton.classList.add('d-none');
-        this.elements.bateriaInstrumentButton.classList.remove('d-none');
-        this.elements.bateriaWrapper.classList.remove('d-none');
-        this.elements.rhythmButtonsControl.classList.remove('d-none');
-        this.elements.playButton.classList.add('blinking');
-        this.elements.drumStyleSelect.classList.remove('d-none');
-        this.esconderElementosMelody();
-    }
-
-    esconderElementosMelody() {
-        this.elements.melodyWrapper.classList.add('d-none');
-    }
-
-    exibirElementosMelody() {
-        this.elements.melodyWrapper.classList.remove('d-none');
-        this.elements.melodyStyleSelect.classList.remove('d-none');
     }
 
     esconderBotoesPlay() {
@@ -321,15 +317,8 @@ class UIController {
         this.elements.partituraFrame.classList.add('d-none');
         this.elements.partituraEditFrame.classList.add('d-none');
 
-        // CORREÇÃO: Agora o piano se mantém visível na tela padrão
-        this.elements.pianoWrapper.classList.remove('d-none');
-
-        this.elements.melodyStyleSelect.classList.remove('d-none');
-        this.elements.drumStyleSelect.classList.add('d-none');
-        this.elements.orgaoInstrumentButton.classList.remove('d-none');
-
-        // Exibe o contêiner pai de instrumentos
         this.elements.instrumentsWrapper.classList.remove('d-none');
+        this.exibirInstrumento(this.currentInstrumentMode);
 
         this.elements.bateriaInstrumentButton.classList.add('d-none');
 
