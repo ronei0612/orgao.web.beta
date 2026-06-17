@@ -116,12 +116,34 @@
                 `${this.audioPath}/${this.instrument}_${n}.ogg`
             ])
         );
-        this.buffers = await this.audioManager.loadBuffers(urls);
+        const novosBuffers = await this.audioManager.loadBuffers(urls);
+        novosBuffers.forEach((buf, key) => this.buffers.set(key, buf));
     }
 
     async init() {
         await this.loadSounds();
         await this.getStyles();
+    }
+
+    async setInstrument(inst) {
+        if (this.instrument === inst) return;
+
+        this.instrument = inst;
+
+        if (inst === 'tone-piano') {
+            this.audioPath = null;
+            this.refreshTrackCache();
+            return;
+        }
+
+        this.audioPath = this.baseUrl + '/assets/audio/studio/' + (inst === 'piano' ? 'Piano' : 'Orgao');
+
+        // Carrega os sons do novo instrumento caso ainda não estejam na memória
+        if (!this.buffers.has(`${this.instrument}_c_baixo`)) {
+            await this.loadSounds();
+        }
+
+        this.refreshTrackCache(); // Atualiza o nome nas trilhas da memória
     }
 
     async getStyles() {
@@ -225,17 +247,29 @@
             const nomeNota = notasAtuais[trackData.noteIndex];
             if (!nomeNota) continue;
 
-            const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
-            if (bufferNota) {
-                const volumeFinal = stepElementVol === 2 ? (this.defaultVol / 1.5) : this.defaultVol;
+            const volumeFinal = stepElementVol === 2 ? (this.defaultVol / 1.5) : this.defaultVol;
 
-                // CORREÇÃO: Captura o nó e adiciona ao Set para controle de release
-                this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
-
-                stepElement.classList.add('playing');
-                setTimeout(() => stepElement.classList.remove('playing'), 100);
+            if (this.instrument === 'tone-piano') {
+                const tonePitch = this.convertToTonePitch(nomeNota);
+                this.audioManager.tonePiano.playNoteAttackRelease(tonePitch, "8n", this.nextNoteTime, volumeFinal);
+            } else {
+                const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
+                if (bufferNota) {
+                    this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
+                }
             }
+
+            stepElement.classList.add('playing');
+            setTimeout(() => stepElement.classList.remove('playing'), 100);
         }
+    }
+
+    convertToTonePitch(nomeNota) {
+        let name = nomeNota;
+        let octave = "5";
+        if (name.endsWith('_grave')) { octave = "3"; name = name.replace('_grave', ''); }
+        else if (name.endsWith('_baixo')) { octave = "4"; name = name.replace('_baixo', ''); }
+        return name.toUpperCase().replace('_', '#') + octave;
     }
 
     getAcordeNotas(acordeNome) {
@@ -252,7 +286,7 @@
 
             return {
                 noteIndex: parseInt(button.dataset.noteIndex),
-                name: button.dataset.name,
+                name: this.instrument, // CORREÇÃO: Agora lê o instrumento atual da classe
                 button,
                 steps
             };

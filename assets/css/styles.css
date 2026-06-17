@@ -287,6 +287,108 @@ body.dark-mode .select2-results__options > li {
             box-shadow: 0 0 20px 5px rgba(255, 69, 0, .7);
         }
 
+/* --- TECLADO DE PIANO VIRTUAL --- */
+#pianoWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    /*margin-bottom: 20px;*/
+}
+
+.piano-keyboard {
+    display: flex;
+    overflow-x: auto;
+    padding: 10px 15px;
+    background: #2b2b2b;
+    border-radius: 8px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    scrollbar-width: none;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+    .piano-keyboard::-webkit-scrollbar {
+        display: none; /* Esconde scrollbar no Chrome/Safari */
+    }
+
+.white-key {
+    position: relative;
+    width: 48px;
+    height: 110px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 0 0 5px 5px;
+    margin-right: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    transition: background 0.1s;
+    touch-action: pan-x;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 5px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #666;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+    .white-key.active-key {
+        background: #e0e0e0;
+        top: 2px; /* MOVER PARA BAIXO SEM QUEBRAR O Z-INDEX */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+.black-key {
+    position: absolute;
+    top: 0;
+    right: -17px;
+    width: 32px;
+    height: 65px;
+    background: #111;
+    border-radius: 0 0 4px 4px;
+    z-index: 2;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.5);
+    transition: background 0.1s;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 4px;
+    font-size: 9px;
+    font-weight: normal;
+    color: #ddd;
+    /* CORREÇÃO 2: Evita a letra ficar selecionada em azul */
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+    .black-key.active-key {
+        background: #444;
+        top: 2px; /* MOVER PARA BAIXO SEM QUEBRAR O Z-INDEX */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+.white-key.active-key .black-key {
+    top: -2px;
+}
+
+/* O span não deve interceptar o mouse, senão o "arrastar" pensa que você tocou num texto ao invés da tecla */
+.piano-key span {
+    pointer-events: none;
+}
+
+/* Classe para bloquear a área de instrumentos enquanto carrega */
+.locked-wrapper {
+    pointer-events: none; /* Impede qualquer clique */
+    opacity: 0.5; /* Deixa meio transparente para dar aspecto de inativo */
+    transition: opacity 0.2s ease;
+}
+
 .btn-delete {
     background-color: #ff4500;
     color: white;

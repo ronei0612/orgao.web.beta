@@ -169,7 +169,7 @@
             <!-- Melody Wrapper -->
             <div id="melodyWrapper">
                 <div class="d-flex align-items-center mb-1">
-                    <div class="input-group flex-grow-1 mr-1">
+                    <div class="input-group flex-grow-1">
                         <select class="form-control" id="melodyStyleSelect">
                         </select>
                         <div class="input-group-append d-none" id="melodySaveControl">
@@ -261,6 +261,26 @@
             <button class="btn-custom mx-1" data-action="acorde" id="acorde4" value="Dm">Dm</button>
             <button class="btn-custom mx-1" data-action="acorde" id="acorde5" value="G">G</button>
             <button class="btn-custom mx-1" data-action="acorde" id="acorde6" value="Em">Em</button>
+        </div>
+
+        <!-- TECLADO DE PIANO VIRTUAL -->
+        <div id="pianoWrapper" class="">
+            <div class="piano-keyboard">
+                <!-- Oitava 4 -->
+                <div class="piano-key white-key" data-pitch="c/4"><span>C4</span><div class="piano-key black-key" data-pitch="c#/4"><span>C#4</span></div></div>
+                <div class="piano-key white-key" data-pitch="d/4"><span>D4</span><div class="piano-key black-key" data-pitch="d#/4"><span>D#4</span></div></div>
+                <div class="piano-key white-key" data-pitch="e/4"><span>E4</span></div>
+                <div class="piano-key white-key" data-pitch="f/4"><span>F4</span><div class="piano-key black-key" data-pitch="f#/4"><span>F#4</span></div></div>
+                <div class="piano-key white-key" data-pitch="g/4"><span>G4</span><div class="piano-key black-key" data-pitch="g#/4"><span>G#4</span></div></div>
+                <div class="piano-key white-key" data-pitch="a/4"><span>A4</span><div class="piano-key black-key" data-pitch="a#/4"><span>A#4</span></div></div>
+                <div class="piano-key white-key" data-pitch="b/4"><span>B4</span></div>
+                <!-- Oitava 5 -->
+                <div class="piano-key white-key" data-pitch="c/5"><span>C5</span><div class="piano-key black-key" data-pitch="c#/5"><span>C#5</span></div></div>
+                <div class="piano-key white-key" data-pitch="d/5"><span>D5</span><div class="piano-key black-key" data-pitch="d#/5"><span>D#5</span></div></div>
+                <div class="piano-key white-key" data-pitch="e/5"><span>E5</span></div>
+                <div class="piano-key white-key" data-pitch="f/5"><span>F5</span><div class="piano-key black-key" data-pitch="f#/5"><span>F#5</span></div></div>
+                <div class="piano-key white-key" data-pitch="g/5"><span>G5</span></div>
+            </div>
         </div>
 
         <div id="bottomSpacer" class="d-none" style="height: 40px;"></div>
@@ -432,6 +452,25 @@
         </div>
     </div>
 
+    <!-- Modal Seleção de Instrumento -->
+    <div class="modal fade" id="instrumentSelectionModal" tabindex="-1" role="dialog" aria-labelledby="instrumentSelectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="instrumentSelectionModalLabel">Escolha o Instrumento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center" id="instrumentSelectionBody">
+                    <!-- Os botões serão injetados dinamicamente via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
     <script src="./assets/lib/js/Jquery/3.5.1/jquery.min.js"></script>
     <script src="./assets/lib/js/Popper/1.14.7/popper.min.js"></script>
     <script src="./assets/lib/js/Bootstrap/4.6.2/bootstrap.min.js"></script>
@@ -440,6 +479,7 @@
 
     <script src="./assets/js/logIntercepted.js"></script>
     <script src="./assets/js/AudioContextManager.js"></script>
+    <script src="./assets/js/TonePianoManager.js"></script>
     <script src="./assets/js/DraggableController.js"></script>
     <script src="./assets/js/CifraPlayer.js"></script>
     <script src="./assets/js/PartituraPlayer.js"></script>
@@ -447,7 +487,9 @@
     <script src="./assets/js/UIController.js"></script>
     <script src="./assets/js/LocalStorageManager.js"></script>
     <script src="./assets/js/StyleManager.js"></script>
+    <script src="./assets/js/ABCParser.js"></script>
     <script src="./assets/js/PartituraEditor.js"></script>
+    <script src="./assets/js/PianoSynthesizer.js"></script>
     <script src="./assets/js/App.js"></script>
     <script src="./assets/js/DrumMachine.js"></script>
     <script src="./assets/js/BateriaUI.js"></script>

@@ -15,10 +15,18 @@ class PartituraPlayer {
 
     async init() {
         if (this._initialized) return;
+
+        // CORREÇÃO: Marca como inicializado para não baixar os sons duas vezes
+        this._initialized = true;
+
         await this.loadSounds();
 
         // Registra callback para bindar cliques sempre que a visualização for redesenhada
         this.partituraEditor.onViewDrawn = () => this.bindClickNotas();
+    }
+
+    setInstrument(inst) {
+        this.instrumento = inst; // Recebe 'flauta' ou 'epiano'
     }
 
     bindClickNotas() {
@@ -63,18 +71,18 @@ class PartituraPlayer {
 
     async loadSounds() {
         try {
-        const notas = [...new Set(
-            Object.values(this.partituraEditor.basePitches).flat()
-        )];
-        const urls = Object.fromEntries(
-            notas.map(nota => {
-                const name = `${this.instrumento}_${nota.replace('/', '').replace('#', '_')}`;
-                return [name, `${this.audioPath}/${name}.ogg`];
-            })
-        );
+            const notas = [...new Set(
+                Object.values(this.partituraEditor.basePitches).flat()
+            )];
+            const urls = Object.fromEntries(
+                notas.map(nota => {
+                    const name = `${this.instrumento}_${nota.replace('/', '').replace('#', '_')}`;
+                    return [name, `${this.audioPath}/${name}.ogg`];
+                })
+            );
             this.buffers = await this.audioManager.loadBuffers(urls);
         } catch { }
-        }
+    }
 
     tocarNotaAtualPartitura(volume = 1) {
         const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
@@ -112,6 +120,50 @@ class PartituraPlayer {
 
         this.partituraEditor.highlightIndex = this.partituraPlaybackIndex;
         this.partituraEditor.draw(frameParaDesenhar, frameParaDesenhar === this.elements.partituraEditFrame);
+    }
+
+    startPianoNote(pitch) {
+        this.stopPianoNote();
+        if (!pitch) return;
+
+        const [nota, oitava] = pitch.split('/');
+        let notaConvertida = nota.toLowerCase();
+
+        const mapBemolParaSustenido = { 'db': 'c#', 'eb': 'd#', 'gb': 'f#', 'ab': 'g#', 'bb': 'a#' };
+        if (mapBemolParaSustenido[notaConvertida]) {
+            notaConvertida = mapBemolParaSustenido[notaConvertida];
+        }
+
+        const notaLimpa = notaConvertida.replace('#', '_');
+        let bufferName = '';
+        let buffer = null;
+
+        // Se for Epiano, ele procura os OGGs na memória do CifraPlayer
+        if (this.instrumento === 'epiano') {
+            let sufixo = '';
+            if (oitava === '3') sufixo = '_grave';
+            else if (oitava === '4') sufixo = '_baixo';
+
+            bufferName = `epiano_${notaLimpa}${sufixo}`;
+            buffer = this.cifraPlayer.buffers.get(bufferName);
+        } else {
+            // Senão, é a flauta padrão
+            bufferName = `flauta_${notaLimpa}${oitava}`;
+            buffer = this.buffers.get(bufferName);
+        }
+
+        if (buffer) {
+            this.activePianoNode = this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.02, false, this.activeSources);
+        }
+    }
+
+    // Interrompe a nota OGG suavemente (Note Off)
+    stopPianoNote() {
+        if (this.activePianoNode) {
+            // Faz um fade-out suave (0.15s) para o som da flauta não cortar seco
+            this.audioManager.stopNode(this.activePianoNode, this.audioContext.currentTime, 0.15);
+            this.activePianoNode = null;
+        }
     }
 
     avancarNotaAtualPartitura() {
