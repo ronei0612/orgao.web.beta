@@ -25,6 +25,10 @@ class PartituraPlayer {
         this.partituraEditor.onViewDrawn = () => this.bindClickNotas();
     }
 
+    setInstrument(inst) {
+        this.instrumento = inst; // Recebe 'flauta' ou 'epiano'
+    }
+
     bindClickNotas() {
         const doc = this.elements.partituraFrame.contentDocument;
         if (!doc) return;
@@ -118,10 +122,8 @@ class PartituraPlayer {
         this.partituraEditor.draw(frameParaDesenhar, frameParaDesenhar === this.elements.partituraEditFrame);
     }
 
-    // Inicia a nota OGG (Note On)
     startPianoNote(pitch) {
-        this.stopPianoNote(); // Corta qualquer nota que já estivesse tocando
-
+        this.stopPianoNote();
         if (!pitch) return;
 
         const [nota, oitava] = pitch.split('/');
@@ -133,13 +135,24 @@ class PartituraPlayer {
         }
 
         const notaLimpa = notaConvertida.replace('#', '_');
-        const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
-        const buffer = this.buffers.get(bufferName);
+        let bufferName = '';
+        let buffer = null;
+
+        // Se for Epiano, ele procura os OGGs na memória do CifraPlayer
+        if (this.instrumento === 'epiano') {
+            let sufixo = '';
+            if (oitava === '3') sufixo = '_grave';
+            else if (oitava === '4') sufixo = '_baixo';
+
+            bufferName = `epiano_${notaLimpa}${sufixo}`;
+            buffer = this.cifraPlayer.buffers.get(bufferName);
+        } else {
+            // Senão, é a flauta padrão
+            bufferName = `flauta_${notaLimpa}${oitava}`;
+            buffer = this.buffers.get(bufferName);
+        }
 
         if (buffer) {
-            // Toca o áudio OGG com um leve ataque (0.02) e o armazena para poder interromper depois
-            // Nota: Se quiser que o áudio fique em LOOP infinito enquanto segura, mude o 'false' para 'true'. 
-            // Mas cuidado: samples comuns podem "estalar" em loop.
             this.activePianoNode = this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.02, false, this.activeSources);
         }
     }

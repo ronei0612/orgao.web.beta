@@ -319,7 +319,7 @@ class CifraPlayer {
             this.adicionarSom('strings', this.baixo, 'grave');
 
         notas.forEach(nota => {
-            if (this.instrumento === 'orgao') {
+            if (this.instrumento === 'orgao' || this.instrumento === 'tone-piano') {
                 this.adicionarSom(this.instrumento, nota.replace('#', '_'), 'baixo');
                 if (!this.elements.notesButton.classList.contains('notaSolo'))
                     this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
@@ -343,7 +343,7 @@ class CifraPlayer {
             }
         });
 
-        if (this.instrumento === 'orgao') {
+        if (this.instrumento === 'orgao' || this.instrumento === 'tone-piano') {
             this.epianoPlay(); // Vamos usar epianoPlay como a função base unificada
         }
         else {
@@ -361,26 +361,40 @@ class CifraPlayer {
     }
 
     epianoPlay() {
-        // Corta o som do acorde anterior suavemente
         this.audioManager.stopAll(this.activeSources, 0.2);
-
-        // Une os dois grupos (órgão, strings e epiano)
-        const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
         const now = this.audioManager.audioContext.currentTime;
 
+        // Limpa as notas antigas do piano
+        if (this.audioManager.tonePiano) this.audioManager.tonePiano.stopAll(now);
+
+        const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
+
         notasParaTocar.forEach(note => {
-            // Busca do Map de buffers da PRÓPRIA classe
+            // Se for piano, envia para o Tone.js
+            if (note.startsWith('tone-piano_')) {
+                const pitch = this.convertToTonePitch(note);
+                this.audioManager.tonePiano.playNoteAttack(pitch, now, this.getVolumeForNote(note));
+                return;
+            }
+
+            // Se for Strings ou Epiano OGG, toca normal
             const buffer = this.buffers.get(note);
             if (!buffer) return;
-
             const isLoop = !note.startsWith('epiano');
-            const volume = this.getVolumeForNote(note); // Usando a lógica local
-
-            // Dispara o som
+            const volume = this.getVolumeForNote(note);
             this.audioManager.playNode(buffer, now, volume, this.attack, isLoop, this.activeSources);
         });
 
         this.tocarEpiano = false;
+    }
+
+    // Método auxiliar para converter nomenclatura
+    convertToTonePitch(noteString) {
+        let name = noteString.replace('tone-piano_', '');
+        let octave = "5";
+        if (name.endsWith('_grave')) { octave = "3"; name = name.replace('_grave', ''); }
+        else if (name.endsWith('_baixo')) { octave = "4"; name = name.replace('_baixo', ''); }
+        return name.toUpperCase().replace('_', '#') + octave;
     }
 
     desabilitarSelectSaves() {

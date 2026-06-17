@@ -10,6 +10,7 @@ class App {
 
         // 1. Criar o gerenciador de áudio ÚNICO aqui
         this.audioManager = new AudioContextManager();
+        this.audioManager.tonePiano = new TonePianoManager(this.audioManager);
 
         // NOVO: Adiciona o Sintetizador de Piano
         this.pianoSynthesizer = new PianoSynthesizer(this.audioManager.audioContext);
@@ -820,11 +821,18 @@ class App {
                 await this.melodyMachine.setInstrument('orgao');
                 this.uiController.exibirInstrumento(mode);
             } else if (mode === 'piano') {
-                this.cifraPlayer.instrumento = 'epiano';
-                await this.cifraPlayer.loadEpianoSounds();
-                this.cifraPlayer.attack = 0;
-                this.cifraPlayer.atualizarVolumeStringsParaEpiano();
-                await this.melodyMachine.setInstrument('piano');
+                await this.audioManager.tonePiano.init(); // Carrega o piano do Tone.js (Sons realistas)
+
+                this.cifraPlayer.instrumento = 'tone-piano';
+                await this.cifraPlayer.loadEpianoSounds(); // Carrega OGG pro teclado de piano
+                this.cifraPlayer.attack = 0.05;
+                this.cifraPlayer.atualizarVolumeStringsParaOrgao(); // MANTÉM STRINGS COMO NO ÓRGÃO
+
+                await this.melodyMachine.setInstrument('tone-piano');
+
+                // Manda o teclado da tela tocar o epiano
+                this.partituraPlayer.setInstrument('epiano');
+
                 this.uiController.exibirInstrumento(mode);
             } else if (mode === 'bateria') {
                 this.cifraPlayer.instrumento = 'epiano';
