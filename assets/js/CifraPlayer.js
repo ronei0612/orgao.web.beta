@@ -22,23 +22,7 @@ class CifraPlayer {
         this.release = 0.2;
         this.baixo = null;
 
-        this.VOLUME_CONFIG = {
-            'grave': {
-                'orgao': 1.0,
-                'strings': 0.8,
-                'epiano': 1.0
-            },
-            'baixo': {
-                'orgao': 1.0,
-                'strings': 0.8,
-                'epiano': 1.0
-            },
-            'agudo': {
-                'orgao': 1.0,
-                'strings': 0.8,
-                'epiano': 1.0
-            }
-        };
+        this.fatorVolumeStrings = 1.25;
 
         this.loadSounds();
         this.epianoLoaded = false;
@@ -201,14 +185,11 @@ class CifraPlayer {
     }
 
     getVolumeForNote(notaKey) {
-        // Ex de notaKey: "strings_c_baixo" ou "orgao_d"
-        const parts = notaKey.split('_');
-        const instrumento = parts[0];
-
-        // Se a nota não tem terceira parte, significa que é 'agudo' (vazio no array original)
-        const oitava = parts.length > 2 ? parts[2] : 'agudo';
-
-        return this.VOLUME_CONFIG[oitava]?.[instrumento] ?? 1.0;
+        // Volume base é 1.0 (máximo). Se for strings, divide pelo fator redutor.
+        if (notaKey.startsWith('strings_')) {
+            return 1.0 / this.fatorVolumeStrings;
+        }
+        return 1.0;
     }
 
     transposeCifra() {
@@ -671,16 +652,10 @@ class CifraPlayer {
     }
 
     atualizarVolumeStringsParaEpiano() {
-        // Altera a fonte da verdade localmente
-        this.VOLUME_CONFIG['grave']['strings'] = 1.0;
-        this.VOLUME_CONFIG['baixo']['strings'] = 1.0;
-        this.VOLUME_CONFIG['agudo']['strings'] = 1.0;
+        this.fatorVolumeStrings = 1.0; // Strings ficam na mesma altura do Epiano
     }
 
     atualizarVolumeStringsParaOrgao() {
-        // Restaura a fonte da verdade para o padrão do órgão
-        this.VOLUME_CONFIG['grave']['strings'] = 0.8;
-        this.VOLUME_CONFIG['baixo']['strings'] = 0.8;
-        this.VOLUME_CONFIG['agudo']['strings'] = 0.8;
+        this.fatorVolumeStrings = 1.25; // Strings ficam um pouco mais baixas que o Órgão
     }
 }

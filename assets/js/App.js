@@ -18,8 +18,12 @@ class App {
         // 2. Passar o audioManager para todos os players
         this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
 
-        // CifraPlayer agora recebe o audioManager pronto
         this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL, this.audioManager);
+
+        // Após inicializar o this.audioManager, defina o volume mestre pegando do HTML:
+        const volumeInput = document.getElementById('volumeMaster');
+        const initialVol = volumeInput ? parseFloat(volumeInput.value) : 1.0;
+        this.audioManager.masterGain.gain.value = initialVol;
 
         this.cifraPlayer.onInstrumentosCarregados = () => {
             this.elements.orgaoInstrumentButton.removeAttribute('disabled');
@@ -174,8 +178,11 @@ class App {
             this.setBPM(bpm);
         });
 
-        document.getElementById('volumeOrgao').addEventListener('change', () => {
-            this.melodyMachine.defaultVol = parseFloat(document.getElementById('volumeOrgao').value);
+        document.getElementById('volumeMaster').addEventListener('input', (e) => {
+            const vol = parseFloat(e.target.value);
+
+            // Altera o volume global na mesma hora de forma suave (sem estalos)
+            this.audioManager.masterGain.gain.setTargetAtTime(vol, this.audioManager.audioContext.currentTime, 0.05);
         });
 
         ['mousedown'].forEach(event => {

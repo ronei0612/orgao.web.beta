@@ -5,7 +5,6 @@
         this.cifraPlayer = cifraPlayer;
         this.attackTime = 0.02;
         this.releaseTime = 0.1;
-        this.defaultVol = 1.0;
         this.buffers = new Map();
         this.audioContext = audioManager.audioContext;
         this.audioManager = audioManager;
@@ -247,7 +246,8 @@
             const nomeNota = notasAtuais[trackData.noteIndex];
             if (!nomeNota) continue;
 
-            const volumeFinal = stepElementVol === 2 ? (this.defaultVol / 1.5) : this.defaultVol;
+            const baseVol = 1.0;
+            const volumeFinal = stepElementVol === 2 ? (baseVol / 1.5) : baseVol;
 
             if (this.instrument === 'tone-piano') {
                 const tonePitch = this.convertToTonePitch(nomeNota);

@@ -315,7 +315,10 @@
                     <p class="d-none"><a href="#" id="downloadStylesLink">Baixar Styles</a></p>
                     <p><a href="#" id="restoreLink">Restaurar</a></p>
                     <p><a href="#" id="about">Sobre este site</a></p>
-                    <p><input type="number" id="volumeOrgao" value="1.0" class="form-control text-center px-1"></p>
+                    <p>
+                        <label for="volumeMaster" class="mb-0">Volume Master</label>
+                        <input type="range" id="volumeMaster" min="0" max="1" step="0.1" value="1.0" class="form-control-range">
+                    </p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">× Fechar</button>
