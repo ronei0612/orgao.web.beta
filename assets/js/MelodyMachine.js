@@ -5,7 +5,7 @@
         this.cifraPlayer = cifraPlayer;
         this.attackTime = 0.02;
         this.releaseTime = 0.1;
-        this.defaultVol = 0.7;
+        this.defaultVol = 1.0;
         this.buffers = new Map();
         this.audioContext = audioManager.audioContext;
         this.audioManager = audioManager;
