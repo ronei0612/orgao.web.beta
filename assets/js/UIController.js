@@ -318,6 +318,7 @@ class UIController {
         this.elements.partituraEditFrame.classList.add('d-none');
 
         this.elements.instrumentsWrapper.classList.remove('d-none');
+        this.elements.pianoWrapper.classList.remove('d-none');
         this.exibirInstrumento(this.currentInstrumentMode);
 
         this.elements.bateriaInstrumentButton.classList.add('d-none');

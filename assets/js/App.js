@@ -895,6 +895,7 @@ class App {
             this.elements.bpmContainer.classList.remove('d-none');
             this.elements.draggableControls.classList.remove('d-none');
             this.elements.instrumentsWrapper.classList.remove('d-none');
+            this.elements.pianoWrapper.classList.remove('d-none');
             this.elements.bottomSpacer.classList.add('d-none');
 
             let tom = 'C';
@@ -914,13 +915,13 @@ class App {
             setTimeout(() => {
                 this.cifraPlayer.selecionarPrimeiraCifra();
             }, 100);
-
         } else {
             this.uiController.esconderBotoesTom();
             this.uiController.esconderBotoesAcordes();
             this.elements.bpmContainer.classList.add('d-none');
             this.elements.draggableControls.classList.add('d-none');
             this.elements.instrumentsWrapper.classList.add('d-none');
+            this.elements.pianoWrapper.classList.add('d-none');
             this.elements.bottomSpacer.classList.remove('d-none');
 
             this.cifraPlayer.preencherIframeCifra(texto);
@@ -965,6 +966,7 @@ class App {
         this.elements.bpmContainer.classList.remove('d-none');
         this.elements.draggableControls.classList.remove('d-none');
         this.elements.instrumentsWrapper.classList.remove('d-none');
+        this.elements.pianoWrapper.classList.remove('d-none');
         this.elements.bottomSpacer.classList.add('d-none');
 
         // 3. Lógica de renderização por tipo
