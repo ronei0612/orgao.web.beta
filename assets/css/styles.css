@@ -177,7 +177,7 @@ body.dark-mode .select2-results__options > li {
     transition: background-color .3s, box-shadow .3s;
     outline: 0;
     user-select: none;
-    margin: 8px;
+    margin: 5px;
 }
 
     .btn-custom:focus {
@@ -298,7 +298,7 @@ body.dark-mode .select2-results__options > li {
 .piano-keyboard {
     display: flex;
     overflow-x: auto;
-    padding: 10px 15px;
+    padding: 5px 5px;
     background: #2b2b2b;
     border-radius: 8px;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.8);

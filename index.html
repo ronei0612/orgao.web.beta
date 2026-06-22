@@ -28,11 +28,11 @@
 
 <body>
     <div class="container d-flex flex-column vh-100" id="container">
-        <div class="d-sm-flex mt-1 mb-1">
+        <div class="d-sm-flex mt-1">
             <div class="d-flex w-100 align-items-center">
                 <img class="button-control mr-2 dark-invert" src="./assets/icons/menu.svg" id="menuButton" data-toggle="modal" data-target="#optionsModal">
 
-                <div class="input-group" id="tomContainer">
+                <div class="input-group mb-1" id="tomContainer">
                     <div class="input-group-prepend">
                         <button class="btn btn-dark-cyan" id="decreaseTom">
                             <img class="icon-svg" src="./assets/icons/dash-lg.svg">
@@ -60,7 +60,7 @@
                 </div>
 
 
-                <div class="input-group drum-unified-group ml-2" id="bpm-container">
+                <div class="input-group drum-unified-group ml-2 mb-1" id="bpm-container">
                     <div class="input-group-prepend">
                         <button class="btn btn-outline-secondary" type="button" id="decrement-bpm-5">-5</button>
                         <button class="btn btn-outline-secondary" type="button" id="decrement-bpm">
@@ -74,7 +74,7 @@
                 </div>
             </div>
 
-            <div class="d-flex flex-grow-1 mt-1">
+            <div class="d-flex flex-grow-1 mb-1">
                 <div class="d-flex align-items-center justify-content-between w-100">
                     <button id="selectedButton" class="btn btn-light d-none">
                     </button>
@@ -104,7 +104,7 @@
             </div>
         </div>
 
-        <div class="mb-2 flex-grow-1">
+        <div class="mb-1 flex-grow-1">
             <iframe class="w-100 border border-secondary rounded d-none" id="liturgiaDiariaFrame" src="https://liturgiadiaria.edicoescnbb.com.br/"></iframe>
             <iframe class="w-100 border border-secondary rounded d-none" id="santamissaFrame" src="./santamissa.html"></iframe>
             <iframe class="w-100 border border-secondary rounded d-none" id="oracoesFrame" src="./oracoes.html"></iframe>
@@ -130,7 +130,7 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-outline-secondary mx-1 font-weight-bold" id="bateriaInstrumentButton" aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
+                    <button class="btn btn-outline-secondary ml-1 font-weight-bold" id="bateriaInstrumentButton" aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
                         Bateria
                     </button>
                 </div>
@@ -178,7 +178,7 @@
                             <button class="btn btn-outline-secondary" type="button" id="deleteMelodyStyle" title="Excluir"><i class="bi bi-trash"></i></button>
                         </div>
 
-                        <button class="btn btn-outline-secondary mx-1 font-weight-bold" id="orgaoInstrumentButton" disabled aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
+                        <button class="btn btn-outline-secondary ml-1 font-weight-bold" id="orgaoInstrumentButton" disabled aria-pressed="false" type="button" style="min-width: 90px; height: 38px;">
                             Órgão
                         </button>
                     </div>
