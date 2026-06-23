@@ -11,16 +11,16 @@ class ChordSheetPlayer {
         this.epianoGroup = [];
         this.tocarEpiano = false;
         this.parado = true;
-        this.acordeTocando = '';
+        this.playingChord = '';
         this.acordeFull = false;
         this.indiceAcorde = 0;
-        this.tomAtual = 'C';
+        this.currentKey = 'C';
         this.tomOriginal = null;
         this.elements_b = null;
         this.instrumento = 'orgao';
         this.attack = 0.2;
         this.release = 0.2;
-        this.baixo = null;
+        this.bassNote = null;
 
         this.fatorVolumeStrings = 1.25;
 
@@ -114,19 +114,19 @@ class ChordSheetPlayer {
 
     processarAcorde(palavra, cifraNum, tom) {
         let acorde = palavra;
-        let baixo = '';
+        let bassNote = '';
 
         if (acorde.includes('/') && !acorde.includes('(')) {
-            [acorde, baixo] = acorde.split('/');
+            [acorde, bassNote] = acorde.split('/');
 
-            baixo = this.musicTheory.getAcorde(baixo, tom);
+            bassNote = this.musicTheory.getAcorde(bassNote, tom);
 
             while (!this.musicTheory.notasAcordes.includes(acorde) && acorde) {
                 acorde = acorde.slice(0, -1);
             }
 
             acorde = this.musicTheory.getAcorde(acorde, tom);
-            acorde = this.musicTheory.acordesSustenidosBemol.includes(baixo) ? `${acorde}/${baixo}` : palavra;
+            acorde = this.musicTheory.acordesSustenidosBemol.includes(bassNote) ? `${acorde}/${bassNote}` : palavra;
         } else {
             while (!this.musicTheory.notasAcordes.includes(acorde) && acorde) {
                 acorde = acorde.slice(0, -1);
@@ -141,7 +141,7 @@ class ChordSheetPlayer {
     async loadSounds() {
         const urls = {};
         const instrumentos = ['orgao', 'strings'];
-        const oitavas = ['grave', 'baixo', ''];
+        const oitavas = ['grave', 'bassNote', ''];
 
         instrumentos.forEach(instrumento => {
             this.musicTheory.notas.forEach(nota => {
@@ -168,7 +168,7 @@ class ChordSheetPlayer {
 
         const urls = {};
         const instrumento = 'epiano';
-        const oitavas = ['grave', 'baixo', ''];
+        const oitavas = ['grave', 'bassNote', ''];
 
         this.musicTheory.notas.forEach(nota => {
             oitavas.forEach(oitava => {
@@ -193,16 +193,16 @@ class ChordSheetPlayer {
     }
 
     transposeCifra() {
-        if (this.elements.tomSelect.value) {
-            const novoTom = this.elements.tomSelect.value;
+        if (this.elements.keySelect.value) {
+            const novoTom = this.elements.keySelect.value;
             this.transporCifraNoIframe(novoTom);
-            this.tomAtual = novoTom;
+            this.currentKey = novoTom;
 
             if (this.indiceAcorde > 0) {
                 this.indiceAcorde--;
             }
 
-            if (!this.parado && this.acordeTocando) {
+            if (!this.parado && this.playingChord) {
                 this.avancarCifra();
             }
         }
@@ -220,7 +220,7 @@ class ChordSheetPlayer {
     transporTom(novoTom) {
         const acordeButtons = document.querySelectorAll('button[data-action="acorde"]');
 
-        const steps = this.musicTheory.tonsMaiores.indexOf(this.musicTheory.acordesMap[novoTom] ?? novoTom) - this.musicTheory.tonsMaiores.indexOf(this.musicTheory.acordesMap[this.tomAtual] ?? this.tomAtual);
+        const steps = this.musicTheory.tonsMaiores.indexOf(this.musicTheory.acordesMap[novoTom] ?? novoTom) - this.musicTheory.tonsMaiores.indexOf(this.musicTheory.acordesMap[this.currentKey] ?? this.currentKey);
 
         acordeButtons.forEach(acordeButton => {
             const antesAcorde = acordeButton.value;
@@ -233,7 +233,7 @@ class ChordSheetPlayer {
             acordeButton.innerHTML = novoAcorde;
         });
 
-        this.tomAtual = novoTom;
+        this.currentKey = novoTom;
 
         if (this.indiceAcorde > 0) {
             this.indiceAcorde--;
@@ -248,7 +248,7 @@ class ChordSheetPlayer {
             tons = this.musicTheory.tonsMenores;
         }
 
-        const steps = tons.indexOf(novoTom) - tons.indexOf(this.tomAtual);
+        const steps = tons.indexOf(novoTom) - tons.indexOf(this.currentKey);
         const cifras = this.elements.iframeCifra.contentDocument.querySelectorAll('b');
 
         for (const cifra of cifras) {
@@ -279,31 +279,31 @@ class ChordSheetPlayer {
         }
     }
 
-    tocarAcorde(acorde) {
-        acorde = this.musicTheory.getAcorde(acorde, this.tomAtual);
-        this.acordeTocando = this.musicTheory.simplificarAcorde(acorde);
+    playChord(acorde) {
+        acorde = this.musicTheory.getAcorde(acorde, this.currentKey);
+        this.playingChord = this.musicTheory.simplificarAcorde(acorde);
 
         this.desabilitarSelectSaves();
 
-        let [notaPrincipal, baixo] = acorde.split('/');
+        let [notaPrincipal, bassNote] = acorde.split('/');
         let notas = this.musicTheory.getAcordeNotas(notaPrincipal);
         if (!notas) return;
 
-        this.baixo = baixo ? baixo.replace('#', '_') : notas[0].replace('#', '_');
+        this.bassNote = bassNote ? bassNote.replace('#', '_') : notas[0].replace('#', '_');
 
         this.acordeGroup = [];
         this.epianoGroup = [];
-        this.adicionarSom(this.instrumento, this.baixo, 'grave');
+        this.adicionarSom(this.instrumento, this.bassNote, 'grave');
         if (!this.elements.notesButton.classList.contains('notaSolo') && this.instrumento === 'orgao')
-            this.adicionarSom('strings', this.baixo, 'grave');
+            this.adicionarSom('strings', this.bassNote, 'grave');
         else if (this.elements.notesButton.classList.contains('pressed') && this.instrumento === 'epiano')
-            this.adicionarSom('strings', this.baixo, 'grave');
+            this.adicionarSom('strings', this.bassNote, 'grave');
 
         notas.forEach(nota => {
             if (this.instrumento === 'orgao' || this.instrumento === 'tone-piano') {
-                this.adicionarSom(this.instrumento, nota.replace('#', '_'), 'baixo');
+                this.adicionarSom(this.instrumento, nota.replace('#', '_'), 'bassNote');
                 if (!this.elements.notesButton.classList.contains('notaSolo'))
-                    this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
+                    this.adicionarSom('strings', nota.replace('#', '_'), 'bassNote');
 
                 if (this.elements.notesButton.classList.contains('pressed')) {
                     this.adicionarSom(this.instrumento, nota.replace('#', '_'));
@@ -312,13 +312,13 @@ class ChordSheetPlayer {
                 }
             }
             else if (this.instrumento === 'epiano') {
-                this.adicionarSom('epiano', nota.replace('#', '_'), 'baixo');
+                this.adicionarSom('epiano', nota.replace('#', '_'), 'bassNote');
 
                 if (!this.elements.notesButton.classList.contains('notaSolo'))
                     this.adicionarSom('epiano', nota.replace('#', '_'));
 
                 if (this.elements.notesButton.classList.contains('pressed')) {
-                    this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
+                    this.adicionarSom('strings', nota.replace('#', '_'), 'bassNote');
                     this.adicionarSom('strings', nota.replace('#', '_'));
                 }
             }
@@ -379,12 +379,12 @@ class ChordSheetPlayer {
     }
 
     desabilitarSelectSaves() {
-        this.elements.savesSelect.disabled = true;
+        this.elements.songSelect.disabled = true;
         this.elements.addButton.disabled = true;
     }
 
     habilitarSelectSaves() {
-        this.elements.savesSelect.disabled = false;
+        this.elements.songSelect.disabled = false;
         this.elements.addButton.disabled = false;
     }
 
@@ -394,8 +394,8 @@ class ChordSheetPlayer {
         this.activeSources.clear();
     }
 
-    inversaoDeAcorde(acorde, baixo) {
-        return this.musicTheory.inversaoDeAcorde(acorde, baixo);
+    inversaoDeAcorde(acorde, bassNote) {
+        return this.musicTheory.inversaoDeAcorde(acorde, bassNote);
     }
 
     preencherIframeCifra(texto) {
@@ -457,7 +457,7 @@ class ChordSheetPlayer {
             this.indiceAcorde--;
         }
 
-        if (!this.parado && this.acordeTocando) {
+        if (!this.parado && this.playingChord) {
             this.avancarCifra();
         }
     }
@@ -477,7 +477,7 @@ class ChordSheetPlayer {
         // REMOVIDO: this.indiceAcorde-- causava double-decrement com o handlePlayMousedown
 
         this.parado = true;
-        this.acordeTocando = '';
+        this.playingChord = '';
     }
 
     retrocederCifra() {
@@ -513,7 +513,7 @@ class ChordSheetPlayer {
                 if (cifraElem.nextElementSibling && !proximacifra) {
                     cifraElem.classList.add('cifraSelecionada');
                     cifraElem.nextElementSibling.scrollIntoView({ behavior: 'smooth' });
-                    this.tocarAcorde(cifra);
+                    this.playChord(cifra);
                     this.indiceAcorde++;
                 }
                 else if (!cifra) {
@@ -522,7 +522,7 @@ class ChordSheetPlayer {
                     this.avancarCifra(true);
                 }
                 else {
-                    this.tocarAcorde(cifra);
+                    this.playChord(cifra);
 
                     cifraElem.classList.add('cifraSelecionada');
                     if (!inicioLinha)
@@ -611,33 +611,33 @@ class ChordSheetPlayer {
 
     preencherSelectAcordes(tom = 'C') {
         tom = this.musicTheory.acordesMap[tom] ?? tom;
-        this.elements.tomSelect.innerHTML = '';
+        this.elements.keySelect.innerHTML = '';
 
         this.musicTheory.tonsAcordes.forEach(tom => {
             const option = document.createElement('option');
             option.value = this.musicTheory.acordesTomMap[tom] ?? tom;
             option.text = this.musicTheory.acordesTomMap[tom] ?? tom;
-            this.elements.tomSelect.appendChild(option);
+            this.elements.keySelect.appendChild(option);
         });
 
-        this.elements.tomSelect.value = tom;
+        this.elements.keySelect.value = tom;
     }
 
     preencherSelectCifras(tom) {
         var option = '<option value="">Letra</option>';
 
-        this.elements.tomSelect.innerHTML = option;
+        this.elements.keySelect.innerHTML = option;
         const tons = this.musicTheory.tonsMaiores.includes(tom) ? this.musicTheory.tonsMaiores : this.musicTheory.tonsMenores.includes(tom) ? this.musicTheory.tonsMenores : [];
 
         tons.forEach(tom => {
             const option = document.createElement('option');
             option.value = tom;
             option.text = tom;
-            this.elements.tomSelect.appendChild(option);
+            this.elements.keySelect.appendChild(option);
         });
 
-        this.elements.tomSelect.value = tom;
-        this.tomAtual = tom;
+        this.elements.keySelect.value = tom;
+        this.currentKey = tom;
         this.tomOriginal = tom;
     }
 
@@ -646,7 +646,7 @@ class ChordSheetPlayer {
         const cifraid = parseInt(cifraElem.id.split('cifra')[1]);
         this.indiceAcorde = Array.from(elements_b).findIndex(b => parseInt(b.id.split('cifra')[1]) === cifraid);
 
-        if (!this.parado && this.acordeTocando) {
+        if (!this.parado && this.playingChord) {
             this.iniciarReproducao();
         }
     }

@@ -208,7 +208,7 @@ class DrumUI {
     }
 
     /**
-     * Alterna o estado do passo fornecido entre inativo, volume baixo, volume médio e volume alto.
+     * Alterna o estado do passo fornecido entre inativo, volume bassNote, volume médio e volume alto.
      */
     toggleStep(step) {
         let volume = parseInt(step.dataset.volume || '0', 10);

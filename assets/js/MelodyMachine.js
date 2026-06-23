@@ -198,7 +198,7 @@
 
         const stepIndex = this.currentStep - 1;
         const iniciouNovoAcorde = this.currentStep === 1;
-        const acordePrincipal = this.chordSheetPlayer.acordeTocando;
+        const acordePrincipal = this.chordSheetPlayer.playingChord;
 
         // 1. Resolvemos as notas do acorde
         let notasAtuais = null;
@@ -215,11 +215,11 @@
             // Toca a nota grave (pedaleira) respeitando a inversão/baixo do acorde (ex: C/E -> toca E grave)
             let notaGraveNome = null;
 
-            if (this.chordSheetPlayer.baixo) {
-                // Formata o baixo pegando da Cifra (ex: 'F_' vira 'f__grave')
-                notaGraveNome = `${this.chordSheetPlayer.baixo.toLowerCase()}_grave`;
+            if (this.chordSheetPlayer.bassNote) {
+                // Formata o bassNote pegando da Cifra (ex: 'F_' vira 'f__grave')
+                notaGraveNome = `${this.chordSheetPlayer.bassNote.toLowerCase()}_grave`;
             } else if (notasAtuais && notasAtuais[0]) {
-                // Fallback para a tônica principal dicionário caso não identifique baixo
+                // Fallback para a tônica principal dicionário caso não identifique bassNote
                 notaGraveNome = notasAtuais[0];
             }
 

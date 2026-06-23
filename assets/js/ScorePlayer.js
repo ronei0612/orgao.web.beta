@@ -91,7 +91,7 @@ class ScorePlayer {
         this.audioManager.stopAll(this.activeSources, 0.02);
 
         if (data.chord) {
-            this.chordSheetPlayer.tocarAcorde(data.chord);
+            this.chordSheetPlayer.playChord(data.chord);
         }
 
         if (!data.rest) {

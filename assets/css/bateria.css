@@ -42,7 +42,7 @@ body.dark-mode {
 
 /* --- START BATERIA STYLES INTEGRATION --- */
 
-#bateriaWrapper {
+#drumWrapper {
 }
 
 /* Container dos inputs de controle (caso ainda seja usado, mas agora usamos d-flex direto no HTML) */
@@ -59,19 +59,19 @@ body.dark-mode {
 }
 
 /* Ajustes Espec�ficos para Dark Mode nos Inputs do Bootstrap */
-body.dark-mode #bateriaWrapper .input-group-text {
+body.dark-mode #drumWrapper .input-group-text {
     background-color: var(--drum-btn-bg);
     border-color: var(--drum-btn-border);
     color: var(--drum-text);
 }
 
-body.dark-mode #bateriaWrapper .form-control {
+body.dark-mode #drumWrapper .form-control {
     background-color: #2c3e50;
     border-color: var(--drum-btn-border);
     color: white;
 }
 
-body.dark-mode #bateriaWrapper .btn-outline-secondary {
+body.dark-mode #drumWrapper .btn-outline-secondary {
     color: #ccc;
     border-color: var(--drum-btn-border);
 }

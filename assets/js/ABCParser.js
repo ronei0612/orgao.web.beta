@@ -43,10 +43,10 @@ class ABCParser {
 
             if (trimmedLine.startsWith('K:')) {
                 const key = trimmedLine.substring(2).trim().split(' ')[0];
-                const tomSelect = document.getElementById('tomSelect');
-                if (tomSelect) {
-                    tomSelect.value = key;
-                    tomSelect.dispatchEvent(new Event('change'));
+                const keySelect = document.getElementById('keySelect');
+                if (keySelect) {
+                    keySelect.value = key;
+                    keySelect.dispatchEvent(new Event('change'));
                 }
                 return;
             }

@@ -112,7 +112,7 @@ iframe {
     text-align: left;
 }
 
-#savesSelect {
+#songSelect {
     -webkit-user-select: none; /* Safari */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
@@ -126,11 +126,11 @@ iframe {
     -o-user-drag: none; /* Opera */
 }
 
-#savesSelect option {
+#songSelect option {
     color: black;
 }
 
-#savesSelect:disabled {
+#songSelect:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }

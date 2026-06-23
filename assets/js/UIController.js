@@ -126,7 +126,7 @@ class UIController {
     }
 
     esconderBotoesTom() {
-        this.elements.tomSelect.innerHTML = '<option value="">Letra</option>';
+        this.elements.keySelect.innerHTML = '<option value="">Letra</option>';
         this.elements.tomContainer.classList.remove('d-flex');
         this.elements.tomContainer.classList.add('d-none');
     }
@@ -137,12 +137,12 @@ class UIController {
     }
 
     desabilitarSelectSaves() {
-        this.elements.savesSelect.disabled = true;
+        this.elements.songSelect.disabled = true;
         this.elements.addButton.disabled = true;
     }
 
     habilitarSelectSaves() {
-        this.elements.savesSelect.disabled = false;
+        this.elements.songSelect.disabled = false;
         this.elements.addButton.disabled = false;
     }
 
@@ -163,21 +163,21 @@ class UIController {
         this.elements.deleteSavesSelect.classList.add('d-none');
         this.elements.editSavesSelect.classList.add('d-none');
 
-        this.elements.savesSelect.innerHTML = '';
+        this.elements.songSelect.innerHTML = '';
 
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
         defaultOption.text = 'Selecione uma Música...';
         defaultOption.selected = true;
         defaultOption.hidden = true;
-        this.elements.savesSelect.appendChild(defaultOption);
+        this.elements.songSelect.appendChild(defaultOption);
 
         const emptyOption = document.createElement('option');
         emptyOption.value = 'acordes__';
         emptyOption.text = 'Acordes';
-        this.elements.savesSelect.appendChild(emptyOption);
+        this.elements.songSelect.appendChild(emptyOption);
 
-        this.elements.savesSelect.style.color = '';
+        this.elements.songSelect.style.color = '';
 
         let saves = localStorage.getItem('saves');
         if (saves && saves !== '{}') {
@@ -187,12 +187,12 @@ class UIController {
 
             saveNames.forEach(saveName => {
                 const listItem = this.criarItemSelect(saveName, saves[saveName]);
-                this.elements.savesSelect.appendChild(listItem);
+                this.elements.songSelect.appendChild(listItem);
             });
 
             if (saveSelected && saveNames.includes(saveSelected)) {
-                this.elements.savesSelect.value = saveSelected;
-                this.elements.savesSelect.style.color = 'black';
+                this.elements.songSelect.value = saveSelected;
+                this.elements.songSelect.style.color = 'black';
             }
         }
     }
@@ -200,7 +200,7 @@ class UIController {
     exibirInstrumento(mode) {
         this.currentInstrumentMode = mode;
         if (mode === 'orgao' || mode === 'piano') {
-            this.elements.bateriaWrapper.classList.add('d-none');
+            this.elements.drumWrapper.classList.add('d-none');
             this.elements.rhythmButtonsControl.classList.add('d-none');
             this.elements.drumStyleSelect.classList.add('d-none');
 
@@ -213,7 +213,7 @@ class UIController {
             this.elements.melodyWrapper.classList.add('d-none');
             this.elements.melodyStyleSelect.classList.add('d-none');
 
-            this.elements.bateriaWrapper.classList.remove('d-none');
+            this.elements.drumWrapper.classList.remove('d-none');
             this.elements.rhythmButtonsControl.classList.remove('d-none');
             this.elements.drumStyleSelect.classList.remove('d-none');
         }
@@ -243,7 +243,7 @@ class UIController {
         option.value = saveName;
         option.textContent = saveName;
 
-        this.elements.savesSelect.appendChild(option);
+        this.elements.songSelect.appendChild(option);
         return option;
     }
 
@@ -321,7 +321,7 @@ class UIController {
         this.elements.pianoWrapper.classList.remove('d-none');
         this.exibirInstrumento(this.currentInstrumentMode);
 
-        this.elements.bateriaInstrumentButton.classList.add('d-none');
+        this.elements.drumInstrumentButton.classList.add('d-none');
 
         // RESTAURA OS ELEMENTOS OCULTADOS PELO MODO LETRA:
         this.elements.bpmContainer.classList.remove('d-none');
@@ -374,17 +374,17 @@ class UIController {
     }
 
     exibirSavesSelect() {
-        this.elements.savesSelect.value = this.elements.selectedButton.innerText;
+        this.elements.songSelect.value = this.elements.selectedButton.innerText;
         this.elements.selectContainer.classList.remove('d-none');
         this.elements.selectedButton.classList.add('d-none');
-        this.elements.savesSelect.click();
+        this.elements.songSelect.click();
     }
 
     exibirFrame(frameId) {
-        if (this.elements.savesSelect.value) {
+        if (this.elements.songSelect.value) {
             this.elements.selectContainer.classList.add('d-none');
             this.elements.selectedButton.classList.remove('d-none');
-            this.elements.selectedButton.innerText = this.elements.savesSelect.value;
+            this.elements.selectedButton.innerText = this.elements.songSelect.value;
         }
         this.elements.oracoesFrame.classList.add('d-none');
         this.elements.santamissaFrame.classList.add('d-none');

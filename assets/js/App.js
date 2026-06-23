@@ -116,8 +116,8 @@ class App {
         this.elements.cancelButton.addEventListener("click", this.handleCancelClick.bind(this));
         this.elements.saveButton.addEventListener('click', this.handleSaveClick.bind(this));
         this.elements.darkModeToggle.addEventListener('change', this.uiController.toggleDarkMode.bind(this.uiController));
-        this.elements.tocarButton.addEventListener('click', this.handleTocarClick.bind(this));
-        this.elements.tomSelect.addEventListener('change', this.handleTomSelectChange.bind(this));
+        this.elements.tocarButton.addEventListener('click', this.handlePlayClick.bind(this));
+        this.elements.keySelect.addEventListener('change', this.handleKeyChange.bind(this));
         this.elements.decreaseTom.addEventListener('click', this.handleDecreaseTomClick.bind(this));
         this.elements.increaseTom.addEventListener('click', this.handleIncreaseTomClick.bind(this));
         this.elements.addButton.addEventListener('click', this.handleAddClick.bind(this));
@@ -137,10 +137,10 @@ class App {
         this.elements.missaOrdinarioLink.addEventListener('click', () => this.exibirFrame('santamissaFrame'));
         this.elements.stopButton.addEventListener('mousedown', this.handleStopMousedown.bind(this));
         this.elements.playButton.addEventListener('mousedown', this.handlePlayMousedown.bind(this));
-        this.elements.avancarButton.addEventListener('mousedown', () => this.avancar());
-        this.elements.retrocederButton.addEventListener('mousedown', () => this.retroceder());
+        this.elements.avancarButton.addEventListener('mousedown', () => this.nextStep());
+        this.elements.retrocederButton.addEventListener('mousedown', () => this.previousStep());
         this.elements.orgaoInstrumentButton.addEventListener('click', () => this.openInstrumentModal());
-        this.elements.bateriaInstrumentButton.addEventListener('click', () => this.openInstrumentModal());
+        this.elements.drumInstrumentButton.addEventListener('click', () => this.openInstrumentModal());
         document.addEventListener('mousedown', this.fullScreen.bind(this));
         document.addEventListener('click', this.handleDocumentClick.bind(this));
         $('#searchModal').on('shown.bs.modal', this.handleSearchModalShown.bind(this));
@@ -151,14 +151,14 @@ class App {
         });
 
         ['mousedown', 'touchstart'].forEach(evento => {
-            this.elements.tomSelect.addEventListener(evento, () => {
-                this.tomAnterior = this.elements.tomSelect.value;
+            this.elements.keySelect.addEventListener(evento, () => {
+                this.tomAnterior = this.elements.keySelect.value;
             });
             this.elements.decreaseTom.addEventListener(evento, () => {
-                this.tomAnterior = this.elements.tomSelect.value;
+                this.tomAnterior = this.elements.keySelect.value;
             });
             this.elements.increaseTom.addEventListener(evento, () => {
-                this.tomAnterior = this.elements.tomSelect.value;
+                this.tomAnterior = this.elements.keySelect.value;
             });
         });
 
@@ -339,7 +339,7 @@ class App {
     setupSelect2() {
         const appInstance = this;
 
-        var $select = $('#savesSelect').select2({
+        var $select = $('#songSelect').select2({
             theme: 'bootstrap4',
             placeholder: "Escolha a Música...",
             width: '100%',
@@ -354,8 +354,8 @@ class App {
 
         $(document).on('click', '.pesquisar-na-web', function () {
             const searchTerm = $('.select2-search__field').val();
-            $('#savesSelect').select2('close');
-            appInstance.pesquisarWeb(searchTerm);
+            $('#songSelect').select2('close');
+            appInstance.searchWeb(searchTerm);
         });
 
         $(document).on('keydown', '.select2-search__field', function (e) {
@@ -366,15 +366,15 @@ class App {
 
                 if (pesquisarWebVisible) {
                     e.preventDefault();
-                    $('#savesSelect').select2('close');
-                    appInstance.pesquisarWeb(searchTerm);
+                    $('#songSelect').select2('close');
+                    appInstance.searchWeb(searchTerm);
                 }
             }
         });
 
-        $('#savesSelect').on('select2:select', async (e) => {
+        $('#songSelect').on('select2:select', async (e) => {
             var selectedValue = e.params.data.id;
-            await appInstance.selectEscolhido(selectedValue);
+            await appInstance.loadSelectedSong(selectedValue);
 
             if (selectedValue === 'acordes__') {
                 $(this).val(null).trigger('change');
@@ -428,7 +428,7 @@ class App {
         this.updateFillBlink(bpm);
     }
 
-    avancar() {
+    nextStep() {
         if (!this.elements.partituraFrame.classList.contains('d-none')) {
             this._moverPartitura(1);
         } else {
@@ -436,7 +436,7 @@ class App {
         }
     }
 
-    retroceder() {
+    previousStep() {
         if (!this.elements.partituraFrame.classList.contains('d-none')) {
             this._moverPartitura(-1);
         } else {
@@ -510,14 +510,14 @@ class App {
 
     handleSelectedButtonClick() {
         this.uiController.exibirSavesSelect();
-        this.selectEscolhido(this.elements.selectedButton.innerText);
+        this.loadSelectedSong(this.elements.selectedButton.innerText);
     }
 
     async handleCancelClick() {
         const confirmed = await this.uiController.customConfirm('Cancelar edição?');
         if (confirmed) {
             this.uiController.resetInterface();
-            this.selectEscolhido(this.elements.itemNameInput.value);
+            this.loadSelectedSong(this.elements.itemNameInput.value);
         }
     }
 
@@ -528,7 +528,7 @@ class App {
             this.editing = false;
             const confirmed = await this.uiController.customConfirm(`Salvar "${saveName}"?`);
             if (confirmed) {
-                this.salvarSave(saveName, this.elements.savesSelect.value);
+                this.salvarSave(saveName, this.elements.songSelect.value);
             } else {
                 this.editing = true;
             }
@@ -538,7 +538,7 @@ class App {
         }
     }
 
-    handleTocarClick() {
+    handlePlayClick() {
         this.showLetraCifra(this.elements.cifraDisplay.textContent);
         $('#searchModal').modal('hide');
     }
@@ -555,8 +555,8 @@ class App {
         return localStorageSalvar;
     }
 
-    handleTomSelectChange(event) {
-        const selectedTom = this.elements.tomSelect.value;
+    handleKeyChange(event) {
+        const selectedTom = this.elements.keySelect.value;
 
         // Se o tom selecionado for nulo/vazio (Selecionou "Letra")
         if (!selectedTom) {
@@ -590,7 +590,7 @@ class App {
         // CENÁRIO 2: MODO SOLO DE ACORDES / AUXILIARES DE MISSA
         // (Selecionou "Acordes", ou está lendo Liturgia/Missa/Orações)
         // -------------------------------------------------------------
-        const noSoloDeAcordes = !this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__';
+        const noSoloDeAcordes = !this.elements.songSelect.value || this.elements.songSelect.value === 'acordes__';
         const lendoTextosMissa = !this.elements.liturgiaDiariaFrame.classList.contains('d-none') ||
             !this.elements.santamissaFrame.classList.contains('d-none') ||
             !this.elements.oracoesFrame.classList.contains('d-none');
@@ -611,38 +611,38 @@ class App {
         if (!this.elements.iframeCifra.classList.contains('d-none')) {
             this.chordSheetPlayer.transposeCifra();
 
-            if (!this.chordSheetPlayer.parado && this.chordSheetPlayer.acordeTocando) {
+            if (!this.chordSheetPlayer.parado && this.chordSheetPlayer.playingChord) {
                 const button = event.currentTarget;
                 this.chordSheetPlayer.parado = false;
-                this.chordSheetPlayer.tocarAcorde(button.value);
+                this.chordSheetPlayer.playChord(button.value);
                 button.classList.add('pressed');
             }
         }
     }
 
     handleDecreaseTomClick() {
-        if (this.elements.tomSelect.value) {
-            const acordeIndex_B = this.elements.tomSelect.innerHTML.includes('Letra') ? 13 : 12;
-            const acordeIndex_C = this.elements.tomSelect.innerHTML.includes('Letra') ? 1 : 0;
+        if (this.elements.keySelect.value) {
+            const acordeIndex_B = this.elements.keySelect.innerHTML.includes('Letra') ? 13 : 12;
+            const acordeIndex_C = this.elements.keySelect.innerHTML.includes('Letra') ? 1 : 0;
 
-            let tomIndex = parseInt(this.elements.tomSelect.selectedIndex);
+            let tomIndex = parseInt(this.elements.keySelect.selectedIndex);
             if (tomIndex === acordeIndex_C)
                 tomIndex = acordeIndex_B;
-            this.elements.tomSelect.value = this.elements.tomSelect.options[tomIndex - 1].value;
-            this.elements.tomSelect.dispatchEvent(new Event('change'));
+            this.elements.keySelect.value = this.elements.keySelect.options[tomIndex - 1].value;
+            this.elements.keySelect.dispatchEvent(new Event('change'));
         }
     }
 
     handleIncreaseTomClick() {
-        if (this.elements.tomSelect.value) {
-            const acordeIndex_B = this.elements.tomSelect.innerHTML.includes('Letra') ? 12 : 11;
-            const acordeIndex_C = this.elements.tomSelect.innerHTML.includes('Letra') ? 0 : -1;
+        if (this.elements.keySelect.value) {
+            const acordeIndex_B = this.elements.keySelect.innerHTML.includes('Letra') ? 12 : 11;
+            const acordeIndex_C = this.elements.keySelect.innerHTML.includes('Letra') ? 0 : -1;
 
-            let tomIndex = parseInt(this.elements.tomSelect.selectedIndex);
+            let tomIndex = parseInt(this.elements.keySelect.selectedIndex);
             if (tomIndex === acordeIndex_B)
                 tomIndex = acordeIndex_C;
-            this.elements.tomSelect.value = this.elements.tomSelect.options[tomIndex + 1].value;
-            this.elements.tomSelect.dispatchEvent(new Event('change'));
+            this.elements.keySelect.value = this.elements.keySelect.options[tomIndex + 1].value;
+            this.elements.keySelect.dispatchEvent(new Event('change'));
         }
     }
 
@@ -656,7 +656,7 @@ class App {
             this.currentEditorType = tipo;
 
             this.elements.itemNameInput.value = '';
-            $('#savesSelect').val('').trigger('change');
+            $('#songSelect').val('').trigger('change');
 
             // 1. Entra no modo de edição (isso esconde os botões de editar/excluir)
             this.uiController.editarMusica(tipo);
@@ -682,7 +682,7 @@ class App {
     }
 
     async handleEditSaveClick() {
-        const saveName = this.elements.savesSelect.value;
+        const saveName = this.elements.songSelect.value;
         if (!saveName) return;
 
         const saveData = this.localStorageManager.getSaveJson(this.LOCAL_STORAGE_SAVES_KEY, saveName);
@@ -706,29 +706,29 @@ class App {
                 : saveData.chords || "";
 
             // Se o tom foi alterado, usa o texto do iframe; senão usa o salvo
-            const tomAtual = this.elements.tomSelect.value;
+            const currentKey = this.elements.keySelect.value;
             const tomOriginal = saveData.key || 'C';
 
-            this.elements.editTextarea.value = (tomAtual !== tomOriginal)
+            this.elements.editTextarea.value = (currentKey !== tomOriginal)
                 ? (iframeBody?.innerText || saveData.chords || "")
                 : (saveData.chords || "");
         }
 
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
-        this.chordSheetPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
+        this.chordSheetPlayer.preencherSelectCifras(this.elements.keySelect.value ?? 'C');
         this.uiController.exibirInstrumento(this.currentInstrumentMode);
     }
 
     async handleDeleteSaveClick() {
-        const saveName = this.elements.savesSelect.value;
-        if (this.elements.savesSelect.selectedIndex !== 0) {
+        const saveName = this.elements.songSelect.value;
+        if (this.elements.songSelect.selectedIndex !== 0) {
             const confirmed = await this.uiController.customConfirm(`Deseja excluir "${saveName}"?`, 'Deletar!');
             if (confirmed) {
                 this.localStorageManager.deleteJson(this.LOCAL_STORAGE_SAVES_KEY, saveName);
                 this.uiController.resetInterface();
                 this.uiController.exibirListaSaves();
-                this.selectEscolhido('acordes__');
+                this.loadSelectedSong('acordes__');
             }
         }
     }
@@ -794,15 +794,15 @@ class App {
         if (!this.elements.addButton.contains(event.target) &&
             !this.elements.deleteSavesSelect.contains(event.target) &&
             !this.elements.editSavesSelect.contains(event.target) &&
-            !this.elements.savesSelect.contains(event.target)
+            !this.elements.songSelect.contains(event.target)
         ) {
             this.uiController.esconderEditDeleteButtons();
         }
     }
 
     handleSearchModalShown() {
-        if (this.elements.savesSelect.value !== '')
-            this.elements.searchModalLabel.textContent = this.elements.savesSelect.value;
+        if (this.elements.songSelect.value !== '')
+            this.elements.searchModalLabel.textContent = this.elements.songSelect.value;
 
         if (this.pesquisarNaWeb) {
             this.pesquisarNaWeb = false;
@@ -850,7 +850,7 @@ class App {
                 this.uiController.exibirInstrumento(mode);
             }
 
-            if (!this.elements.savesSelect.value || this.elements.savesSelect.value === 'acordes__') {
+            if (!this.elements.songSelect.value || this.elements.songSelect.value === 'acordes__') {
                 const localStorageSalvar = this.getIframeStorageName();
                 this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
             }
@@ -907,7 +907,7 @@ class App {
             const musicaCifrada = this.chordSheetPlayer.destacarCifras(texto, tom);
             this.chordSheetPlayer.preencherSelectCifras(tom);
             this.uiController.exibirBotoesCifras();
-            this.elements.tomSelect.dispatchEvent(new Event('change'));
+            this.elements.keySelect.dispatchEvent(new Event('change'));
             this.chordSheetPlayer.preencherIframeCifra(musicaCifrada);
             this.chordSheetPlayer.addEventCifrasIframe(this.elements.iframeCifra);
 
@@ -953,7 +953,7 @@ class App {
 
     async showLetraCifra(saveData) {
         // 1. Identifica o nome da música (chave usada no localStorage)
-        const songName = this.elements.savesSelect.value;
+        const songName = this.elements.songSelect.value;
 
         // 2. Identifica o tipo (Fallback para dados antigos caso 'type' não exista)
         const type = saveData.type || (saveData.chords?.includes('@') ? 'partitura' : 'cifra');
@@ -978,7 +978,7 @@ class App {
 
             this.partituraOriginalKey = saveData.key || 'C';
             this.chordSheetPlayer.tomOriginal = this.partituraOriginalKey;
-            this.elements.tomSelect.value = this.partituraOriginalKey;
+            this.elements.keySelect.value = this.partituraOriginalKey;
 
             if (!this.scorePlayer._initialized) await this.scorePlayer.init();
 
@@ -1001,7 +1001,7 @@ class App {
     salvarMetaDataNoLocalStorage(name, item, chords = null) {
         const metaData = {
             chords: chords ?? this.elements.editTextarea.value,
-            key: this.elements.tomSelect.value,
+            key: this.elements.keySelect.value,
             instrument: this.chordSheetPlayer.instrumento,
             instrumentMode: this.currentInstrumentMode, // NOVO CAMPO PARA SABER SE É PIANO
             style: (this.currentInstrumentMode === 'bateria')
@@ -1013,9 +1013,9 @@ class App {
         this.localStorageManager.saveJson(name, item, metaData);
     }
 
-    async verificarTrocouTom() {
-        if (this.chordSheetPlayer.tomOriginal && this.chordSheetPlayer.tomOriginal !== this.chordSheetPlayer.tomAtual) {
-            const tom = this.chordSheetPlayer.tomAtual;
+    async checkKeyChange() {
+        if (this.chordSheetPlayer.tomOriginal && this.chordSheetPlayer.tomOriginal !== this.chordSheetPlayer.currentKey) {
+            const tom = this.chordSheetPlayer.currentKey;
             const confirmed = await this.uiController.customConfirm(`Você trocou de tom de ${this.chordSheetPlayer.tomOriginal} para ${tom}. Substituir novo tom?`);
             if (confirmed) {
                 this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, this.selectItemAntes);
@@ -1024,8 +1024,8 @@ class App {
         }
     }
 
-    // App.js - Método selectEscolhido
-    async selectEscolhido(selectItem) {
+    // App.js - Método loadSelectedSong
+    async loadSelectedSong(selectItem) {
         this.selectItemAntes = selectItem;
         this.uiController.resetInterface();
         this.elements.partituraEditFrame.classList.add('d-none');
@@ -1058,7 +1058,7 @@ class App {
 
             this.chordSheetPlayer.preencherSelectAcordes(tom);
             this.chordSheetPlayer.preencherAcordes(tom);
-            this.elements.savesSelect.selectedIndex = 0;
+            this.elements.songSelect.selectedIndex = 0;
 
             if (selectItem === 'acordes__') {
                 this.chordSheetPlayer.preencherIframeCifra('');
@@ -1082,8 +1082,8 @@ class App {
         const selecaoString = urlParams.get(param);
 
         if (selecaoString) {
-            $('#savesSelect').val(selecaoString).trigger('change');
-            this.selectEscolhido(selecaoString);
+            $('#songSelect').val(selecaoString).trigger('change');
+            this.loadSelectedSong(selecaoString);
         }
     }
 
@@ -1250,7 +1250,7 @@ class App {
         } else {
             if (action === 'acorde') {
                 this.chordSheetPlayer.parado = false;
-                this.chordSheetPlayer.tocarAcorde(button.value);
+                this.chordSheetPlayer.playChord(button.value);
 
                 // --- NOVO: Adiciona a cifra na partitura se estiver no modo de edição ---
                 if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
@@ -1268,7 +1268,7 @@ class App {
             setTimeout(() => button.classList.add('pressed'), 100);
 
             if (action === 'play' || action === 'acorde') {
-                this.tocarBateriaMelody();
+                this.playSequencers();
 
                 setTimeout(() => button.classList.add('pulse'), 100);
                 this.uiController.exibirBotaoStop();
@@ -1278,7 +1278,7 @@ class App {
         }
     }
 
-    tocarBateriaMelody() {
+    playSequencers() {
         if ((this.currentInstrumentMode === 'orgao' || this.currentInstrumentMode === 'piano') && this.elements.melodyStyleSelect.value) {
             this.melodyUI.play();
             this.melodyMachine.currentStep = 1;
@@ -1308,7 +1308,7 @@ class App {
         this.uiController.exibirFrame(frameId);
     }
 
-    pesquisarWeb(texto) {
+    searchWeb(texto) {
         this.pesquisarNaWeb = true;
         this.elements.searchInput.value = texto;
         $('#searchModal').modal('show');
@@ -1659,7 +1659,7 @@ class App {
     async salvarSave(newSaveName, oldSaveName) {
         // 1. Define um nome padrão caso o usuário não tenha digitado nenhum
         if (!newSaveName) {
-            const musicasDefault = this.elements.savesSelect.querySelectorAll('option[value^="Música "]');
+            const musicasDefault = this.elements.songSelect.querySelectorAll('option[value^="Música "]');
             const count = musicasDefault.length + 1;
             newSaveName = "Música " + count;
         }
@@ -1695,18 +1695,18 @@ class App {
         let tom;
 
         if (this.currentEditorType === 'partitura') {
-            // Para partitura usa direto o tomSelect — já foi transposto pelo usuário
-            tom = this.elements.tomSelect.value || 'C';
+            // Para partitura usa direto o keySelect — já foi transposto pelo usuário
+            tom = this.elements.keySelect.value || 'C';
         } else {
             const musicaCifrada = this.chordSheetPlayer.destacarCifras(content, null);
-            if (this.chordSheetPlayer.tomOriginal && this.chordSheetPlayer.tomOriginal !== this.elements.tomSelect.value) {
-                tom = this.elements.tomSelect.value;
+            if (this.chordSheetPlayer.tomOriginal && this.chordSheetPlayer.tomOriginal !== this.elements.keySelect.value) {
+                tom = this.elements.keySelect.value;
             } else {
-                tom = this.chordSheetPlayer.descobrirTom(musicaCifrada) || this.elements.tomSelect.value || 'C';
+                tom = this.chordSheetPlayer.descobrirTom(musicaCifrada) || this.elements.keySelect.value || 'C';
             }
         }
 
-        this.elements.tomSelect.value = tom;
+        this.elements.keySelect.value = tom;
 
         // 5. Se foi uma edição com troca de nome, remove o registro antigo
         if (oldSaveName && oldSaveName !== newSaveName) {
@@ -1718,7 +1718,7 @@ class App {
         this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, newSaveName, content);
 
         // 7. Atualiza o Select principal para focar na música salva
-        this.elements.savesSelect.value = newSaveName;
+        this.elements.songSelect.value = newSaveName;
 
         // 8. Limpa a interface de edição
         this.uiController.resetInterface();
@@ -1727,7 +1727,7 @@ class App {
         this.uiController.exibirListaSaves(newSaveName); // Recarrega a lista do select2
 
         // 9. Renderiza a música salva imediatamente na tela
-        this.selectEscolhido(newSaveName);
+        this.loadSelectedSong(newSaveName);
     }
 
     setupServiceWorker() {
@@ -1847,12 +1847,12 @@ document.addEventListener('DOMContentLoaded', () => {
         oracoesFrame: document.getElementById('oracoesFrame'),
         darkModeToggle: document.getElementById('darkModeToggle'),
         searchModalLabel: document.getElementById('searchModalLabel'),
-        savesSelect: document.getElementById('savesSelect'),
+        songSelect: document.getElementById('songSelect'),
         selectContainer: document.getElementById('selectContainer'),
         selectedButton: document.getElementById('selectedButton'),
         editSavesSelect: document.getElementById('editSavesSelect'),
         deleteSavesSelect: document.getElementById('deleteSavesSelect'),
-        tomSelect: document.getElementById('tomSelect'),
+        keySelect: document.getElementById('keySelect'),
         decreaseTom: document.getElementById('decreaseTom'),
         increaseTom: document.getElementById('increaseTom'),
         tomContainer: document.getElementById('tomContainer'),
@@ -1884,7 +1884,7 @@ document.addEventListener('DOMContentLoaded', () => {
         borderLeft: document.getElementById('borderLeft'),
         draggableControls: document.getElementById('draggableControls'),
         orgaoInstrumentButton: document.getElementById('orgaoInstrumentButton'),
-        bateriaInstrumentButton: document.getElementById('bateriaInstrumentButton'),
+        drumInstrumentButton: document.getElementById('drumInstrumentButton'),
         bpmInput: document.getElementById('bpm-input'),
         numStepsInput: document.getElementById('num-steps'),
         tracksContainer: document.getElementById('tracks'),
@@ -1897,7 +1897,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteStyleButton: document.getElementById('deleteStyle'),
         copyRhythmButton: document.getElementById('copy-rhythm'),
         pasteRhythmButton: document.getElementById('paste-rhythm'),
-        bateriaWrapper: document.getElementById('bateriaWrapper'),
+        drumWrapper: document.getElementById('drumWrapper'),
         melodyWrapper: document.getElementById('melodyWrapper'),
         instrumentsWrapper: document.getElementById('instrumentsWrapper'),
         bottomSpacer: document.getElementById('bottomSpacer'),

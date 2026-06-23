@@ -647,8 +647,8 @@ class ScoreEditor {
     }
 
     getCurrentKey() {
-        const tomSelect = document.getElementById('tomSelect');
-        let key = tomSelect ? tomSelect.value : 'C';
+        const keySelect = document.getElementById('keySelect');
+        let key = keySelect ? keySelect.value : 'C';
         if (!key || key === '') key = 'C';
 
         if (this.musicTheory && this.musicTheory.acordesTomMap[key]) {

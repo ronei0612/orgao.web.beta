@@ -18,7 +18,7 @@ class DrumMachine {
             { name: 'meia-Lua', icon: 'meiaLua.svg', file: this.audioPath + 'meialua.ogg', somAlternativo: this.audioPath + 'meialua2.ogg' },
             { name: 'violao-baixo', icon: 'violao.svg', file: null, somAlternativo: 'violao_' },
             { name: 'violao-cima', icon: 'violao.svg', file: null, somAlternativo: 'violao_' },
-            { name: 'baixo', icon: 'baixo.svg', file: null, somAlternativo: null }
+            { name: 'bassNote', icon: 'baixo.svg', file: null, somAlternativo: null }
         ];
 
         this.isPlaying = false;
@@ -271,8 +271,8 @@ class DrumMachine {
     }
 
     playBass(instrument, time, volume) {
-        if (instrument === 'baixo' && this.chordSheetPlayer.acordeTocando) {
-            const bass = instrument + '_' + this.chordSheetPlayer.baixo;
+        if (instrument === 'bassNote' && this.chordSheetPlayer.playingChord) {
+            const bass = instrument + '_' + this.chordSheetPlayer.bassNote;
             const buffer = this.buffers.get(bass);
             if (buffer && volume > 0) {
                 this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);
@@ -283,8 +283,8 @@ class DrumMachine {
     }
 
     playViolao(instrument, time, volume) {
-        if (instrument.includes('violao') && this.chordSheetPlayer.acordeTocando) {
-            const violao = instrument + '_' + this.chordSheetPlayer.acordeTocando;
+        if (instrument.includes('violao') && this.chordSheetPlayer.playingChord) {
+            const violao = instrument + '_' + this.chordSheetPlayer.playingChord;
             const buffer = this.buffers.get(violao);
             if (buffer && volume > 0) {
                 this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);

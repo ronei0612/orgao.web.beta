@@ -540,8 +540,8 @@ class MusicTheory {
         return tomProvavel;
     }
 
-    inversaoDeAcorde(acorde, baixo) {
-        const index = acorde.indexOf(baixo);
+    inversaoDeAcorde(acorde, bassNote) {
+        const index = acorde.indexOf(bassNote);
         if (index === -1) return acorde;
 
         return acorde.slice(index).concat(acorde.slice(0, index));
