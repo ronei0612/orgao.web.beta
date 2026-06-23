@@ -1,10 +1,10 @@
-class PartituraPlayer {
-    constructor(elements, cifraPlayer, partituraEditor, baseUrl, audioManager) {
+class ScorePlayer {
+    constructor(elements, chordSheetPlayer, scoreEditor, baseUrl, audioManager) {
         this.audioPath = `${baseUrl}/assets/audio/studio/Flauta`;
         this.instrumento = 'flauta';
         this.elements = elements;
-        this.cifraPlayer = cifraPlayer;
-        this.partituraEditor = partituraEditor;
+        this.chordSheetPlayer = chordSheetPlayer;
+        this.scoreEditor = scoreEditor;
         this.partituraPlaybackIndex = -1;
         this.buffers = new Map();
         this.audioManager = audioManager;
@@ -22,7 +22,7 @@ class PartituraPlayer {
         await this.loadSounds();
 
         // Registra callback para bindar cliques sempre que a visualização for redesenhada
-        this.partituraEditor.onViewDrawn = () => this.bindClickNotas();
+        this.scoreEditor.onViewDrawn = () => this.bindClickNotas();
     }
 
     setInstrument(inst) {
@@ -47,8 +47,8 @@ class PartituraPlayer {
             if (index === -1) return;
 
             // Sempre seleciona
-            this.partituraEditor.highlightIndex = index;
-            this.partituraEditor.draw(this.elements.partituraFrame, false);
+            this.scoreEditor.highlightIndex = index;
+            this.scoreEditor.draw(this.elements.partituraFrame, false);
 
             // Se estiver tocando, também toca
             if (this.partituraPlaybackIndex !== -1) {
@@ -72,7 +72,7 @@ class PartituraPlayer {
     async loadSounds() {
         try {
             const notas = [...new Set(
-                Object.values(this.partituraEditor.basePitches).flat()
+                Object.values(this.scoreEditor.basePitches).flat()
             )];
             const urls = Object.fromEntries(
                 notas.map(nota => {
@@ -85,13 +85,13 @@ class PartituraPlayer {
     }
 
     tocarNotaAtualPartitura(volume = 1) {
-        const data = this.partituraEditor.currentData[this.partituraPlaybackIndex];
+        const data = this.scoreEditor.currentData[this.partituraPlaybackIndex];
         if (!data) return;
 
         this.audioManager.stopAll(this.activeSources, 0.02);
 
         if (data.chord) {
-            this.cifraPlayer.tocarAcorde(data.chord);
+            this.chordSheetPlayer.tocarAcorde(data.chord);
         }
 
         if (!data.rest) {
@@ -118,8 +118,8 @@ class PartituraPlayer {
             ? this.elements.partituraEditFrame
             : this.elements.partituraFrame;
 
-        this.partituraEditor.highlightIndex = this.partituraPlaybackIndex;
-        this.partituraEditor.draw(frameParaDesenhar, frameParaDesenhar === this.elements.partituraEditFrame);
+        this.scoreEditor.highlightIndex = this.partituraPlaybackIndex;
+        this.scoreEditor.draw(frameParaDesenhar, frameParaDesenhar === this.elements.partituraEditFrame);
     }
 
     startPianoNote(pitch) {
@@ -138,14 +138,14 @@ class PartituraPlayer {
         let bufferName = '';
         let buffer = null;
 
-        // Se for Epiano, ele procura os OGGs na memória do CifraPlayer
+        // Se for Epiano, ele procura os OGGs na memória do ChordSheetPlayer
         if (this.instrumento === 'epiano') {
             let sufixo = '';
             if (oitava === '3') sufixo = '_grave';
             else if (oitava === '4') sufixo = '_baixo';
 
             bufferName = `epiano_${notaLimpa}${sufixo}`;
-            buffer = this.cifraPlayer.buffers.get(bufferName);
+            buffer = this.chordSheetPlayer.buffers.get(bufferName);
         } else {
             // Senão, é a flauta padrão
             bufferName = `flauta_${notaLimpa}${oitava}`;
@@ -167,7 +167,7 @@ class PartituraPlayer {
     }
 
     avancarNotaAtualPartitura() {
-        if (this.partituraPlaybackIndex < this.partituraEditor.currentData.length - 1) {
+        if (this.partituraPlaybackIndex < this.scoreEditor.currentData.length - 1) {
             this.partituraPlaybackIndex++;
             this.tocarNotaAtualPartitura();
         }

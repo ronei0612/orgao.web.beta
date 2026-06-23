@@ -16,26 +16,26 @@ class App {
         this.pianoSynthesizer = new PianoSynthesizer(this.audioManager.audioContext);
 
         // 2. Passar o audioManager para todos os players
-        this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
+        this.scoreEditor = new ScoreEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
 
-        this.cifraPlayer = new CifraPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL, this.audioManager);
+        this.chordSheetPlayer = new ChordSheetPlayer(this.elements, this.uiController, this.musicTheory, this.BASE_URL, this.audioManager);
 
         // Após inicializar o this.audioManager, defina o volume mestre pegando do HTML:
         const volumeInput = document.getElementById('volumeMaster');
         const initialVol = volumeInput ? parseFloat(volumeInput.value) : 1.0;
         this.audioManager.masterGain.gain.value = initialVol;
 
-        this.cifraPlayer.onInstrumentosCarregados = () => {
+        this.chordSheetPlayer.onInstrumentosCarregados = () => {
             this.elements.orgaoInstrumentButton.removeAttribute('disabled');
         };
 
-        // PartituraPlayer agora recebe o audioManager pronto
-        this.partituraPlayer = new PartituraPlayer(this.elements, this.cifraPlayer, this.partituraEditor, this.BASE_URL, this.audioManager);
+        // ScorePlayer agora recebe o audioManager pronto
+        this.scorePlayer = new ScorePlayer(this.elements, this.chordSheetPlayer, this.scoreEditor, this.BASE_URL, this.audioManager);
 
         this.draggableController = new DraggableController(this.elements.draggableControls);
 
-        // Em App.init(), após criar o partituraPlayer:
-        this.partituraPlayer.onNotaClicada = () => {
+        // Em App.init(), após criar o scorePlayer:
+        this.scorePlayer.onNotaClicada = () => {
             this.uiController.exibirBotaoStop();
             this.uiController.exibirBotoesAvancarVoltarCifra();
         };
@@ -80,18 +80,18 @@ class App {
         this.updateFillBlink(this.musicTheory.bpm);
 
         // --- ADICIONE ESTA LINHA AQUI ---
-        this.partituraPlayer.init();
+        this.scorePlayer.init();
 
-        this.drumMachine = new DrumMachine(this.BASE_URL, this.cifraPlayer, this.musicTheory, this.audioManager);
-        this.bateriaUI = new BateriaUI(this.elements, this.drumMachine, this.uiController, this.cifraPlayer);
+        this.drumMachine = new DrumMachine(this.BASE_URL, this.chordSheetPlayer, this.musicTheory, this.audioManager);
+        this.drumUI = new DrumUI(this.elements, this.drumMachine, this.uiController, this.chordSheetPlayer);
 
-        this.melodyMachine = new MelodyMachine(this.BASE_URL, this.musicTheory, this.cifraPlayer, this.audioManager);
+        this.melodyMachine = new MelodyMachine(this.BASE_URL, this.musicTheory, this.chordSheetPlayer, this.audioManager);
         await this.melodyMachine.init();
 
         this.melodyUI = new MelodyUI(this.elements, this.melodyMachine, this.uiController);
         await this.melodyUI.init();
 
-        this.cifraPlayer.onChordChange = () => {
+        this.chordSheetPlayer.onChordChange = () => {
             if ((this.currentInstrumentMode === 'orgao' || this.currentInstrumentMode === 'piano') && this.elements.melodyStyleSelect.value !== '') {
                 this.melodyUI.play();
             }
@@ -318,11 +318,11 @@ class App {
         keyElement.classList.add('active-key');
 
         // CORREÇÃO: Dispara o som dos samples OGG da flauta
-        this.partituraPlayer.startPianoNote(pitch);
+        this.scorePlayer.startPianoNote(pitch);
 
         // Aplica na partitura (se estiver editando)
         if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
-            this.partituraEditor.applyPianoNote(pitch);
+            this.scoreEditor.applyPianoNote(pitch);
         }
     }
 
@@ -333,7 +333,7 @@ class App {
         }
 
         // CORREÇÃO: Manda o som da flauta OGG morrer suavemente
-        this.partituraPlayer.stopPianoNote();
+        this.scorePlayer.stopPianoNote();
     }
 
     setupSelect2() {
@@ -445,8 +445,8 @@ class App {
     }
 
     _moverPartitura(direcao) {
-        const total = this.partituraEditor.currentData.length - 1;
-        const atual = this.partituraEditor.highlightIndex === -1 ? 0 : this.partituraEditor.highlightIndex;
+        const total = this.scoreEditor.currentData.length - 1;
+        const atual = this.scoreEditor.highlightIndex === -1 ? 0 : this.scoreEditor.highlightIndex;
 
         let novoIndex = atual + direcao;
 
@@ -457,38 +457,38 @@ class App {
             novoIndex = total;
         }
 
-        this.partituraEditor.highlightIndex = novoIndex;
+        this.scoreEditor.highlightIndex = novoIndex;
 
-        if (this.partituraPlayer.partituraPlaybackIndex !== -1) {
+        if (this.scorePlayer.partituraPlaybackIndex !== -1) {
             // Está tocando: toca a nota
-            this.partituraPlayer.partituraPlaybackIndex = novoIndex;
-            this.partituraPlayer.tocarNotaAtualPartitura();
+            this.scorePlayer.partituraPlaybackIndex = novoIndex;
+            this.scorePlayer.tocarNotaAtualPartitura();
         } else {
             // Parado: só destaca
-            this.partituraEditor.draw(this.elements.partituraFrame, false);
+            this.scoreEditor.draw(this.elements.partituraFrame, false);
         }
     }
 
     _moverCifra(direcao) {
         // Garante que elements_b está inicializado
-        if (!this.cifraPlayer.elements_b) {
-            this.cifraPlayer.elements_b = this.elements.iframeCifra
+        if (!this.chordSheetPlayer.elements_b) {
+            this.chordSheetPlayer.elements_b = this.elements.iframeCifra
                 .contentDocument.getElementsByTagName('b');
         }
 
-        if (!this.cifraPlayer.parado) {
+        if (!this.chordSheetPlayer.parado) {
             // Está tocando: usa o fluxo normal com som
             if (direcao > 0) {
-                this.cifraPlayer.avancarCifra();
+                this.chordSheetPlayer.avancarCifra();
             } else {
-                this.cifraPlayer.retrocederCifra();
+                this.chordSheetPlayer.retrocederCifra();
             }
         } else {
             // Parado: só destaca sem som
             if (direcao > 0) {
-                this.cifraPlayer.avancarDestaque();
+                this.chordSheetPlayer.avancarDestaque();
             } else {
-                this.cifraPlayer.retrocederDestaque();
+                this.chordSheetPlayer.retrocederDestaque();
             }
         }
     }
@@ -560,9 +560,9 @@ class App {
 
         // Se o tom selecionado for nulo/vazio (Selecionou "Letra")
         if (!selectedTom) {
-            this.cifraPlayer.removeCifras(this.elements.iframeCifra.contentDocument.body.innerHTML);
+            this.chordSheetPlayer.removeCifras(this.elements.iframeCifra.contentDocument.body.innerHTML);
             this.uiController.exibirBotoesAcordes();
-            this.cifraPlayer.preencherSelectAcordes('C');
+            this.chordSheetPlayer.preencherSelectAcordes('C');
             return;
         }
 
@@ -572,8 +572,8 @@ class App {
 
         // 1.1: Editando Partitura
         if (!this.elements.partituraEditFrame.classList.contains('d-none')) {
-            this.cifraPlayer.preencherAcordes(selectedTom); // Atualiza os botões de atalho
-            this.partituraEditor.draw(this.elements.partituraEditFrame, true); // Redesenha pauta
+            this.chordSheetPlayer.preencherAcordes(selectedTom); // Atualiza os botões de atalho
+            this.scoreEditor.draw(this.elements.partituraEditFrame, true); // Redesenha pauta
             return;
         }
 
@@ -582,7 +582,7 @@ class App {
             const tomOrigem = this.tomAnterior || selectedTom;
             const semitones = this.musicTheory.getTransposeSteps(tomOrigem, selectedTom);
             this.tomAnterior = selectedTom;
-            this.partituraEditor.transporVisualizacao(semitones);
+            this.scoreEditor.transporVisualizacao(semitones);
             return;
         }
 
@@ -601,7 +601,7 @@ class App {
             this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_ACORDES_KEY, localStorageSalvar);
 
             // Atualiza os botões de acordes na tela
-            this.cifraPlayer.preencherAcordes(selectedTom);
+            this.chordSheetPlayer.preencherAcordes(selectedTom);
             return;
         }
 
@@ -609,12 +609,12 @@ class App {
         // CENÁRIO 3: MODO CIFRA (Música cifrada carregada no iframe)
         // -------------------------------------------------------------
         if (!this.elements.iframeCifra.classList.contains('d-none')) {
-            this.cifraPlayer.transposeCifra();
+            this.chordSheetPlayer.transposeCifra();
 
-            if (!this.cifraPlayer.parado && this.cifraPlayer.acordeTocando) {
+            if (!this.chordSheetPlayer.parado && this.chordSheetPlayer.acordeTocando) {
                 const button = event.currentTarget;
-                this.cifraPlayer.parado = false;
-                this.cifraPlayer.tocarAcorde(button.value);
+                this.chordSheetPlayer.parado = false;
+                this.chordSheetPlayer.tocarAcorde(button.value);
                 button.classList.add('pressed');
             }
         }
@@ -662,15 +662,15 @@ class App {
             this.uiController.editarMusica(tipo);
 
             if (tipo === 'partitura') {
-                if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
-                this.partituraEditor.abrirEditor([]);
+                if (!this.scorePlayer._initialized) await this.scorePlayer.init();
+                this.scoreEditor.abrirEditor([]);
             } else {
                 this.elements.editTextarea.value = '';
             }
 
             this.uiController.exibirBotoesTom();
             this.uiController.exibirBotoesAcordes();
-            this.cifraPlayer.preencherSelectCifras('C');
+            this.chordSheetPlayer.preencherSelectCifras('C');
             this.elements.itemNameInput.focus();
 
             // CORREÇÃO: Não chamamos toggleEditDeleteButtons aqui se entramos no editor, 
@@ -695,14 +695,14 @@ class App {
         this.uiController.editarMusica(tipo);
 
         if (tipo === 'partitura') {
-            if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
+            if (!this.scorePlayer._initialized) await this.scorePlayer.init();
             const dataArray = saveData.chords.split('\n').filter(l => l.trim());
-            this.partituraEditor.abrirEditor(dataArray);
+            this.scoreEditor.abrirEditor(dataArray);
         } else {
             // Pega o texto transposto do iframe em vez do original do localStorage
             const iframeBody = this.elements.iframeCifra.contentDocument?.body;
             const textoTransposto = iframeBody
-                ? this.cifraPlayer.removerTagsDaCifra('<pre>' + iframeBody.innerText + '</pre>')
+                ? this.chordSheetPlayer.removerTagsDaCifra('<pre>' + iframeBody.innerText + '</pre>')
                 : saveData.chords || "";
 
             // Se o tom foi alterado, usa o texto do iframe; senão usa o salvo
@@ -716,7 +716,7 @@ class App {
 
         this.uiController.exibirBotoesTom();
         this.uiController.exibirBotoesAcordes();
-        this.cifraPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
+        this.chordSheetPlayer.preencherSelectCifras(this.elements.tomSelect.value ?? 'C');
         this.uiController.exibirInstrumento(this.currentInstrumentMode);
     }
 
@@ -753,13 +753,13 @@ class App {
     handleStopMousedown() {
         this.uiController.esconderEditDeleteButtons();
 
-        this.partituraPlayer.partituraPlaybackIndex = -1;
-        this.audioManager.stopAll(this.partituraPlayer.activeSources, 0.02);
+        this.scorePlayer.partituraPlaybackIndex = -1;
+        this.audioManager.stopAll(this.scorePlayer.activeSources, 0.02);
 
         this.uiController.habilitarSelectSaves(); // Reabilita opções e edições ao parar partitura
 
-        this.cifraPlayer.pararReproducao();
-        this.bateriaUI.stop();
+        this.chordSheetPlayer.pararReproducao();
+        this.drumUI.stop();
         if (this.elements.melodyStyleSelect.value) {
             this.melodyUI.stop();
         }
@@ -767,12 +767,12 @@ class App {
 
     handlePlayMousedown() {
         if (this.currentEditorType === 'partitura' || (!this.elements.partituraFrame.classList.contains('d-none'))) {
-            const startIndex = this.partituraEditor.highlightIndex !== -1
-                ? this.partituraEditor.highlightIndex
+            const startIndex = this.scoreEditor.highlightIndex !== -1
+                ? this.scoreEditor.highlightIndex
                 : 0;
 
-            this.partituraPlayer.partituraPlaybackIndex = startIndex;
-            this.partituraPlayer.tocarNotaAtualPartitura();
+            this.scorePlayer.partituraPlaybackIndex = startIndex;
+            this.scorePlayer.tocarNotaAtualPartitura();
             this.uiController.exibirBotaoStop();
             this.uiController.exibirBotoesAvancarVoltarCifra();
 
@@ -780,13 +780,13 @@ class App {
         }
         else if (this.elements.acorde1.classList.contains('d-none')) {
             // Modo cifra — começa do índice atual se houver destaque
-            if (this.cifraPlayer.indiceAcorde > 0) {
+            if (this.chordSheetPlayer.indiceAcorde > 0) {
                 // Já há uma posição selecionada, retrocede um para retocar a atual
-                this.cifraPlayer.indiceAcorde--;
+                this.chordSheetPlayer.indiceAcorde--;
             }
-            this.cifraPlayer.iniciarReproducao();
+            this.chordSheetPlayer.iniciarReproducao();
         } else {
-            this.bateriaUI.play();
+            this.drumUI.play();
         }
     }
 
@@ -818,34 +818,34 @@ class App {
             this.currentInstrumentMode = mode;
 
             if (mode === 'orgao') {
-                this.cifraPlayer.instrumento = 'orgao';
-                this.cifraPlayer.attack = 0.2;
-                this.cifraPlayer.atualizarVolumeStringsParaOrgao();
+                this.chordSheetPlayer.instrumento = 'orgao';
+                this.chordSheetPlayer.attack = 0.2;
+                this.chordSheetPlayer.atualizarVolumeStringsParaOrgao();
                 await this.melodyMachine.setInstrument('orgao');
                 this.uiController.exibirInstrumento(mode);
             } else if (mode === 'piano') {
                 await this.audioManager.tonePiano.init(); // Carrega o piano do Tone.js (Sons realistas)
 
-                this.cifraPlayer.instrumento = 'tone-piano';
-                await this.cifraPlayer.loadEpianoSounds(); // Carrega OGG pro teclado de piano
-                this.cifraPlayer.attack = 0.05;
-                this.cifraPlayer.atualizarVolumeStringsParaOrgao(); // MANTÉM STRINGS COMO NO ÓRGÃO
+                this.chordSheetPlayer.instrumento = 'tone-piano';
+                await this.chordSheetPlayer.loadEpianoSounds(); // Carrega OGG pro teclado de piano
+                this.chordSheetPlayer.attack = 0.05;
+                this.chordSheetPlayer.atualizarVolumeStringsParaOrgao(); // MANTÉM STRINGS COMO NO ÓRGÃO
 
                 await this.melodyMachine.setInstrument('tone-piano');
 
                 // Manda o teclado da tela tocar o epiano
-                this.partituraPlayer.setInstrument('epiano');
+                this.scorePlayer.setInstrument('epiano');
 
                 this.uiController.exibirInstrumento(mode);
             } else if (mode === 'bateria') {
-                this.cifraPlayer.instrumento = 'epiano';
-                await this.cifraPlayer.loadEpianoSounds();
-                this.cifraPlayer.attack = 0;
-                this.cifraPlayer.atualizarVolumeStringsParaEpiano();
-                if (!this.bateriaUI._initialized) {
+                this.chordSheetPlayer.instrumento = 'epiano';
+                await this.chordSheetPlayer.loadEpianoSounds();
+                this.chordSheetPlayer.attack = 0;
+                this.chordSheetPlayer.atualizarVolumeStringsParaEpiano();
+                if (!this.drumUI._initialized) {
                     await this.drumMachine.init();
-                    await this.bateriaUI.init();
-                    this.bateriaUI._initialized = true;
+                    await this.drumUI.init();
+                    this.drumUI._initialized = true;
                 }
                 this.uiController.exibirInstrumento(mode);
             }
@@ -902,18 +902,18 @@ class App {
             if (saveData && saveData.key && saveData.key !== '') {
                 tom = saveData.key;
             } else {
-                tom = this.cifraPlayer.descobrirTom(texto);
+                tom = this.chordSheetPlayer.descobrirTom(texto);
             }
-            const musicaCifrada = this.cifraPlayer.destacarCifras(texto, tom);
-            this.cifraPlayer.preencherSelectCifras(tom);
+            const musicaCifrada = this.chordSheetPlayer.destacarCifras(texto, tom);
+            this.chordSheetPlayer.preencherSelectCifras(tom);
             this.uiController.exibirBotoesCifras();
             this.elements.tomSelect.dispatchEvent(new Event('change'));
-            this.cifraPlayer.preencherIframeCifra(musicaCifrada);
-            this.cifraPlayer.addEventCifrasIframe(this.elements.iframeCifra);
+            this.chordSheetPlayer.preencherIframeCifra(musicaCifrada);
+            this.chordSheetPlayer.addEventCifrasIframe(this.elements.iframeCifra);
 
             // CORREÇÃO: Destacar a primeira cifra logo ao carregar
             setTimeout(() => {
-                this.cifraPlayer.selecionarPrimeiraCifra();
+                this.chordSheetPlayer.selecionarPrimeiraCifra();
             }, 100);
         } else {
             this.uiController.esconderBotoesTom();
@@ -924,7 +924,7 @@ class App {
             this.elements.pianoWrapper.classList.add('d-none');
             this.elements.bottomSpacer.classList.remove('d-none');
 
-            this.cifraPlayer.preencherIframeCifra(texto);
+            this.chordSheetPlayer.preencherIframeCifra(texto);
         }
         this.preencherLayoutDoLocalStorage(saveData);
     }
@@ -960,7 +960,7 @@ class App {
 
         this.uiController.exibirIframeCifra();
         this.uiController.exibirBotoesTom();
-        this.cifraPlayer.indiceAcorde = 0;
+        this.chordSheetPlayer.indiceAcorde = 0;
 
         // Garante a restauração visual caso viéssemos de uma Letra anterior
         this.elements.bpmContainer.classList.remove('d-none');
@@ -977,17 +977,17 @@ class App {
             this.elements.iframeCifra.classList.add('d-none');
 
             this.partituraOriginalKey = saveData.key || 'C';
-            this.cifraPlayer.tomOriginal = this.partituraOriginalKey;
+            this.chordSheetPlayer.tomOriginal = this.partituraOriginalKey;
             this.elements.tomSelect.value = this.partituraOriginalKey;
 
-            if (!this.partituraPlayer._initialized) await this.partituraPlayer.init();
+            if (!this.scorePlayer._initialized) await this.scorePlayer.init();
 
-            this.partituraEditor.renderizarVisualizacao(dataArray);
+            this.scoreEditor.renderizarVisualizacao(dataArray);
             this.uiController.exibirBotoesCifras();
         } else if (type === 'cifra') {
             this.elements.iframeCifra.removeAttribute('src'); // Limpa o modo partitura
             const texto = saveData.chords ?? saveData;
-            const textoMusica = this.cifraPlayer.destacarCifras(texto, saveData.key || null);
+            const textoMusica = this.chordSheetPlayer.destacarCifras(texto, saveData.key || null);
 
             this.verifyLetraOuCifra(textoMusica, saveData.chords ? saveData : null);
             this.uiController.esconderPartitura();
@@ -1002,7 +1002,7 @@ class App {
         const metaData = {
             chords: chords ?? this.elements.editTextarea.value,
             key: this.elements.tomSelect.value,
-            instrument: this.cifraPlayer.instrumento,
+            instrument: this.chordSheetPlayer.instrumento,
             instrumentMode: this.currentInstrumentMode, // NOVO CAMPO PARA SABER SE É PIANO
             style: (this.currentInstrumentMode === 'bateria')
                 ? this.elements.drumStyleSelect.value
@@ -1014,13 +1014,13 @@ class App {
     }
 
     async verificarTrocouTom() {
-        if (this.cifraPlayer.tomOriginal && this.cifraPlayer.tomOriginal !== this.cifraPlayer.tomAtual) {
-            const tom = this.cifraPlayer.tomAtual;
-            const confirmed = await this.uiController.customConfirm(`Você trocou de tom de ${this.cifraPlayer.tomOriginal} para ${tom}. Substituir novo tom?`);
+        if (this.chordSheetPlayer.tomOriginal && this.chordSheetPlayer.tomOriginal !== this.chordSheetPlayer.tomAtual) {
+            const tom = this.chordSheetPlayer.tomAtual;
+            const confirmed = await this.uiController.customConfirm(`Você trocou de tom de ${this.chordSheetPlayer.tomOriginal} para ${tom}. Substituir novo tom?`);
             if (confirmed) {
                 this.salvarMetaDataNoLocalStorage(this.LOCAL_STORAGE_SAVES_KEY, this.selectItemAntes);
             }
-            this.cifraPlayer.tomOriginal = null;
+            this.chordSheetPlayer.tomOriginal = null;
         }
     }
 
@@ -1056,12 +1056,12 @@ class App {
                     tom = saveData;
             }
 
-            this.cifraPlayer.preencherSelectAcordes(tom);
-            this.cifraPlayer.preencherAcordes(tom);
+            this.chordSheetPlayer.preencherSelectAcordes(tom);
+            this.chordSheetPlayer.preencherAcordes(tom);
             this.elements.savesSelect.selectedIndex = 0;
 
             if (selectItem === 'acordes__') {
-                this.cifraPlayer.preencherIframeCifra('');
+                this.chordSheetPlayer.preencherIframeCifra('');
                 // Garante que o iframe de partitura de visualização também suma
                 this.elements.partituraFrame.classList.add('d-none');
             }
@@ -1210,7 +1210,7 @@ class App {
             });
             const data = await response.json();
             if (data.success) {
-                var texto = this.cifraPlayer.removerTagsDaCifra(data.message);
+                var texto = this.chordSheetPlayer.removerTagsDaCifra(data.message);
                 this.elements.cifraDisplay.textContent = texto;
                 this.uiController.exibirBotaoTocar();
             } else {
@@ -1231,30 +1231,30 @@ class App {
         if (action === 'notes') {
             var icon = this.elements.notesButton.querySelector('i');
             if (!this.held && this.elements.musicNoteBeamedIcon.classList.contains('d-none')) {
-                this.cifraPlayer.acordeFull = false;
+                this.chordSheetPlayer.acordeFull = false;
                 this.elements.musicNoteIcon.classList.add('d-none');
                 this.elements.musicNoteBeamedIcon.classList.remove('d-none');
                 this.elements.notesButton.classList.remove('notaSolo');
             }
             else if (this.elements.notesButton.classList.contains('pressed')) {
-                this.cifraPlayer.acordeFull = false;
+                this.chordSheetPlayer.acordeFull = false;
                 this.elements.musicNoteIcon.classList.remove('d-none');
                 this.elements.musicNoteBeamedIcon.classList.add('d-none');
 
                 this.elements.notesButton.classList.remove('pressed');
                 this.elements.notesButton.classList.add('notaSolo');
             } else if (!this.elements.notesButton.classList.contains('notaSolo')) {
-                this.cifraPlayer.acordeFull = true;
+                this.chordSheetPlayer.acordeFull = true;
                 this.elements.notesButton.classList.add('pressed');
             }
         } else {
             if (action === 'acorde') {
-                this.cifraPlayer.parado = false;
-                this.cifraPlayer.tocarAcorde(button.value);
+                this.chordSheetPlayer.parado = false;
+                this.chordSheetPlayer.tocarAcorde(button.value);
 
                 // --- NOVO: Adiciona a cifra na partitura se estiver no modo de edição ---
                 if (this.currentEditorType === 'partitura' && !this.elements.partituraEditFrame.classList.contains('d-none')) {
-                    this.partituraEditor.setChordToCurrentNote(button.value);
+                    this.scoreEditor.setChordToCurrentNote(button.value);
                 }
             }
 
@@ -1283,7 +1283,7 @@ class App {
             this.melodyUI.play();
             this.melodyMachine.currentStep = 1;
         } else {
-            if (this.bateriaUI) this.bateriaUI.play();
+            if (this.drumUI) this.drumUI.play();
         }
     }
 
@@ -1303,8 +1303,8 @@ class App {
             else if (saveData !== '')
                 tom = saveData;
         }
-        this.cifraPlayer.preencherAcordes(tom);
-        this.cifraPlayer.preencherSelectCifras(tom);
+        this.chordSheetPlayer.preencherAcordes(tom);
+        this.chordSheetPlayer.preencherSelectCifras(tom);
         this.uiController.exibirFrame(frameId);
     }
 
@@ -1680,7 +1680,7 @@ class App {
         // --- 3. COLETA O CONTEÚDO (O CORPO DA MÚSICA) ---
         let content = "";
         if (this.currentEditorType === 'partitura') {
-            content = this.partituraEditor.obterDadosParaSalvar(); // COLECIONA OS DADOS
+            content = this.scoreEditor.obterDadosParaSalvar(); // COLECIONA OS DADOS
         } else {
             content = this.elements.editTextarea.value;
         }
@@ -1690,7 +1690,7 @@ class App {
         this.elements.editTextarea.value = content;
 
         // 4. Lógica para identificar o Tom (Key)
-        const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
+        const musicaCifrada = this.chordSheetPlayer.destacarCifras(content, null);
         // 4. Lógica para identificar o Tom (Key)
         let tom;
 
@@ -1698,11 +1698,11 @@ class App {
             // Para partitura usa direto o tomSelect — já foi transposto pelo usuário
             tom = this.elements.tomSelect.value || 'C';
         } else {
-            const musicaCifrada = this.cifraPlayer.destacarCifras(content, null);
-            if (this.cifraPlayer.tomOriginal && this.cifraPlayer.tomOriginal !== this.elements.tomSelect.value) {
+            const musicaCifrada = this.chordSheetPlayer.destacarCifras(content, null);
+            if (this.chordSheetPlayer.tomOriginal && this.chordSheetPlayer.tomOriginal !== this.elements.tomSelect.value) {
                 tom = this.elements.tomSelect.value;
             } else {
-                tom = this.cifraPlayer.descobrirTom(musicaCifrada) || this.elements.tomSelect.value || 'C';
+                tom = this.chordSheetPlayer.descobrirTom(musicaCifrada) || this.elements.tomSelect.value || 'C';
             }
         }
 

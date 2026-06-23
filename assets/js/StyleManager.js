@@ -65,7 +65,7 @@ class StyleManager {
         if (!storage.data) storage.data = {};
         storage.data[newName] = {};
 
-        // Para BateriaUI (A, B, C, D e fills), ou MelodyUI (apenas o base)
+        // Para DrumUI (A, B, C, D e fills), ou MelodyUI (apenas o base)
         if (extraKeys.length > 0) {
             extraKeys.forEach(r => {
                 storage.data[newName][r] = this.createEmptyPatternCallback(numSteps);

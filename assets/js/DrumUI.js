@@ -1,6 +1,6 @@
-class BateriaUI {
-    constructor(elements, drumMachine, uiController, cifraPlayer) {
-        this.cifraPlayer = cifraPlayer;
+class DrumUI {
+    constructor(elements, drumMachine, uiController, chordSheetPlayer) {
+        this.chordSheetPlayer = chordSheetPlayer;
         this.elements = elements;
         this.drumMachine = drumMachine;
         this.uiController = uiController;
@@ -335,7 +335,7 @@ class BateriaUI {
             this.pendingButton = rhythmButton;
         }
 
-        if (!this.cifraPlayer.parado) {
+        if (!this.chordSheetPlayer.parado) {
             this.play();
         }
     }

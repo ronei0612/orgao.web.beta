@@ -1,4 +1,4 @@
-class CifrasEditor {
+class ChordSheetEditor {
     constructor() {
         this.cifras = [];
         this.cifrasToImport = [];
@@ -388,5 +388,5 @@ class CifrasEditor {
 
 // Inicializa a página
 document.addEventListener('DOMContentLoaded', () => {
-    new CifrasEditor().init();
+    new ChordSheetEditor().init();
 });

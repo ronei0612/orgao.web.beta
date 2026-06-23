@@ -1,8 +1,8 @@
 ﻿class MelodyMachine {
-    constructor(baseUrl, musicTheory, cifraPlayer, audioManager) {
+    constructor(baseUrl, musicTheory, chordSheetPlayer, audioManager) {
         this.baseUrl = baseUrl;
         this.musicTheory = musicTheory;
-        this.cifraPlayer = cifraPlayer;
+        this.chordSheetPlayer = chordSheetPlayer;
         this.attackTime = 0.02;
         this.releaseTime = 0.1;
         this.buffers = new Map();
@@ -183,8 +183,8 @@
 
     piscarStopButton() {
         const isInicioTempo = ((this.currentStep - 1) % this.stepsPorTempo === 0);
-        const temRitmo = this.cifraPlayer.elements.melodyStyleSelect.value !== '' && !this.cifraPlayer.elements.melodyStyleSelect.value.startsWith(1);
-        const stopButton = this.cifraPlayer.elements.stopButton;
+        const temRitmo = this.chordSheetPlayer.elements.melodyStyleSelect.value !== '' && !this.chordSheetPlayer.elements.melodyStyleSelect.value.startsWith(1);
+        const stopButton = this.chordSheetPlayer.elements.stopButton;
 
         if (isInicioTempo && temRitmo) {
             stopButton.classList.add('pulse');
@@ -198,12 +198,12 @@
 
         const stepIndex = this.currentStep - 1;
         const iniciouNovoAcorde = this.currentStep === 1;
-        const acordePrincipal = this.cifraPlayer.acordeTocando;
+        const acordePrincipal = this.chordSheetPlayer.acordeTocando;
 
         // 1. Resolvemos as notas do acorde
         let notasAtuais = null;
         if (acordePrincipal) {
-            const chaveAcorde = acordePrincipal + (this.cifraPlayer.acordeFull ? '1' : '');
+            const chaveAcorde = acordePrincipal + (this.chordSheetPlayer.acordeFull ? '1' : '');
             notasAtuais = this.getAcordeNotas(chaveAcorde);
         }
 
@@ -215,9 +215,9 @@
             // Toca a nota grave (pedaleira) respeitando a inversão/baixo do acorde (ex: C/E -> toca E grave)
             let notaGraveNome = null;
 
-            if (this.cifraPlayer.baixo) {
+            if (this.chordSheetPlayer.baixo) {
                 // Formata o baixo pegando da Cifra (ex: 'F_' vira 'f__grave')
-                notaGraveNome = `${this.cifraPlayer.baixo.toLowerCase()}_grave`;
+                notaGraveNome = `${this.chordSheetPlayer.baixo.toLowerCase()}_grave`;
             } else if (notasAtuais && notasAtuais[0]) {
                 // Fallback para a tônica principal dicionário caso não identifique baixo
                 notaGraveNome = notasAtuais[0];

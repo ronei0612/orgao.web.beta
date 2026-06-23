@@ -1,4 +1,4 @@
-class CifraPlayer {
+class ChordSheetPlayer {
     constructor(elements, uiController, musicTheory, baseUrl, audioManager) {
         this.audioPath = `${baseUrl}/assets/audio/`;
         this.uiController = uiController;
@@ -155,7 +155,7 @@ class CifraPlayer {
             });
         });
 
-        // Agora o CifraPlayer gerencia seu próprio Map de buffers!
+        // Agora o ChordSheetPlayer gerencia seu próprio Map de buffers!
         this.buffers = await this.audioManager.loadBuffers(urls);
 
         if (this.onInstrumentosCarregados) {

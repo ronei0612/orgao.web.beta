@@ -1,7 +1,7 @@
 class DrumMachine {
-    constructor(baseUrl, cifraPlayer, musicTheory, audioManager) {
+    constructor(baseUrl, chordSheetPlayer, musicTheory, audioManager) {
         this.baseUrl = baseUrl;
-        this.cifraPlayer = cifraPlayer;
+        this.chordSheetPlayer = chordSheetPlayer;
         this.musicTheory = musicTheory;
         this.audioContext = audioManager.audioContext;
         this.audioManager = audioManager;
@@ -271,8 +271,8 @@ class DrumMachine {
     }
 
     playBass(instrument, time, volume) {
-        if (instrument === 'baixo' && this.cifraPlayer.acordeTocando) {
-            const bass = instrument + '_' + this.cifraPlayer.baixo;
+        if (instrument === 'baixo' && this.chordSheetPlayer.acordeTocando) {
+            const bass = instrument + '_' + this.chordSheetPlayer.baixo;
             const buffer = this.buffers.get(bass);
             if (buffer && volume > 0) {
                 this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);
@@ -283,8 +283,8 @@ class DrumMachine {
     }
 
     playViolao(instrument, time, volume) {
-        if (instrument.includes('violao') && this.cifraPlayer.acordeTocando) {
-            const violao = instrument + '_' + this.cifraPlayer.acordeTocando;
+        if (instrument.includes('violao') && this.chordSheetPlayer.acordeTocando) {
+            const violao = instrument + '_' + this.chordSheetPlayer.acordeTocando;
             const buffer = this.buffers.get(violao);
             if (buffer && volume > 0) {
                 this.audioManager.playNode(buffer, time, volume === 2 ? 0.4 : 1, 0.003, false, this.activeSources);
@@ -295,8 +295,8 @@ class DrumMachine {
     }
 
     playEpiano() {
-        if (this.cifraPlayer.epianoGroup.length > 0 && this.cifraPlayer.tocarEpiano) {
-            this.cifraPlayer.epianoPlay();
+        if (this.chordSheetPlayer.epianoGroup.length > 0 && this.chordSheetPlayer.tocarEpiano) {
+            this.chordSheetPlayer.epianoPlay();
         }
     }
 }

@@ -1,4 +1,4 @@
-class PartituraEditor {
+class ScoreEditor {
     constructor(editIframe, viewIframe, musicTheory) {
         this.editIframe = editIframe;
         this.viewIframe = viewIframe;
