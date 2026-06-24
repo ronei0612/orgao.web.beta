@@ -8,8 +8,9 @@ class PartituraPlayer {
         this.partituraPlaybackIndex = -1;
         this.buffers = new Map();
         this.audioManager = audioManager;
-        this.audioContext = audioManager.audioContext; 
-        this.activeSources = new Set();
+        this.audioContext = audioManager.audioContext;
+        this.activeSources = new Set(); // Fontes de áudio da partitura
+        this.pianoActiveSources = new Set(); // NOVO: Fontes de áudio EXCLUSIVAS do teclado
         this._initialized = false;
     }
 
@@ -123,7 +124,12 @@ class PartituraPlayer {
     }
 
     startPianoNote(pitch) {
-        this.stopPianoNote();
+        // 1. GARANTE A MONOFONIA: Corta instantaneamente (0.02s) qualquer nota 
+        // do teclado/flauta que ainda esteja tocando ou em fase de sustain.
+        this.audioManager.stopAll(this.pianoActiveSources, 0.02);
+        this.activePianoNode = null;
+        this.activePianoNodeStartTime = null;
+
         if (!pitch) return;
 
         const [nota, oitava] = pitch.split('/');
@@ -138,7 +144,6 @@ class PartituraPlayer {
         let bufferName = '';
         let buffer = null;
 
-        // Se for Epiano, ele procura os OGGs na memória do CifraPlayer
         if (this.instrumento === 'epiano') {
             let sufixo = '';
             if (oitava === '3') sufixo = '_grave';
@@ -147,22 +152,37 @@ class PartituraPlayer {
             bufferName = `epiano_${notaLimpa}${sufixo}`;
             buffer = this.cifraPlayer.buffers.get(bufferName);
         } else {
-            // Senão, é a flauta padrão
             bufferName = `flauta_${notaLimpa}${oitava}`;
             buffer = this.buffers.get(bufferName);
         }
 
         if (buffer) {
-            this.activePianoNode = this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.02, false, this.activeSources);
+            // 2. Toca a nota e a adiciona no Set exclusivo do teclado (pianoActiveSources)
+            this.activePianoNode = this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.02, false, this.pianoActiveSources);
+            this.activePianoNodeStartTime = this.audioContext.currentTime;
         }
     }
 
-    // Interrompe a nota OGG suavemente (Note Off)
     stopPianoNote() {
         if (this.activePianoNode) {
-            // Faz um fade-out suave (0.15s) para o som da flauta não cortar seco
-            this.audioManager.stopNode(this.activePianoNode, this.audioContext.currentTime, 0.15);
+            const now = this.audioContext.currentTime;
+            let stopTime = now;
+
+            if (this.activePianoNodeStartTime) {
+                const tempoDecorrido = now - this.activePianoNodeStartTime;
+                const sustainMinimo = 0.5; // 500ms de duração mínima
+
+                // Aplica o sustain mínimo APENAS se você levantou o dedo
+                // (se você tocou outra nota, o startPianoNote mata a anterior antes de chegar aqui)
+                if (tempoDecorrido < sustainMinimo) {
+                    stopTime = this.activePianoNodeStartTime + sustainMinimo;
+                }
+            }
+
+            this.audioManager.stopNode(this.activePianoNode, stopTime, 0.15);
+
             this.activePianoNode = null;
+            this.activePianoNodeStartTime = null;
         }
     }
 

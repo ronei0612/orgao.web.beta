@@ -91,7 +91,12 @@ class AudioContextManager {
 
 		try {
 			nodeEntry.gainNode.gain.cancelScheduledValues(stopTime);
-			// setTargetAtTime: Decaimento natural (Bug #3)
+
+			// NOVO: Garante que o volume seja mantido no topo ATÉ o momento do stopTime
+			// (Sem isso, o navegador pode cortar a nota abruptamente antes da hora)
+			nodeEntry.gainNode.gain.setValueAtTime(nodeEntry.gainNode.gain.value, stopTime);
+
+			// setTargetAtTime: Decaimento natural
 			nodeEntry.gainNode.gain.setTargetAtTime(0, stopTime, release);
 
 			// Para o nó após o decaimento (release * 5 é o tempo seguro para setTarget chegar a ~0)
