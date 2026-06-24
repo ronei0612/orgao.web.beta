@@ -345,22 +345,14 @@ class CifraPlayer {
         this.audioManager.stopAll(this.activeSources, 0.2);
         const now = this.audioManager.audioContext.currentTime;
 
-        // Limpa as notas antigas do piano
-        if (this.audioManager.tonePiano) this.audioManager.tonePiano.stopAll(now);
-
         const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
 
         notasParaTocar.forEach(note => {
-            // Se for piano, envia para o Tone.js
-            if (note.startsWith('tone-piano_')) {
-                const pitch = this.convertToTonePitch(note);
-                this.audioManager.tonePiano.playNoteAttack(pitch, now, this.getVolumeForNote(note));
-                return;
-            }
-
-            // Se for Strings ou Epiano OGG, toca normal
+            // Removemos a checagem do 'tone-piano_' aqui.
+            // Tudo agora é tratado como buffer normal (.ogg)
             const buffer = this.buffers.get(note);
             if (!buffer) return;
+
             const isLoop = !note.startsWith('epiano');
             const volume = this.getVolumeForNote(note);
             this.audioManager.playNode(buffer, now, volume, this.attack, isLoop, this.activeSources);

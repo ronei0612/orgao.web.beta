@@ -811,7 +811,6 @@ class App {
     }
 
     async changeInstrumentMode(mode) {
-        // 1. BLOQUEIA A TELA
         this.uiController.bloquearInstrumentos();
 
         try {
@@ -822,22 +821,22 @@ class App {
                 this.cifraPlayer.attack = 0.2;
                 this.cifraPlayer.atualizarVolumeStringsParaOrgao();
                 await this.melodyMachine.setInstrument('orgao');
+                this.partituraPlayer.setInstrument('flauta'); // Partitura volta pro padrão
                 this.uiController.exibirInstrumento(mode);
-            } else if (mode === 'piano') {
-                await this.audioManager.tonePiano.init(); // Carrega o piano do Tone.js (Sons realistas)
-
-                this.cifraPlayer.instrumento = 'tone-piano';
-                await this.cifraPlayer.loadEpianoSounds(); // Carrega OGG pro teclado de piano
+            }
+            else if (mode === 'piano') {
+                // AQUI ESTÁ A MÁGICA: O modo UI é 'piano', mas o motor de áudio usa 'epiano'
+                this.cifraPlayer.instrumento = 'epiano';
+                await this.cifraPlayer.loadEpianoSounds();
                 this.cifraPlayer.attack = 0.05;
-                this.cifraPlayer.atualizarVolumeStringsParaOrgao(); // MANTÉM STRINGS COMO NO ÓRGÃO
+                this.cifraPlayer.atualizarVolumeStringsParaOrgao();
 
-                await this.melodyMachine.setInstrument('tone-piano');
-
-                // Manda o teclado da tela tocar o epiano
+                await this.melodyMachine.setInstrument('epiano');
                 this.partituraPlayer.setInstrument('epiano');
 
                 this.uiController.exibirInstrumento(mode);
-            } else if (mode === 'bateria') {
+            }
+            else if (mode === 'bateria') {
                 this.cifraPlayer.instrumento = 'epiano';
                 await this.cifraPlayer.loadEpianoSounds();
                 this.cifraPlayer.attack = 0;
@@ -857,7 +856,6 @@ class App {
         } catch (error) {
             console.error("Erro ao trocar de instrumento:", error);
         } finally {
-            // 2. DESBLOQUEIA A TELA DEPOIS QUE TUDO TERMINAR
             this.uiController.desbloquearInstrumentos();
         }
     }
