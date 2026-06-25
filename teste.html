@@ -49,16 +49,29 @@
             border: 1px solid #adb5bd;
             border-radius: 4px;
             width: 100%;
-            margin-bottom: 10px;
             transition: background-color 0.3s ease;
         }
 
-        /* Span de BPM Central Customizado */
+        /* Input de BPM Central Customizado */
         .custom-bpm {
             background-color: #ffffff;
             color: #0d6efd;
             border-color: #ced4da;
+            text-align: center;
+            min-width: 60px; /* Garante tamanho mínimo no mobile */
+            max-width: 80px; /* Evita expansão excessiva */
         }
+
+            /* Esconde as setas padrão do input number */
+            .custom-bpm::-webkit-outer-spin-button,
+            .custom-bpm::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            .custom-bpm[type=number] {
+                -moz-appearance: textfield;
+            }
 
         .icon-menu {
             color: #212529;
@@ -238,9 +251,9 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <p class="text-muted mb-4">Ajuste as preferências do aplicativo.</p>
+            <p class="text-muted mb-1">Ajuste as preferências do aplicativo.</p>
 
-            <div class="form-check form-switch fs-5 d-flex align-items-center gap-2">
+            <div class="form-check form-switch fs-5 d-flex align-items-center gap-1">
                 <input class="form-check-input mt-0" type="checkbox" role="switch" id="toggleDarkMode">
                 <label class="form-check-label mb-0" for="toggleDarkMode">Modo Escuro (Dark Mode)</label>
             </div>
@@ -250,9 +263,9 @@
     <div class="app-container">
 
         <!-- BARRA SUPERIOR (HEADER) -->
-        <div class="row g-2 align-items-center mb-2">
+        <div class="row g-1 align-items-center mb-1">
             <!-- Grupo Esquerdo (Menu, Tom, Tempo) -->
-            <div class="col-12 col-md-auto d-flex gap-2">
+            <div class="col-12 col-md-auto d-flex gap-1">
 
                 <!-- Hamburger -->
                 <button class="btn btn-light-gray px-3 flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
@@ -260,19 +273,19 @@
                 </button>
 
                 <!-- Controle de Tom -->
-                <div class="input-group" style="width: auto;">
+                <div class="input-group">
                     <button class="btn btn-teal px-3"><i class="fas fa-minus"></i></button>
-                    <select class="form-select text-center fw-bold" style="width: 70px;">
+                    <select class="form-select text-center fw-bold">
                         <option>C</option>
                     </select>
                     <button class="btn btn-teal px-3"><i class="fas fa-plus"></i></button>
                 </div>
 
                 <!-- Controle de Tempo -->
-                <div class="input-group" style="width: auto;">
+                <div class="input-group">
                     <button class="btn btn-light-gray">-5</button>
                     <button class="btn btn-light-gray"><i class="fas fa-minus"></i></button>
-                    <span class="input-group-text custom-bpm fw-bold border-start-0 border-end-0">90</span>
+                    <input type="number" class="form-control custom-bpm fw-bold border-start-0 border-end-0" value="90">
                     <button class="btn btn-light-gray">+5</button>
                 </div>
             </div>
@@ -289,7 +302,7 @@
         </div>
 
         <!-- TELA PRINCIPAL (BEGE / ESCURA) -->
-        <div class="main-display"></div>
+        <div class="main-display mb-1"></div>
 
         <!-- BARRA DE OPÇÕES INFERIOR (AGORA É INPUT-GROUP, unidos igual a foto) -->
         <div class="input-group mb-4 flex-nowrap">
