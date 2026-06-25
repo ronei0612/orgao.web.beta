@@ -16,7 +16,7 @@
             background-color: #ecedf1;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 10px;
-            transition: background-color 0.3s ease; /* Transição suave */
+            transition: background-color 0.3s ease;
         }
 
         .app-container {
@@ -49,7 +49,6 @@
             border: 1px solid #adb5bd;
             border-radius: 4px;
             width: 100%;
-            margin-top: 10px;
             margin-bottom: 10px;
             transition: background-color 0.3s ease;
         }
@@ -57,7 +56,8 @@
         /* Span de BPM Central Customizado */
         .custom-bpm {
             background-color: #ffffff;
-            color: #0d6efd; /* text-primary do bootstrap */
+            color: #0d6efd;
+            border-color: #ced4da;
         }
 
         .icon-menu {
@@ -80,7 +80,7 @@
 
         .btn-play {
             background-color: #2b7af1;
-            box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4); /* Efeito de brilho */
+            box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4);
         }
 
         .btn-music {
@@ -240,7 +240,6 @@
         <div class="offcanvas-body">
             <p class="text-muted mb-4">Ajuste as preferências do aplicativo.</p>
 
-            <!-- Switch do Dark Mode -->
             <div class="form-check form-switch fs-5 d-flex align-items-center gap-2">
                 <input class="form-check-input mt-0" type="checkbox" role="switch" id="toggleDarkMode">
                 <label class="form-check-label mb-0" for="toggleDarkMode">Modo Escuro (Dark Mode)</label>
@@ -251,12 +250,12 @@
     <div class="app-container">
 
         <!-- BARRA SUPERIOR (HEADER) -->
-        <div class="row g-2 align-items-center">
+        <div class="row g-2 align-items-center mb-2">
             <!-- Grupo Esquerdo (Menu, Tom, Tempo) -->
-            <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
+            <div class="col-12 col-md-auto d-flex gap-2">
 
-                <!-- Hamburger (Agora chama o Offcanvas) -->
-                <button class="btn btn-light-gray px-3" data-bs-toggle="offcanvas" data-bs-target="#menuLateral" aria-controls="menuLateral">
+                <!-- Hamburger -->
+                <button class="btn btn-light-gray px-3 flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
                     <i class="fas fa-bars fs-5 icon-menu"></i>
                 </button>
 
@@ -278,20 +277,22 @@
                 </div>
             </div>
 
-            <!-- Grupo Direito (Seleção de Música) -->
-            <div class="col-12 col-md d-flex">
-                <select class="form-select border-end-0">
-                    <option>Escolha a Música...</option>
-                </select>
-                <button class="btn btn-teal border-start-0 rounded-end"><i class="fas fa-plus"></i></button>
+            <!-- Grupo Direito (Seleção de Música) AGORA É INPUT-GROUP -->
+            <div class="col-12 col-md">
+                <div class="input-group flex-nowrap">
+                    <select class="form-select">
+                        <option>Escolha a Música...</option>
+                    </select>
+                    <button class="btn btn-teal px-3"><i class="fas fa-plus"></i></button>
+                </div>
             </div>
         </div>
 
         <!-- TELA PRINCIPAL (BEGE / ESCURA) -->
         <div class="main-display"></div>
 
-        <!-- BARRA DE OPÇÕES INFERIOR -->
-        <div class="d-flex gap-2 mb-4">
+        <!-- BARRA DE OPÇÕES INFERIOR (AGORA É INPUT-GROUP, unidos igual a foto) -->
+        <div class="input-group mb-4 flex-nowrap">
             <select class="form-select text-secondary">
                 <option>Sem ritmo</option>
             </select>
@@ -353,23 +354,19 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const toggleDarkMode = document.getElementById('toggleDarkMode');
-            const htmlElement = document.documentElement; // Pega a tag <html>
+            const htmlElement = document.documentElement;
 
-            // Verifica no LocalStorage se o usuário já preferia o tema escuro antes
             const currentTheme = localStorage.getItem('theme');
             if (currentTheme === 'dark') {
                 htmlElement.setAttribute('data-bs-theme', 'dark');
                 toggleDarkMode.checked = true;
             }
 
-            // Fica observando o clique (change) no botão switch do menu
             toggleDarkMode.addEventListener('change', (e) => {
                 if (e.target.checked) {
-                    // Ativa Modo Escuro
                     htmlElement.setAttribute('data-bs-theme', 'dark');
                     localStorage.setItem('theme', 'dark');
                 } else {
-                    // Ativa Modo Claro
                     htmlElement.setAttribute('data-bs-theme', 'light');
                     localStorage.setItem('theme', 'light');
                 }
