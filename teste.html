@@ -1,563 +1,289 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Detector de Harmonia Vocal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface Musical</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome para Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
     <style>
-        :root {
-            --bg-color: #121212;
-            --text-color: #ffffff;
-            --accent-color: #00d4ff;
-            --chord-color: #ffcc00; /* Cor para destaque de acordes */
-            --btn-start: #1db954;
-            --btn-stop: #ff4d4d;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
+            background-color: #ecedf1;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 10px;
         }
 
-        .container {
-            text-align: center;
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Cores Personalizadas */
+        .btn-teal {
+            background-color: #0b8e8e;
+            color: white;
+            border: 1px solid #0b8e8e;
+        }
+
+            .btn-teal:hover {
+                background-color: #086b6b;
+                color: white;
+            }
+
+        .btn-light-gray {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            color: #6c757d;
+        }
+
+        /* Área de Texto Central */
+        .main-display {
+            background-color: #fcf9ee;
+            min-height: 350px;
+            border: 1px solid #adb5bd;
+            border-radius: 4px;
             width: 100%;
-            max-width: 400px;
-            padding: 20px;
-        }
-
-        h1 {
-            font-size: 0.9rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            margin-top: 10px;
             margin-bottom: 10px;
         }
 
-        /* Área de Harmonia (Novidade) */
-        .harmony-display {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            background: #1e1e1e;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #333;
-        }
-
-        .harmony-box {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .harmony-label {
-            font-size: 0.8rem;
-            color: #888;
-            margin-bottom: 5px;
-        }
-
-        .harmony-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--chord-color);
-        }
-
-        /* Display da Nota */
-        .note-display {
-            font-size: 6rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
-            height: 120px;
+        /* Botões Redondos Principais */
+        .btn-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: color 0.2s;
-        }
-
-        .frequency {
-            font-size: 1rem;
-            color: #888;
-            margin-bottom: 20px;
-            font-family: monospace;
-            height: 20px;
-        }
-
-        /* Indicador de Afinação */
-        .tuner-bar {
-            width: 80%;
-            height: 6px;
-            background: #333;
-            border-radius: 3px;
-            position: relative;
-            margin: 0 auto 30px auto;
-        }
-
-        .tuner-marker {
-            width: 2px;
-            height: 14px;
-            background: #fff;
-            position: absolute;
-            left: 50%;
-            top: -4px;
-            transform: translateX(-50%);
-        }
-
-        .tuner-dot {
-            width: 16px;
-            height: 16px;
-            background: var(--accent-color);
-            border-radius: 50%;
-            position: absolute;
-            top: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: left 0.1s ease-out, background-color 0.2s;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        /* Botão */
-        .mic-button {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
+            font-size: 24px;
+            color: white;
             border: none;
-            background-color: var(--btn-start);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             cursor: pointer;
+        }
+
+        .btn-play {
+            background-color: #2b7af1;
+            box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4); /* Efeito de brilho */
+        }
+
+        .btn-music {
+            background-color: #9a84b8;
+        }
+
+        /* Botões de Acordes */
+        .chord-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: transform 0.1s;
         }
 
-            .mic-button:active {
+            .chord-btn:active {
                 transform: scale(0.95);
             }
 
-            .mic-button.listening {
-                background-color: var(--btn-stop);
-                animation: pulse 1.5s infinite;
-            }
-
-        .mic-icon {
-            width: 28px;
-            height: 28px;
-            fill: white;
+        /* Cores dos Acordes baseados na imagem */
+        .bg-gray-chord {
+            background-color: #9b95a5;
         }
 
-        .status-text {
-            margin-top: 15px;
-            font-size: 0.9rem;
+        .bg-c {
+            background-color: #4981ad;
+        }
+
+        .bg-am {
+            background-color: #a476db;
+        }
+
+        .bg-f {
+            background-color: #e36be0;
+        }
+
+        .bg-dm {
+            background-color: #ef7b7b;
+        }
+
+        .bg-g {
+            background-color: #f98b00;
+        }
+
+        .bg-em {
+            background-color: #e5bc00;
+        }
+
+        /* Teclado de Piano CSS */
+        .piano-container {
+            display: flex;
+            height: 140px;
+            border: 4px solid #111;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #111;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .key-white {
+            flex: 1;
+            background: linear-gradient(to bottom, #fff 0%, #f9f9f9 100%);
+            border: 1px solid #ccc;
+            border-radius: 0 0 4px 4px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-size: 11px;
             color: #666;
+            cursor: pointer;
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7);
+            .key-white:active {
+                background: #eee;
             }
 
-            70% {
-                box-shadow: 0 0 0 15px rgba(255, 77, 77, 0);
+        .key-black {
+            position: absolute;
+            top: 0;
+            right: -30%; /* Posiciona no meio de duas teclas brancas */
+            width: 60%;
+            height: 60%;
+            background: linear-gradient(to bottom, #333 0%, #000 100%);
+            z-index: 2;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            font-size: 9px;
+            color: #fff;
+            box-shadow: inset 0 -2px 3px rgba(255,255,255,0.2);
+            cursor: pointer;
+        }
+
+            .key-black:active {
+                background: #000;
             }
 
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 77, 77, 0);
-            }
+        /* Ajuste do dropdown do header */
+        .form-select, .form-control {
+            border-color: #adb5bd;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Detector Harmônico</h1>
+    <div class="app-container">
 
-        <div class="harmony-display">
-            <div class="harmony-box">
-                <span class="harmony-label">TOM ESTIMADO</span>
-                <span class="harmony-value" id="keyVal">--</span>
+        <!-- BARRA SUPERIOR (HEADER) -->
+        <div class="row g-2 align-items-center">
+            <!-- Grupo Esquerdo (Menu, Tom, Tempo) -->
+            <div class="col-12 col-md-auto d-flex flex-wrap gap-2">
+                <!-- Hamburger -->
+                <button class="btn btn-light-gray px-3"><i class="fas fa-bars fs-5 text-dark"></i></button>
+
+                <!-- Controle de Tom -->
+                <div class="input-group" style="width: auto;">
+                    <button class="btn btn-teal px-3"><i class="fas fa-minus"></i></button>
+                    <select class="form-select text-center fw-bold" style="width: 70px;">
+                        <option>C</option>
+                    </select>
+                    <button class="btn btn-teal px-3"><i class="fas fa-plus"></i></button>
+                </div>
+
+                <!-- Controle de Tempo -->
+                <div class="input-group" style="width: auto;">
+                    <button class="btn btn-light-gray">-5</button>
+                    <button class="btn btn-light-gray"><i class="fas fa-minus"></i></button>
+                    <span class="input-group-text bg-white text-primary">90</span>
+                    <button class="btn btn-light-gray">+5</button>
+                </div>
             </div>
-            <div class="harmony-box">
-                <span class="harmony-label">ACORDE ATUAL</span>
-                <span class="harmony-value" id="chordVal">--</span>
+
+            <!-- Grupo Direito (Seleção de Música) - Quebra para a linha de baixo no celular -->
+            <div class="col-12 col-md d-flex">
+                <select class="form-select border-end-0">
+                    <option>Escolha a Música...</option>
+                </select>
+                <button class="btn btn-teal border-start-0 rounded-end"><i class="fas fa-plus"></i></button>
             </div>
         </div>
 
-        <div class="note-display" id="note">--</div>
+        <!-- TELA PRINCIPAL (BEGE) -->
+        <div class="main-display"></div>
 
-        <div class="tuner-bar">
-            <div class="tuner-marker"></div>
-            <div class="tuner-dot" id="indicator"></div>
+        <!-- BARRA DE OPÇÕES INFERIOR -->
+        <div class="d-flex gap-2 mb-4">
+            <select class="form-select text-secondary">
+                <option>Sem ritmo</option>
+            </select>
+            <button class="btn btn-light-gray fw-bold text-secondary px-4">ÓRGÃO</button>
         </div>
 
-        <div class="frequency" id="freq">Silêncio</div>
+        <!-- BOTÕES PLAY E MÚSICA -->
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <button class="btn-circle btn-play"><i class="fas fa-play"></i></button>
+            <button class="btn-circle btn-music"><i class="fas fa-music"></i></button>
+        </div>
 
-        <button class="mic-button" id="micBtn">
-            <svg class="mic-icon" viewBox="0 0 24 24">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-            </svg>
-        </button>
-        <div class="status-text" id="status">Toque para iniciar</div>
+        <!-- BOTÕES DE ACORDES -->
+        <div class="d-flex flex-column align-items-center gap-2 mb-3">
+            <!-- Linha 1 -->
+            <div class="d-flex justify-content-center gap-2">
+                <button class="chord-btn bg-gray-chord">Bb</button>
+                <button class="chord-btn bg-gray-chord">A</button>
+                <button class="chord-btn bg-gray-chord">B°</button>
+                <button class="chord-btn bg-gray-chord">E</button>
+                <button class="chord-btn bg-gray-chord">D</button>
+            </div>
+            <!-- Linha 2 -->
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <button class="chord-btn bg-c">C</button>
+                <button class="chord-btn bg-am">Am</button>
+                <button class="chord-btn bg-f">F</button>
+                <button class="chord-btn bg-dm">Dm</button>
+                <button class="chord-btn bg-g">G</button>
+                <button class="chord-btn bg-em">Em</button>
+            </div>
+        </div>
+
+        <!-- TECLADO DE PIANO -->
+        <div class="piano-container">
+            <!-- Oitava 4 -->
+            <div class="key-white">C4<div class="key-black">C#4</div></div>
+            <div class="key-white">D4<div class="key-black">D#4</div></div>
+            <div class="key-white">E4</div>
+            <div class="key-white">F4<div class="key-black">F#4</div></div>
+            <div class="key-white">G4<div class="key-black">G#4</div></div>
+            <div class="key-white">A4<div class="key-black">A#4</div></div>
+            <div class="key-white">B4</div>
+
+            <!-- Oitava 5 -->
+            <div class="key-white">C5<div class="key-black">C#5</div></div>
+            <div class="key-white">D5<div class="key-black">D#5</div></div>
+            <div class="key-white">E5</div>
+            <div class="key-white">F5<div class="key-black">F#5</div></div>
+            <div class="key-white">G5</div>
+        </div>
+
     </div>
 
-    <script>
-        // --- CONSTANTES E ELEMENTOS ---
-        const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-        const noteElem = document.getElementById("note");
-        const freqElem = document.getElementById("freq");
-        const statusElem = document.getElementById("status");
-        const btnElem = document.getElementById("micBtn");
-        const indicatorElem = document.getElementById("indicator");
-        const keyElem = document.getElementById("keyVal");
-        const chordElem = document.getElementById("chordVal");
-
-        // --- VARIÁVEIS DE AUDIO ---
-        let audioContext = null;
-        let analyser = null;
-        let isListening = false;
-        let animationId = null;
-
-        // --- CONFIGURAÇÕES DE SENSIBILIDADE ---
-        const NOISE_THRESHOLD = 0.02;
-        const MIN_FREQ = 80;
-        const MAX_FREQ = 1100;
-        const SMOOTHING_THRESHOLD = 5;
-
-        // --- VARIÁVEIS DE LÓGICA MUSICAL ---
-        let lastNoteBuffer = [];
-        let currentNoteIndex = -1; // Índice 0-11 da nota atual
-        let lastProcessedNoteIndex = -1;
-
-        // Estado da Sessão Musical
-        let musicState = {
-            detectedNotes: [], // Histórico das notas capturadas {note: int, time: ms}
-            noteStartTime: 0,  // Quando a nota atual começou
-            lastNoteEndTime: 0, // Quando a última nota parou
-            avgNoteDuration: 0, // Duração média das notas cantadas
-            key: null,          // Tom detectado (ex: "C Major")
-            keyRoot: null,      // Índice da tônica (ex: 0 para C)
-            scaleType: null,    // "Major" ou "Minor"
-            resetTimer: null    // Timer para resetar o tom
-        };
-
-        const SILENCE_RESET_TIME = 4000; // 4 segundos de silêncio reseta tudo
-        const LONG_SILENCE_THRESHOLD = 1000; // 1 seg de silêncio considera frase nova
-        const RHYTHM_FACTOR = 1.5; // Fator para considerar nota "longa" (1.5x a média)
-
-        btnElem.addEventListener("click", toggleMic);
-
-        async function toggleMic() {
-            if (isListening) {
-                stopListening();
-            } else {
-                await startListening();
-            }
-        }
-
-        async function startListening() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: false
-                    }
-                });
-
-                const source = audioContext.createMediaStreamSource(stream);
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 2048;
-                source.connect(analyser);
-
-                isListening = true;
-                btnElem.classList.add("listening");
-                statusElem.innerText = "Cante para detectar tom e acorde...";
-
-                resetMusicState();
-                updatePitch();
-            } catch (err) {
-                alert("Erro: Permissão negada ou ambiente inseguro (use HTTPS).");
-            }
-        }
-
-        function stopListening() {
-            isListening = false;
-            btnElem.classList.remove("listening");
-            statusElem.innerText = "Toque para iniciar";
-            noteElem.innerText = "--";
-            freqElem.innerText = "Silêncio";
-            indicatorElem.style.left = "50%";
-            indicatorElem.style.backgroundColor = "var(--accent-color)";
-            if (animationId) cancelAnimationFrame(animationId);
-            if (audioContext) audioContext.close();
-            resetMusicState();
-        }
-
-        function resetMusicState() {
-            musicState = {
-                detectedNotes: [],
-                noteStartTime: 0,
-                lastNoteEndTime: Date.now(),
-                avgNoteDuration: 500, // Começa com uma média padrão de 0.5s
-                key: null,
-                keyRoot: null,
-                scaleType: null,
-                resetTimer: null
-            };
-            keyElem.innerText = "--";
-            chordElem.innerText = "--";
-            lastProcessedNoteIndex = -1;
-        }
-
-        // --- MOTOR DE ÁUDIO (AutoCorrelação) ---
-        function autoCorrelate(buf, sampleRate) {
-            let SIZE = buf.length;
-            let rms = 0;
-
-            for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
-            rms = Math.sqrt(rms / SIZE);
-            if (rms < NOISE_THRESHOLD) return -1; // Silêncio
-
-            let r1 = 0, r2 = SIZE - 1, thres = 0.2;
-            for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < thres) { r1 = i; break; } }
-            for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; } }
-
-            buf = buf.slice(r1, r2);
-            SIZE = buf.length;
-            let c = new Array(SIZE).fill(0);
-            for (let i = 0; i < SIZE; i++) { for (let j = 0; j < SIZE - i; j++) { c[i] = c[i] + buf[j] * buf[j + i]; } }
-            let d = 0; while (c[d] > c[d + 1]) d++;
-            let maxval = -1, maxpos = -1;
-            for (let i = d; i < SIZE; i++) { if (c[i] > maxval) { maxval = c[i]; maxpos = i; } }
-
-            let T0 = maxpos;
-            let x1 = c[T0 - 1], x2 = c[T0], x3 = c[T0 + 1];
-            let a = (x1 + x3 - 2 * x2) / 2;
-            let b = (x3 - x1) / 2;
-            if (a) T0 = T0 - b / (2 * a);
-
-            return sampleRate / T0;
-        }
-
-        function updatePitch() {
-            if (!isListening) return;
-
-            const buf = new Float32Array(analyser.fftSize);
-            analyser.getFloatTimeDomainData(buf);
-            const pitch = autoCorrelate(buf, audioContext.sampleRate);
-
-            const now = Date.now();
-
-            // Lógica de Silêncio / Reset Automático
-            if (pitch === -1 || pitch < MIN_FREQ || pitch > MAX_FREQ) {
-                // Se estamos em silêncio agora, mas estávamos cantando antes
-                if (currentNoteIndex !== -1) {
-                    finishNote(currentNoteIndex, now);
-                    currentNoteIndex = -1; // Reseta nota atual
-                }
-
-                // Timer para resetar tudo se ficar muito tempo sem cantar
-                if (!musicState.resetTimer) {
-                    musicState.resetTimer = setTimeout(() => {
-                        resetMusicState();
-                        statusElem.innerText = "Tom resetado por inatividade.";
-                    }, SILENCE_RESET_TIME);
-                }
-            } else {
-                // Som detectado! Cancela o reset timer
-                if (musicState.resetTimer) {
-                    clearTimeout(musicState.resetTimer);
-                    musicState.resetTimer = null;
-                }
-
-                const noteNum = 12 * (Math.log(pitch / 440) / Math.log(2));
-                const noteRounded = Math.round(noteNum) + 69;
-                const value = noteRounded % 12;
-
-                if (!isNaN(value)) {
-                    // Buffer de estabilização
-                    lastNoteBuffer.push(value);
-                    if (lastNoteBuffer.length > SMOOTHING_THRESHOLD) lastNoteBuffer.shift();
-                    const isStable = lastNoteBuffer.every(v => v === lastNoteBuffer[0]);
-
-                    if (isStable) {
-                        const noteName = noteStrings[value];
-                        noteElem.innerText = noteName;
-                        freqElem.innerText = Math.round(pitch) + " Hz";
-
-                        // --- INÍCIO DA LÓGICA DE HARMONIA ---
-
-                        // Se mudou a nota ou é o início de uma nota após silêncio
-                        if (value !== currentNoteIndex) {
-                            if (currentNoteIndex !== -1) {
-                                finishNote(currentNoteIndex, now); // Finaliza a nota anterior
-                            }
-
-                            // Inicia nova nota
-                            currentNoteIndex = value;
-                            musicState.noteStartTime = now;
-
-                            // Verifica se o silêncio anterior foi longo (Trigger de mudança de acorde)
-                            const silenceDuration = now - musicState.lastNoteEndTime;
-                            const isLongSilence = silenceDuration > LONG_SILENCE_THRESHOLD;
-
-                            processHarmony(value, isLongSilence, false);
-                        } else {
-                            // A nota continua a mesma (Sustentando)
-                            // Verifica se a duração já é considerada "Longa" (fora do padrão)
-                            const currentDuration = now - musicState.noteStartTime;
-                            if (currentDuration > (musicState.avgNoteDuration * RHYTHM_FACTOR)) {
-                                processHarmony(value, false, true); // true = nota longa
-                            }
-                        }
-                        // --- FIM DA LÓGICA DE HARMONIA ---
-
-                        // Visualização Afinação
-                        const cents = Math.floor(1200 * (Math.log(pitch / frequencyFromNoteNumber(noteRounded)) / Math.log(2)));
-                        let visualPosition = 50 + (cents / 50) * 45;
-                        if (visualPosition > 95) visualPosition = 95;
-                        if (visualPosition < 5) visualPosition = 5;
-                        indicatorElem.style.left = visualPosition + "%";
-
-                        if (Math.abs(cents) < 10) {
-                            noteElem.style.color = "#1db954";
-                            indicatorElem.style.backgroundColor = "#1db954";
-                        } else {
-                            noteElem.style.color = "#00d4ff";
-                            indicatorElem.style.backgroundColor = "#00d4ff";
-                        }
-                    }
-                }
-            }
-            animationId = requestAnimationFrame(updatePitch);
-        }
-
-        function finishNote(noteVal, endTime) {
-            const duration = endTime - musicState.noteStartTime;
-            if (duration > 100) { // Ignora notas muito curtas (bugs)
-                musicState.detectedNotes.push({ note: noteVal, duration: duration });
-                musicState.lastNoteEndTime = endTime;
-
-                // Atualiza média de duração (Média Móvel Simples)
-                const count = musicState.detectedNotes.length;
-                musicState.avgNoteDuration = ((musicState.avgNoteDuration * (count - 1)) + duration) / count;
-            }
-        }
-
-        // --- CÉREBRO DA TEORIA MUSICAL ---
-        function processHarmony(currentNote, afterLongSilence, isLongNote) {
-            const history = musicState.detectedNotes;
-
-            // 1. Definição Inicial do Tom (Primeiras 2 notas)
-            if (history.length === 1 && musicState.key === null) {
-                // Temos 1 nota no histórico e estamos cantando a 2ª agora
-                const note1 = history[0].note;
-                const note2 = currentNote;
-
-                // Calcula intervalo em semitons (cuidando do wrap do array)
-                let interval = (note2 - note1 + 12) % 12;
-
-                // Lógica Simplificada de Intervalos para definir Tom Maior ou Menor
-                let root = note1;
-                let type = "Major"; // Default
-                let chordName = noteStrings[root];
-
-                // Intervalo de 3ª Maior (4 semitons) ou 5ª Justa (7 semitons) -> Sugere Maior
-                if (interval === 4 || interval === 7) {
-                    type = "Major";
-                    chordName = noteStrings[root];
-                }
-                // Intervalo de 3ª Menor (3 semitons) -> Sugere Menor
-                else if (interval === 3) {
-                    type = "Minor";
-                    chordName = noteStrings[root] + "m";
-                }
-                // Intervalo de 4ª Justa (5 semitons) -> Inversão? Vamos assumir que a 2ª nota é a tônica
-                else if (interval === 5) {
-                    root = note2;
-                    type = "Major";
-                    chordName = noteStrings[root];
-                }
-
-                musicState.keyRoot = root;
-                musicState.scaleType = type;
-                musicState.key = noteStrings[root] + " " + (type === "Major" ? "Maior" : "Menor");
-
-                keyElem.innerText = musicState.key;
-                chordElem.innerText = chordName;
-
-                // Evita processar a mesma nota repetidamente
-                lastProcessedNoteIndex = currentNote;
-                return;
-            }
-
-            // 2. Mudança de Acorde durante a música
-            // Se já temos um tom definido e:
-            // a) Houve um silêncio longo antes dessa nota
-            // b) A nota atual está sendo sustentada por muito tempo (fora do padrão rítmico)
-            if (musicState.key !== null) {
-
-                // Evita spam de troca de acorde na mesma nota sustentada
-                if (currentNote === lastProcessedNoteIndex && !isLongNote) return;
-
-                if (afterLongSilence || isLongNote || history.length % 4 === 0) {
-                    // Sugerir acorde baseado no Grau da Escala (Campo Harmônico)
-                    let intervalFromRoot = (currentNote - musicState.keyRoot + 12) % 12;
-                    let suggestedChord = "--";
-
-                    // Mapeamento simples de Campo Harmônico
-                    // 0=I, 2=ii, 4=iii, 5=IV, 7=V, 9=vi, 11=vii°
-
-                    if (musicState.scaleType === "Major") {
-                        if (intervalFromRoot === 0) suggestedChord = noteStrings[currentNote]; // I (Tônica)
-                        if (intervalFromRoot === 2) suggestedChord = noteStrings[currentNote] + "m"; // ii
-                        if (intervalFromRoot === 4) suggestedChord = noteStrings[currentNote] + "m"; // iii
-                        if (intervalFromRoot === 5) suggestedChord = noteStrings[currentNote]; // IV
-                        if (intervalFromRoot === 7) suggestedChord = noteStrings[currentNote]; // V (Dominante)
-                        if (intervalFromRoot === 9) suggestedChord = noteStrings[currentNote] + "m"; // vi (Relativa)
-                        if (intervalFromRoot === 11) suggestedChord = noteStrings[currentNote] + "dim"; // vii°
-                    } else {
-                        // Lógica simples para Menor (Aeolio)
-                        if (intervalFromRoot === 0) suggestedChord = noteStrings[currentNote] + "m"; // i
-                        if (intervalFromRoot === 3) suggestedChord = noteStrings[currentNote]; // III
-                        if (intervalFromRoot === 5) suggestedChord = noteStrings[currentNote] + "m"; // iv
-                        if (intervalFromRoot === 7) suggestedChord = noteStrings[currentNote] + "m"; // v
-                        if (intervalFromRoot === 8) suggestedChord = noteStrings[currentNote]; // VI
-                        if (intervalFromRoot === 10) suggestedChord = noteStrings[currentNote]; // VII
-                    }
-
-                    // Se a nota não pertence à escala, mostra apenas a nota como acorde (empréstimo/cromarismo)
-                    if (suggestedChord === "--") suggestedChord = noteStrings[currentNote] + "?";
-
-                    chordElem.innerText = suggestedChord;
-
-                    // Animação visual para mostrar que o acorde mudou
-                    chordElem.style.transform = "scale(1.2)";
-                    setTimeout(() => chordElem.style.transform = "scale(1)", 200);
-
-                    lastProcessedNoteIndex = currentNote;
-                }
-            }
-        }
-
-        function frequencyFromNoteNumber(note) {
-            return 440 * Math.pow(2, (note - 69) / 12);
-        }
-    </script>
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
