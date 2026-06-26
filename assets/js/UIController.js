@@ -248,8 +248,9 @@ class UIController {
     }
 
     ritmoAtivo() {
-        const isKeyboard = this.elements.orgaoInstrumentButton.classList.contains('d-none');
-        return isKeyboard && this.elements.rhythmButtons.some(button => button.classList.contains('selected'));
+        // Verifica diretamente pelo modo de instrumento atual em vez da classe CSS
+        const isBateria = this.currentInstrumentMode === 'bateria';
+        return isBateria && this.elements.rhythmButtons.some(button => button.classList.contains('selected'));
     }
 
     resetAnimacaoRitmo() {
