@@ -29,9 +29,19 @@
         }
 
             .btn-teal:hover {
-                background-color: #086b6b;
+                background-color: #0b8e8e;
                 color: white;
             }
+
+            .input-group .btn:focus {
+                background-color: #0b8e8e;
+                color: white;
+            }
+
+        .input-group .btn-secondary:focus {
+            background-color: #6c757d;
+            color: white;
+        }
 
         .btn-light-gray {
             background-color: #f8f9fa;
@@ -39,85 +49,67 @@
             color: #6c757d;
         }
 
-        .main-display {
-            background-color: #fcf9ee;
-            min-height: 350px;
-            border: 1px solid #adb5bd;
-            border-radius: 4px;
-            width: 100%;
-            transition: background-color 0.3s ease;
-        }
+            .main-display {
+                background-color: #fcf9ee;
+                min-height: 350px;
+                border: 1px solid #adb5bd;
+                border-radius: 4px;
+                width: 100%;
+                transition: background-color 0.3s ease;
+            }
 
         .custom-bpm {
-            background-color: #ffffff;
-            border-color: #ced4da;
             text-align: center;
             min-width: 60px;
             max-width: 100px;
         }
 
-        .icon-menu {
-            color: #212529;
-        }
-
-        .form-select, .form-control {
-            border-color: #adb5bd;
-        }
-
-        [data-bs-theme="dark"] body {
-            background-color: #121212;
-        }
-
-        [data-bs-theme="dark"] .main-display {
-            background-color: #1e1e1e;
-            border-color: #333;
-        }
-
-        [data-bs-theme="dark"] .btn-light-gray {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
-
-            [data-bs-theme="dark"] .btn-light-gray:hover {
-                background-color: #343a40;
+            .icon-menu {
+                color: #212529;
             }
 
-        [data-bs-theme="dark"] .custom-bpm {
-            background-color: #2b3035;
-            color: #6ea8fe;
-            border-color: #495057;
-        }
+            .form-select, .form-control {
+                border-color: #adb5bd;
+            }
 
-        [data-bs-theme="dark"] .icon-menu {
-            color: #f8f9fa;
-        }
+            [data-bs-theme="dark"] body {
+                background-color: #121212;
+            }
 
-        [data-bs-theme="dark"] .ts-control {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
+            [data-bs-theme="dark"] .main-display {
+                background-color: #1e1e1e;
+                border-color: #333;
+            }
 
-        [data-bs-theme="dark"] .ts-dropdown {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
-
-            [data-bs-theme="dark"] .ts-dropdown .option {
+            [data-bs-theme="dark"] .btn-light-gray {
+                background-color: #2b3035;
+                border-color: #495057;
                 color: #dee2e6;
             }
 
-                [data-bs-theme="dark"] .ts-dropdown .option:hover,
-                [data-bs-theme="dark"] .ts-dropdown .active {
-                    background-color: #343a40;
-                    color: #fff;
+            [data-bs-theme="dark"] .icon-menu {
+                color: #f8f9fa;
+            }
+
+            [data-bs-theme="dark"] .ts-control {
+                background-color: #2b3035;
+                border-color: #495057;
+                color: #dee2e6;
+            }
+
+            [data-bs-theme="dark"] .ts-dropdown {
+                background-color: #2b3035;
+                border-color: #495057;
+                color: #dee2e6;
+            }
+
+                [data-bs-theme="dark"] .ts-dropdown .option {
+                    color: #dee2e6;
                 }
 
-        [data-bs-theme="dark"] .ts-control input {
-            color: #dee2e6;
-        }
+            [data-bs-theme="dark"] .ts-control input {
+                color: #dee2e6;
+            }
     </style>
 </head>
 <body>
@@ -155,10 +147,10 @@
                 </div>
 
                 <div class="input-group">
-                    <button class="btn btn-light-gray">-5</button>
-                    <button class="btn btn-light-gray"><i class="fas fa-minus"></i></button>
+                    <button class="btn btn-teal">-5</button>
+                    <button class="btn btn-teal border-start"><i class="fas fa-minus"></i></button>
                     <input type="number" class="form-control custom-bpm fw-bold" value="90">
-                    <button class="btn btn-light-gray">+5</button>
+                    <button class="btn btn-teal">+5</button>
                 </div>
             </div>
 
@@ -183,7 +175,7 @@
                 <select class="form-select text-secondary">
                     <option>Sem ritmo</option>
                 </select>
-                <button class="btn btn-light-gray fw-bold text-secondary px-4">ÓRGÃO</button>
+                <button class="btn btn-secondary fw-bold px-4">ÓRGÃO</button>
             </div>
 
         </div>
