@@ -24,160 +24,82 @@
     <meta property="og:image" content="https://lh3.googleusercontent.com/pw/AP1GczODcofmyRI7UV8AyIydqqoZkEiXwfJoTzPS4sRhppNoyDrL823jrlbofF6A9Jy-DCtrj9Ri-iIno2Otjx5D96BO1mYF3HF_H_-U64iR1jzFPKkfRqJI_UinWohqNLj9hRuS_pO5N9DKHxOvDvSFNQtYlQ=w1090-h919-s-no-gm?authuser=0" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:locale" content="pt_BR" />
-
-    <style>
-        body {
-            background-color: #ecedf1;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        .app-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .btn-teal {
-            background-color: #0b8e8e;
-            color: white;
-            border: 1px solid #0b8e8e;
-        }
-
-            .btn-teal:hover {
-                background-color: #0b8e8e;
-                color: white;
-            }
-
-        .input-group .btn:focus {
-            background-color: #0b8e8e;
-            color: white;
-        }
-
-        .input-group .btn-secondary:focus {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-light-gray {
-            background-color: #f8f9fa;
-            border: 1px solid #ced4da;
-            color: #6c757d;
-        }
-
-        .main-display {
-            background-color: #fcf9ee;
-            min-height: 350px;
-            border: 1px solid #adb5bd;
-            border-radius: 4px;
-            width: 100%;
-            transition: background-color 0.3s ease;
-        }
-
-        .custom-bpm {
-            text-align: center;
-            min-width: 60px;
-            max-width: 100px;
-        }
-
-        .icon-menu {
-            color: #212529;
-        }
-
-        .form-select, .form-control {
-            border-color: #adb5bd;
-        }
-
-        [data-bs-theme="dark"] body {
-            background-color: #121212;
-        }
-
-        [data-bs-theme="dark"] .main-display {
-            background-color: #1e1e1e;
-            border-color: #333;
-        }
-
-        [data-bs-theme="dark"] .btn-light-gray {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
-
-        [data-bs-theme="dark"] .icon-menu {
-            color: #f8f9fa;
-        }
-
-        [data-bs-theme="dark"] .ts-control {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
-
-        [data-bs-theme="dark"] .ts-dropdown {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
-
-            [data-bs-theme="dark"] .ts-dropdown .option {
-                color: #dee2e6;
-            }
-
-        [data-bs-theme="dark"] .ts-control input {
-            color: #dee2e6;
-        }
-    </style>
 </head>
 
 <body>
     <div class="container d-flex flex-column vh-100" id="container">
         <div class="d-sm-flex mt-1">
-            <div class="row g-1 align-items-center mb-1">
-                <div class="col-12 col-md-auto d-flex gap-1">
+            <div class="d-flex w-100 align-items-center">
+                <img class="button-control mr-2 dark-invert" src="./assets/icons/menu.svg" id="menuButton" data-toggle="modal" data-target="#optionsModal">
 
-                    <button class="btn btn-link-gray px-3 flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
-                        <i class="fas fa-bars fs-5 icon-menu"></i>
-                    </button>
-
-                    <div class="input-group">
-                        <button class="btn btn-teal px-3"><i class="fas fa-minus"></i></button>
-                        <select class="form-select text-center fw-bold" id="tomSelect">
-                            <option value="C" selected>C</option>
-                            <option value="C#">C#</option>
-                            <option value="D">D</option>
-                            <option value="Eb">Eb</option>
-                            <option value="E">E</option>
-                            <option value="F">F</option>
-                            <option value="F#">F#</option>
-                            <option value="G">G</option>
-                            <option value="Ab">Ab</option>
-                            <option value="A">A</option>
-                            <option value="Bb">Bb</option>
-                            <option value="B">B</option>
-                        </select>
-                        <button class="btn btn-teal px-3" id="increaseTom"><i class="fas fa-plus"></i></button>
+                <div class="input-group mb-1" id="tomContainer">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-dark-cyan" id="decreaseTom">
+                            <img class="icon-svg" src="./assets/icons/dash-lg.svg">
+                        </button>
                     </div>
-
-                    <div class="input-group" id="bpm-container">
-                        <button class="btn btn-teal" id="decrement-bpm-5">-5</button>
-                        <button class="btn btn-teal border-start" id="decrement-bpm"><i class="fas fa-minus"></i></button>
-                        <input type="number" id="bpm-input" class="form-control custom-bpm fw-bold" value="90">
-                        <button class="btn btn-teal" id="increment-bpm-5">+5</button>
+                    <select class="form-control" id="tomSelect">
+                        <option value="C" selected>C</option>
+                        <option value="C#">C#</option>
+                        <option value="D">D</option>
+                        <option value="Eb">Eb</option>
+                        <option value="E">E</option>
+                        <option value="F">F</option>
+                        <option value="F#">F#</option>
+                        <option value="G">G</option>
+                        <option value="Ab">Ab</option>
+                        <option value="A">A</option>
+                        <option value="Bb">Bb</option>
+                        <option value="B">B</option>
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-dark-cyan" id="increaseTom">
+                            <img class="icon-svg" src="./assets/icons/plus-lg.svg">
+                        </button>
                     </div>
                 </div>
 
-                <div class="col-12 col-md">
-                    <div class="input-group flex-nowrap">
-                        <select id="select-musica" placeholder="Escolha a Música..." autocomplete="off">
-                            <option value="">Escolha a Música...</option>
-                            <option value="1">Aclame ao Senhor</option>
-                            <option value="2">Grandioso És Tu</option>
-                            <option value="3">Rendido Estou</option>
-                            <option value="4">Ousado Amor</option>
-                            <option value="5">Quão Grande é o Meu Deus</option>
-                        </select>
-                        <button class="btn btn-teal px-3"><i class="fas fa-plus"></i></button>
+
+                <div class="input-group drum-unified-group ml-2 mb-1" id="bpm-container">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-outline-secondary" type="button" id="decrement-bpm-5">-5</button>
+                        <button class="btn btn-outline-secondary" type="button" id="decrement-bpm">
+                            <img class="icon-svg dark-invert" src="./assets/icons/dash.svg">
+                        </button>
                     </div>
+                    <input type="number" id="bpm-input" value="90" class="form-control text-center px-1" aria-label="BPM">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="increment-bpm-5">+5</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-grow-1 mb-1">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <button id="selectedButton" class="btn btn-light d-none">
+                    </button>
+                    <div id="selectContainer">
+                        <select class="form-control" id="savesSelect">
+                        </select>
+                    </div>
+                    <input type="search" autocomplete="off" class="form-control d-none" id="itemNameInput" placeholder="Nome da Música...">
+
+                    <button class="btn btn-primary btn-control-custom rounded-right d-none" id="saveButton">
+                        <img class="icon-svg" src="./assets/icons/check.svg">
+                    </button>
+                    <button class="btn btn-danger btn-control-custom rounded-right d-none" id="cancelButton">
+                        ×
+                    </button>
+
+                    <button class="btn btn-control-custom btn-add rounded-right" id="addButton">
+                        <img class="icon-svg" src="./assets/icons/plus-square.svg">
+                    </button>
+                    <button class="btn btn-control-custom btn-success rounded-0 fade d-none" id="editSavesSelect">
+                        <img class="icon-svg" src="./assets/icons/pencil.svg">
+                    </button>
+                    <button class="btn btn-danger rounded-right-custom fade d-none" id="deleteSavesSelect">
+                        <img class="icon-svg" src="./assets/icons/trash.svg">
+                    </button>
                 </div>
             </div>
         </div>
