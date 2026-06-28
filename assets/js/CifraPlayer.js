@@ -184,6 +184,29 @@ class CifraPlayer {
         this.epianoLoaded = true;
     }
 
+    async loadPianoSounds() {
+        if (this.pianoLoaded) return;
+
+        const urls = {};
+        const instrumento = 'piano';
+        // Carregamos todas as oitavas para suportar tanto os acordes quanto o teclado de piano virtual
+        const oitavas = ['grave', 'baixo', '', 'agudo', 'agudo_agudo'];
+
+        this.musicTheory.notas.forEach(nota => {
+            oitavas.forEach(oitava => {
+                const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
+                // Mapeia para a pasta que você mostrou no print
+                const path = `${this.audioPath}studio/Piano/${key}.ogg`;
+                urls[key] = path;
+            });
+        });
+
+        const pianoBuffers = await this.audioManager.loadBuffers(urls);
+        // Mescla no Map existente
+        pianoBuffers.forEach((buf, key) => this.buffers.set(key, buf));
+        this.pianoLoaded = true;
+    }
+
     getVolumeForNote(notaKey) {
         // Volume base é 1.0 (máximo). Se for strings, divide pelo fator redutor.
         if (notaKey.startsWith('strings_')) {
@@ -296,7 +319,8 @@ class CifraPlayer {
         this.adicionarSom(this.instrumento, this.baixo, 'grave');
         if (!this.elements.notesButton.classList.contains('notaSolo') && this.instrumento === 'orgao')
             this.adicionarSom('strings', this.baixo, 'grave');
-        else if (this.elements.notesButton.classList.contains('pressed') && this.instrumento === 'epiano')
+        // MUDOU AQUI EM BAIXO
+        else if (this.elements.notesButton.classList.contains('pressed') && this.instrumento === 'piano')
             this.adicionarSom('strings', this.baixo, 'grave');
 
         notas.forEach(nota => {
@@ -311,11 +335,12 @@ class CifraPlayer {
                         this.adicionarSom('strings', nota.replace('#', '_'));
                 }
             }
-            else if (this.instrumento === 'epiano') {
-                this.adicionarSom('epiano', nota.replace('#', '_'), 'baixo');
+            // MUDOU AQUI EM BAIXO (Todo o bloco de epiano virou piano)
+            else if (this.instrumento === 'piano') {
+                this.adicionarSom('piano', nota.replace('#', '_'), 'baixo');
 
                 if (!this.elements.notesButton.classList.contains('notaSolo'))
-                    this.adicionarSom('epiano', nota.replace('#', '_'));
+                    this.adicionarSom('piano', nota.replace('#', '_'));
 
                 if (this.elements.notesButton.classList.contains('pressed')) {
                     this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
@@ -348,12 +373,11 @@ class CifraPlayer {
         const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
 
         notasParaTocar.forEach(note => {
-            // Removemos a checagem do 'tone-piano_' aqui.
-            // Tudo agora é tratado como buffer normal (.ogg)
             const buffer = this.buffers.get(note);
             if (!buffer) return;
 
-            const isLoop = !note.startsWith('epiano');
+            // MUDOU AQUI: Se for som de piano acústico ou elétrico, não faz loop
+            const isLoop = !(note.startsWith('epiano') || note.startsWith('piano'));
             const volume = this.getVolumeForNote(note);
             this.audioManager.playNode(buffer, now, volume, this.attack, isLoop, this.activeSources);
         });
@@ -584,7 +608,8 @@ class CifraPlayer {
         nota = this.getNomeArquivoAudio(nota);
         const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
 
-        if (instrumento === 'epiano') {
+        // ADICIONE a checagem 'piano' aqui
+        if (instrumento === 'epiano' || instrumento === 'piano') {
             this.epianoGroup.push(key);
         }
         else {

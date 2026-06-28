@@ -825,14 +825,14 @@ class App {
                 this.uiController.exibirInstrumento(mode);
             }
             else if (mode === 'piano') {
-                // AQUI ESTÁ A MÁGICA: O modo UI é 'piano', mas o motor de áudio usa 'epiano'
-                this.cifraPlayer.instrumento = 'epiano';
-                await this.cifraPlayer.loadEpianoSounds();
+                // AQUI: Agora usamos o piano acústico real
+                this.cifraPlayer.instrumento = 'piano';
+                await this.cifraPlayer.loadPianoSounds();
                 this.cifraPlayer.attack = 0.05;
                 this.cifraPlayer.atualizarVolumeStringsParaOrgao();
 
-                await this.melodyMachine.setInstrument('epiano');
-                this.partituraPlayer.setInstrument('epiano');
+                await this.melodyMachine.setInstrument('piano');
+                this.partituraPlayer.setInstrument('piano');
 
                 this.uiController.exibirInstrumento(mode);
             }

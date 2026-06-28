@@ -144,12 +144,16 @@ class PartituraPlayer {
         let bufferName = '';
         let buffer = null;
 
-        if (this.instrumento === 'epiano') {
+        // Agora suporta tanto o 'piano' quanto o antigo 'epiano'
+        if (this.instrumento === 'epiano' || this.instrumento === 'piano') {
             let sufixo = '';
             if (oitava === '3') sufixo = '_grave';
             else if (oitava === '4') sufixo = '_baixo';
+            else if (oitava === '5') sufixo = '';
+            else if (oitava === '6') sufixo = '_agudo';
+            else if (oitava === '7') sufixo = '_agudo_agudo';
 
-            bufferName = `epiano_${notaLimpa}${sufixo}`;
+            bufferName = `${this.instrumento}_${notaLimpa}${sufixo}`;
             buffer = this.cifraPlayer.buffers.get(bufferName);
         } else {
             bufferName = `flauta_${notaLimpa}${oitava}`;
