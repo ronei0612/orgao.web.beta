@@ -128,6 +128,10 @@
         if (this.instrument === inst) return;
 
         this.instrument = inst;
+
+        // ADICIONADO: Atualiza o nome dos instrumentos internos para a geração correta das chaves (ex: piano_4)
+        this.instruments.forEach(i => i.name = inst);
+
         this.audioPath = this.baseUrl + '/assets/audio/studio/' + (inst === 'piano' ? 'Piano' : 'Orgao');
 
         // Carrega os sons do novo instrumento caso ainda não estejam na memória

@@ -28,7 +28,7 @@ class BateriaUI {
 
     getStoredRhythm(styleName, rhythmKey) {
         const s = this.drumMachine.styles;
-        return s.data && s.data[styleName] ? s.data[styleName][rhythmKey] || null : null;
+        return s && s[styleName] ? s[styleName][rhythmKey] || null : null;
     }
 
     async init() {
@@ -75,9 +75,8 @@ class BateriaUI {
      */
     saveRhythmToStyle(styleName, rhythmKey, rhythmData) {
         const storage = this.styleManager.getStorageData(this.drumMachine.styles);
-        if (!storage.data) storage.data = {};
-        if (!storage.data[styleName]) storage.data[styleName] = {};
-        storage.data[styleName][rhythmKey] = rhythmData;
+        if (!storage[styleName]) storage[styleName] = {};
+        storage[styleName][rhythmKey] = rhythmData;
         this.styleManager.persistStorageData(storage);
     }
 
@@ -110,7 +109,7 @@ class BateriaUI {
         let data = null;
         const storage = this.styleManager.getStorageData(this.drumMachine.styles);
 
-        data = storage.data && storage.data[styleName] ? storage.data[styleName][rhythm] : null;
+        data = storage && storage[styleName] ? storage[styleName][rhythm] : null;
 
         if (!data) {
             // Garante que as trilhas existam antes de limpar

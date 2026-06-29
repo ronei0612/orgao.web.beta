@@ -29,7 +29,15 @@
     }
 
     async init() {
-        this.styleManager.loadStyles(this.melodyMachine.styles);
+        // CORREÇÃO: Define a chave do localstorage baseada no instrumento (ex: melodyStylesData_orgao)
+        // Assim, ritmos salvos de órgão não se misturam com os de piano.
+        this.storageKey = `melodyStylesData_${this.melodyMachine.instrument}`;
+        this.styleManager.storageKey = this.storageKey;
+
+        // CORREÇÃO: Passa apenas os estilos do instrumento atual, não o JSON inteiro
+        const defaultStyles = this.melodyMachine.styles ? this.melodyMachine.styles[this.melodyMachine.instrument] : null;
+        this.styleManager.loadStyles(defaultStyles);
+
         // Se tem um estilo selecionado, carrega. Senão, cria trilhas vazias.
         if (this.elements.melodyStyleSelect.value) {
             this.loadPattern(this.elements.melodyStyleSelect.value);
@@ -37,6 +45,22 @@
             this.initializeTracks();
         }
         this.bindEvents();
+    }
+
+    // NOVA FUNÇÃO: Atualiza a interface quando o instrumento for alterado no App.js
+    updateInstrument() {
+        this.storageKey = `melodyStylesData_${this.melodyMachine.instrument}`;
+        this.styleManager.storageKey = this.storageKey;
+
+        const defaultStyles = this.melodyMachine.styles ? this.melodyMachine.styles[this.melodyMachine.instrument] : null;
+        this.styleManager.loadStyles(defaultStyles);
+
+        if (this.elements.melodyStyleSelect.options.length > 0) {
+            this.elements.melodyStyleSelect.selectedIndex = 0;
+            this.loadPattern(this.elements.melodyStyleSelect.value);
+        } else {
+            this.initializeTracks();
+        }
     }
 
     createEmptyPattern(numSteps) {
@@ -169,8 +193,11 @@
             patternData[instKey] = { steps, selected: isSelected };
         });
 
-        const storage = this.styleManager.getStorageData(this.melodyMachine.styles);
-        storage.data[styleName] = patternData;
+        const defaultStyles = this.melodyMachine.styles ? this.melodyMachine.styles[this.melodyMachine.instrument] : null;
+        const storage = this.styleManager.getStorageData(defaultStyles);
+
+        // Removemos o .data!
+        storage[styleName] = patternData;
         this.styleManager.persistStorageData(storage);
 
         // Feedback Visual
@@ -183,12 +210,17 @@
             this.saveBtn.classList.remove('btn-success');
             this.saveBtn.classList.add('btn-primary');
         }, 1000);
+
+        this.styleManager.persistStorageData(storage);
     }
 
     loadPattern(styleName) {
-        const storage = this.styleManager.getStorageData(this.melodyMachine.styles);
-        const data = storage.data ? storage.data[styleName] : null;
+        const defaultStyles = this.melodyMachine.styles ? this.melodyMachine.styles[this.melodyMachine.instrument] : null;
+        const storage = this.styleManager.getStorageData(defaultStyles);
 
+        const data = storage ? storage[styleName] : null;
+
+        // CORREÇÃO: Removemos a obrigatoriedade do "!data.vozes" para permitir dados salvos localmente
         if (!data) {
             // Garante que as trilhas existam na tela antes de limpar
             if (this.tracksContainer.children.length === 0) {
@@ -203,10 +235,18 @@
         this.initializeTracks();
 
         const tracks = this.tracksContainer.querySelectorAll('.track');
-        tracks.forEach(track => {
+        tracks.forEach((track, index) => {
             const labelSpan = track.querySelector('.track-label span');
             const instKey = labelSpan.dataset.instrument;
-            const trackData = data[instKey];
+
+            let trackData = data[instKey];
+
+            // CORREÇÃO: Suporte para o formato nativo do styles-melody.json (que usa 'vozes')
+            if (!trackData && data.vozes && Array.isArray(data.vozes) && data.vozes.length > index) {
+                const stepsArr = data.vozes[index];
+                const isSelected = stepsArr.some(v => v > 0);
+                trackData = { steps: stepsArr, selected: isSelected };
+            }
 
             const btn = track.querySelector('.instrument-button');
             const stepsElements = track.querySelectorAll('.step');
