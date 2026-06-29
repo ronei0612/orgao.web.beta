@@ -26,10 +26,6 @@ class PartituraPlayer {
         this.partituraEditor.onViewDrawn = () => this.bindClickNotas();
     }
 
-    setInstrument(inst) {
-        this.instrumento = inst; // Recebe 'flauta' ou 'epiano'
-    }
-
     bindClickNotas() {
         const doc = this.elements.partituraFrame.contentDocument;
         if (!doc) return;
@@ -106,8 +102,11 @@ class PartituraPlayer {
                 }
 
                 const notaLimpa = notaConvertida.replace('#', '_');
-                const bufferName = `${this.instrumento}_${notaLimpa}${oitava}`;
+
+                // SEMPRE FLAUTA na partitura
+                const bufferName = `flauta_${notaLimpa}${oitava}`;
                 const buffer = this.buffers.get(bufferName);
+
                 if (buffer) {
                     this.audioManager.playNode(buffer, this.audioContext.currentTime, volume, 0.02, false, this.activeSources);
                 }
@@ -124,8 +123,6 @@ class PartituraPlayer {
     }
 
     startPianoNote(pitch) {
-        // 1. GARANTE A MONOFONIA: Corta instantaneamente (0.02s) qualquer nota 
-        // do teclado/flauta que ainda esteja tocando ou em fase de sustain.
         this.audioManager.stopAll(this.pianoActiveSources, 0.02);
         this.activePianoNode = null;
         this.activePianoNodeStartTime = null;
@@ -141,27 +138,12 @@ class PartituraPlayer {
         }
 
         const notaLimpa = notaConvertida.replace('#', '_');
-        let bufferName = '';
-        let buffer = null;
 
-        // Agora suporta tanto o 'piano' quanto o antigo 'epiano'
-        if (this.instrumento === 'epiano' || this.instrumento === 'piano') {
-            let sufixo = '';
-            if (oitava === '3') sufixo = '_grave';
-            else if (oitava === '4') sufixo = '_baixo';
-            else if (oitava === '5') sufixo = '';
-            else if (oitava === '6') sufixo = '_agudo';
-            else if (oitava === '7') sufixo = '_agudo_agudo';
-
-            bufferName = `${this.instrumento}_${notaLimpa}${sufixo}`;
-            buffer = this.cifraPlayer.buffers.get(bufferName);
-        } else {
-            bufferName = `flauta_${notaLimpa}${oitava}`;
-            buffer = this.buffers.get(bufferName);
-        }
+        // SEMPRE FLAUTA no teclado virtual
+        const bufferName = `flauta_${notaLimpa}${oitava}`;
+        const buffer = this.buffers.get(bufferName);
 
         if (buffer) {
-            // 2. Toca a nota e a adiciona no Set exclusivo do teclado (pianoActiveSources)
             this.activePianoNode = this.audioManager.playNode(buffer, this.audioContext.currentTime, 1, 0.02, false, this.pianoActiveSources);
             this.activePianoNodeStartTime = this.audioContext.currentTime;
         }

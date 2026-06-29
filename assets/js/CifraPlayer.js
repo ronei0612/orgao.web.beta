@@ -316,48 +316,63 @@ class CifraPlayer {
 
         this.acordeGroup = [];
         this.epianoGroup = [];
-        this.adicionarSom(this.instrumento, this.baixo, 'grave');
-        if (!this.elements.notesButton.classList.contains('notaSolo') && this.instrumento === 'orgao')
-            this.adicionarSom('strings', this.baixo, 'grave');
-        // MUDOU AQUI EM BAIXO
-        else if (this.elements.notesButton.classList.contains('pressed') && this.instrumento === 'piano')
-            this.adicionarSom('strings', this.baixo, 'grave');
 
+        // --- LÓGICA DO BAIXO (GRAVE) ---
+        // Piano não toca o baixo grave, foco apenas nas notas médias/agudas.
+        if (this.instrumento !== 'piano') {
+            this.adicionarSom(this.instrumento, this.baixo, 'grave');
+        }
+
+        // Strings no Baixo Grave (Sempre presente para Órgão e Piano, a menos que seja nota solo)
+        if (!this.elements.notesButton.classList.contains('notaSolo') && (this.instrumento === 'orgao' || this.instrumento === 'piano')) {
+            this.adicionarSom('strings', this.baixo, 'grave');
+        }
+
+        // --- LÓGICA DAS NOTAS DO ACORDE ---
         notas.forEach(nota => {
-            if (this.instrumento === 'orgao') {
-                this.adicionarSom(this.instrumento, nota.replace('#', '_'), 'baixo');
-                if (!this.elements.notesButton.classList.contains('notaSolo'))
-                    this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
+            const notaLimpa = nota.replace('#', '_');
+
+            // 1. Órgão e Epiano (Bateria)
+            if (this.instrumento === 'orgao' || this.instrumento === 'epiano') {
+                this.adicionarSom(this.instrumento, notaLimpa, 'baixo');
 
                 if (this.elements.notesButton.classList.contains('pressed')) {
-                    this.adicionarSom(this.instrumento, nota.replace('#', '_'));
-                    if (!this.elements.notesButton.classList.contains('notaSolo'))
-                        this.adicionarSom('strings', nota.replace('#', '_'));
+                    this.adicionarSom(this.instrumento, notaLimpa, ''); // Normal
                 }
             }
-            // MUDOU AQUI EM BAIXO (Todo o bloco de epiano virou piano)
+            // 2. Piano Acústico
             else if (this.instrumento === 'piano') {
-                this.adicionarSom('piano', nota.replace('#', '_'), 'baixo');
+                // Piano toca na oitava agudo por padrão
+                this.adicionarSom('piano', notaLimpa, 'agudo');
 
-                if (!this.elements.notesButton.classList.contains('notaSolo'))
-                    this.adicionarSom('piano', nota.replace('#', '_'));
-
+                // Se notesButton estiver ativado, enche com o agudo_agudo
                 if (this.elements.notesButton.classList.contains('pressed')) {
-                    this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
-                    this.adicionarSom('strings', nota.replace('#', '_'));
+                    this.adicionarSom('piano', notaLimpa, 'agudo_agudo');
+                }
+            }
+
+            // 3. Strings (Cama de fundo para Órgão e Piano)
+            if (this.instrumento === 'orgao' || this.instrumento === 'piano') {
+                if (!this.elements.notesButton.classList.contains('notaSolo')) {
+                    this.adicionarSom('strings', notaLimpa, 'baixo');
+
+                    if (this.elements.notesButton.classList.contains('pressed')) {
+                        this.adicionarSom('strings', notaLimpa, ''); // Normal
+                    }
                 }
             }
         });
 
+        // --- EXECUÇÃO DO ÁUDIO ---
         if (this.instrumento === 'orgao') {
-            this.epianoPlay();
+            this.epianoPlay(); // Toca instantaneamente
         }
         else {
             if (!this.uiController.ritmoAtivo()) {
-                this.epianoPlay();
+                this.epianoPlay(); // Toca instantaneamente se não tiver ritmo
             }
             else {
-                this.tocarEpiano = true; // Deixa para a DrumMachine acionar depois
+                this.tocarEpiano = true; // Fica agendado para o metrônomo (DrumMachine/MelodyMachine) acionar no tempo certo
             }
         }
 
