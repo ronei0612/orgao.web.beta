@@ -1,212 +1,66 @@
 {
-  "styles": [ "4/4", "2/4", "3/4", "3/8", "6/8", "2/8", "4/8", "5/4", "1/4" ],
-  "data": {
+  "orgao": {
     "4/4": {
       "numSteps": 8,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 0, 1, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 1, 0, 0, 0, 1, 0 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 1, 0, 1, 0, 1, 0, 1 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
-    },
-    "2/4": {
-      "numSteps": 4,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 0 ],
-        "selected": false
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 1, 0 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 1, 0, 1 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 1, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0 ],
-        "selected": true
-      }
+      "vozes": [
+        [ 1, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 1, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 1, 0, 1, 0, 1, 0, 1 ],
+        [ 0, 0, 1, 0, 0, 0, 1, 0 ],
+        [ 0, 0, 0, 0, 1, 0, 0, 0 ]
+      ]
     },
     "3/4": {
       "numSteps": 6,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 0, 0, 0 ],
-        "selected": false
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 0, 0, 1, 0 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 0, 1, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 1, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
-    },
-    "3/8": {
-      "numSteps": 6,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 0, 0, 0 ],
-        "selected": false
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 1, 0, 1, 0 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 1, 0, 1, 0, 1 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 1, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
+      "vozes": [
+        [ 1, 0, 0, 0, 0, 0 ],
+        [ 1, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 1, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 1, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ]
+      ]
     },
     "6/8": {
       "numSteps": 6,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 1, 0, 0 ],
-        "selected": true
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 1, 0, 1, 0 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 1, 0, 0, 0, 1 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 1, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
-    },
-    "2/8": {
+      "vozes": [
+        [ 1, 0, 0, 0, 0, 0 ],
+        [ 1, 0, 0, 0, 0, 0 ],
+        [ 0, 1, 0, 0, 0, 1 ],
+        [ 0, 0, 1, 0, 1, 0 ],
+        [ 0, 0, 0, 1, 0, 0 ]
+      ]
+    }
+  },
+  "piano": {
+    "4/4 (Balada)": {
       "numSteps": 8,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 1, 0, 0, 0, 1 ],
-        "selected": true
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 1, 0, 0, 0, 1, 0 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 1, 0, 0, 0, 1, 0, 0 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 1, 0, 0, 0, 1, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
+      "vozes": [
+        [ 1, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 1, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 1, 0, 1, 0, 1, 0, 1, 0 ]
+      ]
     },
-    "4/8": {
-      "numSteps": 8,
-      "orgao_4": {
-        "steps": [ 0, 0, 1, 0, 1, 0, 1, 0 ],
-        "selected": true
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 0, 1, 0, 1, 0, 1 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 1, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
+    "3/4 (Valsa)": {
+      "numSteps": 6,
+      "vozes": [
+        [ 1, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 1, 0, 1, 0 ]
+      ]
     },
-    "5/4": {
-      "numSteps": 8,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 0, 1, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 0, 1, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_2": {
-        "steps": [ 0, 0, 1, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_1": {
-        "steps": [ 0, 1, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
-    },
-    "1/4": {
-      "numSteps": 8,
-      "orgao_4": {
-        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": false
-      },
-      "orgao_3": {
-        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": false
-      },
-      "orgao_2": {
-        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": false
-      },
-      "orgao_1": {
-        "steps": [ 0, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": false
-      },
-      "orgao_0": {
-        "steps": [ 1, 0, 0, 0, 0, 0, 0, 0 ],
-        "selected": true
-      }
+    "6/8 (Arpejo)": {
+      "numSteps": 6,
+      "vozes": [
+        [ 1, 0, 0, 0, 0, 0 ],
+        [ 0, 1, 0, 0, 0, 1 ],
+        [ 0, 0, 1, 0, 1, 0 ],
+        [ 0, 0, 0, 1, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0 ]
+      ]
     }
   }
 }

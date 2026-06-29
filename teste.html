@@ -49,6 +49,79 @@
             color: #6c757d;
         }
 
+        /* Botões Redondos Principais */
+        .btn-circle {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-play {
+            background-color: #2b7af1;
+            box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4); /* Efeito de brilho */
+        }
+
+        .btn-music {
+            background-color: #9a84b8;
+        }
+
+        /* Botões de Acordes */
+        .chord-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+
+            .chord-btn:active {
+                transform: scale(0.95);
+            }
+
+        /* Cores dos Acordes */
+        .bg-gray-chord {
+            background-color: #9b95a5;
+        }
+
+        .bg-c {
+            background-color: #4981ad;
+        }
+
+        .bg-am {
+            background-color: #a476db;
+        }
+
+        .bg-f {
+            background-color: #e36be0;
+        }
+
+        .bg-dm {
+            background-color: #ef7b7b;
+        }
+
+        .bg-g {
+            background-color: #f98b00;
+        }
+
+        .bg-em {
+            background-color: #e5bc00;
+        }
+
             .main-display {
                 background-color: #fcf9ee;
                 min-height: 350px;
@@ -58,11 +131,11 @@
                 transition: background-color 0.3s ease;
             }
 
-        .custom-bpm {
-            text-align: center;
-            min-width: 60px;
-            max-width: 100px;
-        }
+            .custom-bpm {
+                text-align: center;
+                min-width: 60px;
+                max-width: 100px;
+            }
 
             .icon-menu {
                 color: #212529;
@@ -176,6 +249,33 @@
                 <option>Sem ritmo</option>
             </select>
             <button class="btn btn-secondary fw-bold px-4">ÓRGÃO</button>
+        </div>
+
+        <!-- BOTÕES PLAY E MÚSICA -->
+        <div class="d-flex justify-content-center gap-3 mb-4">
+            <button class="btn-circle btn-play"><i class="fas fa-play"></i></button>
+            <button class="btn-circle btn-music"><i class="fas fa-music"></i></button>
+        </div>
+
+        <!-- BOTÕES DE ACORDES -->
+        <div class="d-flex flex-column align-items-center gap-2 mb-3">
+            <!-- Linha 1 -->
+            <div class="d-flex justify-content-center gap-2">
+                <button class="chord-btn bg-gray-chord">Bb</button>
+                <button class="chord-btn bg-gray-chord">A</button>
+                <button class="chord-btn bg-gray-chord">B°</button>
+                <button class="chord-btn bg-gray-chord">E</button>
+                <button class="chord-btn bg-gray-chord">D</button>
+            </div>
+            <!-- Linha 2 -->
+            <div class="d-flex justify-content-center flex-wrap gap-2">
+                <button class="chord-btn bg-c">C</button>
+                <button class="chord-btn bg-am">Am</button>
+                <button class="chord-btn bg-f">F</button>
+                <button class="chord-btn bg-dm">Dm</button>
+                <button class="chord-btn bg-g">G</button>
+                <button class="chord-btn bg-em">Em</button>
+            </div>
         </div>
 
     </div>

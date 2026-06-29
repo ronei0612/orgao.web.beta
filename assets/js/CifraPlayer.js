@@ -184,6 +184,29 @@ class CifraPlayer {
         this.epianoLoaded = true;
     }
 
+    async loadPianoSounds() {
+        if (this.pianoLoaded) return;
+
+        const urls = {};
+        const instrumento = 'piano';
+        // Carregamos todas as oitavas para suportar tanto os acordes quanto o teclado de piano virtual
+        const oitavas = ['grave', 'baixo', '', 'agudo', 'agudo_agudo'];
+
+        this.musicTheory.notas.forEach(nota => {
+            oitavas.forEach(oitava => {
+                const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
+                // Mapeia para a pasta que você mostrou no print
+                const path = `${this.audioPath}studio/Piano/${key}.ogg`;
+                urls[key] = path;
+            });
+        });
+
+        const pianoBuffers = await this.audioManager.loadBuffers(urls);
+        // Mescla no Map existente
+        pianoBuffers.forEach((buf, key) => this.buffers.set(key, buf));
+        this.pianoLoaded = true;
+    }
+
     getVolumeForNote(notaKey) {
         // Volume base é 1.0 (máximo). Se for strings, divide pelo fator redutor.
         if (notaKey.startsWith('strings_')) {
@@ -293,46 +316,63 @@ class CifraPlayer {
 
         this.acordeGroup = [];
         this.epianoGroup = [];
-        this.adicionarSom(this.instrumento, this.baixo, 'grave');
-        if (!this.elements.notesButton.classList.contains('notaSolo') && this.instrumento === 'orgao')
-            this.adicionarSom('strings', this.baixo, 'grave');
-        else if (this.elements.notesButton.classList.contains('pressed') && this.instrumento === 'epiano')
-            this.adicionarSom('strings', this.baixo, 'grave');
 
+        // --- LÓGICA DO BAIXO (GRAVE) ---
+        // Piano não toca o baixo grave, foco apenas nas notas médias/agudas.
+        if (this.instrumento !== 'piano') {
+            this.adicionarSom(this.instrumento, this.baixo, 'grave');
+        }
+
+        // Strings no Baixo Grave (Sempre presente para Órgão e Piano, a menos que seja nota solo)
+        if (!this.elements.notesButton.classList.contains('notaSolo') && (this.instrumento === 'orgao' || this.instrumento === 'piano')) {
+            this.adicionarSom('strings', this.baixo, 'grave');
+        }
+
+        // --- LÓGICA DAS NOTAS DO ACORDE ---
         notas.forEach(nota => {
-            if (this.instrumento === 'orgao' || this.instrumento === 'tone-piano') {
-                this.adicionarSom(this.instrumento, nota.replace('#', '_'), 'baixo');
-                if (!this.elements.notesButton.classList.contains('notaSolo'))
-                    this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
+            const notaLimpa = nota.replace('#', '_');
+
+            // 1. Órgão e Epiano (Bateria)
+            if (this.instrumento === 'orgao' || this.instrumento === 'epiano') {
+                this.adicionarSom(this.instrumento, notaLimpa, 'baixo');
 
                 if (this.elements.notesButton.classList.contains('pressed')) {
-                    this.adicionarSom(this.instrumento, nota.replace('#', '_'));
-                    if (!this.elements.notesButton.classList.contains('notaSolo'))
-                        this.adicionarSom('strings', nota.replace('#', '_'));
+                    this.adicionarSom(this.instrumento, notaLimpa, ''); // Normal
                 }
             }
-            else if (this.instrumento === 'epiano') {
-                this.adicionarSom('epiano', nota.replace('#', '_'), 'baixo');
+            // 2. Piano Acústico
+            else if (this.instrumento === 'piano') {
+                // Piano toca na oitava agudo por padrão
+                this.adicionarSom('piano', notaLimpa, 'agudo');
 
-                if (!this.elements.notesButton.classList.contains('notaSolo'))
-                    this.adicionarSom('epiano', nota.replace('#', '_'));
-
+                // Se notesButton estiver ativado, enche com o agudo_agudo
                 if (this.elements.notesButton.classList.contains('pressed')) {
-                    this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
-                    this.adicionarSom('strings', nota.replace('#', '_'));
+                    this.adicionarSom('piano', notaLimpa, 'agudo_agudo');
+                }
+            }
+
+            // 3. Strings (Cama de fundo para Órgão e Piano)
+            if (this.instrumento === 'orgao' || this.instrumento === 'piano') {
+                if (!this.elements.notesButton.classList.contains('notaSolo')) {
+                    this.adicionarSom('strings', notaLimpa, 'baixo');
+
+                    if (this.elements.notesButton.classList.contains('pressed')) {
+                        this.adicionarSom('strings', notaLimpa, ''); // Normal
+                    }
                 }
             }
         });
 
-        if (this.instrumento === 'orgao' || this.instrumento === 'tone-piano') {
-            this.epianoPlay(); // Vamos usar epianoPlay como a função base unificada
+        // --- EXECUÇÃO DO ÁUDIO ---
+        if (this.instrumento === 'orgao') {
+            this.epianoPlay(); // Toca instantaneamente
         }
         else {
             if (!this.uiController.ritmoAtivo()) {
-                this.epianoPlay();
+                this.epianoPlay(); // Toca instantaneamente se não tiver ritmo
             }
             else {
-                this.tocarEpiano = true; // Deixa para a DrumMachine acionar depois
+                this.tocarEpiano = true; // Fica agendado para o metrônomo (DrumMachine/MelodyMachine) acionar no tempo certo
             }
         }
 
@@ -348,26 +388,16 @@ class CifraPlayer {
         const notasParaTocar = [...new Set([...this.epianoGroup, ...this.acordeGroup])];
 
         notasParaTocar.forEach(note => {
-            // Removemos a checagem do 'tone-piano_' aqui.
-            // Tudo agora é tratado como buffer normal (.ogg)
             const buffer = this.buffers.get(note);
             if (!buffer) return;
 
-            const isLoop = !note.startsWith('epiano');
+            // MUDOU AQUI: Se for som de piano acústico ou elétrico, não faz loop
+            const isLoop = !(note.startsWith('epiano') || note.startsWith('piano'));
             const volume = this.getVolumeForNote(note);
             this.audioManager.playNode(buffer, now, volume, this.attack, isLoop, this.activeSources);
         });
 
         this.tocarEpiano = false;
-    }
-
-    // Método auxiliar para converter nomenclatura
-    convertToTonePitch(noteString) {
-        let name = noteString.replace('tone-piano_', '');
-        let octave = "5";
-        if (name.endsWith('_grave')) { octave = "3"; name = name.replace('_grave', ''); }
-        else if (name.endsWith('_baixo')) { octave = "4"; name = name.replace('_baixo', ''); }
-        return name.toUpperCase().replace('_', '#') + octave;
     }
 
     desabilitarSelectSaves() {
@@ -584,7 +614,8 @@ class CifraPlayer {
         nota = this.getNomeArquivoAudio(nota);
         const key = `${instrumento}_${nota}${oitava ? '_' + oitava : ''}`;
 
-        if (instrumento === 'epiano') {
+        // ADICIONE a checagem 'piano' aqui
+        if (instrumento === 'epiano' || instrumento === 'piano') {
             this.epianoGroup.push(key);
         }
         else {

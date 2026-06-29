@@ -128,13 +128,6 @@
         if (this.instrument === inst) return;
 
         this.instrument = inst;
-
-        if (inst === 'tone-piano') {
-            this.audioPath = null;
-            this.refreshTrackCache();
-            return;
-        }
-
         this.audioPath = this.baseUrl + '/assets/audio/studio/' + (inst === 'piano' ? 'Piano' : 'Orgao');
 
         // Carrega os sons do novo instrumento caso ainda não estejam na memória
@@ -200,7 +193,7 @@
         const iniciouNovoAcorde = this.currentStep === 1;
         const acordePrincipal = this.cifraPlayer.acordeTocando;
 
-        // 1. Resolvemos as notas do acorde
+        // 1. Resolvemos as notas do acorde baseadas no dicionário do MelodyMachine
         let notasAtuais = null;
         if (acordePrincipal) {
             const chaveAcorde = acordePrincipal + (this.cifraPlayer.acordeFull ? '1' : '');
@@ -209,67 +202,58 @@
 
         // 2. Lógica de início de compasso (Tempo 1)
         if (iniciouNovoAcorde) {
-            // Para as notas do compasso anterior com release
+            // Apenas paramos as notas do compasso anterior com release suave
             this.audioManager.stopAll(this.activeSources, 0.1, this.nextNoteTime);
 
-            // Toca a nota grave (pedaleira) respeitando a inversão/baixo do acorde (ex: C/E -> toca E grave)
-            let notaGraveNome = null;
-
-            if (this.cifraPlayer.baixo) {
-                // Formata o baixo pegando da Cifra (ex: 'F_' vira 'f__grave')
-                notaGraveNome = `${this.cifraPlayer.baixo.toLowerCase()}_grave`;
-            } else if (notasAtuais && notasAtuais[0]) {
-                // Fallback para a tônica principal dicionário caso não identifique baixo
-                notaGraveNome = notasAtuais[0];
-            }
-
-            if (notaGraveNome) {
-                const bufferGrave = this.buffers.get(`${this.instrument}_${notaGraveNome}`);
-                if (bufferGrave) {
-                    // Captura o nó retornado e adiciona ao Set
-                    this.audioManager.playNode(bufferGrave, this.nextNoteTime, this.defaultVol, 0.003, false, this.activeSources);
-                }
-            }
+            // (Você removeu o bloco do notaGraveNome daqui. Correto! A Voz 1 vai cuidar do grave).
         }
 
         if (!notasAtuais || !this.tracksCache) return;
 
-        // 4. Loop das trilhas (Vozes do Órgão)
+        // 3. Loop das trilhas (Vozes do Órgão / Piano)
         for (let i = 0; i < this.tracksCache.length; i++) {
             const trackData = this.tracksCache[i];
+
             if (!trackData.button.classList.contains('selected')) continue;
 
             const stepElement = trackData.steps[stepIndex];
             const stepElementVol = parseInt(stepElement?.dataset.volume || '0', 10);
             if (stepElementVol <= 0) continue;
 
-            const nomeNota = notasAtuais[trackData.noteIndex];
-            if (!nomeNota) continue;
-
             const baseVol = 1.0;
-            const volumeFinal = stepElementVol === 2 ? (baseVol / 1.5) : baseVol;
+            const volumeFinal = stepElementVol === 2 ? (baseVol / 1.8) : baseVol;
 
-            if (this.instrument === 'tone-piano') {
-                const tonePitch = this.convertToTonePitch(nomeNota);
-                this.audioManager.tonePiano.playNoteAttackRelease(tonePitch, "8n", this.nextNoteTime, volumeFinal);
-            } else {
-                const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
-                if (bufferNota) {
-                    this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
+            // --- LÓGICA ESPECIAL: VOZ 5 NO PIANO ---
+            // O noteIndex 4 corresponde à Voz 5 na interface
+            if (this.instrument === 'piano' && trackData.noteIndex === 4) {
+                // Pega as notas que formam o acorde na oitava normal (ex: ['c', 'e', 'g'])
+                const notasDoAcorde = this.musicTheory.getAcordeNotas(acordePrincipal.charAt(0).toUpperCase() + acordePrincipal.slice(1));
+
+                if (notasDoAcorde) {
+                    notasDoAcorde.forEach(nota => {
+                        const notaLimpa = nota.replace('#', '_'); // Assegura formato do arquivo
+                        const bufferNota = this.buffers.get(`${this.instrument}_${notaLimpa}`);
+                        if (bufferNota) {
+                            this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
+                        }
+                    });
+                }
+            }
+            // --- COMPORTAMENTO PADRÃO: OUTRAS VOZES OU MODO ÓRGÃO ---
+            else {
+                const nomeNota = notasAtuais[trackData.noteIndex];
+                if (nomeNota) {
+                    const bufferNota = this.buffers.get(`${this.instrument}_${nomeNota}`);
+                    if (bufferNota) {
+                        this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
+                    }
                 }
             }
 
+            // Feedback visual no botão do sequenciador
             stepElement.classList.add('playing');
             setTimeout(() => stepElement.classList.remove('playing'), 100);
         }
-    }
-
-    convertToTonePitch(nomeNota) {
-        let name = nomeNota;
-        let octave = "5";
-        if (name.endsWith('_grave')) { octave = "3"; name = name.replace('_grave', ''); }
-        else if (name.endsWith('_baixo')) { octave = "4"; name = name.replace('_baixo', ''); }
-        return name.toUpperCase().replace('_', '#') + octave;
     }
 
     getAcordeNotas(acordeNome) {

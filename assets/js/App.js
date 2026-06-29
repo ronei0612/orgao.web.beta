@@ -10,10 +10,6 @@ class App {
 
         // 1. Criar o gerenciador de áudio ÚNICO aqui
         this.audioManager = new AudioContextManager();
-        this.audioManager.tonePiano = new TonePianoManager(this.audioManager);
-
-        // NOVO: Adiciona o Sintetizador de Piano
-        this.pianoSynthesizer = new PianoSynthesizer(this.audioManager.audioContext);
 
         // 2. Passar o audioManager para todos os players
         this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
@@ -821,18 +817,16 @@ class App {
                 this.cifraPlayer.attack = 0.2;
                 this.cifraPlayer.atualizarVolumeStringsParaOrgao();
                 await this.melodyMachine.setInstrument('orgao');
-                this.partituraPlayer.setInstrument('flauta'); // Partitura volta pro padrão
                 this.uiController.exibirInstrumento(mode);
             }
             else if (mode === 'piano') {
-                // AQUI ESTÁ A MÁGICA: O modo UI é 'piano', mas o motor de áudio usa 'epiano'
-                this.cifraPlayer.instrumento = 'epiano';
-                await this.cifraPlayer.loadEpianoSounds();
+                // AQUI: Agora usamos o piano acústico real
+                this.cifraPlayer.instrumento = 'piano';
+                await this.cifraPlayer.loadPianoSounds();
                 this.cifraPlayer.attack = 0.05;
                 this.cifraPlayer.atualizarVolumeStringsParaOrgao();
 
-                await this.melodyMachine.setInstrument('epiano');
-                this.partituraPlayer.setInstrument('epiano');
+                await this.melodyMachine.setInstrument('piano');
 
                 this.uiController.exibirInstrumento(mode);
             }
