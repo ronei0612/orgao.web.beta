@@ -10,7 +10,6 @@ class App {
 
         // 1. Criar o gerenciador de áudio ÚNICO aqui
         this.audioManager = new AudioContextManager();
-        this.audioManager.tonePiano = new TonePianoManager(this.audioManager);
 
         // NOVO: Adiciona o Sintetizador de Piano
         this.pianoSynthesizer = new PianoSynthesizer(this.audioManager.audioContext);

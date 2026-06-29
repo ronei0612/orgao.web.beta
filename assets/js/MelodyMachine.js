@@ -128,13 +128,6 @@
         if (this.instrument === inst) return;
 
         this.instrument = inst;
-
-        if (inst === 'tone-piano') {
-            this.audioPath = null;
-            this.refreshTrackCache();
-            return;
-        }
-
         this.audioPath = this.baseUrl + '/assets/audio/studio/' + (inst === 'piano' ? 'Piano' : 'Orgao');
 
         // Carrega os sons do novo instrumento caso ainda não estejam na memória
@@ -249,27 +242,14 @@
             const baseVol = 1.0;
             const volumeFinal = stepElementVol === 2 ? (baseVol / 1.5) : baseVol;
 
-            if (this.instrument === 'tone-piano') {
-                const tonePitch = this.convertToTonePitch(nomeNota);
-                this.audioManager.tonePiano.playNoteAttackRelease(tonePitch, "8n", this.nextNoteTime, volumeFinal);
-            } else {
-                const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
-                if (bufferNota) {
-                    this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
-                }
+            const bufferNota = this.buffers.get(`${trackData.name}_${nomeNota}`);
+            if (bufferNota) {
+                this.audioManager.playNode(bufferNota, this.nextNoteTime, volumeFinal, 0.003, false, this.activeSources);
             }
 
             stepElement.classList.add('playing');
             setTimeout(() => stepElement.classList.remove('playing'), 100);
         }
-    }
-
-    convertToTonePitch(nomeNota) {
-        let name = nomeNota;
-        let octave = "5";
-        if (name.endsWith('_grave')) { octave = "3"; name = name.replace('_grave', ''); }
-        else if (name.endsWith('_baixo')) { octave = "4"; name = name.replace('_baixo', ''); }
-        return name.toUpperCase().replace('_', '#') + octave;
     }
 
     getAcordeNotas(acordeNome) {

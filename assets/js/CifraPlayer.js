@@ -324,7 +324,7 @@ class CifraPlayer {
             this.adicionarSom('strings', this.baixo, 'grave');
 
         notas.forEach(nota => {
-            if (this.instrumento === 'orgao' || this.instrumento === 'tone-piano') {
+            if (this.instrumento === 'orgao') {
                 this.adicionarSom(this.instrumento, nota.replace('#', '_'), 'baixo');
                 if (!this.elements.notesButton.classList.contains('notaSolo'))
                     this.adicionarSom('strings', nota.replace('#', '_'), 'baixo');
@@ -349,8 +349,8 @@ class CifraPlayer {
             }
         });
 
-        if (this.instrumento === 'orgao' || this.instrumento === 'tone-piano') {
-            this.epianoPlay(); // Vamos usar epianoPlay como a função base unificada
+        if (this.instrumento === 'orgao') {
+            this.epianoPlay();
         }
         else {
             if (!this.uiController.ritmoAtivo()) {
@@ -383,15 +383,6 @@ class CifraPlayer {
         });
 
         this.tocarEpiano = false;
-    }
-
-    // Método auxiliar para converter nomenclatura
-    convertToTonePitch(noteString) {
-        let name = noteString.replace('tone-piano_', '');
-        let octave = "5";
-        if (name.endsWith('_grave')) { octave = "3"; name = name.replace('_grave', ''); }
-        else if (name.endsWith('_baixo')) { octave = "4"; name = name.replace('_baixo', ''); }
-        return name.toUpperCase().replace('_', '#') + octave;
     }
 
     desabilitarSelectSaves() {
