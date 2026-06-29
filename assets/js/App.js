@@ -11,9 +11,6 @@ class App {
         // 1. Criar o gerenciador de áudio ÚNICO aqui
         this.audioManager = new AudioContextManager();
 
-        // NOVO: Adiciona o Sintetizador de Piano
-        this.pianoSynthesizer = new PianoSynthesizer(this.audioManager.audioContext);
-
         // 2. Passar o audioManager para todos os players
         this.partituraEditor = new PartituraEditor(this.elements.partituraEditFrame, this.elements.partituraFrame, this.musicTheory);
 
