@@ -9,9 +9,22 @@ class StyleManager {
     }
 
     getStorageData(fallbackStyles) {
-        const data = localStorage.getItem(this.storageKey);
-        if (data) return JSON.parse(data);
-        return fallbackStyles || { styles: [], data: {} };
+        const dataStr = localStorage.getItem(this.storageKey);
+
+        let parsed = null;
+        if (dataStr) {
+            parsed = JSON.parse(dataStr);
+        } else if (fallbackStyles) {
+            parsed = fallbackStyles;
+        }
+
+        // MÁGICA DA MIGRAÇÃO: Converte o formato antigo (styles/data) para o formato plano
+        if (parsed && typeof parsed === 'object' && parsed.data && Array.isArray(parsed.styles)) {
+            parsed = parsed.data;
+            if (dataStr) this.persistStorageData(parsed); // Salva no localstorage o formato limpo
+        }
+
+        return parsed || {};
     }
 
     persistStorageData(obj) {
@@ -20,7 +33,10 @@ class StyleManager {
 
     loadStyles(fallbackStyles) {
         const storage = this.getStorageData(fallbackStyles);
-        const styles = storage.styles || [];
+
+        // Lê as chaves diretamente do objeto raiz (Adeus array e adeus .data!)
+        const stylesNames = Object.keys(storage || {});
+
         this.selectElement.innerHTML = '';
 
         if (this.hasBlankOption) {
@@ -30,7 +46,7 @@ class StyleManager {
             this.selectElement.appendChild(blankOption);
         }
 
-        if (!styles.length) {
+        if (!stylesNames.length) {
             if (this.defaultStyle) {
                 const option = document.createElement('option');
                 option.value = this.defaultStyle;
@@ -41,7 +57,7 @@ class StyleManager {
             return;
         }
 
-        const sorted = styles.slice().sort((a, b) => a.localeCompare(b));
+        const sorted = stylesNames.sort((a, b) => a.localeCompare(b));
         sorted.forEach(s => {
             const option = document.createElement('option');
             option.value = s;
@@ -56,23 +72,20 @@ class StyleManager {
         const newName = prompt('Digite o nome do novo estilo:');
         if (!newName) return;
         const storage = this.getStorageData();
-        if ((storage.styles || []).includes(newName)) {
+
+        if (storage[newName]) {
             alert('Este nome de estilo já existe.');
             return;
         }
-        if (!storage.styles) storage.styles = [];
-        storage.styles.push(newName);
-        if (!storage.data) storage.data = {};
-        storage.data[newName] = {};
 
-        // Para BateriaUI (A, B, C, D e fills), ou MelodyUI (apenas o base)
         if (extraKeys.length > 0) {
+            storage[newName] = {};
             extraKeys.forEach(r => {
-                storage.data[newName][r] = this.createEmptyPatternCallback(numSteps);
-                storage.data[newName][`${r}-fill`] = this.createEmptyPatternCallback(numSteps);
+                storage[newName][r] = this.createEmptyPatternCallback(numSteps);
+                storage[newName][`${r}-fill`] = this.createEmptyPatternCallback(numSteps);
             });
         } else {
-            storage.data[newName] = this.createEmptyPatternCallback(numSteps);
+            storage[newName] = this.createEmptyPatternCallback(numSteps);
         }
 
         this.persistStorageData(storage);
@@ -87,18 +100,17 @@ class StyleManager {
         const newName = prompt('Digite o novo nome para o estilo:', current);
         if (!newName || newName === current) return;
         const storage = this.getStorageData();
-        if ((storage.styles || []).includes(newName)) {
+
+        if (storage[newName]) {
             alert('Este nome de estilo já existe.');
             return;
         }
-        const idx = storage.styles.indexOf(current);
-        if (idx !== -1) storage.styles[idx] = newName;
 
-        if (storage.data && storage.data[current]) {
-            storage.data[newName] = storage.data[current];
-            delete storage.data[current];
+        if (storage[current]) {
+            storage[newName] = storage[current];
+            delete storage[current];
         } else {
-            storage.data[newName] = {};
+            storage[newName] = {};
         }
 
         this.persistStorageData(storage);
@@ -111,9 +123,12 @@ class StyleManager {
         const current = this.selectElement.value;
         if (!current) return;
         if (!confirm(`Tem certeza que deseja excluir o estilo "${current}"?`)) return;
+
         const storage = this.getStorageData();
-        storage.styles = (storage.styles || []).filter(s => s !== current);
-        if (storage.data && storage.data[current]) delete storage.data[current];
+        if (storage[current]) {
+            delete storage[current];
+        }
+
         this.persistStorageData(storage);
         this.loadStyles();
         if (this.reloadCallback) this.reloadCallback(this.selectElement.value);

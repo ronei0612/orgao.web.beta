@@ -817,6 +817,9 @@ class App {
                 this.cifraPlayer.attack = 0.2;
                 this.cifraPlayer.atualizarVolumeStringsParaOrgao();
                 await this.melodyMachine.setInstrument('orgao');
+
+                if (this.melodyUI) this.melodyUI.updateInstrument(); // <-- ADICIONADO
+
                 this.uiController.exibirInstrumento(mode);
             }
             else if (mode === 'piano') {
@@ -827,6 +830,8 @@ class App {
                 this.cifraPlayer.atualizarVolumeStringsParaOrgao();
 
                 await this.melodyMachine.setInstrument('piano');
+
+                if (this.melodyUI) this.melodyUI.updateInstrument(); // <-- ADICIONADO
 
                 this.uiController.exibirInstrumento(mode);
             }
