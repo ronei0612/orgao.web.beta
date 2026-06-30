@@ -93,18 +93,13 @@ class App {
             }
         };
 
-        //if (this.BASE_URL.includes('http')) {
-        //    document.getElementById('downloadStylesLink').parentElement.classList.remove('d-none');
-        //    document.getElementById('styleButtons').classList.remove('d-none');
-        //    document.getElementById('drumEditor').classList.remove('d-none');
-        //    document.getElementById('melodyTracks').classList.remove('d-none');
-        //    document.getElementById('stepsMelody').classList.remove('d-none');
-        //    document.getElementById('melodySaveControl').classList.remove('d-none');
-        //    document.getElementById('save-melody').classList.remove('d-none');
-        //}
+        // ADICIONE ESTAS LINHAS NO FINAL DE init()
+        const edicaoSalva = localStorage.getItem('habilitarEdicaoRitmo') === 'true';
+        if (this.elements.toggleRhythmEditor) {
+            this.elements.toggleRhythmEditor.checked = edicaoSalva;
+            this.toggleRhythmElements(edicaoSalva);
+        }
     }
-
-    // ATENÇÃO: COPIE APENAS OS MÉTODOS BINDEvents e handlePianoKeyClick do APP.JS
 
     bindEvents() {
         this.elements.santamissaFrame.addEventListener('load', this.handleSantaMissaLoad.bind(this));
@@ -180,6 +175,9 @@ class App {
             // Altera o volume global na mesma hora de forma suave (sem estalos)
             this.audioManager.masterGain.gain.setTargetAtTime(vol, this.audioManager.audioContext.currentTime, 0.05);
         });
+
+        // ADICIONE ESTA LINHA:
+        this.elements.toggleRhythmEditor.addEventListener('change', (e) => this.toggleRhythmElements(e.target.checked));
 
         ['mousedown'].forEach(event => {
             const controlButtons = [
@@ -1561,12 +1559,54 @@ class App {
         URL.revokeObjectURL(link.href);
     }
 
+    // NOVA FUNÇÃO: Controla exibição dos elementos de ritmo e salva a preferência do usuário
+    toggleRhythmElements(show) {
+        const elementsToToggle = [
+            document.getElementById('styleButtons'),
+            document.getElementById('drumEditor'),
+            document.getElementById('melodyTracks'),
+            document.getElementById('stepsMelody'),
+            document.getElementById('melodySaveControl'),
+            document.getElementById('save-melody'),
+            document.getElementById('baixarStyles')
+        ];
+
+        elementsToToggle.forEach(el => {
+            if (el) {
+                if (show) {
+                    el.classList.remove('d-none');
+                } else {
+                    el.classList.add('d-none');
+                }
+            }
+        });
+
+        // Persiste a escolha do usuário
+        localStorage.setItem('habilitarEdicaoRitmo', show);
+    }
+
+    // FUNÇÃO AJUSTADA: Converte o formato do localStorage para o formato estruturado do styles-melody.json
     downloadStyles() {
-        const key = this.STYLES_LOCAL_KEY;
+        let key = this.STYLES_LOCAL_KEY; // 'drumStylesData' por padrão
+        let filename = 'drum-styles.json';
+        let displayName = 'Bateria';
+
+        const isMelody = (this.currentInstrumentMode === 'orgao' || this.currentInstrumentMode === 'piano');
+
+        if (this.currentInstrumentMode === 'orgao') {
+            key = 'melodyStylesData_orgao';
+            filename = 'melody-styles-orgao.json';
+            displayName = 'Órgão';
+        } else if (this.currentInstrumentMode === 'piano') {
+            key = 'melodyStylesData_piano';
+            filename = 'melody-styles-piano.json';
+            displayName = 'Piano';
+        }
+
         try {
             const raw = localStorage.getItem(key);
             if (!raw) {
-                this.uiController.customAlert('Não há drumStylesData salvo no localStorage.', 'Aviso');
+                this.uiController.customAlert(`Não há ritmos de ${displayName} salvos no localStorage para baixar.`, 'Aviso');
                 return;
             }
 
@@ -1574,22 +1614,62 @@ class App {
             try {
                 data = JSON.parse(raw);
             } catch (parseErr) {
-                this.uiController.customAlert('Conteúdo de drumStylesData inválido (JSON).', 'Erro');
+                this.uiController.customAlert(`Conteúdo de ritmos de ${displayName} inválido (JSON).`, 'Erro');
                 return;
             }
 
-            const filename = (document.getElementById('downloadStylesLink')?.dataset?.filename) || 'drum-styles.json';
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            let finalDataToDownload = data;
+
+            // Se for melodia (Órgão ou Piano), agrupa no formato estruturado para styles-melody.json
+            if (isMelody) {
+                const instName = this.currentInstrumentMode; // 'orgao' ou 'piano'
+                const structuredData = {};
+                structuredData[instName] = {};
+
+                Object.keys(data).forEach(rhythmName => {
+                    const rhythmData = data[rhythmName];
+                    if (rhythmData && typeof rhythmData === 'object') {
+                        const numSteps = rhythmData.numSteps || 8;
+
+                        // Mapeia as 5 vozes na ordem correta [Voz 5 (note 4), Voz 4 (note 3), Voz 3 (note 2), Voz 2 (note 1), Voz 1 (note 0)]
+                        const vozes = [4, 3, 2, 1, 0].map(note => {
+                            const keyVoice = `${instName}_${note}`;
+                            const voiceData = rhythmData[keyVoice];
+
+                            if (voiceData && Array.isArray(voiceData.steps)) {
+                                return voiceData.steps;
+                            } else if (Array.isArray(voiceData)) {
+                                return voiceData;
+                            }
+                            // Retorna silêncio padrão se a voz não foi configurada
+                            return Array(numSteps).fill(0);
+                        });
+
+                        structuredData[instName][rhythmName] = {
+                            numSteps: numSteps,
+                            vozes: vozes
+                        };
+                    }
+                });
+
+                finalDataToDownload = structuredData;
+            }
+
+            // Cria o blob e força o download de forma limpa em qualquer navegador
+            const blob = new Blob([JSON.stringify(finalDataToDownload, null, 2)], { type: 'application/json;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
+
             document.body.appendChild(a);
             a.click();
-            a.remove();
+
+            // Limpeza de memória
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
         } catch (err) {
-            this.uiController.customAlert('Erro ao gerar o arquivo de download dos styles.', 'Erro');
+            this.uiController.customAlert('Erro ao gerar o arquivo de download dos ritmos.', 'Erro');
         }
     }
 
@@ -1902,7 +1982,8 @@ document.addEventListener('DOMContentLoaded', () => {
         rhythmButtonsControl: document.getElementById('rhythm-buttons'),
         musicNoteIcon: document.getElementById('music-note'),
         musicNoteBeamedIcon: document.getElementById('music-note-beamed'),
-        bpmContainer: document.getElementById('bpm-container')
+        bpmContainer: document.getElementById('bpm-container'),
+        toggleRhythmEditor: document.getElementById('toggleRhythmEditor')
     };
 
     const app = new App(elements);
