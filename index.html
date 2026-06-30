@@ -312,13 +312,18 @@
 
                     <p><a href="#" id="downloadSavesLink">Baixar meu Repertório</a></p>
                     <p><a href="#" id="uploadSavesLink">Importar um Repertório</a></p>
-                    <p class="d-none"><a href="#" id="downloadStylesLink">Baixar Styles</a></p>
+                    <p class="d-none" id="baixarStyles"><a href="#" id="downloadStylesLink">Baixar Styles</a></p>
                     <p><a href="#" id="restoreLink">Restaurar</a></p>
                     <p><a href="#" id="about">Sobre este site</a></p>
                     <p>
                         <label for="volumeMaster" class="mb-0">Volume Master</label>
                         <input type="range" id="volumeMaster" min="0" max="1" step="0.1" value="1.0" class="form-control-range">
                     </p>
+                    <!-- CHAVE ADICIONADA: Habilitar Edição de Ritmo -->
+                    <div class="custom-control custom-switch mt-2">
+                        <input type="checkbox" id="toggleRhythmEditor" class="custom-control-input">
+                        <label class="custom-control-label" for="toggleRhythmEditor">Habilitar Edição de Ritmo</label>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">× Fechar</button>
