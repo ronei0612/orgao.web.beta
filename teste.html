@@ -1,266 +1,82 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-bs-theme="light">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interface Musical</title>
+    <title>Musical Interface</title>
 
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Tom Select CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
-    <style>
-        body {
-            background-color: #ecedf1;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 10px;
-            transition: background-color 0.3s ease;
-        }
-
-        .app-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .btn-teal {
-            background-color: #0b8e8e;
-            color: white;
-            border: 1px solid #0b8e8e;
-        }
-
-            .btn-teal:hover, .input-group .btn:focus {
-                background-color: #0b8e8e;
-                color: white;
-            }
-
-        .input-group .btn-secondary:focus {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        .btn-light-gray {
-            background-color: #f8f9fa;
-            border: 1px solid #ced4da;
-            color: #6c757d;
-        }
-
-        /* Botões Redondos Principais */
-        .btn-circle {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* Botão Play / Stop */
-        .btn-play {
-            background-color: #2b7af1;
-            box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4);
-            transition: all 0.3s ease;
-        }
-
-            .btn-play.playing {
-                background-color: #ff6347; /* Tomate */
-                box-shadow: 0 0 25px 5px rgba(255, 99, 71, 0.6);
-            }
-
-        /* Botão Musica (3 Fases) */
-        .btn-music {
-            background-color: #9a84b8;
-            transition: all 0.3s ease;
-        }
-
-            .btn-music.phase-3 {
-                box-shadow: 0 0 25px 5px rgba(154, 132, 184, 0.8);
-            }
-
-        /* Emoji Branco */
-        .music-emoji {
-            font-style: normal;
-            font-size: 1.4rem;
-            line-height: 1;
-            filter: brightness(0) invert(1); /* Deixa o emoji todo branco */
-        }
-
-        /* Botões de Acordes */
-        .chord-btn {
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            color: white;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.1s, filter 0.2s, box-shadow 0.2s;
-        }
-
-            .chord-btn:active {
-                transform: scale(0.95);
-            }
-
-            /* Estado "Pressionado/Ativo" do acorde */
-            .chord-btn.active {
-                filter: brightness(0.70);
-                box-shadow: 0 0 15px 5px var(--chord-bg);
-                transform: scale(0.95);
-            }
-
-        /* Animação para efeito de "Repressionado" MAIS DISCRETA */
-        @keyframes repress-effect {
-            0% {
-                transform: scale(0.95);
-                filter: brightness(0.70);
-                box-shadow: 0 0 15px 5px var(--chord-bg);
-            }
-
-            50% {
-                transform: scale(0.92);
-                filter: brightness(0.85);
-                box-shadow: 0 0 18px 6px var(--chord-bg);
-            }
-
-            100% {
-                transform: scale(0.95);
-                filter: brightness(0.70);
-                box-shadow: 0 0 15px 5px var(--chord-bg);
-            }
-        }
-
-        .chord-btn.repress-anim {
-            animation: repress-effect 0.2s ease-in-out;
-        }
-
-        /* Cores dos Acordes com uso de CSS Variables */
-        .bg-gray-chord {
-            --chord-bg: #9b95a5;
-            background-color: var(--chord-bg);
-        }
-
-        .bg-c {
-            --chord-bg: #4981ad;
-            background-color: var(--chord-bg);
-        }
-
-        .bg-am {
-            --chord-bg: #a476db;
-            background-color: var(--chord-bg);
-        }
-
-        .bg-f {
-            --chord-bg: #e36be0;
-            background-color: var(--chord-bg);
-        }
-
-        .bg-dm {
-            --chord-bg: #ef7b7b;
-            background-color: var(--chord-bg);
-        }
-
-        .bg-g {
-            --chord-bg: #f98b00;
-            background-color: var(--chord-bg);
-        }
-
-        .bg-em {
-            --chord-bg: #e5bc00;
-            background-color: var(--chord-bg);
-        }
-
-        .main-display {
-            background-color: #fcf9ee;
-            min-height: 350px;
-            border: 1px solid #adb5bd;
-            border-radius: 4px;
-            width: 100%;
-            transition: background-color 0.3s ease;
-        }
-
-        .custom-bpm {
-            text-align: center;
-            min-width: 60px;
-            max-width: 100px;
-        }
-
-        .icon-menu {
-            color: #212529;
-        }
-
-        .form-select, .form-control {
-            border-color: #adb5bd;
-        }
-
-        /* Modo Escuro */
-        [data-bs-theme="dark"] body {
-            background-color: #121212;
-        }
-
-        [data-bs-theme="dark"] .main-display {
-            background-color: #1e1e1e;
-            border-color: #333;
-        }
-
-        [data-bs-theme="dark"] .btn-light-gray {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
-
-        [data-bs-theme="dark"] .icon-menu {
-            color: #f8f9fa;
-        }
-
-        [data-bs-theme="dark"] .ts-control, [data-bs-theme="dark"] .ts-dropdown {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #dee2e6;
-        }
-
-            [data-bs-theme="dark"] .ts-dropdown .option, [data-bs-theme="dark"] .ts-control input {
-                color: #dee2e6;
-            }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="menuLateral" aria-labelledby="menuLateralLabel">
+    <!-- Menu Lateral (Offcanvas) -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sideMenu" aria-labelledby="sideMenuLabel">
         <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title fw-bold" id="menuLateralLabel"><i class="fas fa-cog me-2"></i>Configurações</h5>
+            <h5 class="offcanvas-title fw-bold" id="sideMenuLabel">
+                <i class="fas fa-cog me-2"></i><span data-i18n="settingsTitle">Settings</span>
+            </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <p class="text-muted mb-1">Ajuste as preferências do aplicativo.</p>
-            <div class="form-check form-switch fs-5 d-flex align-items-center gap-1">
-                <input class="form-check-input mt-0" type="checkbox" role="switch" id="toggleDarkMode">
-                <label class="form-check-label mb-0" for="toggleDarkMode">Modo Escuro (Dark Mode)</label>
+            <p class="text-muted mb-4" data-i18n="settingsDesc">Adjust application preferences.</p>
+
+            <!-- Botões de Ação (Tema e Idioma) -->
+            <div class="d-flex gap-3 justify-content-center">
+                <!-- Botão de Modo Escuro / Claro -->
+                <button class="btn btn-setting-circle" id="btn-theme-toggle" title="Toggle Theme">
+                    <i class="bi bi-moon-fill fs-4" id="icon-theme"></i>
+                </button>
+
+                <!-- Botão de Idioma -->
+                <button class="btn btn-setting-circle" id="btn-language-toggle" title="Toggle Language">
+                    <span class="fs-3" id="icon-flag">🇺🇸</span>
+                </button>
             </div>
         </div>
     </div>
 
     <div class="app-container">
+
+        <!-- Barra Superior de Controles -->
         <div class="row g-1 align-items-center mb-1">
             <div class="col-12 col-md-auto d-flex gap-1">
-                <button class="btn btn-link-gray px-3 flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#menuLateral">
+
+                <!-- Botão Menu -->
+                <button class="btn btn-light-gray px-3 flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
                     <i class="fas fa-bars fs-5 icon-menu"></i>
                 </button>
+
+                <!-- Controle de Tom (Transposição) -->
                 <div class="input-group">
-                    <button class="btn btn-teal px-3"><i class="fas fa-minus"></i></button>
-                    <select class="form-select text-center fw-bold">
-                        <option>C</option>
+                    <button class="btn btn-teal px-3" id="btn-key-down"><i class="fas fa-minus"></i></button>
+                    <select class="form-select text-center fw-bold" id="key-select">
+                        <option value="0">C</option>
+                        <option value="1">C#</option>
+                        <option value="2">D</option>
+                        <option value="3">Eb</option>
+                        <option value="4">E</option>
+                        <option value="5">F</option>
+                        <option value="6">F#</option>
+                        <option value="7">G</option>
+                        <option value="8">G#</option>
+                        <option value="9">A</option>
+                        <option value="10">Bb</option>
+                        <option value="11">B</option>
                     </select>
-                    <button class="btn btn-teal px-3"><i class="fas fa-plus"></i></button>
+                    <button class="btn btn-teal px-3" id="btn-key-up"><i class="fas fa-plus"></i></button>
                 </div>
+
+                <!-- Controle de BPM -->
                 <div class="input-group">
                     <button class="btn btn-teal">-5</button>
                     <button class="btn btn-teal border-start"><i class="fas fa-minus"></i></button>
@@ -268,10 +84,12 @@
                     <button class="btn btn-teal">+5</button>
                 </div>
             </div>
+
+            <!-- Seleção de Música -->
             <div class="col-12 col-md">
                 <div class="input-group flex-nowrap">
-                    <select id="select-musica" placeholder="Escolha a Música..." autocomplete="off">
-                        <option value="">Escolha a Música...</option>
+                    <select id="song-select" autocomplete="off">
+                        <option value="" data-i18n="chooseSong">Choose a Song...</option>
                         <option value="1">Aclame ao Senhor</option>
                         <option value="2">Grandioso És Tu</option>
                         <option value="3">Rendido Estou</option>
@@ -283,147 +101,50 @@
             </div>
         </div>
 
+        <!-- Tela Principal de Exibição -->
         <div class="main-display mb-1"></div>
 
+        <!-- Ritmo e Instrumento -->
         <div class="input-group mb-4 flex-nowrap">
             <select class="form-select text-secondary">
-                <option>Sem ritmo</option>
+                <option data-i18n="noRhythm">No rhythm</option>
             </select>
-            <button class="btn btn-secondary fw-bold px-4">ÓRGÃO</button>
+            <button class="btn btn-secondary fw-bold px-4" data-i18n="organ">ORGAN</button>
         </div>
 
-        <!-- BOTÕES PLAY E MÚSICA -->
+        <!-- Botões Circulares Centrais -->
         <div class="d-flex justify-content-center gap-3 mb-3">
-            <button class="btn-circle btn-play" id="btnPlay"><i class="fas fa-play" id="iconPlay"></i></button>
-            <button class="btn-circle btn-music" id="btnMusic"><i class="bi bi-music-note" id="iconMusic"></i></button>
+            <button class="btn-circle btn-play" id="btn-play"><i class="fas fa-play" id="icon-play"></i></button>
+            <button class="btn-circle btn-music" id="btn-music"><i class="bi bi-music-note" id="icon-music"></i></button>
         </div>
 
-        <!-- BOTÕES DE ACORDES -->
+        <!-- Botões de Acordes (Os dados "data-interval" representam a distância em semitons a partir de C) -->
         <div class="d-flex flex-column align-items-center gap-2 mb-3">
             <!-- Linha 1 -->
             <div class="d-flex justify-content-center gap-2">
-                <button class="chord-btn bg-gray-chord">Bb</button>
-                <button class="chord-btn bg-gray-chord">A</button>
-                <button class="chord-btn bg-gray-chord">B°</button>
-                <button class="chord-btn bg-gray-chord">E</button>
-                <button class="chord-btn bg-gray-chord">D</button>
+                <button class="chord-btn bg-degree-gray" data-interval="10" data-type="">Bb</button>
+                <button class="chord-btn bg-degree-gray" data-interval="9" data-type="">A</button>
+                <button class="chord-btn bg-degree-gray" data-interval="11" data-type="°">B°</button>
+                <button class="chord-btn bg-degree-gray" data-interval="4" data-type="">E</button>
+                <button class="chord-btn bg-degree-gray" data-interval="2" data-type="">D</button>
             </div>
             <!-- Linha 2 -->
             <div class="d-flex justify-content-center flex-wrap gap-2">
-                <button class="chord-btn bg-c">C</button>
-                <button class="chord-btn bg-am">Am</button>
-                <button class="chord-btn bg-f">F</button>
-                <button class="chord-btn bg-dm">Dm</button>
-                <button class="chord-btn bg-g">G</button>
-                <button class="chord-btn bg-em">Em</button>
+                <button class="chord-btn bg-degree-1" data-interval="0" data-type="">C</button>
+                <button class="chord-btn bg-degree-6" data-interval="9" data-type="m">Am</button>
+                <button class="chord-btn bg-degree-4" data-interval="5" data-type="">F</button>
+                <button class="chord-btn bg-degree-2" data-interval="2" data-type="m">Dm</button>
+                <button class="chord-btn bg-degree-5" data-interval="7" data-type="">G</button>
+                <button class="chord-btn bg-degree-3" data-interval="4" data-type="m">Em</button>
             </div>
         </div>
     </div>
 
+    <!-- Scripts Externos -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inicialização do Select
-            new TomSelect("#select-musica", {
-                create: false,
-                sortField: { field: "text", direction: "asc" }
-            });
-
-            // Configuração do Modo Escuro
-            const toggleDarkMode = document.getElementById('toggleDarkMode');
-            const htmlElement = document.documentElement;
-            const currentTheme = localStorage.getItem('theme');
-
-            if (currentTheme === 'dark') {
-                htmlElement.setAttribute('data-bs-theme', 'dark');
-                toggleDarkMode.checked = true;
-            }
-
-            toggleDarkMode.addEventListener('change', (e) => {
-                if (e.target.checked) {
-                    htmlElement.setAttribute('data-bs-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    htmlElement.setAttribute('data-bs-theme', 'light');
-                    localStorage.setItem('theme', 'light');
-                }
-            });
-
-            // LÓGICA DE PLAY / STOP e ACORDES
-            const btnPlay = document.getElementById('btnPlay');
-            const iconPlay = document.getElementById('iconPlay');
-            const chordBtns = document.querySelectorAll('.chord-btn');
-            let isPlaying = false;
-
-            function setPlayState(state) {
-                isPlaying = state;
-                if (isPlaying) {
-                    btnPlay.classList.add('playing');
-                    iconPlay.classList.replace('fa-play', 'fa-stop');
-                } else {
-                    btnPlay.classList.remove('playing');
-                    iconPlay.classList.replace('fa-stop', 'fa-play');
-                    chordBtns.forEach(b => {
-                        b.classList.remove('active');
-                        b.classList.remove('repress-anim');
-                    });
-                }
-            }
-
-            btnPlay.addEventListener('click', () => {
-                setPlayState(!isPlaying);
-            });
-
-            chordBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // Verifica se o botão clicado já está ativo
-                    if (btn.classList.contains('active')) {
-                        // Reseta e aciona a animação de "re-pressionar"
-                        btn.classList.remove('repress-anim');
-                        void btn.offsetWidth; // Força um reflow para reiniciar a animação
-                        btn.classList.add('repress-anim');
-                    } else {
-                        // Remove o ativo e a animação de todos
-                        chordBtns.forEach(b => {
-                            b.classList.remove('active');
-                            b.classList.remove('repress-anim');
-                        });
-
-                        // Ativa o atual
-                        btn.classList.add('active');
-
-                        if (!isPlaying) {
-                            setPlayState(true);
-                        }
-                    }
-                });
-            });
-
-            // LÓGICA: BOTÃO DE NOTAS MUSICAIS (3 FASES)
-            const btnMusic = document.getElementById('btnMusic');
-            const iconMusic = document.getElementById('iconMusic');
-            let musicPhase = 1;
-
-            btnMusic.addEventListener('click', () => {
-                musicPhase = (musicPhase % 3) + 1;
-
-                btnMusic.classList.remove('phase-3');
-                iconMusic.className = '';
-                iconMusic.innerText = '';
-
-                if (musicPhase === 1) {
-                    iconMusic.className = 'bi bi-music-note';
-                } else if (musicPhase === 2) {
-                    iconMusic.className = 'bi bi-music-note-beamed';
-                } else if (musicPhase === 3) {
-                    btnMusic.classList.add('phase-3');
-                    iconMusic.className = 'music-emoji';
-                    iconMusic.innerText = '🎶';
-                }
-            });
-        });
-    </script>
+    <!-- Custom JS -->
+    <script src="app.js"></script>
 </body>
 </html>

@@ -1,0 +1,253 @@
+/* Configurações Globais */
+body {
+    background-color: #ecedf1;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.app-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Botões Customizados */
+.btn-teal {
+    background-color: #0b8e8e;
+    color: white;
+    border: 1px solid #0b8e8e;
+}
+
+    .btn-teal:hover, .input-group .btn:focus {
+        background-color: #0b8e8e;
+        color: white;
+    }
+
+.input-group .btn-secondary:focus {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-light-gray {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #6c757d;
+}
+
+/* Botões Redondos de Configurações (Tema e Idioma) */
+.btn-setting-circle {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+    color: #495057;
+}
+
+    .btn-setting-circle:hover {
+        background-color: #dee2e6;
+        transform: scale(1.05);
+    }
+
+    .btn-setting-circle:active {
+        transform: scale(0.95);
+    }
+
+/* Botões Redondos Principais (Play / Music) */
+.btn-circle {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+/* Estado de Play / Stop */
+.btn-play {
+    background-color: #2b7af1;
+    box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4);
+    transition: all 0.3s ease;
+}
+
+    .btn-play.playing {
+        background-color: #ff6347;
+        box-shadow: 0 0 25px 5px rgba(255, 99, 71, 0.6);
+    }
+
+/* Botão de Música */
+.btn-music {
+    background-color: #9a84b8;
+    transition: all 0.3s ease;
+}
+
+    .btn-music.phase-3 {
+        box-shadow: 0 0 25px 5px rgba(154, 132, 184, 0.8);
+    }
+
+.music-emoji {
+    font-style: normal;
+    font-size: 1.4rem;
+    line-height: 1;
+    filter: brightness(0) invert(1);
+}
+
+/* Botões de Acordes */
+.chord-btn {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.1s, filter 0.2s, box-shadow 0.2s;
+}
+
+    .chord-btn:active {
+        transform: scale(0.95);
+    }
+
+    .chord-btn.active {
+        filter: brightness(0.70);
+        box-shadow: 0 0 15px 5px var(--chord-bg);
+        transform: scale(0.95);
+    }
+
+/* Animação Discreta de Repressionamento */
+@keyframes repress-effect {
+    0% {
+        transform: scale(0.95);
+        filter: brightness(0.70);
+        box-shadow: 0 0 15px 5px var(--chord-bg);
+    }
+
+    50% {
+        transform: scale(0.92);
+        filter: brightness(0.85);
+        box-shadow: 0 0 18px 6px var(--chord-bg);
+    }
+
+    100% {
+        transform: scale(0.95);
+        filter: brightness(0.70);
+        box-shadow: 0 0 15px 5px var(--chord-bg);
+    }
+}
+
+.chord-btn.repress-anim {
+    animation: repress-effect 0.2s ease-in-out;
+}
+
+/* Cores Baseadas no Grau do Acorde */
+.bg-degree-gray {
+    --chord-bg: #9b95a5;
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-1 {
+    --chord-bg: #4981ad;
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-6 {
+    --chord-bg: #a476db;
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-4 {
+    --chord-bg: #e36be0;
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-2 {
+    --chord-bg: #ef7b7b;
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-5 {
+    --chord-bg: #f98b00;
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-3 {
+    --chord-bg: #e5bc00;
+    background-color: var(--chord-bg);
+}
+
+/* Display Principal */
+.main-display {
+    background-color: #fcf9ee;
+    min-height: 350px;
+    border: 1px solid #adb5bd;
+    border-radius: 4px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.custom-bpm {
+    text-align: center;
+    min-width: 60px;
+    max-width: 100px;
+}
+
+.icon-menu {
+    color: #212529;
+}
+
+.form-select, .form-control {
+    border-color: #adb5bd;
+}
+
+/* Modo Escuro */
+[data-bs-theme="dark"] body {
+    background-color: #121212;
+}
+
+[data-bs-theme="dark"] .main-display {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+
+[data-bs-theme="dark"] .btn-light-gray {
+    background-color: #2b3035;
+    border-color: #495057;
+    color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .btn-setting-circle {
+    background-color: #2b3035;
+    border-color: #495057;
+    color: #f8f9fa;
+}
+
+    [data-bs-theme="dark"] .btn-setting-circle:hover {
+        background-color: #343a40;
+    }
+
+[data-bs-theme="dark"] .icon-menu {
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .ts-control, [data-bs-theme="dark"] .ts-dropdown {
+    background-color: #2b3035;
+    border-color: #495057;
+    color: #dee2e6;
+}
+
+    [data-bs-theme="dark"] .ts-dropdown .option, [data-bs-theme="dark"] .ts-control input {
+        color: #dee2e6;
+    }
