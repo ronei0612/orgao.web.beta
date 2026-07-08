@@ -45,7 +45,8 @@ class LanguageManager {
         this.btnLangToggle = document.getElementById('btn-language-toggle');
         this.iconFlag = document.getElementById('icon-flag');
         this.tomSelectInstance = tomSelectInstance;
-        this.currentLang = 'en';
+        const systemLang = navigator.language || navigator.userLanguage;
+        this.currentLang = systemLang.startsWith('pt') ? 'pt' : 'en';
 
         this.translations = {
             en: {
@@ -72,6 +73,8 @@ class LanguageManager {
             this.currentLang = this.currentLang === 'en' ? 'pt' : 'en';
             this.updateInterface();
         });
+
+        this.updateInterface();
     }
 
     updateInterface() {
