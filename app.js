@@ -1,5 +1,5 @@
 /**
- * Gerencia a troca de tema (Claro / Escuro) usando um botão com ícone
+ * Gerencia a troca de tema (Claro / Escuro)
  */
 class ThemeManager {
     constructor() {
@@ -27,28 +27,26 @@ class ThemeManager {
         this.htmlElement.setAttribute('data-bs-theme', theme);
         localStorage.setItem('theme', theme);
 
-        // Troca o ícone: Lua no claro, Sol no escuro
         if (this.isDark) {
             this.iconTheme.classList.replace('bi-moon-fill', 'bi-sun-fill');
-            this.iconTheme.style.color = "#ffc107"; // Amarelo para o sol
+            this.iconTheme.style.color = "#ffc107";
         } else {
             this.iconTheme.classList.replace('bi-sun-fill', 'bi-moon-fill');
-            this.iconTheme.style.color = ""; // Volta a cor original
+            this.iconTheme.style.color = "";
         }
     }
 }
 
 /**
- * Gerencia a troca de idioma e as traduções da interface
+ * Gerencia a troca de idioma e atualiza o TomSelect adequadamente
  */
 class LanguageManager {
     constructor(tomSelectInstance) {
         this.btnLangToggle = document.getElementById('btn-language-toggle');
         this.iconFlag = document.getElementById('icon-flag');
         this.tomSelectInstance = tomSelectInstance;
-        this.currentLang = 'en'; // Default
+        this.currentLang = 'en';
 
-        // Dicionário de traduções
         this.translations = {
             en: {
                 settingsTitle: "Settings",
@@ -77,12 +75,10 @@ class LanguageManager {
     }
 
     updateInterface() {
-        // Altera o emoji da bandeira no botão
         this.iconFlag.innerText = this.currentLang === 'en' ? '🇺🇸' : '🇧🇷';
-
         const dict = this.translations[this.currentLang];
 
-        // Atualiza todos os elementos que possuem o atributo data-i18n
+        // Atualiza elementos HTML normais usando innerText
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (dict[key]) {
@@ -90,15 +86,18 @@ class LanguageManager {
             }
         });
 
-        // Atualiza o texto nativo (placeholder) dentro do componente TomSelect
+        // Força a atualização do texto do TomSelect (Placeholder nativo)
         if (this.tomSelectInstance) {
-            const option = this.tomSelectInstance.options['']; // Option com value vazio
-            if (option) {
-                this.tomSelectInstance.updateOption('', {
-                    value: '',
-                    text: dict.chooseSong
-                });
-            }
+            // Atualiza o texto visual do input do plugin
+            this.tomSelectInstance.settings.placeholder = dict.chooseSong;
+            this.tomSelectInstance.control_input.placeholder = dict.chooseSong;
+
+            // Atualiza a opção vazia na lista suspensa
+            this.tomSelectInstance.updateOption('', {
+                value: '',
+                text: dict.chooseSong
+            });
+            this.tomSelectInstance.sync();
         }
     }
 }
@@ -174,7 +173,7 @@ class NotePhaseManager {
 }
 
 /**
- * Gerencia os acordes (Interações e Transposição de Tom)
+ * Gerencia os acordes (Interações e Inteligência de Sustenido/Bemol)
  */
 class ChordManager {
     constructor(playbackManager) {
@@ -185,7 +184,9 @@ class ChordManager {
         this.btnKeyDown = document.getElementById('btn-key-down');
         this.btnKeyUp = document.getElementById('btn-key-up');
 
-        this.notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+        // Escalas cromáticas separadas
+        this.notesSharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        this.notesFlat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
         this.init();
     }
@@ -206,7 +207,7 @@ class ChordManager {
     handleChordClick(btn) {
         if (btn.classList.contains('active')) {
             btn.classList.remove('repress-anim');
-            void btn.offsetWidth; // Force reflow
+            void btn.offsetWidth;
             btn.classList.add('repress-anim');
         } else {
             this.clearActiveChords();
@@ -234,12 +235,19 @@ class ChordManager {
     }
 
     transposeChords(keyOffset) {
+        // Pega o texto da opção selecionada (ex: "Eb", "F#", "C")
+        const selectedText = this.keySelect.options[this.keySelect.selectedIndex].text;
+
+        // Se o tom tiver "b" no nome, OU se o tom for "F" (Fá maior usa notas bemóis), usa a escala flat
+        const useFlats = selectedText.includes('b') || selectedText === 'F';
+        const currentScale = useFlats ? this.notesFlat : this.notesSharp;
+
         this.chordBtns.forEach(btn => {
             const baseInterval = parseInt(btn.getAttribute('data-interval'), 10);
             const chordType = btn.getAttribute('data-type');
 
             const newIndex = (baseInterval + keyOffset) % 12;
-            const newNote = this.notes[newIndex];
+            const newNote = currentScale[newIndex];
 
             btn.innerText = `${newNote}${chordType}`;
         });
@@ -247,11 +255,10 @@ class ChordManager {
 }
 
 /**
- * Inicialização do Sistema
+ * Inicialização Principal
  */
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Inicia o TomSelect e guarda a referência
     const tomSelectInstance = new TomSelect("#song-select", {
         create: false,
         sortField: { field: "text", direction: "asc" }

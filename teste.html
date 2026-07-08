@@ -31,16 +31,22 @@
             <p class="text-muted mb-4" data-i18n="settingsDesc">Adjust application preferences.</p>
 
             <!-- Botões de Ação (Tema e Idioma) -->
-            <div class="d-flex gap-3 justify-content-center">
+            <div class="d-flex gap-2 justify-content-center">
                 <!-- Botão de Modo Escuro / Claro -->
                 <button class="btn btn-setting-circle" id="btn-theme-toggle" title="Toggle Theme">
-                    <i class="bi bi-moon-fill fs-4" id="icon-theme"></i>
+                    <i class="bi bi-moon-fill fs-5" id="icon-theme"></i>
                 </button>
 
                 <!-- Botão de Idioma -->
                 <button class="btn btn-setting-circle" id="btn-language-toggle" title="Toggle Language">
-                    <span class="fs-3" id="icon-flag">🇺🇸</span>
+                    <span class="fs-4" id="icon-flag">🇺🇸</span>
                 </button>
+            </div>
+
+            <!-- Espaço reservado para os próximos itens que você for colocar no menu -->
+            <hr class="my-4">
+            <div id="extra-menu-items">
+                <!-- Seus novos itens entrarão aqui -->
             </div>
         </div>
     </div>
@@ -49,11 +55,11 @@
 
         <!-- Barra Superior de Controles -->
         <div class="row g-1 align-items-center mb-1">
-            <div class="col-12 col-md-auto d-flex gap-1">
+            <div class="col-12 col-md-auto d-flex gap-1 align-items-center">
 
-                <!-- Botão Menu -->
-                <button class="btn btn-light-gray px-3 flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
-                    <i class="fas fa-bars fs-5 icon-menu"></i>
+                <!-- Botão Menu (Agora Apenas Ícone) -->
+                <button class="btn-menu-icon flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
+                    <i class="fas fa-bars icon-menu"></i>
                 </button>
 
                 <!-- Controle de Tom (Transposição) -->
@@ -106,7 +112,7 @@
 
         <!-- Ritmo e Instrumento -->
         <div class="input-group mb-4 flex-nowrap">
-            <select class="form-select text-secondary">
+            <select class="form-select text-secondary" id="rhythm-select">
                 <option data-i18n="noRhythm">No rhythm</option>
             </select>
             <button class="btn btn-secondary fw-bold px-4" data-i18n="organ">ORGAN</button>
