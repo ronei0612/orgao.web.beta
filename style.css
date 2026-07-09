@@ -222,15 +222,17 @@ body {
     background-color: var(--chord-bg);
 }
 
-/* Display Principal Flexível */
-.main-display {
-    flex-grow: 1;
-    min-height: 80px;
+/* Display Principal (Música/Partitura e Liturgia) */
+.main-display, .main-iframe {
     background-color: #fcf9ee;
     border: 1px solid #adb5bd;
     border-radius: 4px;
     width: 100%;
     transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.main-display {
+    min-height: 80px;
     white-space: pre-wrap;
     outline: none;
     padding: 15px;
@@ -243,6 +245,10 @@ body {
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         cursor: text;
     }
+
+.main-iframe {
+    background-color: #ffffff;
+}
 
 .custom-bpm {
     text-align: center;
@@ -265,11 +271,10 @@ body {
     border-radius: 4px;
 }
 
-/* Sombras laterais para indicar scroll */
 .scroll-shadow {
     position: absolute;
-    top: 5px; /* Compensa o padding-top */
-    bottom: 5px; /* Compensa o padding-bottom */
+    top: 5px;
+    bottom: 5px;
     width: 25px;
     pointer-events: none;
     z-index: 10;
@@ -301,7 +306,6 @@ body {
         cursor: grabbing;
     }
 
-    /* Custom Scrollbar */
     .piano-container::-webkit-scrollbar {
         height: 6px;
     }
@@ -324,7 +328,6 @@ body {
     cursor: pointer;
     flex-shrink: 0;
     transition: background-color 0.1s, transform 0.1s;
-    /* Configuração do Texto (Nome das notas) */
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -334,7 +337,7 @@ body {
 }
 
     .key span {
-        pointer-events: none; /* Para não bugar o clique e o arraste */
+        pointer-events: none;
     }
 
     .key.white {
@@ -361,7 +364,6 @@ body {
         padding-bottom: 5px;
     }
 
-    /* Efeito de Pressão */
     .key.white.pressed {
         background-color: #e9ecef;
         box-shadow: 0 1px 1px rgba(0,0,0,0.1);
@@ -374,19 +376,19 @@ body {
         transform: translateY(2px);
     }
 
-/* Auto-Ocultamento em telas pequenas para preservar a área de leitura/edição */
 @media (max-height: 650px) {
     .piano-wrapper {
         display: none !important;
     }
 }
 
-/* MODO ESCURO */
+/* MODO ESCURO (Limpo de redundâncias que o Bootstrap já cobre) */
 [data-bs-theme="dark"] body {
     background-color: #121212;
 }
 
-[data-bs-theme="dark"] .main-display {
+[data-bs-theme="dark"] .main-display,
+[data-bs-theme="dark"] .main-iframe {
     background-color: #1e1e1e;
     border-color: #333;
 }
@@ -411,24 +413,17 @@ body {
         background-color: #343a40;
     }
 
-/* Correções TomSelect Modo Escuro */
-[data-bs-theme="dark"] .ts-control {
-    background-color: #2b3035;
-    border-color: #495057;
-    color: #dee2e6;
-}
-
-    [data-bs-theme="dark"] .ts-control > input {
-        color: #dee2e6;
-    }
-
+/* TomSelect Dark Mode Fix */
+[data-bs-theme="dark"] .ts-control,
 [data-bs-theme="dark"] .ts-dropdown {
     background-color: #2b3035;
     border-color: #495057;
     color: #dee2e6;
 }
 
-    [data-bs-theme="dark"] .ts-dropdown .option {
+    [data-bs-theme="dark"] .ts-control > input,
+    [data-bs-theme="dark"] .ts-dropdown .option,
+    [data-bs-theme="dark"] .ts-control .item {
         color: #dee2e6;
     }
 
@@ -438,11 +433,7 @@ body {
             color: #fff;
         }
 
-[data-bs-theme="dark"] .ts-control .item {
-    color: #dee2e6;
-}
-
-/* Piano no Modo Escuro */
+/* Piano Modo Escuro */
 [data-bs-theme="dark"] .key.white {
     background-color: #cfd4da;
     border-color: #495057;

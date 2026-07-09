@@ -17,12 +17,12 @@
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sideMenu" aria-labelledby="sideMenuLabel">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-bold" id="sideMenuLabel">
-                <i class="fas fa-cog me-2"></i><span data-i18n="settingsTitle">Configurações</span>
+                <i class="fas fa-bars me-2"></i><span data-i18n="settingsTitle">Menu</span>
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            <p class="text-muted mb-4" data-i18n="settingsDesc">Ajuste as preferências do aplicativo.</p>
+            <p class="text-muted mb-4" data-i18n="settingsDesc">Navegue pelas opções do aplicativo.</p>
 
             <div class="d-flex gap-2 justify-content-center mb-4">
                 <button class="btn btn-setting-circle" id="btn-theme-toggle" title="Alternar Tema">
@@ -35,8 +35,12 @@
 
             <hr class="my-4">
 
-            <!-- Links Azuis de Download e Importação -->
+            <!-- Links Azuis de Navegação, Download e Importação -->
             <div class="d-flex flex-column gap-2 ps-2">
+                <a href="#" class="text-decoration-none link-primary py-1" id="btn-liturgy">
+                    <span data-i18n="liturgy">📖 Liturgia Diária</span>
+                </a>
+
                 <a href="#" class="text-decoration-none link-primary py-1" data-bs-toggle="modal" data-bs-target="#exportModal">
                     <i class="fas fa-download me-2"></i><span data-i18n="downloadRepertoire">Baixar meu Repertório</span>
                 </a>
@@ -49,7 +53,7 @@
 
     <div class="app-container">
 
-        <!-- Barra Superior -->
+        <!-- Barra Superior (LAYOUT MANTIDO INTACTO COMO SOLICITADO) -->
         <div class="row g-1 align-items-center mb-1 flex-shrink-0">
             <div class="col-12 col-md-auto d-flex gap-1 align-items-center">
 
@@ -84,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- Seleção e Ações de Música -->
+            <!-- Seleção e Ações de Música (LAYOUT MANTIDO INTACTO) -->
             <div class="col-12 col-md">
                 <div class="input-group flex-nowrap" id="song-control-group">
                     <div id="wrapper-song-select" class="flex-grow-1" style="min-width: 0;">
@@ -106,8 +110,9 @@
             </div>
         </div>
 
-        <!-- Tela Principal -->
-        <div class="main-display mb-2" id="main-display" contenteditable="false"></div>
+        <!-- Displays Principais (Letra/Partitura vs Liturgia) -->
+        <div class="main-display flex-grow-1 mb-2" id="main-display" contenteditable="false"></div>
+        <iframe class="main-iframe flex-grow-1 d-none mb-2" id="main-iframe" src=""></iframe>
 
         <div class="input-group mb-2 flex-nowrap flex-shrink-0">
             <select class="form-select text-secondary" id="rhythm-select">
@@ -140,55 +145,13 @@
             </div>
         </div>
 
-        <!-- Wrapper do Piano (Com sombras de contorno laterais) -->
+        <!-- Wrapper do Piano (Teclas geradas via JS) -->
         <div class="piano-wrapper flex-shrink-0 mt-auto">
             <div class="scroll-shadow scroll-shadow-left d-none"></div>
             <div class="scroll-shadow scroll-shadow-right d-none"></div>
 
             <div class="piano-container" id="piano-container">
-                <div class="piano">
-                    <!-- Oitava 3 -->
-                    <div class="key white"><span>C3</span></div>
-                    <div class="key black"><span>C#3</span></div>
-                    <div class="key white"><span>D3</span></div>
-                    <div class="key black"><span>D#3</span></div>
-                    <div class="key white"><span>E3</span></div>
-                    <div class="key white"><span>F3</span></div>
-                    <div class="key black"><span>F#3</span></div>
-                    <div class="key white"><span>G3</span></div>
-                    <div class="key black"><span>G#3</span></div>
-                    <div class="key white"><span>A3</span></div>
-                    <div class="key black"><span>A#3</span></div>
-                    <div class="key white"><span>B3</span></div>
-                    <!-- Oitava 4 -->
-                    <div class="key white"><span>C4</span></div>
-                    <div class="key black"><span>C#4</span></div>
-                    <div class="key white"><span>D4</span></div>
-                    <div class="key black"><span>D#4</span></div>
-                    <div class="key white"><span>E4</span></div>
-                    <div class="key white"><span>F4</span></div>
-                    <div class="key black"><span>F#4</span></div>
-                    <div class="key white"><span>G4</span></div>
-                    <div class="key black"><span>G#4</span></div>
-                    <div class="key white"><span>A4</span></div>
-                    <div class="key black"><span>A#4</span></div>
-                    <div class="key white"><span>B4</span></div>
-                    <!-- Oitava 5 -->
-                    <div class="key white"><span>C5</span></div>
-                    <div class="key black"><span>C#5</span></div>
-                    <div class="key white"><span>D5</span></div>
-                    <div class="key black"><span>D#5</span></div>
-                    <div class="key white"><span>E5</span></div>
-                    <div class="key white"><span>F5</span></div>
-                    <div class="key black"><span>F#5</span></div>
-                    <div class="key white"><span>G5</span></div>
-                    <div class="key black"><span>G#5</span></div>
-                    <div class="key white"><span>A5</span></div>
-                    <div class="key black"><span>A#5</span></div>
-                    <div class="key white"><span>B5</span></div>
-                    <!-- Tecla Final (Dó 6) -->
-                    <div class="key white"><span>C6</span></div>
-                </div>
+                <div class="piano" id="piano"></div>
             </div>
         </div>
 
@@ -199,13 +162,13 @@
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
-                    <h6 class="modal-title fw-bold" id="confirmModalTitle" data-i18n="confirmSaveTitle">Confirmar</h6>
+                    <h6 class="modal-title fw-bold" id="confirmModalTitle">Confirmar</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body py-3" id="confirmModalBody" data-i18n="confirmSaveBody">Tem certeza?</div>
+                <div class="modal-body py-3" id="confirmModalBody">Tem certeza?</div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" id="btn-confirm-no" data-i18n="no">Não</button>
-                    <button type="button" class="btn btn-teal btn-sm text-white" id="btn-confirm-yes" data-i18n="yes">Sim</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" id="btn-confirm-no">Não</button>
+                    <button type="button" class="btn btn-teal btn-sm text-white" id="btn-confirm-yes">Sim</button>
                 </div>
             </div>
         </div>

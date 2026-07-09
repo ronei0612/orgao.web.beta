@@ -1,7 +1,8 @@
 {
   "en": {
-    "settingsTitle": "Settings",
-    "settingsDesc": "Adjust application preferences.",
+    "settingsTitle": "Menu",
+    "settingsDesc": "Navigate application options.",
+    "liturgy": "📖 Daily Liturgy",
     "chooseSong": "Choose a Song...",
     "noRhythm": "No rhythm",
     "organ": "ORGAN",
@@ -24,8 +25,9 @@
     "no": "No"
   },
   "pt": {
-    "settingsTitle": "Configurações",
-    "settingsDesc": "Ajuste as preferências do aplicativo.",
+    "settingsTitle": "Menu",
+    "settingsDesc": "Navegue pelas opções do aplicativo.",
+    "liturgy": "📖 Liturgia Diária",
     "chooseSong": "Escolha a Música...",
     "noRhythm": "Sem ritmo",
     "organ": "ÓRGÃO",
