@@ -38,7 +38,7 @@ class ThemeManager {
 }
 
 /**
- * Gerencia a troca de idioma e os dicionários
+ * Gerencia a troca de idioma importando os dados do arquivo JSON
  */
 class LanguageManager {
     constructor(tomSelectInstance) {
@@ -49,58 +49,28 @@ class LanguageManager {
         const systemLang = navigator.language || navigator.userLanguage;
         this.currentLang = systemLang.startsWith('pt') ? 'pt' : 'en';
 
-        this.translations = {
-            en: {
-                settingsTitle: "Settings",
-                settingsDesc: "Adjust application preferences.",
-                chooseSong: "Choose a Song...",
-                noRhythm: "No rhythm",
-                organ: "ORGAN",
-                downloadRepertoire: "Download my Repertoire",
-                importRepertoire: "Import a Repertoire",
-                exportTitle: "Export Repertoire",
-                importTitle: "Import Repertoire",
-                selectAll: "Select All",
-                cancel: "Cancel",
-                songTitlePlaceholder: "Song title...",
-                confirmSaveTitle: "Save Song",
-                confirmSaveBody: "Are you sure you want to save this song?",
-                confirmCancelTitle: "Cancel Changes",
-                confirmCancelBody: "Are you sure you want to cancel? Unsaved changes will be lost.",
-                confirmDeleteTitle: "Delete Song",
-                confirmDeleteBody: "Are you sure you want to delete this song?",
-                duplicateTitle: "Duplicate Title",
-                duplicateBody: "A song with this title already exists. Please choose a unique title.",
-                yes: "Yes",
-                no: "No"
-            },
-            pt: {
-                settingsTitle: "Configurações",
-                settingsDesc: "Ajuste as preferências do aplicativo.",
-                chooseSong: "Escolha a Música...",
-                noRhythm: "Sem ritmo",
-                organ: "ÓRGÃO",
-                downloadRepertoire: "Baixar meu Repertório",
-                importRepertoire: "Importar um Repertório",
-                exportTitle: "Exportar Repertório",
-                importTitle: "Importar Repertório",
-                selectAll: "Selecionar Tudo",
-                cancel: "Cancelar",
-                songTitlePlaceholder: "Título da música...",
-                confirmSaveTitle: "Salvar Música",
-                confirmSaveBody: "Tem certeza de que deseja salvar esta música?",
-                confirmCancelTitle: "Cancelar Alterações",
-                confirmCancelBody: "Tem certeza de que deseja cancelar? Todas as alterações não salvas serão perdidas.",
-                confirmDeleteTitle: "Excluir Música",
-                confirmDeleteBody: "Tem certeza de que deseja excluir esta música?",
-                duplicateTitle: "Título Duplicado",
-                duplicateBody: "Uma música com este título já existe. Por favor, escolha um título único.",
-                yes: "Sim",
-                no: "Não"
-            }
-        };
+        this.translations = {}; // Inicia vazio, será preenchido pelo fetch
 
-        this.init();
+        // Inicia o processo de carregamento do JSON
+        this.loadTranslations();
+    }
+
+    async loadTranslations() {
+        try {
+            // Requisita o arquivo JSON externo
+            const response = await fetch('translations.json');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            this.translations = await response.json();
+
+            // Só inicia os eventos de clique e atualiza a interface após carregar os dados
+            this.init();
+        } catch (error) {
+            console.error("Erro ao carregar as traduções:", error);
+        }
     }
 
     init() {
@@ -108,10 +78,15 @@ class LanguageManager {
             this.currentLang = this.currentLang === 'en' ? 'pt' : 'en';
             this.updateInterface();
         });
+
+        // Faz a tradução inicial assim que o arquivo é carregado
         this.updateInterface();
     }
 
     updateInterface() {
+        // Se as traduções não carregaram, aborta para não gerar erros
+        if (!this.translations[this.currentLang]) return;
+
         this.iconFlag.innerText = this.currentLang === 'en' ? '🇺🇸' : '🇧🇷';
         const dict = this.translations[this.currentLang];
 
@@ -137,7 +112,7 @@ class LanguageManager {
 }
 
 /**
- * Gerencia o Repertório (Persistência, Edição Inline, Modais de Confirmação e Segurança)
+ * Gerencia o Repertório (Persistência, CRUD Inline e Modais)
  */
 class RepertoireManager {
     constructor(tomSelectInstance, languageManager) {
@@ -228,7 +203,8 @@ class RepertoireManager {
 
     showCustomModal(titleKey, bodyKey, onConfirm, showCancel = true) {
         const lang = this.langManager.currentLang;
-        const dict = this.langManager.translations[lang];
+        // Garantia caso as traduções ainda estejam carregando no background
+        const dict = this.langManager.translations[lang] || {};
 
         document.getElementById('confirmModalTitle').innerText = dict[titleKey] || titleKey;
         document.getElementById('confirmModalBody').innerText = dict[bodyKey] || bodyKey;
@@ -589,12 +565,10 @@ class PianoManager {
     init() {
         if (!this.container) return;
 
-        // Atualiza as sombras ao rolar ou redimensionar a tela
         this.container.addEventListener('scroll', () => this.updateShadows());
         window.addEventListener('resize', () => this.updateShadows());
         setTimeout(() => this.updateShadows(), 100);
 
-        // Lógica de Mouse (Desktop)
         this.container.addEventListener('mousedown', (e) => {
             this.isDown = true;
             this.isDragging = false;
@@ -604,7 +578,7 @@ class PianoManager {
             const key = e.target.closest('.key');
             if (key) {
                 this.activeKey = key;
-                key.classList.add('pressed'); // "Arma" a tecla visualmente
+                key.classList.add('pressed');
             }
         });
 
@@ -613,7 +587,7 @@ class PianoManager {
             if (this.activeKey) {
                 this.activeKey.classList.remove('pressed');
                 if (!this.isDragging) {
-                    // TO DO FUTURO: Código para tocar o som (Tocou a nota!)
+                    // Tocar a nota aqui no futuro
                 }
                 this.activeKey = null;
             }
@@ -625,19 +599,16 @@ class PianoManager {
             const x = e.pageX - this.container.offsetLeft;
             const walk = (x - this.startX);
 
-            // Se moveu mais de 5px, considera arraste
             if (Math.abs(walk) > 5) {
                 this.isDragging = true;
                 this.container.scrollLeft = this.scrollLeft - walk;
 
-                // Cancela o visual da tecla pressionada durante o arraste
                 if (this.activeKey) {
                     this.activeKey.classList.remove('pressed');
                 }
             }
         });
 
-        // Lógica de Toque (Mobile/Tablet)
         this.container.addEventListener('touchstart', (e) => {
             this.isDown = true;
             this.isDragging = false;
@@ -677,11 +648,9 @@ class PianoManager {
         const maxScroll = this.container.scrollWidth - this.container.clientWidth;
         const currentScroll = this.container.scrollLeft;
 
-        // Controle sombra esquerda
         if (currentScroll > 0) this.shadowLeft.classList.remove('d-none');
         else this.shadowLeft.classList.add('d-none');
 
-        // Controle sombra direita (-1 para margem de arredondamento de pixels)
         if (currentScroll < maxScroll - 1 && maxScroll > 0) this.shadowRight.classList.remove('d-none');
         else this.shadowRight.classList.add('d-none');
     }
