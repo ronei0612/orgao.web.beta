@@ -1,7 +1,6 @@
 {
   "en": {
     "settingsTitle": "Menu",
-    "settingsDesc": "Navigate application options.",
     "liturgy": "📖 Daily Liturgy",
     "chooseSong": "Choose a Song...",
     "noRhythm": "No rhythm",
@@ -26,7 +25,6 @@
   },
   "pt": {
     "settingsTitle": "Menu",
-    "settingsDesc": "Navegue pelas opções do aplicativo.",
     "liturgy": "📖 Liturgia Diária",
     "chooseSong": "Escolha a Música...",
     "noRhythm": "Sem ritmo",
