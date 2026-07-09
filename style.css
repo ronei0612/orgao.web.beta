@@ -187,38 +187,49 @@ body {
     animation: repress-effect 0.2s ease-in-out;
 }
 
+/* Paleta de Cores Modernas dos Acordes */
 .bg-degree-gray {
-    --chord-bg: #9b95a5;
+    --chord-bg: #788290; /* Cinza Ardósia Neutro */
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-minor-rel {
+    --chord-bg: #b095e6; /* Violeta Suave (Ponte visual com o Am) */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-1 {
-    --chord-bg: #4981ad;
+    --chord-bg: #4c8ade; /* Azul Suave */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-6 {
-    --chord-bg: #a476db;
+    --chord-bg: #8056d6; /* Roxo Moderno (Am) */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-4 {
-    --chord-bg: #e36be0;
+    --chord-bg: #d16baf; /* Rosa Antigo */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-2 {
-    --chord-bg: #ef7b7b;
+    --chord-bg: #e06c6c; /* Vermelho Terroso / Salmão */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-5 {
-    --chord-bg: #f98b00;
+    --chord-bg: #e88d4f; /* Laranja Pêssego */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-3 {
-    --chord-bg: #e5bc00;
+    --chord-bg: #d9aa45; /* Amarelo Mostarda */
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-3-rel {
+    --chord-bg: #9c67d6; /* Roxo Vibrante/Quente (Ponte de tensão para o Am) */
     background-color: var(--chord-bg);
 }
 
