@@ -28,6 +28,18 @@ body {
     color: white;
 }
 
+/* Força os botões finais do input group a terem cantos arredondados corretos */
+.force-rounded-end {
+    border-top-right-radius: var(--bs-border-radius) !important;
+    border-bottom-right-radius: var(--bs-border-radius) !important;
+}
+
+/* Remove o arredondamento direito do TomSelect para colar com os botões */
+#wrapper-song-select .ts-control {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
 /* Botão de Menu (Apenas Ícone) */
 .btn-menu-icon {
     background: transparent;
@@ -43,7 +55,7 @@ body {
         color: #0b8e8e;
     }
 
-/* Botões Redondos de Configurações (Tema e Idioma) - Reduzidos */
+/* Botões Redondos de Configurações - Reduzidos */
 .btn-setting-circle {
     width: 45px;
     height: 45px;
@@ -137,7 +149,6 @@ body {
         transform: scale(0.95);
     }
 
-/* Animação Discreta de Repressionamento */
 @keyframes repress-effect {
     0% {
         transform: scale(0.95);
@@ -198,15 +209,27 @@ body {
     background-color: var(--chord-bg);
 }
 
-/* Display Principal */
+/* Display Principal (Com suporte a Rich Text) */
 .main-display {
     background-color: #fcf9ee;
     min-height: 350px;
     border: 1px solid #adb5bd;
     border-radius: 4px;
     width: 100%;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    white-space: pre-wrap;
+    outline: none;
+    padding: 15px;
+    overflow-y: auto;
 }
+
+    /* Estado de Edição (Rich Text Ativo) */
+    .main-display[contenteditable="true"] {
+        background-color: #ffffff;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        cursor: text;
+    }
 
 .custom-bpm {
     text-align: center;
@@ -222,6 +245,11 @@ body {
     border-color: #adb5bd;
 }
 
+/* Ajuste fino para os botões inline no input-group */
+.input-group > .btn {
+    transition: all 0.15s ease-in-out;
+}
+
 /* Modo Escuro */
 [data-bs-theme="dark"] body {
     background-color: #121212;
@@ -231,6 +259,12 @@ body {
     background-color: #1e1e1e;
     border-color: #333;
 }
+
+    [data-bs-theme="dark"] .main-display[contenteditable="true"] {
+        background-color: #212529;
+        border-color: #0b8e8e;
+        box-shadow: 0 0 0 0.25rem rgba(11, 142, 142, 0.25);
+    }
 
 [data-bs-theme="dark"] .btn-menu-icon {
     color: #f8f9fa;
@@ -246,12 +280,33 @@ body {
         background-color: #343a40;
     }
 
-[data-bs-theme="dark"] .ts-control, [data-bs-theme="dark"] .ts-dropdown {
+/* Correções Avançadas do TomSelect no Modo Escuro */
+[data-bs-theme="dark"] .ts-control {
     background-color: #2b3035;
     border-color: #495057;
     color: #dee2e6;
 }
 
-    [data-bs-theme="dark"] .ts-dropdown .option, [data-bs-theme="dark"] .ts-control input {
+    [data-bs-theme="dark"] .ts-control > input {
         color: #dee2e6;
     }
+
+[data-bs-theme="dark"] .ts-dropdown {
+    background-color: #2b3035;
+    border-color: #495057;
+    color: #dee2e6;
+}
+
+    [data-bs-theme="dark"] .ts-dropdown .option {
+        color: #dee2e6;
+    }
+
+        [data-bs-theme="dark"] .ts-dropdown .option:hover,
+        [data-bs-theme="dark"] .ts-dropdown .option.active {
+            background-color: #495057;
+            color: #fff;
+        }
+
+[data-bs-theme="dark"] .ts-control .item {
+    color: #dee2e6;
+}

@@ -30,23 +30,25 @@
         <div class="offcanvas-body">
             <p class="text-muted mb-4" data-i18n="settingsDesc">Adjust application preferences.</p>
 
-            <!-- Botões de Ação (Tema e Idioma) -->
-            <div class="d-flex gap-2 justify-content-center">
-                <!-- Botão de Modo Escuro / Claro -->
+            <div class="d-flex gap-2 justify-content-center mb-4">
                 <button class="btn btn-setting-circle" id="btn-theme-toggle" title="Toggle Theme">
                     <i class="bi bi-moon-fill fs-5" id="icon-theme"></i>
                 </button>
-
-                <!-- Botão de Idioma -->
                 <button class="btn btn-setting-circle" id="btn-language-toggle" title="Toggle Language">
                     <span class="fs-4" id="icon-flag">🇺🇸</span>
                 </button>
             </div>
 
-            <!-- Espaço reservado para os próximos itens que você for colocar no menu -->
             <hr class="my-4">
-            <div id="extra-menu-items">
-                <!-- Seus novos itens entrarão aqui -->
+
+            <!-- Links Azuis de Download e Importação de Repertório -->
+            <div class="d-flex flex-column gap-2 ps-2">
+                <a href="#" class="text-decoration-none link-primary py-1" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <i class="fas fa-download me-2"></i><span data-i18n="downloadRepertoire">Download my Repertoire</span>
+                </a>
+                <a href="#" class="text-decoration-none link-primary py-1" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <i class="fas fa-upload me-2"></i><span data-i18n="importRepertoire">Import a Repertoire</span>
+                </a>
             </div>
         </div>
     </div>
@@ -57,12 +59,10 @@
         <div class="row g-1 align-items-center mb-1">
             <div class="col-12 col-md-auto d-flex gap-1 align-items-center">
 
-                <!-- Botão Menu (Agora Apenas Ícone) -->
                 <button class="btn-menu-icon flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
                     <i class="fas fa-bars icon-menu"></i>
                 </button>
 
-                <!-- Controle de Tom (Transposição) -->
                 <div class="input-group">
                     <button class="btn btn-teal px-3" id="btn-key-down"><i class="fas fa-minus"></i></button>
                     <select class="form-select text-center fw-bold" id="key-select">
@@ -82,7 +82,6 @@
                     <button class="btn btn-teal px-3" id="btn-key-up"><i class="fas fa-plus"></i></button>
                 </div>
 
-                <!-- Controle de BPM -->
                 <div class="input-group">
                     <button class="btn btn-teal">-5</button>
                     <button class="btn btn-teal border-start"><i class="fas fa-minus"></i></button>
@@ -91,26 +90,38 @@
                 </div>
             </div>
 
-            <!-- Seleção de Música -->
+            <!-- Seleção de Música e Controle de Edição -->
             <div class="col-12 col-md">
-                <div class="input-group flex-nowrap">
-                    <select id="song-select" autocomplete="off">
-                        <option value="" data-i18n="chooseSong">Choose a Song...</option>
-                        <option value="1">Aclame ao Senhor</option>
-                        <option value="2">Grandioso És Tu</option>
-                        <option value="3">Rendido Estou</option>
-                        <option value="4">Ousado Amor</option>
-                        <option value="5">Quão Grande é o Meu Deus</option>
-                    </select>
-                    <button class="btn btn-teal px-3"><i class="fas fa-plus"></i></button>
+                <div class="input-group flex-nowrap" id="song-control-group">
+
+                    <!-- View Mode (Select) -->
+                    <div id="wrapper-song-select" class="flex-grow-1" style="min-width: 0;">
+                        <select id="song-select" autocomplete="off" placeholder="Choose a Song...">
+                            <option value=""></option>
+                        </select>
+                    </div>
+
+                    <!-- Edit Mode (Input Title) -->
+                    <input type="text" id="song-title-input" class="form-control d-none" data-i18n-placeholder="songTitlePlaceholder" placeholder="Song title...">
+
+                    <!-- Botão Principal + -->
+                    <button class="btn btn-teal px-3 force-rounded-end" id="btn-action-toggle" title="Actions"><i class="fas fa-plus"></i></button>
+
+                    <!-- Botões de Ação Inline (Adicionar, Editar, Excluir) -->
+                    <button class="btn btn-success d-none" id="btn-action-add" title="Add"><i class="fas fa-file-medical"></i></button>
+                    <button class="btn btn-info text-white d-none" id="btn-action-edit" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger force-rounded-end d-none" id="btn-action-delete" title="Delete"><i class="fas fa-trash"></i></button>
+
+                    <!-- Edit/Add Mode Buttons (Salvar Azul, Cancelar Vermelho) -->
+                    <button class="btn btn-primary d-none border-start border-white" id="btn-action-save" title="Save"><i class="fas fa-save"></i></button>
+                    <button class="btn btn-danger force-rounded-end d-none border-start border-white" id="btn-action-cancel" title="Cancel"><i class="fas fa-times"></i></button>
                 </div>
             </div>
         </div>
 
         <!-- Tela Principal de Exibição -->
-        <div class="main-display mb-1"></div>
+        <div class="main-display mb-1" id="main-display" contenteditable="false"></div>
 
-        <!-- Ritmo e Instrumento -->
         <div class="input-group mb-4 flex-nowrap">
             <select class="form-select text-secondary" id="rhythm-select">
                 <option data-i18n="noRhythm">No rhythm</option>
@@ -118,15 +129,12 @@
             <button class="btn btn-secondary fw-bold px-4" data-i18n="organ">ORGAN</button>
         </div>
 
-        <!-- Botões Circulares Centrais -->
         <div class="d-flex justify-content-center gap-3 mb-3">
             <button class="btn-circle btn-play" id="btn-play"><i class="fas fa-play" id="icon-play"></i></button>
             <button class="btn-circle btn-music" id="btn-music"><i class="bi bi-music-note" id="icon-music"></i></button>
         </div>
 
-        <!-- Botões de Acordes (Os dados "data-interval" representam a distância em semitons a partir de C) -->
         <div class="d-flex flex-column align-items-center gap-2 mb-3">
-            <!-- Linha 1 -->
             <div class="d-flex justify-content-center gap-2">
                 <button class="chord-btn bg-degree-gray" data-interval="10" data-type="">Bb</button>
                 <button class="chord-btn bg-degree-gray" data-interval="9" data-type="">A</button>
@@ -134,7 +142,6 @@
                 <button class="chord-btn bg-degree-gray" data-interval="4" data-type="">E</button>
                 <button class="chord-btn bg-degree-gray" data-interval="2" data-type="">D</button>
             </div>
-            <!-- Linha 2 -->
             <div class="d-flex justify-content-center flex-wrap gap-2">
                 <button class="chord-btn bg-degree-1" data-interval="0" data-type="">C</button>
                 <button class="chord-btn bg-degree-6" data-interval="9" data-type="m">Am</button>
@@ -142,6 +149,73 @@
                 <button class="chord-btn bg-degree-2" data-interval="2" data-type="m">Dm</button>
                 <button class="chord-btn bg-degree-5" data-interval="7" data-type="">G</button>
                 <button class="chord-btn bg-degree-3" data-interval="4" data-type="m">Em</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Unificado de Confirmação e Avisos -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold" id="confirmModalTitle">Confirm</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3" id="confirmModalBody">
+                    Are you sure?
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" id="btn-confirm-no" data-i18n="no">No</button>
+                    <button type="button" class="btn btn-teal btn-sm text-white" id="btn-confirm-yes" data-i18n="yes">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals de Exportação e Importação -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" data-i18n="exportTitle">Export Repertoire</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check mb-3 border-bottom pb-2">
+                        <input class="form-check-input" type="checkbox" id="export-select-all" checked>
+                        <label class="form-check-label fw-bold" for="export-select-all" data-i18n="selectAll">Select All</label>
+                    </div>
+                    <div id="export-list" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn btn-teal" id="btn-confirm-export" data-i18n="downloadRepertoire">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" data-i18n="importTitle">Import Repertoire</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control mb-3" type="file" id="import-file-input" accept=".json">
+                    <div id="import-selection-area" class="d-none">
+                        <div class="form-check mb-3 border-bottom pb-2">
+                            <input class="form-check-input" type="checkbox" id="import-select-all" checked>
+                            <label class="form-check-label fw-bold" for="import-select-all" data-i18n="selectAll">Select All</label>
+                        </div>
+                        <div id="import-list" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
+                    <button type="button" class="btn btn-teal d-none" id="btn-confirm-import" data-i18n="importRepertoire">Import</button>
+                </div>
             </div>
         </div>
     </div>
