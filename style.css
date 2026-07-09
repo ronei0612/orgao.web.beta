@@ -313,7 +313,7 @@ body {
 
 .piano {
     display: flex;
-    height: 85px;
+    height: 95px;
     width: max-content;
     margin: 0 auto;
     padding: 0 5px;
