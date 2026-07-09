@@ -967,6 +967,83 @@ class PianoManager {
 }
 
 /**
+ * Gerencia a experiência em dispositivos móveis (Tela Cheia e Bloqueio de Suspensão/Wake Lock)
+ */
+class MobileExperienceManager {
+    constructor() {
+        this.wakeLock = null;
+        this.shouldKeepAwake = false;
+        this.isActivating = false;
+
+        this.init();
+    }
+
+    init() {
+        // Usando capture: true para garantir que o evento seja pego antes de qualquer biblioteca (como o TomSelect) anular o clique
+        ['click', 'touchstart'].forEach(eventType => {
+            document.addEventListener(eventType, () => this.enableMobileExperience(), { capture: true, passive: true });
+        });
+
+        // Restaura o Wake Lock se o usuário minimizar o navegador e voltar
+        document.addEventListener('visibilitychange', () => this.handleVisibilityChange());
+    }
+
+    isMobileDevice() {
+        // Consideramos mobile se a tela for menor que 768px E o dispositivo suportar toque
+        return window.innerWidth <= 768 && navigator.maxTouchPoints > 0;
+    }
+
+    async enableMobileExperience() {
+        if (!this.isMobileDevice()) return;
+
+        // Se já tem tela cheia e o bloqueio de tela ativos, ignora para não sobrecarregar
+        if (document.fullscreenElement && this.wakeLock) return;
+
+        // Impede de fazer requisições simultâneas enquanto uma já está carregando
+        if (this.isActivating) return;
+        this.isActivating = true;
+
+        try {
+            await this.requestFullscreen();
+            await this.requestWakeLock();
+        } finally {
+            this.isActivating = false;
+        }
+    }
+
+    async requestFullscreen() {
+        if (!document.fullscreenElement) {
+            try {
+                await document.documentElement.requestFullscreen();
+            } catch (error) {
+                // Erros silenciosos, comum em iOS
+            }
+        }
+    }
+
+    async requestWakeLock() {
+        if ('wakeLock' in navigator && !this.wakeLock) {
+            try {
+                this.wakeLock = await navigator.wakeLock.request('screen');
+                this.shouldKeepAwake = true;
+
+                this.wakeLock.addEventListener('release', () => {
+                    this.wakeLock = null;
+                });
+            } catch (error) {
+                console.warn("Não foi possível ativar o bloqueio de tela:", error.message);
+            }
+        }
+    }
+
+    async handleVisibilityChange() {
+        if (this.shouldKeepAwake && document.visibilityState === 'visible') {
+            await this.requestWakeLock();
+        }
+    }
+}
+
+/**
  * Inicialização Principal (Injeção de Dependências)
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -978,6 +1055,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allowEmptyOption: false
     });
 
+    // Infraestrutura e Dados
     const dbManager = new DatabaseManager();
     const viewManager = new ViewManager();
     const themeManager = new ThemeManager();
@@ -985,14 +1063,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalManager = new ModalManager(languageManager);
     const backupManager = new BackupManager(dbManager);
 
-    // Core Controllers
+    // Core Controllers (Lógica de Negócios Central)
     const repertoireController = new RepertoireController(tomSelectInstance, dbManager, viewManager, modalManager, backupManager);
     const liturgyManager = new LiturgyManager(tomSelectInstance, viewManager);
 
-    // Component Controllers
+    // Component Controllers (Interface)
     const bpmManager = new BpmManager();
     const playbackManager = new PlaybackManager();
     const notePhaseManager = new NotePhaseManager();
     const chordManager = new ChordManager(playbackManager);
     const pianoManager = new PianoManager();
+
+    // Experiência em Dispositivos Móveis
+    const mobileExperienceManager = new MobileExperienceManager();
 });
