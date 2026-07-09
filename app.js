@@ -125,12 +125,10 @@ class LanguageManager {
             if (dict[key]) el.placeholder = dict[key];
         });
 
-        // Atualiza nativamente o texto do TomSelect para não mostrar lixo na interface
         if (this.tomSelectInstance) {
             this.tomSelectInstance.settings.placeholder = dict.chooseSong;
             this.tomSelectInstance.control_input.placeholder = dict.chooseSong;
 
-            // Força a renderização do placeholder se nenhum item estiver selecionado
             if (!this.tomSelectInstance.getValue()) {
                 this.tomSelectInstance.clear(true);
             }
@@ -139,7 +137,7 @@ class LanguageManager {
 }
 
 /**
- * Gerencia o Repertório (Persistência, Edição Inline, Modais de Confirmação, Segurança e Auto-Encolhimento)
+ * Gerencia o Repertório (Persistência, Edição Inline, Modais de Confirmação e Segurança)
  */
 class RepertoireManager {
     constructor(tomSelectInstance, languageManager) {
@@ -148,19 +146,14 @@ class RepertoireManager {
         this.STORAGE_KEY = 'songs';
         this.songs = this.loadSongs();
 
-        // Estado
-        this.currentMode = 'view'; // view, add, edit
+        this.currentMode = 'view';
         this.currentSongId = null;
-
-        // Modal do Bootstrap para Confirmação
         this.confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
 
-        // Elementos DOM
         this.wrapperSelect = document.getElementById('wrapper-song-select');
         this.inputTitle = document.getElementById('song-title-input');
         this.mainDisplay = document.getElementById('main-display');
 
-        // Elementos de Ação
         this.btnToggle = document.getElementById('btn-action-toggle');
         this.btnAdd = document.getElementById('btn-action-add');
         this.btnEdit = document.getElementById('btn-action-edit');
@@ -176,7 +169,7 @@ class RepertoireManager {
     loadSongs() {
         const data = localStorage.getItem(this.STORAGE_KEY);
         if (data) return JSON.parse(data);
-        return []; // Inicia vazio e limpo
+        return [];
     }
 
     saveToStorage() {
@@ -192,13 +185,11 @@ class RepertoireManager {
             this.mainDisplay.innerHTML = song ? song.content : '';
         });
 
-        // Alterna entre botão "+" e as opções CRUD Inline
         this.btnToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleInlineActions(true);
         });
 
-        // Evento Global: Encolhe as opções ao clicar fora delas
         document.addEventListener('click', (e) => {
             if (!this.btnAdd.classList.contains('d-none')) {
                 const clickedAnAction = e.target.closest('#btn-action-add') ||
@@ -210,28 +201,23 @@ class RepertoireManager {
             }
         });
 
-        // Ações CRUD
         this.btnAdd.addEventListener('click', () => this.enterEditMode(true));
         this.btnEdit.addEventListener('click', () => this.enterEditMode(false));
         this.btnDelete.addEventListener('click', () => {
             this.showCustomModal('confirmDeleteTitle', 'confirmDeleteBody', () => this.deleteSong());
         });
 
-        // Salvar / Cancelar com modais
         this.btnSave.addEventListener('click', () => {
             const title = this.inputTitle.value.trim();
             if (!title) {
                 alert('O título da música não pode estar vazio!');
                 return;
             }
-
-            // Segurança: impede duplicação
             const isDuplicate = this.songs.some(s => s.title.toLowerCase() === title.toLowerCase() && s.id !== this.currentSongId);
             if (isDuplicate) {
                 this.showCustomModal('duplicateTitle', 'duplicateBody', null, false);
                 return;
             }
-
             this.showCustomModal('confirmSaveTitle', 'confirmSaveBody', () => this.saveSong());
         });
 
@@ -262,7 +248,6 @@ class RepertoireManager {
 
         const newBtnYes = btnYes.cloneNode(true);
         btnYes.parentNode.replaceChild(newBtnYes, btnYes);
-
         newBtnYes.addEventListener('click', () => {
             this.confirmModal.hide();
             if (onConfirm) onConfirm();
@@ -286,11 +271,10 @@ class RepertoireManager {
     }
 
     updateSelectOptions() {
-        this.ts.clear(true); // silent clear
+        this.ts.clear(true);
         this.ts.clearOptions();
         this.songs.forEach(s => this.ts.addOption({ value: s.id, text: s.title }));
 
-        // Restaura a seleção se houver um id válido
         if (this.currentSongId && this.songs.some(s => s.id === this.currentSongId)) {
             this.ts.setValue(this.currentSongId, true);
         }
@@ -350,12 +334,12 @@ class RepertoireManager {
             const newId = Date.now().toString();
             this.songs.push({ id: newId, title, content });
             this.currentSongId = newId;
-            this.ts.addOption({ value: newId, text: title }); // Atualização individual rápida
+            this.ts.addOption({ value: newId, text: title });
         } else if (this.currentMode === 'edit') {
             const index = this.songs.findIndex(s => s.id === this.currentSongId);
             if (index > -1) {
                 this.songs[index] = { ...this.songs[index], title, content };
-                this.ts.updateOption(this.currentSongId, { value: this.currentSongId, text: title }); // Atualização instantânea sem glitch visual
+                this.ts.updateOption(this.currentSongId, { value: this.currentSongId, text: title });
             }
         }
 
@@ -529,7 +513,7 @@ class NotePhaseManager {
 }
 
 /**
- * Gerencia os acordes (Interações e Inteligência de Sustenido/Bemol)
+ * Gerencia os acordes (Interações e Transposição)
  */
 class ChordManager {
     constructor(playbackManager) {
@@ -584,6 +568,126 @@ class ChordManager {
 }
 
 /**
+ * Gerencia o Piano Virtual (Interação, Sombras de Scroll e Drag)
+ */
+class PianoManager {
+    constructor() {
+        this.container = document.getElementById('piano-container');
+        this.keys = document.querySelectorAll('.key');
+        this.shadowLeft = document.querySelector('.scroll-shadow-left');
+        this.shadowRight = document.querySelector('.scroll-shadow-right');
+
+        this.isDown = false;
+        this.isDragging = false;
+        this.startX = 0;
+        this.scrollLeft = 0;
+        this.activeKey = null;
+
+        this.init();
+    }
+
+    init() {
+        if (!this.container) return;
+
+        // Atualiza as sombras ao rolar ou redimensionar a tela
+        this.container.addEventListener('scroll', () => this.updateShadows());
+        window.addEventListener('resize', () => this.updateShadows());
+        setTimeout(() => this.updateShadows(), 100);
+
+        // Lógica de Mouse (Desktop)
+        this.container.addEventListener('mousedown', (e) => {
+            this.isDown = true;
+            this.isDragging = false;
+            this.startX = e.pageX - this.container.offsetLeft;
+            this.scrollLeft = this.container.scrollLeft;
+
+            const key = e.target.closest('.key');
+            if (key) {
+                this.activeKey = key;
+                key.classList.add('pressed'); // "Arma" a tecla visualmente
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            this.isDown = false;
+            if (this.activeKey) {
+                this.activeKey.classList.remove('pressed');
+                if (!this.isDragging) {
+                    // TO DO FUTURO: Código para tocar o som (Tocou a nota!)
+                }
+                this.activeKey = null;
+            }
+        });
+
+        this.container.addEventListener('mousemove', (e) => {
+            if (!this.isDown) return;
+
+            const x = e.pageX - this.container.offsetLeft;
+            const walk = (x - this.startX);
+
+            // Se moveu mais de 5px, considera arraste
+            if (Math.abs(walk) > 5) {
+                this.isDragging = true;
+                this.container.scrollLeft = this.scrollLeft - walk;
+
+                // Cancela o visual da tecla pressionada durante o arraste
+                if (this.activeKey) {
+                    this.activeKey.classList.remove('pressed');
+                }
+            }
+        });
+
+        // Lógica de Toque (Mobile/Tablet)
+        this.container.addEventListener('touchstart', (e) => {
+            this.isDown = true;
+            this.isDragging = false;
+            this.startX = e.touches[0].pageX;
+
+            const key = e.target.closest('.key');
+            if (key) {
+                this.activeKey = key;
+                key.classList.add('pressed');
+            }
+        }, { passive: true });
+
+        this.container.addEventListener('touchmove', (e) => {
+            if (!this.isDown) return;
+            const x = e.touches[0].pageX;
+            const walk = (x - this.startX);
+
+            if (Math.abs(walk) > 5) {
+                this.isDragging = true;
+                if (this.activeKey) {
+                    this.activeKey.classList.remove('pressed');
+                }
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            this.isDown = false;
+            if (this.activeKey) {
+                this.activeKey.classList.remove('pressed');
+                this.activeKey = null;
+            }
+        });
+    }
+
+    updateShadows() {
+        if (!this.container) return;
+        const maxScroll = this.container.scrollWidth - this.container.clientWidth;
+        const currentScroll = this.container.scrollLeft;
+
+        // Controle sombra esquerda
+        if (currentScroll > 0) this.shadowLeft.classList.remove('d-none');
+        else this.shadowLeft.classList.add('d-none');
+
+        // Controle sombra direita (-1 para margem de arredondamento de pixels)
+        if (currentScroll < maxScroll - 1 && maxScroll > 0) this.shadowRight.classList.remove('d-none');
+        else this.shadowRight.classList.add('d-none');
+    }
+}
+
+/**
  * Inicialização Principal
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -601,4 +705,5 @@ document.addEventListener('DOMContentLoaded', () => {
     const playbackManager = new PlaybackManager();
     const notePhaseManager = new NotePhaseManager();
     const chordManager = new ChordManager(playbackManager);
+    const pianoManager = new PianoManager();
 });

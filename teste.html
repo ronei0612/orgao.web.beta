@@ -5,16 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Musical Interface</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Tom Select CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -41,7 +35,7 @@
 
             <hr class="my-4">
 
-            <!-- Links Azuis de Download e Importação de Repertório -->
+            <!-- Links Azuis de Download e Importação -->
             <div class="d-flex flex-column gap-2 ps-2">
                 <a href="#" class="text-decoration-none link-primary py-1" data-bs-toggle="modal" data-bs-target="#exportModal">
                     <i class="fas fa-download me-2"></i><span data-i18n="downloadRepertoire">Download my Repertoire</span>
@@ -55,8 +49,8 @@
 
     <div class="app-container">
 
-        <!-- Barra Superior de Controles -->
-        <div class="row g-1 align-items-center mb-1">
+        <!-- Barra Superior -->
+        <div class="row g-1 align-items-center mb-1 flex-shrink-0">
             <div class="col-12 col-md-auto d-flex gap-1 align-items-center">
 
                 <button class="btn-menu-icon flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
@@ -90,51 +84,45 @@
                 </div>
             </div>
 
-            <!-- Seleção de Música e Controle de Edição -->
+            <!-- Seleção e Ações de Música -->
             <div class="col-12 col-md">
                 <div class="input-group flex-nowrap" id="song-control-group">
-
-                    <!-- View Mode (Select) -->
                     <div id="wrapper-song-select" class="flex-grow-1" style="min-width: 0;">
                         <select id="song-select" autocomplete="off" placeholder="Choose a Song...">
                             <option value=""></option>
                         </select>
                     </div>
-
-                    <!-- Edit Mode (Input Title) -->
                     <input type="text" id="song-title-input" class="form-control d-none" data-i18n-placeholder="songTitlePlaceholder" placeholder="Song title...">
 
-                    <!-- Botão Principal + -->
                     <button class="btn btn-teal px-3 force-rounded-end" id="btn-action-toggle" title="Actions"><i class="fas fa-plus"></i></button>
 
-                    <!-- Botões de Ação Inline (Adicionar, Editar, Excluir) -->
                     <button class="btn btn-success d-none" id="btn-action-add" title="Add"><i class="fas fa-file-medical"></i></button>
                     <button class="btn btn-info text-white d-none" id="btn-action-edit" title="Edit"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-danger force-rounded-end d-none" id="btn-action-delete" title="Delete"><i class="fas fa-trash"></i></button>
 
-                    <!-- Edit/Add Mode Buttons (Salvar Azul, Cancelar Vermelho) -->
                     <button class="btn btn-primary d-none border-start border-white" id="btn-action-save" title="Save"><i class="fas fa-save"></i></button>
                     <button class="btn btn-danger force-rounded-end d-none border-start border-white" id="btn-action-cancel" title="Cancel"><i class="fas fa-times"></i></button>
                 </div>
             </div>
         </div>
 
-        <!-- Tela Principal de Exibição -->
-        <div class="main-display mb-1" id="main-display" contenteditable="false"></div>
+        <!-- Tela Principal -->
+        <div class="main-display mb-2" id="main-display" contenteditable="false"></div>
 
-        <div class="input-group mb-4 flex-nowrap">
+        <div class="input-group mb-2 flex-nowrap flex-shrink-0">
             <select class="form-select text-secondary" id="rhythm-select">
                 <option data-i18n="noRhythm">No rhythm</option>
             </select>
             <button class="btn btn-secondary fw-bold px-4" data-i18n="organ">ORGAN</button>
         </div>
 
-        <div class="d-flex justify-content-center gap-3 mb-3">
+        <div class="d-flex justify-content-center gap-3 mb-2 flex-shrink-0">
             <button class="btn-circle btn-play" id="btn-play"><i class="fas fa-play" id="icon-play"></i></button>
             <button class="btn-circle btn-music" id="btn-music"><i class="bi bi-music-note" id="icon-music"></i></button>
         </div>
 
-        <div class="d-flex flex-column align-items-center gap-2 mb-3">
+        <!-- Acordes -->
+        <div class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
             <div class="d-flex justify-content-center gap-2">
                 <button class="chord-btn bg-degree-gray" data-interval="10" data-type="">Bb</button>
                 <button class="chord-btn bg-degree-gray" data-interval="9" data-type="">A</button>
@@ -151,19 +139,71 @@
                 <button class="chord-btn bg-degree-3" data-interval="4" data-type="m">Em</button>
             </div>
         </div>
+
+        <!-- Wrapper do Piano (Com sombras de contorno laterais) -->
+        <div class="piano-wrapper flex-shrink-0 mt-auto">
+            <div class="scroll-shadow scroll-shadow-left d-none"></div>
+            <div class="scroll-shadow scroll-shadow-right d-none"></div>
+
+            <!-- Teclado de Piano (Ocultado em telas pequenas) -->
+            <div class="piano-container" id="piano-container">
+                <div class="piano">
+                    <!-- Oitava 3 -->
+                    <div class="key white"><span>C3</span></div>
+                    <div class="key black"><span>C#3</span></div>
+                    <div class="key white"><span>D3</span></div>
+                    <div class="key black"><span>D#3</span></div>
+                    <div class="key white"><span>E3</span></div>
+                    <div class="key white"><span>F3</span></div>
+                    <div class="key black"><span>F#3</span></div>
+                    <div class="key white"><span>G3</span></div>
+                    <div class="key black"><span>G#3</span></div>
+                    <div class="key white"><span>A3</span></div>
+                    <div class="key black"><span>A#3</span></div>
+                    <div class="key white"><span>B3</span></div>
+                    <!-- Oitava 4 -->
+                    <div class="key white"><span>C4</span></div>
+                    <div class="key black"><span>C#4</span></div>
+                    <div class="key white"><span>D4</span></div>
+                    <div class="key black"><span>D#4</span></div>
+                    <div class="key white"><span>E4</span></div>
+                    <div class="key white"><span>F4</span></div>
+                    <div class="key black"><span>F#4</span></div>
+                    <div class="key white"><span>G4</span></div>
+                    <div class="key black"><span>G#4</span></div>
+                    <div class="key white"><span>A4</span></div>
+                    <div class="key black"><span>A#4</span></div>
+                    <div class="key white"><span>B4</span></div>
+                    <!-- Oitava 5 -->
+                    <div class="key white"><span>C5</span></div>
+                    <div class="key black"><span>C#5</span></div>
+                    <div class="key white"><span>D5</span></div>
+                    <div class="key black"><span>D#5</span></div>
+                    <div class="key white"><span>E5</span></div>
+                    <div class="key white"><span>F5</span></div>
+                    <div class="key black"><span>F#5</span></div>
+                    <div class="key white"><span>G5</span></div>
+                    <div class="key black"><span>G#5</span></div>
+                    <div class="key white"><span>A5</span></div>
+                    <div class="key black"><span>A#5</span></div>
+                    <div class="key white"><span>B5</span></div>
+                    <!-- Tecla Final (Dó 6) -->
+                    <div class="key white"><span>C6</span></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Modal Unificado de Confirmação e Avisos -->
+    <!-- Modais (Inalterados) -->
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
                     <h6 class="modal-title fw-bold" id="confirmModalTitle">Confirm</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body py-3" id="confirmModalBody">
-                    Are you sure?
-                </div>
+                <div class="modal-body py-3" id="confirmModalBody">Are you sure?</div>
                 <div class="modal-footer border-0 pt-0">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" id="btn-confirm-no" data-i18n="no">No</button>
                     <button type="button" class="btn btn-teal btn-sm text-white" id="btn-confirm-yes" data-i18n="yes">Yes</button>
@@ -172,13 +212,12 @@
         </div>
     </div>
 
-    <!-- Modals de Exportação e Importação -->
     <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" data-i18n="exportTitle">Export Repertoire</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-check mb-3 border-bottom pb-2">
@@ -200,7 +239,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" data-i18n="importTitle">Import Repertoire</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input class="form-control mb-3" type="file" id="import-file-input" accept=".json">
@@ -220,11 +259,8 @@
         </div>
     </div>
 
-    <!-- Scripts Externos -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-
-    <!-- Custom JS -->
     <script src="app.js"></script>
 </body>
 </html>

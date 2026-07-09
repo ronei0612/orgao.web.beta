@@ -1,14 +1,25 @@
-/* Configurações Globais */
+/* Configurações Globais p/ Suporte de Altura 100% Flexível */
 body {
     background-color: #ecedf1;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 10px;
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     transition: background-color 0.3s ease;
 }
 
 .app-container {
     max-width: 800px;
     margin: 0 auto;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
 }
 
 /* Botões Customizados */
@@ -28,19 +39,25 @@ body {
     color: white;
 }
 
-/* Força os botões finais do input group a terem cantos arredondados corretos */
 .force-rounded-end {
     border-top-right-radius: var(--bs-border-radius) !important;
     border-bottom-right-radius: var(--bs-border-radius) !important;
 }
 
-/* Remove o arredondamento direito do TomSelect para colar com os botões */
 #wrapper-song-select .ts-control {
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
 }
 
-/* Botão de Menu (Apenas Ícone) */
+.hover-teal {
+    transition: color 0.2s ease;
+}
+
+    .hover-teal:hover {
+        color: #0b8e8e !important;
+    }
+
+/* Menus e Círculos */
 .btn-menu-icon {
     background: transparent;
     border: none;
@@ -55,7 +72,6 @@ body {
         color: #0b8e8e;
     }
 
-/* Botões Redondos de Configurações - Reduzidos */
 .btn-setting-circle {
     width: 45px;
     height: 45px;
@@ -79,7 +95,7 @@ body {
         transform: scale(0.95);
     }
 
-/* Botões Redondos Principais (Play / Music) */
+/* Play / Music Buttons */
 .btn-circle {
     width: 55px;
     height: 55px;
@@ -93,7 +109,6 @@ body {
     cursor: pointer;
 }
 
-/* Estado de Play / Stop */
 .btn-play {
     background-color: #2b7af1;
     box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4);
@@ -105,7 +120,6 @@ body {
         box-shadow: 0 0 25px 5px rgba(255, 99, 71, 0.6);
     }
 
-/* Botão de Música */
 .btn-music {
     background-color: #9a84b8;
     transition: all 0.3s ease;
@@ -173,7 +187,6 @@ body {
     animation: repress-effect 0.2s ease-in-out;
 }
 
-/* Cores Baseadas no Grau do Acorde */
 .bg-degree-gray {
     --chord-bg: #9b95a5;
     background-color: var(--chord-bg);
@@ -209,10 +222,11 @@ body {
     background-color: var(--chord-bg);
 }
 
-/* Display Principal (Com suporte a Rich Text) */
+/* Display Principal Flexível */
 .main-display {
+    flex-grow: 1;
+    min-height: 80px;
     background-color: #fcf9ee;
-    min-height: 350px;
     border: 1px solid #adb5bd;
     border-radius: 4px;
     width: 100%;
@@ -223,7 +237,6 @@ body {
     overflow-y: auto;
 }
 
-    /* Estado de Edição (Rich Text Ativo) */
     .main-display[contenteditable="true"] {
         background-color: #ffffff;
         border-color: #0d6efd;
@@ -237,20 +250,138 @@ body {
     max-width: 100px;
 }
 
-.icon-menu {
-    color: inherit;
-}
-
 .form-select, .form-control {
     border-color: #adb5bd;
 }
 
-/* Ajuste fino para os botões inline no input-group */
 .input-group > .btn {
     transition: all 0.15s ease-in-out;
 }
 
-/* Modo Escuro */
+/* 🎹 TECLADO DE PIANO COM SCROLL DINÂMICO 🎹 */
+.piano-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 4px;
+}
+
+/* Sombras laterais para indicar scroll */
+.scroll-shadow {
+    position: absolute;
+    top: 5px; /* Compensa o padding-top */
+    bottom: 5px; /* Compensa o padding-bottom */
+    width: 25px;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+    border-radius: 4px;
+}
+
+.scroll-shadow-left {
+    left: 0;
+    background: linear-gradient(to right, rgba(0,0,0,0.25), transparent);
+}
+
+.scroll-shadow-right {
+    right: 0;
+    background: linear-gradient(to left, rgba(0,0,0,0.25), transparent);
+}
+
+.piano-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    cursor: grab;
+    padding: 5px 0;
+    scrollbar-width: thin;
+}
+
+    .piano-container:active {
+        cursor: grabbing;
+    }
+
+    /* Custom Scrollbar */
+    .piano-container::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .piano-container::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 4px;
+    }
+
+.piano {
+    display: flex;
+    height: 85px;
+    width: max-content;
+    margin: 0 auto;
+    padding: 0 5px;
+}
+
+.key {
+    border-radius: 0 0 4px 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.1s, transform 0.1s;
+    /* Configuração do Texto (Nome das notas) */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    font-weight: bold;
+    user-select: none;
+}
+
+    .key span {
+        pointer-events: none; /* Para não bugar o clique e o arraste */
+    }
+
+    .key.white {
+        width: 45px;
+        background-color: #ffffff;
+        border: 1px solid #ccc;
+        z-index: 1;
+        box-shadow: 0 4px 4px rgba(0,0,0,0.1);
+        color: #495057;
+        font-size: 11px;
+        padding-bottom: 5px;
+    }
+
+    .key.black {
+        width: 28px;
+        height: 55px;
+        background-color: #222;
+        z-index: 2;
+        margin-left: -14px;
+        margin-right: -14px;
+        box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+        color: #f8f9fa;
+        font-size: 9px;
+        padding-bottom: 5px;
+    }
+
+    /* Efeito de Pressão */
+    .key.white.pressed {
+        background-color: #e9ecef;
+        box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        transform: translateY(2px);
+    }
+
+    .key.black.pressed {
+        background-color: #000;
+        box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+        transform: translateY(2px);
+    }
+
+/* Auto-Ocultamento em telas pequenas para preservar a área de leitura/edição */
+@media (max-height: 650px) {
+    .piano-wrapper {
+        display: none !important;
+    }
+}
+
+/* MODO ESCURO */
 [data-bs-theme="dark"] body {
     background-color: #121212;
 }
@@ -280,7 +411,7 @@ body {
         background-color: #343a40;
     }
 
-/* Correções Avançadas do TomSelect no Modo Escuro */
+/* Correções TomSelect Modo Escuro */
 [data-bs-theme="dark"] .ts-control {
     background-color: #2b3035;
     border-color: #495057;
@@ -309,4 +440,23 @@ body {
 
 [data-bs-theme="dark"] .ts-control .item {
     color: #dee2e6;
+}
+
+/* Piano no Modo Escuro */
+[data-bs-theme="dark"] .key.white {
+    background-color: #cfd4da;
+    border-color: #495057;
+    color: #212529;
+}
+
+    [data-bs-theme="dark"] .key.white.pressed {
+        background-color: #adb5bd;
+    }
+
+[data-bs-theme="dark"] .scroll-shadow-left {
+    background: linear-gradient(to right, rgba(0,0,0,0.6), transparent);
+}
+
+[data-bs-theme="dark"] .scroll-shadow-right {
+    background: linear-gradient(to left, rgba(0,0,0,0.6), transparent);
 }
