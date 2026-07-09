@@ -46,48 +46,43 @@ class LanguageManager {
         this.iconFlag = document.getElementById('icon-flag');
         this.tomSelectInstance = tomSelectInstance;
 
+        // Agora o padrão será Português, a menos que o sistema esteja forçando inglês
         const systemLang = navigator.language || navigator.userLanguage;
-        this.currentLang = systemLang.startsWith('pt') ? 'pt' : 'en';
+        this.currentLang = systemLang.startsWith('en') ? 'en' : 'pt';
 
-        this.translations = {}; // Inicia vazio, será preenchido pelo fetch
+        this.translations = {};
 
-        // Inicia o processo de carregamento do JSON
         this.loadTranslations();
     }
 
     async loadTranslations() {
         try {
-            // Requisita o arquivo JSON externo
             const response = await fetch('translations.json');
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             this.translations = await response.json();
 
-            // Só inicia os eventos de clique e atualiza a interface após carregar os dados
+            // Só inicializa/atualiza interface se o fetch funcionar
             this.init();
         } catch (error) {
-            console.error("Erro ao carregar as traduções:", error);
+            console.error("Aviso: Falha ao carregar as traduções (normal em file:// local sem servidor).", error);
+            // Removido o alert!
+            // O sistema vai continuar funcionando em português porque o HTML já está em PT-BR.
         }
     }
 
     init() {
         this.btnLangToggle.addEventListener('click', () => {
-            this.currentLang = this.currentLang === 'en' ? 'pt' : 'en';
+            this.currentLang = this.currentLang === 'pt' ? 'en' : 'pt';
             this.updateInterface();
         });
 
-        // Faz a tradução inicial assim que o arquivo é carregado
         this.updateInterface();
     }
 
     updateInterface() {
-        // Se as traduções não carregaram, aborta para não gerar erros
         if (!this.translations[this.currentLang]) return;
 
-        this.iconFlag.innerText = this.currentLang === 'en' ? '🇺🇸' : '🇧🇷';
+        this.iconFlag.innerText = this.currentLang === 'pt' ? '🇧🇷' : '🇺🇸';
         const dict = this.translations[this.currentLang];
 
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -203,7 +198,6 @@ class RepertoireManager {
 
     showCustomModal(titleKey, bodyKey, onConfirm, showCancel = true) {
         const lang = this.langManager.currentLang;
-        // Garantia caso as traduções ainda estejam carregando no background
         const dict = this.langManager.translations[lang] || {};
 
         document.getElementById('confirmModalTitle').innerText = dict[titleKey] || titleKey;
@@ -212,11 +206,11 @@ class RepertoireManager {
         const btnNo = document.getElementById('btn-confirm-no');
         const btnYes = document.getElementById('btn-confirm-yes');
 
-        btnNo.innerText = dict['no'] || 'No';
+        btnNo.innerText = dict['no'] || 'Não';
 
         if (showCancel) {
             btnNo.classList.remove('d-none');
-            btnYes.innerText = dict['yes'] || 'Yes';
+            btnYes.innerText = dict['yes'] || 'Sim';
         } else {
             btnNo.classList.add('d-none');
             btnYes.innerText = 'OK';
@@ -663,7 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tomSelectInstance = new TomSelect("#song-select", {
         create: false,
         sortField: { field: "text", direction: "asc" },
-        placeholder: "Choose a Song...",
+        placeholder: "Escolha a Música...", // Placeholder inicial em Português
         allowEmptyOption: false
     });
 
