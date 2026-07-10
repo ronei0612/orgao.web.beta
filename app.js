@@ -337,7 +337,6 @@ class BpmManager {
 
         this.btnMinus5 = document.getElementById('btn-bpm-minus-5');
         this.btnMinus1 = document.getElementById('btn-bpm-minus-1');
-        this.btnPlus1 = document.getElementById('btn-bpm-plus-1');
         this.btnPlus5 = document.getElementById('btn-bpm-plus-5');
 
         this.init();
@@ -348,7 +347,6 @@ class BpmManager {
 
         this.btnMinus5.addEventListener('click', () => this.changeBpm(-5));
         this.btnMinus1.addEventListener('click', () => this.changeBpm(-1));
-        this.btnPlus1.addEventListener('click', () => this.changeBpm(1));
         this.btnPlus5.addEventListener('click', () => this.changeBpm(5));
 
         // Validação quando o usuário digita manualmente e tira o foco
