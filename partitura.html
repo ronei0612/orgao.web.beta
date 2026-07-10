@@ -11,6 +11,9 @@
     <!-- Biblioteca de Renderização VexFlow via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
 
+    <!-- Biblioteca de Renderização ABCJS via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.4.1/dist/abcjs-basic-min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
@@ -57,6 +60,15 @@
             background: #fdfdfd;
             min-height: 250px;
         }
+
+        /* Oculta as hastes no resultado gerado pelo abcjs */
+        .abcjs-stem {
+            display: none !important;
+        }
+
+        #abcjs-paper {
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -90,14 +102,14 @@
     <!-- Área Principal em Grid -->
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
 
-        <!-- Coluna Esquerda: Editor Visual Vexflow com as Toolbars embutidas -->
-        <section class="lg:col-span-8 flex flex-col gap-4">
+        <!-- Coluna Esquerda: Editor Visual Vexflow e Visualização ABCJS -->
+        <section class="lg:col-span-8 flex flex-col gap-6">
+
+            <!-- Bloco do Editor VexFlow -->
             <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4 relative flex flex-col">
                 <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Editor Visual Interativo</h2>
 
-                <!-- Container de Edição Estruturado -->
                 <div class="relative border border-slate-100 rounded-lg bg-slate-50 pt-16 pb-16 pr-16 min-h-[320px]">
-
                     <!-- Top Toolbar (Navegação de Foco/Altura) -->
                     <div class="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-white/95 border border-slate-200 p-1 rounded-lg shadow-sm z-10">
                         <button class="w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:text-green-600 hover:bg-slate-50 rounded transition-all" id="btn-prev" title="Nota Anterior">◀</button>
@@ -135,8 +147,13 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
+            </div>
+
+            <!-- Bloco de Visualização abcjs -->
+            <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex flex-col">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Visualização abcjs (Sem Hastes)</h2>
+                <div id="abcjs-paper" class="p-4 border border-slate-100 rounded-lg bg-white min-h-[120px]"></div>
             </div>
 
             <!-- Caixa informativa de atalhos rápidos de teclado -->
@@ -158,7 +175,7 @@
 
             <div class="flex-1 flex flex-col gap-2">
                 <label class="block text-xs font-bold text-slate-500 uppercase">Código ABC Gerado</label>
-                <textarea id="abc-export-textarea" readonly class="w-full h-96 border border-slate-200 rounded bg-slate-50 p-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+                <textarea id="abc-export-textarea" class="w-full h-96 border border-slate-200 rounded bg-slate-50 p-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
             </div>
 
             <div class="flex gap-2">
@@ -739,6 +756,11 @@
                 // Código ABC
                 const abcStr = convertToABC(this.currentData, key);
                 document.getElementById('abc-export-textarea').value = abcStr;
+
+                // Renderiza na aba de pré-visualização abcjs
+                if (typeof ABCJS !== 'undefined') {
+                    ABCJS.renderAbc("abcjs-paper", abcStr, { responsive: "resize" });
+                }
             }
 
             draw() {
@@ -915,6 +937,14 @@
             document.getElementById('tomSelect').addEventListener('change', () => {
                 editor.draw();
                 editor.atualizarCamposExportacao();
+            });
+
+            // Permite digitação/edição direta no campo de texto de exportação com atualização em tempo real
+            document.getElementById('abc-export-textarea').addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (typeof ABCJS !== 'undefined') {
+                    ABCJS.renderAbc("abcjs-paper", val, { responsive: "resize" });
+                }
             });
         };
     </script>
