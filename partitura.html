@@ -8,10 +8,8 @@
     <!-- Tailwind CSS para um design moderno e limpo -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Bibliotecas de Renderização via CDN -->
+    <!-- Biblioteca de Renderização VexFlow via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.3.0/dist/abcjs-basic-min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.3.0/abcjs-audio.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
@@ -67,15 +65,10 @@
     <header class="bg-white border-b border-slate-200 px-6 py-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
             <span class="text-2xl">🎼</span>
-            <h1 class="text-xl font-bold tracking-tight text-slate-900">Editor de Partitura Contínua</h1>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">Editor de Partituras</h1>
         </div>
 
         <div class="flex flex-wrap items-center gap-4">
-            <div class="flex flex-col">
-                <label class="text-xs font-semibold text-slate-500 uppercase">Título da Obra</label>
-                <input type="text" id="tituloInput" value="Melodia Sem Compasso" class="border border-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500">
-            </div>
-
             <div class="flex flex-col">
                 <label class="text-xs font-semibold text-slate-500 uppercase">Tom (Armadura)</label>
                 <select id="tomSelect" class="border border-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500">
@@ -159,53 +152,19 @@
             </div>
         </section>
 
-        <!-- Coluna Direita: Abas de visualização, Player e Backups -->
+        <!-- Coluna Direita: Código ABC Exportado -->
         <section class="lg:col-span-4 bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex flex-col gap-4">
+            <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Exportar Código ABC</h2>
 
-            <!-- Abas do painel lateral -->
-            <div class="flex border-b border-slate-200">
-                <button onclick="switchTab('export-tab')" id="tab-btn-export-tab" class="tab-btn py-2 px-3 border-b-2 border-blue-500 font-semibold text-blue-600 text-xs uppercase tracking-wider">Exportar ABC</button>
-                <button onclick="switchTab('player-tab')" id="tab-btn-player-tab" class="tab-btn py-2 px-3 border-b-2 border-transparent font-semibold text-slate-500 hover:text-slate-700 text-xs uppercase tracking-wider">Player Áudio</button>
-                <button onclick="switchTab('import-tab')" id="tab-btn-import-tab" class="tab-btn py-2 px-3 border-b-2 border-transparent font-semibold text-slate-500 hover:text-slate-700 text-xs uppercase tracking-wider">Backup/Importar</button>
+            <div class="flex-1 flex flex-col gap-2">
+                <label class="block text-xs font-bold text-slate-500 uppercase">Código ABC Gerado</label>
+                <textarea id="abc-export-textarea" readonly class="w-full h-96 border border-slate-200 rounded bg-slate-50 p-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
             </div>
 
-            <!-- Aba 1: Exportar / Código ABC -->
-            <div id="export-tab" class="tab-content flex flex-col gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Código ABCJS Gerado</label>
-                    <textarea id="abc-export-textarea" readonly class="w-full h-44 border border-slate-200 rounded bg-slate-50 p-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="copyToClipboard('abc-export-textarea')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-3 rounded text-xs transition-colors">Copiar ABC</button>
-                    <button onclick="downloadABCFile()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-xs transition-colors">Baixar .abc</button>
-                </div>
+            <div class="flex gap-2">
+                <button onclick="copyToClipboard('abc-export-textarea')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-3 rounded text-xs transition-colors">Copiar ABC</button>
+                <button onclick="downloadABCFile()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-xs transition-colors">Baixar .abc</button>
             </div>
-
-            <!-- Aba 2: Player & Sintetizador ABCJS -->
-            <div id="player-tab" class="tab-content hidden flex flex-col gap-4">
-                <div class="border border-slate-100 rounded-lg p-2 bg-slate-50">
-                    <h3 class="text-xs font-bold text-slate-500 mb-2">Painel de Áudio</h3>
-                    <!-- Sintetizador do ABCJS -->
-                    <div id="abcjs-audio-container" class="w-full"></div>
-                </div>
-                <div class="border border-slate-100 rounded-lg p-2 max-h-[250px] overflow-auto">
-                    <h3 class="text-xs font-bold text-slate-400 mb-2">Pré-visualização ABCJS</h3>
-                    <div id="abcjs-paper"></div>
-                </div>
-            </div>
-
-            <!-- Aba 3: Backup / Importador do formato antigo -->
-            <div id="import-tab" class="tab-content hidden flex flex-col gap-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Dados de Salvamento (Formato Antigo)</label>
-                    <textarea id="custom-export-textarea" class="w-full h-36 border border-slate-200 rounded bg-slate-50 p-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Insira o texto de backup para importar..."></textarea>
-                </div>
-                <div class="flex flex-col gap-2">
-                    <button onclick="carregarFormatoAntigo()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs transition-colors">Carregar Dados Acima</button>
-                    <button onclick="downloadBackupFile()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded text-xs transition-colors">Baixar Backup (.orgao)</button>
-                </div>
-            </div>
-
         </section>
     </main>
 
@@ -248,10 +207,9 @@
             return accSym + abcNote;
         }
 
-        // Função para converter o modelo de notas em uma String ABC sem compasso (M: none)
-        function convertToABC(currentData, key, title) {
+        // Função para converter o modelo de notas em uma String ABC sem compasso (M: none) e sem título
+        function convertToABC(currentData, key) {
             let abc = `X: 1\n`;
-            abc += `T: ${title || 'Minha Partitura'}\n`;
             abc += `M: none\n`; // Sem compasso na especificação ABC
             abc += `L: 1/4\n`;
             abc += `K: ${key || 'C'}\n`;
@@ -303,7 +261,7 @@
             return abc;
         }
 
-        // --- Classe Principal PartituraEditor (Legado unificado sem iframes) ---
+        // --- Classe Principal PartituraEditor ---
         class PartituraEditor {
             constructor(musicTheory) {
                 this.musicTheory = musicTheory;
@@ -338,44 +296,6 @@
                     key = this.musicTheory.acordesTomMap[key];
                 }
                 return key;
-            }
-
-            normalizeItem(item) {
-                let str = String(item).trim();
-                let chord = "", lyric = "", bar = false, rest = false, tie = false;
-
-                // Removemos o suporte a 'L|' (quebra de linha) pois a pauta é contínua agora
-                if (str.startsWith('R|')) { rest = true; str = str.slice(2); }
-                if (str.endsWith('|')) { bar = true; str = str.slice(0, -1); }
-
-                if (str.includes('@')) {
-                    let parts = str.split('@');
-                    lyric = parts[1]; str = parts[0];
-                }
-
-                if (str.endsWith('~')) { tie = true; str = str.slice(0, -1); }
-
-                if (str.startsWith('[')) {
-                    let closeIdx = str.indexOf(']');
-                    if (closeIdx !== -1) { chord = str.substring(1, closeIdx); str = str.substring(closeIdx + 1); }
-                }
-
-                let notes = str.split(',').map(n => n.trim());
-                if (notes.length === 1 && notes[0] === "") notes = ["b/4"];
-
-                return { notes, chord, lyric, bar, rest, tie };
-            }
-
-            obterDadosParaSalvar() {
-                return this.currentData.map(d => {
-                    let s = d.chord ? `[${d.chord}]` : "";
-                    s += d.notes.join(",");
-                    if (d.tie) s += '~';
-                    if (d.lyric) s += `@${d.lyric}`;
-                    if (d.rest) s = 'R|' + s;
-                    if (d.bar) s += `|`;
-                    return s;
-                }).join('\n');
             }
 
             getEnarmonicPitch(pitchStr) {
@@ -815,18 +735,10 @@
 
             atualizarCamposExportacao() {
                 const key = this.getCurrentKey();
-                const title = document.getElementById('tituloInput').value || 'Minha Partitura';
 
                 // Código ABC
-                const abcStr = convertToABC(this.currentData, key, title);
+                const abcStr = convertToABC(this.currentData, key);
                 document.getElementById('abc-export-textarea').value = abcStr;
-
-                // Formato Legado / Salvamento customizado
-                const customStr = this.obterDadosParaSalvar();
-                document.getElementById('custom-export-textarea').value = customStr;
-
-                // Renderização ao vivo na aba do player ABCJS
-                renderAbcjsLivePreview(abcStr);
             }
 
             draw() {
@@ -946,67 +858,12 @@
             }
         }
 
-        // --- SISTEMA DE CONTROLE DE TABS ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-blue-500', 'text-blue-600');
-                btn.classList.add('border-transparent', 'text-slate-500');
-            });
-
-            const activeBtn = document.getElementById('tab-btn-' + tabId);
-            activeBtn.classList.remove('border-transparent', 'text-slate-500');
-            activeBtn.classList.add('border-blue-500', 'text-blue-600');
-        }
-
-        // --- SISTEMA DE AUDIO & SYNTH ABCJS ---
-        let abcjsVisualObj = null;
-        let abcjsSynthController = null;
-
-        function renderAbcjsLivePreview(abcStr) {
-            if (typeof ABCJS === 'undefined') return;
-            abcjsVisualObj = ABCJS.renderAbc("abcjs-paper", abcStr, {
-                responsive: "resize"
-            })[0];
-            setupAbcjsAudio();
-        }
-
-        async function setupAbcjsAudio() {
-            if (typeof ABCJS === 'undefined' || !abcjsVisualObj) return;
-
-            const audioContainer = document.getElementById("abcjs-audio-container");
-            audioContainer.innerHTML = "";
-
-            try {
-                if (ABCJS.synth.supportsAudio()) {
-                    abcjsSynthController = new ABCJS.synth.SynthController();
-                    abcjsSynthController.load("#abcjs-audio-container", null, {
-                        displayLoop: true,
-                        displayRestart: true,
-                        displayPlay: true,
-                        displayProgress: true,
-                        displayWarp: true
-                    });
-
-                    const createSynth = new ABCJS.synth.CreateSynth();
-                    await createSynth.init({ visualObj: abcjsVisualObj });
-                    await abcjsSynthController.setTune(abcjsVisualObj, false, {});
-                } else {
-                    audioContainer.innerHTML = "<p class='text-red-500 text-xs'>AudioContext indisponível no navegador.</p>";
-                }
-            } catch (e) {
-                console.warn("Falha ao preparar o sintetizador MIDI:", e);
-            }
-        }
-
         // --- EXPORTAÇÃO E DOWNLOADS ---
         function copyToClipboard(textareaId) {
             const textarea = document.getElementById(textareaId);
             textarea.select();
             document.execCommand('copy');
-            alert("Copiado com sucesso para a Área de Transferência!");
+            alert("Código copiado!");
         }
 
         function downloadTextFile(filename, text) {
@@ -1021,53 +878,40 @@
 
         function downloadABCFile() {
             const text = document.getElementById('abc-export-textarea').value;
-            const title = document.getElementById('tituloInput').value || 'partitura';
-            downloadTextFile(`${title.toLowerCase().replace(/\s+/g, '_')}.abc`, text);
+            downloadTextFile(`partitura.abc`, text);
         }
 
-        function downloadBackupFile() {
-            const text = document.getElementById('custom-export-textarea').value;
-            const title = document.getElementById('tituloInput').value || 'partitura';
-            downloadTextFile(`${title.toLowerCase().replace(/\s+/g, '_')}.orgao`, text);
-        }
-
-        // --- IMPORTADOR DE DADOS ---
-        function carregarFormatoAntigo() {
-            const text = document.getElementById('custom-export-textarea').value.trim();
-            if (!text) {
-                alert("Por favor, cole os dados de salvamento antigos antes de importar.");
-                return;
-            }
-            const lines = text.split('\n').filter(l => l.trim() !== '');
-            if (lines.length === 0) return;
-
-            editor.currentData = lines.map(line => editor.normalizeItem(line));
-            editor.persistentSelectedIndex = 0;
-            editor.selectionStart = 0;
-            editor.selectionEnd = 0;
-            editor.draw();
-            editor.atualizarCamposExportacao();
-            alert("Partitura importada e convertida com sucesso!");
-        }
-
-        // --- MELODIA DEMONSTRATIVA INICIAL ---
+        // --- MODELO INTERNO DE NOTAS (ARRAY ESTRUTURADO) ---
         const musicaDemonstrativa = [
-            "[C]c/4@Bri-", "c/4@lha,", "[G]g/4@bri-", "g/4@lha,", "[Am]a/4@es-", "a/4@tre-", "[G]g/4@li-", "R|b/4@nha,", "|",
-            "[F]f/4@lá", "f/4@no", "[C]e/4@céu,", "e/4@es-", "[G]d/4@tou", "d/4@a-", "[C]c/4@lhando."
+            { notes: ["c/4"], chord: "C", lyric: "Bri-", bar: false, rest: false, tie: false },
+            { notes: ["c/4"], chord: "", lyric: "lha,", bar: false, rest: false, tie: false },
+            { notes: ["g/4"], chord: "G", lyric: "bri-", bar: false, rest: false, tie: false },
+            { notes: ["g/4"], chord: "", lyric: "lha,", bar: false, rest: false, tie: false },
+            { notes: ["a/4"], chord: "Am", lyric: "es-", bar: false, rest: false, tie: false },
+            { notes: ["a/4"], chord: "", lyric: "tre-", bar: false, rest: false, tie: false },
+            { notes: ["g/4"], chord: "G", lyric: "li-", bar: false, rest: false, tie: false },
+            { notes: ["b/4"], chord: "", lyric: "nha,", bar: false, rest: true, tie: false },
+            { notes: ["b/4"], chord: "", lyric: "", bar: true, rest: false, tie: false },
+            { notes: ["f/4"], chord: "F", lyric: "lá", bar: false, rest: false, tie: false },
+            { notes: ["f/4"], chord: "", lyric: "no", bar: false, rest: false, tie: false },
+            { notes: ["e/4"], chord: "C", lyric: "céu,", bar: false, rest: false, tie: false },
+            { notes: ["e/4"], chord: "", lyric: "es-", bar: false, rest: false, tie: false },
+            { notes: ["d/4"], chord: "G", lyric: "tou", bar: false, rest: false, tie: false },
+            { notes: ["d/4"], chord: "", lyric: "a-", bar: false, rest: false, tie: false },
+            { notes: ["c/4"], chord: "C", lyric: "lhando.", bar: false, rest: false, tie: false }
         ];
 
         let editor = null;
         window.onload = () => {
             editor = new PartituraEditor(MusicTheory);
 
-            // Carrega música de demonstração
-            editor.currentData = musicaDemonstrativa.map(m => editor.normalizeItem(m));
+            // Carrega música de demonstração mapeada na memória diretamente
+            editor.currentData = JSON.parse(JSON.stringify(musicaDemonstrativa));
             editor.persistentSelectedIndex = 0;
             editor.draw();
             editor.atualizarCamposExportacao();
 
-            // Ouvintes para Inputs Principais
-            document.getElementById('tituloInput').addEventListener('input', () => editor.atualizarCamposExportacao());
+            // Ouvinte para Armadura de Clave
             document.getElementById('tomSelect').addEventListener('change', () => {
                 editor.draw();
                 editor.atualizarCamposExportacao();
