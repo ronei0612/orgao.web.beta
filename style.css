@@ -111,22 +111,23 @@ body {
 
 .btn-play {
     background-color: #2b7af1;
-    box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4);
+    box-shadow: 0 0 25px 5px rgba(11, 142, 142, 0.4);
     transition: all 0.3s ease;
 }
 
+    /* Stop (Vermelho Vibrante Moderno) */
     .btn-play.playing {
         background-color: #ff6347;
-        box-shadow: 0 0 25px 5px rgba(255, 99, 71, 0.6);
+        box-shadow: 0 0 25px 5px rgba(230, 57, 70, 0.6);
     }
 
 .btn-music {
-    background-color: #9a84b8;
+    background-color: #0b8e8e;
     transition: all 0.3s ease;
 }
 
     .btn-music.phase-3 {
-        box-shadow: 0 0 25px 5px rgba(154, 132, 184, 0.8);
+        box-shadow: 0 0 25px 5px rgba(11, 142, 142, 0.8); /* Sombra atualizada para o Teal */
     }
 
 .music-emoji {
