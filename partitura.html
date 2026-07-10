@@ -55,7 +55,7 @@
             overflow-x: auto;
             overflow-y: hidden;
             background: #fdfdfd;
-            min-height: 220px;
+            min-height: 250px;
         }
     </style>
 </head>
@@ -96,7 +96,7 @@
                 <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Editor Visual Interativo</h2>
 
                 <!-- Container de Edição Estruturado -->
-                <div class="relative border border-slate-100 rounded-lg bg-slate-50 pt-16 pb-16 pr-16 min-h-[300px]">
+                <div class="relative border border-slate-100 rounded-lg bg-slate-50 pt-16 pb-16 pr-16 min-h-[320px]">
 
                     <!-- Top Toolbar (Navegação de Foco/Altura) -->
                     <div class="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-white/95 border border-slate-200 p-1 rounded-lg shadow-sm z-10">
@@ -125,7 +125,7 @@
 
                     <!-- Viewport de renderização do VexFlow com rolagem horizontal -->
                     <div id="score-scroll-area">
-                        <div id="score-container" class="p-4 relative min-h-[180px]">
+                        <div id="score-container" class="p-4 relative min-h-[220px]">
                             <div id="vexflow-target"></div>
 
                             <!-- Inputs Flutuantes Acoplados na Nota Selecionada (Altura Vertical Fixa) -->
@@ -715,12 +715,12 @@
 
                         container.style.display = 'block';
 
-                        // Posicionamento HORIZONTAL dinâmico e VERTICAL 100% estático/fixo
+                        // Posicionamento HORIZONTAL dinâmico e VERTICAL estático ajustado
                         chordInput.style.left = xPos + 'px';
-                        chordInput.style.top = '15px'; // Chords sempre travados a 15px do topo
+                        chordInput.style.top = '30px'; // Chords travados a 30px do topo
 
                         lyricInput.style.left = xPos + 'px';
-                        lyricInput.style.top = '145px'; // Lyrics sempre travados a 145px do topo
+                        lyricInput.style.top = '170px'; // Lyrics travados a 170px do topo
 
                         const currentNote = this.currentData[this.persistentSelectedIndex];
                         if (document.activeElement !== chordInput) chordInput.value = currentNote.chord || '';
