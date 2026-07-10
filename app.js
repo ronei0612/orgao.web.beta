@@ -354,10 +354,11 @@ class BpmManager {
         this.input.addEventListener('change', () => {
             let value = parseInt(this.input.value, 10);
 
-            if (isNaN(value) || value < 30) {
-                value = 30;
-            } else if (value > 300) {
-                value = 300;
+            // Ajuste dos limites para 1 e 999
+            if (isNaN(value) || value < 1) {
+                value = 1;
+            } else if (value > 999) {
+                value = 999;
             }
 
             this.input.value = value;
@@ -373,10 +374,11 @@ class BpmManager {
 
         let newValue = currentValue + amount;
 
-        if (newValue < 30) {
-            newValue = 30;
-        } else if (newValue > 300) {
-            newValue = 300;
+        // Ajuste dos limites para 1 e 999 nos botões de incremento/decremento
+        if (newValue < 1) {
+            newValue = 1;
+        } else if (newValue > 999) {
+            newValue = 999;
         }
 
         this.input.value = newValue;
