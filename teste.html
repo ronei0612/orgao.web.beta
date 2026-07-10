@@ -71,7 +71,7 @@
                         <option value="5">F</option>
                         <option value="6">F#</option>
                         <option value="7">G</option>
-                        <option value="8">G#</option>
+                        <option value="8">Ab</option> <!-- Alterado de G# para Ab -->
                         <option value="9">A</option>
                         <option value="10">Bb</option>
                         <option value="11">B</option>
@@ -79,15 +79,14 @@
                     <button class="btn btn-teal px-3" id="btn-key-up"><i class="fas fa-plus"></i></button>
                 </div>
 
-                <!-- Botões e Input do BPM Simétricos -->
+                <!-- Botões e Input do BPM -->
                 <div class="input-group">
-                    <button class="btn btn-teal px-2" id="btn-bpm-minus-5">-5</button>
-                    <button class="btn btn-teal px-2 border-start" id="btn-bpm-minus-1"><i class="fas fa-minus"></i></button>
+                    <button class="btn btn-teal btn-bpm" id="btn-bpm-minus-5">-5</button>
+                    <button class="btn btn-teal btn-bpm border-start" id="btn-bpm-minus-1"><i class="fas fa-minus"></i></button>
 
-                    <input type="number" class="form-control custom-bpm fw-bold px-1" id="bpm-input" value="90">
+                    <input type="number" class="form-control custom-bpm fw-bold px-1" id="bpm-input" value="90" min="1" max="999">
 
-                    <button class="btn btn-teal px-2" id="btn-bpm-plus-1"><i class="fas fa-plus"></i></button>
-                    <button class="btn btn-teal px-2 border-start" id="btn-bpm-plus-5">+5</button>
+                    <button class="btn btn-teal btn-bpm" id="btn-bpm-plus-5">+5</button>
                 </div>
             </div>
 
@@ -114,7 +113,7 @@
         </div>
 
         <!-- Displays Principais (Letra/Partitura vs Liturgia) -->
-        <div class="main-display flex-grow-1 mb-2" id="main-display" contenteditable="false"></div>
+        <div class="main-display flex-grow-1 mb-1" id="main-display" contenteditable="false"></div>
         <iframe class="main-iframe flex-grow-1 d-none mb-2" id="main-iframe" src=""></iframe>
 
         <div class="input-group mb-2 flex-nowrap flex-shrink-0">
@@ -131,13 +130,16 @@
 
         <!-- Acordes -->
         <div class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
+            <!-- Linha de cima (Empréstimos e Relativos) -->
             <div class="d-flex justify-content-center gap-2">
                 <button class="chord-btn bg-degree-gray" data-interval="10" data-type="">Bb</button>
-                <button class="chord-btn bg-degree-gray" data-interval="9" data-type="">A</button>
+                <button class="chord-btn bg-degree-minor-rel" data-interval="9" data-type="">A</button>
                 <button class="chord-btn bg-degree-gray" data-interval="11" data-type="°">B°</button>
-                <button class="chord-btn bg-degree-gray" data-interval="4" data-type="">E</button>
+                <!-- Acorde E puxando a paleta de cores do Am (Tensão para o Lá menor) -->
+                <button class="chord-btn bg-degree-3-rel" data-interval="4" data-type="">E</button>
                 <button class="chord-btn bg-degree-gray" data-interval="2" data-type="">D</button>
             </div>
+            <!-- Linha de baixo (Campo Harmônico Principal) -->
             <div class="d-flex justify-content-center flex-wrap gap-2">
                 <button class="chord-btn bg-degree-1" data-interval="0" data-type="">C</button>
                 <button class="chord-btn bg-degree-6" data-interval="9" data-type="m">Am</button>

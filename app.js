@@ -52,7 +52,8 @@ class LanguageManager {
 
     async loadTranslations() {
         try {
-            const response = await fetch('translations.json');
+            // Aponta diretamente para o local absoluto no seu servidor beta
+            const response = await fetch('https://roneicostasoares.com.br/orgao.web.beta/translations.json');
 
             if (!response.ok) {
                 throw new Error('Falha no carregamento do arquivo JSON');
@@ -337,7 +338,6 @@ class BpmManager {
 
         this.btnMinus5 = document.getElementById('btn-bpm-minus-5');
         this.btnMinus1 = document.getElementById('btn-bpm-minus-1');
-        this.btnPlus1 = document.getElementById('btn-bpm-plus-1');
         this.btnPlus5 = document.getElementById('btn-bpm-plus-5');
 
         this.init();
@@ -348,17 +348,17 @@ class BpmManager {
 
         this.btnMinus5.addEventListener('click', () => this.changeBpm(-5));
         this.btnMinus1.addEventListener('click', () => this.changeBpm(-1));
-        this.btnPlus1.addEventListener('click', () => this.changeBpm(1));
         this.btnPlus5.addEventListener('click', () => this.changeBpm(5));
 
         // Validação quando o usuário digita manualmente e tira o foco
         this.input.addEventListener('change', () => {
             let value = parseInt(this.input.value, 10);
 
-            if (isNaN(value) || value < 30) {
-                value = 30;
-            } else if (value > 300) {
-                value = 300;
+            // Ajuste dos limites para 1 e 999
+            if (isNaN(value) || value < 1) {
+                value = 1;
+            } else if (value > 999) {
+                value = 999;
             }
 
             this.input.value = value;
@@ -374,10 +374,11 @@ class BpmManager {
 
         let newValue = currentValue + amount;
 
-        if (newValue < 30) {
-            newValue = 30;
-        } else if (newValue > 300) {
-            newValue = 300;
+        // Ajuste dos limites para 1 e 999 nos botões de incremento/decremento
+        if (newValue < 1) {
+            newValue = 1;
+        } else if (newValue > 999) {
+            newValue = 999;
         }
 
         this.input.value = newValue;
@@ -772,8 +773,8 @@ class ChordManager {
         this.btnKeyDown = document.getElementById('btn-key-down');
         this.btnKeyUp = document.getElementById('btn-key-up');
 
-        this.notesSharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        this.notesFlat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+        // Escala única baseada na regra: somente C e F têm sustenidos (#), demais são bemóis (b)
+        this.notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 
         this.init();
     }
@@ -825,16 +826,13 @@ class ChordManager {
     }
 
     transposeChords(keyOffset) {
-        const selectedText = this.keySelect.options[this.keySelect.selectedIndex].text;
-        const useFlats = selectedText.includes('b') || this.keySelect.value === '5'; // 5 é Fá
-        const currentScale = useFlats ? this.notesFlat : this.notesSharp;
-
+        // Agora aplicamos diretamente a escala unificada "this.notes" para os botões
         this.chordBtns.forEach(btn => {
             const baseInterval = parseInt(btn.getAttribute('data-interval'), 10);
             const chordType = btn.getAttribute('data-type');
 
             const newIndex = (baseInterval + keyOffset) % 12;
-            const newNote = currentScale[newIndex];
+            const newNote = this.notes[newIndex];
 
             btn.innerText = `${newNote}${chordType}`;
         });

@@ -19,7 +19,7 @@ body {
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 10px;
+    padding: 5px;
 }
 
 /* Botões Customizados */
@@ -111,22 +111,23 @@ body {
 
 .btn-play {
     background-color: #2b7af1;
-    box-shadow: 0 0 25px 5px rgba(43, 122, 241, 0.4);
+    box-shadow: 0 0 25px 5px rgba(11, 142, 142, 0.4);
     transition: all 0.3s ease;
 }
 
+    /* Stop (Vermelho Vibrante Moderno) */
     .btn-play.playing {
         background-color: #ff6347;
-        box-shadow: 0 0 25px 5px rgba(255, 99, 71, 0.6);
+        box-shadow: 0 0 25px 5px rgba(230, 57, 70, 0.6);
     }
 
 .btn-music {
-    background-color: #9a84b8;
+    background-color: #0b8e8e;
     transition: all 0.3s ease;
 }
 
     .btn-music.phase-3 {
-        box-shadow: 0 0 25px 5px rgba(154, 132, 184, 0.8);
+        box-shadow: 0 0 25px 5px rgba(11, 142, 142, 0.8); /* Sombra atualizada para o Teal */
     }
 
 .music-emoji {
@@ -187,38 +188,49 @@ body {
     animation: repress-effect 0.2s ease-in-out;
 }
 
+/* Paleta de Cores Modernas dos Acordes */
 .bg-degree-gray {
-    --chord-bg: #9b95a5;
+    --chord-bg: #788290; /* Cinza Ardósia Neutro */
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-minor-rel {
+    --chord-bg: #b095e6; /* Violeta Suave (Ponte visual com o Am) */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-1 {
-    --chord-bg: #4981ad;
+    --chord-bg: #4c8ade; /* Azul Suave */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-6 {
-    --chord-bg: #a476db;
+    --chord-bg: #8056d6; /* Roxo Moderno (Am) */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-4 {
-    --chord-bg: #e36be0;
+    --chord-bg: #d16baf; /* Rosa Antigo */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-2 {
-    --chord-bg: #ef7b7b;
+    --chord-bg: #e06c6c; /* Vermelho Terroso / Salmão */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-5 {
-    --chord-bg: #f98b00;
+    --chord-bg: #e88d4f; /* Laranja Pêssego */
     background-color: var(--chord-bg);
 }
 
 .bg-degree-3 {
-    --chord-bg: #e5bc00;
+    --chord-bg: #d9aa45; /* Amarelo Mostarda */
+    background-color: var(--chord-bg);
+}
+
+.bg-degree-3-rel {
+    --chord-bg: #9c67d6; /* Roxo Vibrante/Quente (Ponte de tensão para o Am) */
     background-color: var(--chord-bg);
 }
 
@@ -254,6 +266,11 @@ body {
     text-align: center;
     min-width: 60px;
     max-width: 100px;
+}
+
+/* Nova regra para ajustar a largura dos botões do BPM */
+.btn-bpm {
+    min-width: 48px;
 }
 
 .form-select, .form-control {
