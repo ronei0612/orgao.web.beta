@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de Partituras Pro</title>
+
+    <!-- Tailwind CSS para um design moderno e limpo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bibliotecas de Renderização via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/abcjs@6.3.0/dist/abcjs-basic-min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/abcjs@6.3.0/abcjs-audio.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        /* Customizações do Editor VexFlow */
+        .floating-input {
+            position: absolute;
+            transform: translateX(-50%);
+            width: 80px;
+            text-align: center;
+            font-size: 14px;
+            border: 2px solid #3b82f6;
+            border-radius: 6px;
+            background: white;
+            color: black;
+            padding: 4px;
+            outline: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            pointer-events: auto;
+            z-index: 50;
+        }
+
+        .chord-input {
+            font-weight: bold;
+            color: #dc2626;
+        }
+
+        .lyric-input {
+            font-weight: normal;
+            font-style: italic;
+            color: #1e293b;
+        }
+
+        .vf-stavenote {
+            cursor: pointer;
+        }
+        /* Responsividade para rolagem de partituras longas */
+        #score-scroll-area {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+            background: #fdfdfd;
+            min-height: 250px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header / Barra Superior de Metadados -->
+    <header class="bg-white border-b border-slate-200 px-6 py-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🎼</span>
+            <h1 class="text-xl font-bold tracking-tight text-slate-900">Editor de Partitura & ABC</h1>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex flex-col">
+                <label class="text-xs font-semibold text-slate-500 uppercase">Título da Obra</label>
+                <input type="text" id="tituloInput" value="Brilha Brilha Estrelinha" class="border border-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-xs font-semibold text-slate-500 uppercase">Tom (Armadura)</label>
+                <select id="tomSelect" class="border border-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500">
+                    <option value="C" selected>C (Dó Maior)</option>
+                    <option value="G">G (Sol Maior)</option>
+                    <option value="D">D (Ré Maior)</option>
+                    <option value="A">A (Lá Maior)</option>
+                    <option value="E">E (Mi Maior)</option>
+                    <option value="B">B (Si Maior)</option>
+                    <option value="F">F (Fá Maior)</option>
+                    <option value="Bb">Bb (Si Bemol Maior)</option>
+                    <option value="Eb">Eb (Mi Bemol Maior)</option>
+                    <option value="Ab">Ab (Lá Bemol Maior)</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-xs font-semibold text-slate-500 uppercase">Compasso</label>
+                <select id="compassoSelect" class="border border-slate-300 rounded px-3 py-1 text-sm focus:outline-none focus:border-blue-500">
+                    <option value="4/4" selected>4/4</option>
+                    <option value="3/4">3/4</option>
+                    <option value="2/4">2/4</option>
+                    <option value="6/8">6/8</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Área Principal em Grid -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+
+        <!-- Coluna Esquerda: Editor Visual Vexflow com as Toolbars embutidas -->
+        <section class="lg:col-span-8 flex flex-col gap-4">
+            <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-4 relative flex flex-col">
+                <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Editor Visual Interativo</h2>
+
+                <!-- Container de Edição Estruturado -->
+                <div class="relative border border-slate-100 rounded-lg bg-slate-50 pt-16 pb-16 pr-16 min-h-[350px]">
+
+                    <!-- Top Toolbar (Navegação de Foco/Altura) -->
+                    <div class="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-white/95 border border-slate-200 p-1 rounded-lg shadow-sm z-10">
+                        <button class="w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:text-green-600 hover:bg-slate-50 rounded transition-all" id="btn-prev" title="Nota Anterior">◀</button>
+                        <button class="w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:text-green-600 hover:bg-slate-50 rounded transition-all" id="btn-up" title="Subir Nota">▲</button>
+                        <button class="w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:text-green-600 hover:bg-slate-50 rounded transition-all" id="btn-down" title="Baixar Nota">▼</button>
+                        <button class="w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:text-green-600 hover:bg-slate-50 rounded transition-all" id="btn-next" title="Próxima Nota">▶</button>
+                    </div>
+
+                    <!-- Side Toolbar (Adição/Edição de Parâmetros) -->
+                    <div class="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col gap-1.5 bg-white/95 border border-slate-200 p-1 rounded-lg shadow-sm z-10">
+                        <button class="w-10 h-10 flex items-center justify-center text-lg font-bold text-emerald-600 hover:bg-slate-50 rounded transition-all" id="btn-add" title="Adicionar Nota">+♪</button>
+                        <button class="w-10 h-10 flex items-center justify-center text-lg font-bold text-slate-700 hover:bg-slate-50 rounded transition-all" id="btn-rest" title="Adicionar Pausa">𝄽</button>
+                        <button class="w-10 h-10 flex items-center justify-center text-xl font-bold text-blue-600 hover:bg-slate-50 rounded pb-1 transition-all" id="btn-tie" title="Ligar à próxima nota">‿</button>
+                        <button class="w-10 h-10 flex items-center justify-center text-lg font-bold text-purple-600 hover:bg-slate-50 rounded transition-all" id="btn-bar" title="Inserir Linha de Compasso">|</button>
+                        <button class="w-10 h-10 flex items-center justify-center text-red-600 hover:bg-red-50 rounded transition-all" id="btn-delete" title="Apagar Nota">
+                            <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M5.83 5.146a.5.5 0 0 0 0 .708L7.975 8l-2.147 2.146a.5.5 0 0 0 .707.708l2.147-2.147 2.146 2.147a.5.5 0 0 0 .707-.708L9.39 8l2.146-2.146a.5.5 0 0 0-.707-.708L8.683 7.293 6.536 5.146a.5.5 0 0 0-.707 0z"></path><path d="M13.683 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7.08a2 2 0 0 1-1.519-.698L.241 8.65a1 1 0 0 1 0-1.302L5.084 1.7A2 2 0 0 1 6.603 1zm-7.08 1a1 1 0 0 0-.76.35L1 8l4.844 5.65a1 1 0 0 0 .759.35h7.08a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z"></path></svg>
+                        </button>
+                    </div>
+
+                    <!-- Bottom Toolbar (Oitavas e Quebras) -->
+                    <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-white/95 border border-slate-200 p-1 rounded-lg shadow-sm z-10">
+                        <button class="px-3 h-10 text-xs font-bold text-violet-700 hover:bg-slate-50 rounded border border-slate-100 transition-all" id="btn-octave-up" title="Subir Oitava">↑8ª</button>
+                        <button class="px-3 h-10 text-xs font-bold text-violet-700 hover:bg-slate-50 rounded border border-slate-100 transition-all" id="btn-octave-down" title="Descer Oitava">↓8ª</button>
+                        <div class="w-[1px] h-6 bg-slate-200 mx-1"></div>
+                        <button class="w-10 h-10 flex items-center justify-center text-lg font-bold text-slate-600 hover:bg-slate-50 rounded transition-all" id="btn-linebreak" title="Quebrar Linha Após a Nota">↲</button>
+                    </div>
+
+                    <!-- Viewport de renderização do VexFlow -->
+                    <div id="score-scroll-area">
+                        <div id="score-container" class="p-4 relative">
+                            <div id="vexflow-target"></div>
+
+                            <!-- Inputs Flutuantes Acoplados na Nota Selecionada -->
+                            <div id="floating-inputs-container" style="display: none;">
+                                <input type="text" id="floating-chord" class="floating-input chord-input" placeholder="Cifra" autocomplete="off">
+                                <input type="text" id="floating-lyric" class="floating-input lyric-input" placeholder="Letra" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Caixa informativa de atalhos rápidos de teclado -->
+            <div class="bg-slate-800 text-slate-300 rounded-xl p-4 text-xs shadow-inner">
+                <span class="font-bold text-white block mb-1">🎹 Atalhos de Teclado (Foco Fora dos Inputs):</span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div><kbd class="bg-slate-700 px-1.5 py-0.5 rounded text-white">Seta Esq/Dir</kbd> Navega notas</div>
+                    <div><kbd class="bg-slate-700 px-1.5 py-0.5 rounded text-white">Seta Cima/Baixo</kbd> Altera Altura</div>
+                    <div><kbd class="bg-slate-700 px-1.5 py-0.5 rounded text-white">Enter</kbd> Adiciona nova nota</div>
+                    <div><kbd class="bg-slate-700 px-1.5 py-0.5 rounded text-white">Del/Backspace</kbd> Apaga nota</div>
+                    <div class="col-span-2"><kbd class="bg-slate-700 px-1.5 py-0.5 rounded text-white">Teclas [A] até [P]</kbd> Teclado Musical Virtual (C4 a B5)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Coluna Direita: Abas de visualização, Player e Backups -->
+        <section class="lg:col-span-4 bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex flex-col gap-4">
+
+            <!-- Abas do painel lateral -->
+            <div class="flex border-b border-slate-200">
+                <button onclick="switchTab('export-tab')" id="tab-btn-export-tab" class="tab-btn py-2 px-3 border-b-2 border-blue-500 font-semibold text-blue-600 text-xs uppercase tracking-wider">Exportar ABC</button>
+                <button onclick="switchTab('player-tab')" id="tab-btn-player-tab" class="tab-btn py-2 px-3 border-b-2 border-transparent font-semibold text-slate-500 hover:text-slate-700 text-xs uppercase tracking-wider">Player Áudio</button>
+                <button onclick="switchTab('import-tab')" id="tab-btn-import-tab" class="tab-btn py-2 px-3 border-b-2 border-transparent font-semibold text-slate-500 hover:text-slate-700 text-xs uppercase tracking-wider">Backup/Importar</button>
+            </div>
+
+            <!-- Aba 1: Exportar / Código ABC -->
+            <div id="export-tab" class="tab-content flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Código ABCJS Gerado</label>
+                    <textarea id="abc-export-textarea" readonly class="w-full h-44 border border-slate-200 rounded bg-slate-50 p-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="copyToClipboard('abc-export-textarea')" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 px-3 rounded text-xs transition-colors">Copiar ABC</button>
+                    <button onclick="downloadABCFile()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded text-xs transition-colors">Baixar .abc</button>
+                </div>
+            </div>
+
+            <!-- Aba 2: Player & Sintetizador ABCJS -->
+            <div id="player-tab" class="tab-content hidden flex flex-col gap-4">
+                <div class="border border-slate-100 rounded-lg p-2 bg-slate-50">
+                    <h3 class="text-xs font-bold text-slate-500 mb-2">Painel de Áudio</h3>
+                    <!-- Sintetizador do ABCJS -->
+                    <div id="abcjs-audio-container" class="w-full"></div>
+                </div>
+                <div class="border border-slate-100 rounded-lg p-2 max-h-[250px] overflow-auto">
+                    <h3 class="text-xs font-bold text-slate-400 mb-2">Pré-visualização ABCJS</h3>
+                    <div id="abcjs-paper"></div>
+                </div>
+            </div>
+
+            <!-- Aba 3: Backup / Importador do formato antigo -->
+            <div id="import-tab" class="tab-content hidden flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Dados de Salvamento (Formato Antigo)</label>
+                    <textarea id="custom-export-textarea" class="w-full h-36 border border-slate-200 rounded bg-slate-50 p-2 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-blue-500" placeholder="Insira o texto de backup para importar..."></textarea>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button onclick="carregarFormatoAntigo()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-xs transition-colors">Carregar Dados Acima</button>
+                    <button onclick="downloadBackupFile()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2 rounded text-xs transition-colors">Baixar Backup (.orgao)</button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Script Lógico Integrado -->
+    <script>
+        // Teoria Musical de Suporte (Unificada)
+        const MusicTheory = {
+            tonsPreferemBemol: new Set(['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm']),
+            acordesTomMap: {
+                'C': 'C', 'G': 'G', 'D': 'D', 'A': 'A', 'E': 'E', 'B': 'B', 'F#': 'F#', 'C#': 'C#',
+                'F': 'F', 'Bb': 'Bb', 'Eb': 'Eb', 'Ab': 'Ab', 'Db': 'Db', 'Gb': 'Gb', 'Cb': 'Cb',
+                'Am': 'Am', 'Em': 'Em', 'Bm': 'Bm', 'F#m': 'F#m', 'C#m': 'C#m', 'G#m': 'G#m', 'D#m': 'D#m', 'A#m': 'A#m',
+                'Dm': 'Dm', 'Gm': 'Gm', 'Cm': 'Cm', 'Fm': 'Fm', 'Bbm': 'Bbm', 'Ebm': 'Ebm', 'Abm': 'Abm'
+            }
+        };
+
+        // Função utilitária para converter Alturas Vexflow (ex: "c/4", "f#/5") para Notação ABC
+        function vexflowToAbc(pitch) {
+            const regex = /^([a-g])(b|#)?\/([3-6])$/i;
+            const match = pitch.toLowerCase().match(regex);
+            if (!match) return pitch;
+
+            let [_, noteName, accidental, octaveNum] = match;
+            octaveNum = parseInt(octaveNum, 10);
+
+            let accSym = '';
+            if (accidental === '#') accSym = '^';
+            else if (accidental === 'b') accSym = '_';
+
+            let abcNote = noteName.toUpperCase(); // padrão oitava 4 (Dó central)
+
+            if (octaveNum === 3) {
+                abcNote = abcNote + ",";
+            } else if (octaveNum === 5) {
+                abcNote = abcNote.toLowerCase();
+            } else if (octaveNum === 6) {
+                abcNote = abcNote.toLowerCase() + "'";
+            }
+
+            return accSym + abcNote;
+        }
+
+        // Função para converter o array do modelo em uma String ABC Standard
+        function convertToABC(currentData, key, title, timeSig) {
+            let abc = `X: 1\n`;
+            abc += `T: ${title || 'Minha Partitura'}\n`;
+            abc += `M: ${timeSig || '4/4'}\n`;
+            abc += `L: 1/4\n`;
+            abc += `K: ${key || 'C'}\n`;
+
+            // Agrupa os compassos por quebras de linha (lineBreak)
+            const lines = [];
+            let currentLine = [];
+            currentData.forEach(item => {
+                currentLine.push(item);
+                if (item.lineBreak) {
+                    lines.push(currentLine);
+                    currentLine = [];
+                }
+            });
+            if (currentLine.length > 0) {
+                lines.push(currentLine);
+            }
+
+            lines.forEach(line => {
+                let notePart = "";
+                let lyricWords = [];
+
+                line.forEach(item => {
+                    if (item.bar) {
+                        notePart += " |";
+                        return;
+                    }
+
+                    let abcNote = "";
+                    if (item.rest) {
+                        abcNote = "z";
+                    } else if (item.notes && item.notes.length > 0) {
+                        if (item.notes.length === 1) {
+                            abcNote = vexflowToAbc(item.notes[0]);
+                        } else {
+                            abcNote = "[" + item.notes.map(vexflowToAbc).join("") + "]";
+                        }
+                    }
+
+                    if (item.tie) {
+                        abcNote += "-";
+                    }
+
+                    if (item.chord) {
+                        notePart += ` "${item.chord}"` + abcNote;
+                    } else {
+                        notePart += " " + abcNote;
+                    }
+
+                    if (!item.rest) {
+                        if (item.lyric && item.lyric.trim() !== "") {
+                            lyricWords.push(item.lyric.trim().replace(/\s+/g, '_'));
+                        } else {
+                            lyricWords.push("*");
+                        }
+                    }
+                });
+
+                abc += notePart.trim() + "\n";
+                if (lyricWords.length > 0 && lyricWords.some(w => w !== "*")) {
+                    abc += "w: " + lyricWords.join(" ") + "\n";
+                }
+            });
+
+            return abc;
+        }
+
+        // --- Classe Principal PartituraEditor (Legado unificado sem iframes) ---
+        class PartituraEditor {
+            constructor(musicTheory) {
+                this.musicTheory = musicTheory;
+                this.vf = Vex.Flow;
+
+                this.basePitches = [
+                    "f/3", "f#/3", "g/3", "g#/3", "a/3", "a#/3", "b/3",
+                    "c/4", "c#/4", "d/4", "d#/4", "e/4", "f/4", "f#/4", "g/4", "g#/4", "a/4", "a#/4", "b/4",
+                    "c/5", "c#/5", "d/5", "d#/5", "e/5", "f/5", "f#/5", "g/5", "g#/5", "a/5", "a#/5", "b/5",
+                    "c/6", "c#/6", "d/6", "d#/6", "e/6"
+                ];
+
+                this.currentData = [];
+                this.noteXPositions = [];
+                this.noteYPositions = [];
+                this.persistentSelectedIndex = 0;
+                this.selectionStart = 0;
+                this.selectionEnd = 0;
+                this.copiedNotesBuffer = null;
+
+                this.highlightIndex = -1;
+                this.lastUsedPitch = "b/4";
+
+                this.inicializarEditor();
+            }
+
+            getCurrentKey() {
+                const tomSelect = document.getElementById('tomSelect');
+                let key = tomSelect ? tomSelect.value : 'C';
+                if (!key || key === '') key = 'C';
+                if (this.musicTheory && this.musicTheory.acordesTomMap[key]) {
+                    key = this.musicTheory.acordesTomMap[key];
+                }
+                return key;
+            }
+
+            normalizeItem(item) {
+                let str = String(item).trim();
+                let chord = "", lyric = "", bar = false, rest = false, tie = false, lineBreak = false;
+
+                if (str.startsWith('L|')) { lineBreak = true; str = str.slice(2); }
+                if (str.startsWith('R|')) { rest = true; str = str.slice(2); }
+                if (str.endsWith('|')) { bar = true; str = str.slice(0, -1); }
+
+                if (str.includes('@')) {
+                    let parts = str.split('@');
+                    lyric = parts[1]; str = parts[0];
+                }
+
+                if (str.endsWith('~')) { tie = true; str = str.slice(0, -1); }
+
+                if (str.startsWith('[')) {
+                    let closeIdx = str.indexOf(']');
+                    if (closeIdx !== -1) { chord = str.substring(1, closeIdx); str = str.substring(closeIdx + 1); }
+                }
+
+                let notes = str.split(',').map(n => n.trim());
+                if (notes.length === 1 && notes[0] === "") notes = ["b/4"];
+
+                return { notes, chord, lyric, bar, rest, tie, lineBreak };
+            }
+
+            obterDadosParaSalvar() {
+                return this.currentData.map(d => {
+                    let s = d.chord ? `[${d.chord}]` : "";
+                    s += d.notes.join(",");
+                    if (d.tie) s += '~';
+                    if (d.lyric) s += `@${d.lyric}`;
+                    if (d.rest) s = 'R|' + s;
+                    if (d.lineBreak) s = 'L|' + s;
+                    if (d.bar) s += `|`;
+                    return s;
+                }).join('\n');
+            }
+
+            getEnarmonicPitch(pitchStr) {
+                const currentKey = this.getCurrentKey();
+                let prefereBemol = false;
+                if (currentKey.endsWith('b') || currentKey.endsWith('bm')) {
+                    prefereBemol = true;
+                } else if (['F', 'Dm', 'Gm', 'Cm', 'Fm'].includes(currentKey)) {
+                    prefereBemol = true;
+                } else if (this.musicTheory.tonsPreferemBemol.has(currentKey) && currentKey !== 'C' && currentKey !== 'Am') {
+                    prefereBemol = true;
+                }
+
+                if (!prefereBemol) return pitchStr;
+
+                const partes = pitchStr.split('/');
+                if (partes.length !== 2) return pitchStr;
+
+                const nota = partes[0].toLowerCase();
+                const oitava = partes[1];
+
+                const mapSustenidoParaBemol = {
+                    'c#': 'db', 'd#': 'eb', 'f#': 'gb', 'g#': 'ab', 'a#': 'bb'
+                };
+
+                if (mapSustenidoParaBemol[nota]) {
+                    return mapSustenidoParaBemol[nota] + '/' + oitava;
+                }
+                return pitchStr;
+            }
+
+            convertAccidentalsToKey() {
+                let changed = false;
+                this.currentData.forEach(item => {
+                    if (!item.rest) {
+                        const newNotes = item.notes.map(n => {
+                            const partes = n.split('/');
+                            if (partes.length !== 2) return n;
+                            const mapBemolParaSustenido = { 'db': 'c#', 'eb': 'd#', 'gb': 'f#', 'ab': 'g#', 'bb': 'a#' };
+                            const notaBase = partes[0].toLowerCase();
+
+                            let sustenido = n;
+                            if (mapBemolParaSustenido[notaBase]) {
+                                sustenido = mapBemolParaSustenido[notaBase] + '/' + partes[1];
+                            }
+
+                            const enarmonico = this.getEnarmonicPitch(sustenido);
+                            if (enarmonico !== n) changed = true;
+                            return enarmonico;
+                        });
+                        item.notes = newNotes;
+                    }
+                });
+                return changed;
+            }
+
+            inicializarEditor() {
+                // Associação de Eventos aos Botões de Edição
+                document.getElementById('btn-prev').onclick = () => this.navegarCursor(-1);
+                document.getElementById('btn-next').onclick = () => this.navegarCursor(1);
+                document.getElementById('btn-up').onclick = () => this.alterarAltura(1);
+                document.getElementById('btn-down').onclick = () => this.alterarAltura(-1);
+                document.getElementById('btn-bar').onclick = () => this.toggleBar();
+                document.getElementById('btn-add').onclick = () => this.addNewNote();
+                document.getElementById('btn-rest').onclick = () => this.addRest();
+                document.getElementById('btn-tie').onclick = () => this.toggleTie();
+                document.getElementById('btn-delete').onclick = () => this.deleteNoteAtCursor();
+                document.getElementById('btn-linebreak').onclick = () => this.toggleLineBreak();
+                document.getElementById('btn-octave-up').onclick = () => this.shiftOctaveAll(1);
+                document.getElementById('btn-octave-down').onclick = () => this.shiftOctaveAll(-1);
+
+                const chordInput = document.getElementById('floating-chord');
+                const lyricInput = document.getElementById('floating-lyric');
+
+                const handleFloatingInput = (e, type) => {
+                    if (this.persistentSelectedIndex >= 0) {
+                        this.currentData[this.persistentSelectedIndex][type] = e.target.value;
+                        this.draw();
+                        this.atualizarCamposExportacao();
+                    }
+                };
+
+                const handleFloatingKeydown = (e) => {
+                    if (e.key === 'Enter' || e.key === 'Tab') {
+                        e.preventDefault();
+                        this.navegarCursor(1);
+                        setTimeout(() => {
+                            const nextInput = document.getElementById(e.target.id);
+                            if (nextInput) { nextInput.focus(); nextInput.select(); }
+                        }, 50);
+                    } else if (e.key === 'ArrowRight' && e.target.selectionStart === e.target.value.length) {
+                        e.preventDefault();
+                        this.navegarCursor(1);
+                        setTimeout(() => {
+                            const nextInput = document.getElementById(e.target.id);
+                            if (nextInput) { nextInput.focus(); nextInput.select(); }
+                        }, 50);
+                    } else if (e.key === 'ArrowLeft' && e.target.selectionEnd === 0) {
+                        e.preventDefault();
+                        this.navegarCursor(-1);
+                        setTimeout(() => {
+                            const prevInput = document.getElementById(e.target.id);
+                            if (prevInput) { prevInput.focus(); prevInput.select(); }
+                        }, 50);
+                    } else if (e.key === 'Escape') {
+                        e.target.blur();
+                        document.body.focus();
+                    }
+                };
+
+                if (chordInput && lyricInput) {
+                    chordInput.addEventListener('input', (e) => handleFloatingInput(e, 'chord'));
+                    chordInput.addEventListener('keydown', handleFloatingKeydown);
+                    lyricInput.addEventListener('input', (e) => handleFloatingInput(e, 'lyric'));
+                    lyricInput.addEventListener('keydown', handleFloatingKeydown);
+                }
+
+                // Configura Teclado Virtual Musical & Atalhos de teclas de controle
+                const tecladoMapeamento = {
+                    'z': 'a#/3', 'x': 'b/3',
+                    'c': 'c/4', 'v': 'c#/4', 'b': 'd/4', 'n': 'd#/4', 'm': 'e/4',
+                    'a': 'f/4', 's': 'f#/4', 'd': 'g/4', 'f': 'g#/4', 'g': 'a/4', 'h': 'a#/4', 'j': 'b/4',
+                    'k': 'c/5', 'l': 'c#/5',
+                    'q': 'd/5', 'w': 'd#/5', 'e': 'e/5', 'r': 'f/5', 't': 'f#/5', 'y': 'g/5', 'u': 'g#/5', 'i': 'a/5', 'o': 'a#/5', 'p': 'b/5'
+                };
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.target && (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea')) return;
+
+                    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+                        e.preventDefault();
+                        this.copySelectedRange();
+                        return;
+                    }
+
+                    const keyLower = e.key.toLowerCase();
+
+                    if (tecladoMapeamento[keyLower]) {
+                        e.preventDefault();
+                        if (this.persistentSelectedIndex >= 0) {
+                            const newPitch = this.getEnarmonicPitch(tecladoMapeamento[keyLower]);
+                            this.currentData[this.persistentSelectedIndex].notes = [newPitch];
+                            this.currentData[this.persistentSelectedIndex].rest = false;
+                            this.lastUsedPitch = newPitch;
+                            this.draw();
+                            this.centralizarNoCursor();
+                            this.atualizarCamposExportacao();
+                        }
+                        return;
+                    }
+
+                    switch (e.key) {
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            this.alterarAltura(1);
+                            this.atualizarCamposExportacao();
+                            break;
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            this.alterarAltura(-1);
+                            this.atualizarCamposExportacao();
+                            break;
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                let novoIndex = this.persistentSelectedIndex - 1;
+                                if (novoIndex >= 0) {
+                                    this.persistentSelectedIndex = novoIndex;
+                                    this.selectionEnd = novoIndex;
+                                    this.draw();
+                                    this.centralizarNoCursor();
+                                }
+                            } else {
+                                this.navegarCursor(-1);
+                            }
+                            break;
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                let novoIndex = this.persistentSelectedIndex + 1;
+                                if (novoIndex < this.currentData.length) {
+                                    this.persistentSelectedIndex = novoIndex;
+                                    this.selectionEnd = novoIndex;
+                                    this.draw();
+                                    this.centralizarNoCursor();
+                                }
+                            } else {
+                                this.navegarCursor(1);
+                            }
+                            break;
+                        case 'Enter':
+                            e.preventDefault();
+                            this.addNewNote();
+                            this.atualizarCamposExportacao();
+                            break;
+                        case 'Backspace':
+                        case 'Delete':
+                            e.preventDefault();
+                            this.deleteNoteAtCursor();
+                            this.atualizarCamposExportacao();
+                            break;
+                    }
+                });
+
+                this.onEditDrawn = () => this.bindClickNotasEditor();
+            }
+
+            navegarCursor(direcao) {
+                let novoIndex = this.persistentSelectedIndex + direcao;
+                if (novoIndex >= 0 && novoIndex < this.currentData.length) {
+                    this.persistentSelectedIndex = novoIndex;
+                    this.selectionStart = novoIndex;
+                    this.selectionEnd = novoIndex;
+                    this.draw();
+                    this.centralizarNoCursor();
+                }
+            }
+
+            alterarAltura(direcao) {
+                if (this.persistentSelectedIndex === -1) return;
+                const notaAtual = this.currentData[this.persistentSelectedIndex].notes[0];
+                const partes = notaAtual.split('/');
+                if (partes.length !== 2) return;
+
+                const notaLimpa = partes[0].toLowerCase();
+                const oitava = parseInt(partes[1], 10);
+                const valoresNotas = { 'c': 0, 'c#': 1, 'db': 1, 'd': 2, 'd#': 3, 'eb': 3, 'e': 4, 'f': 5, 'f#': 6, 'gb': 6, 'g': 7, 'g#': 8, 'ab': 8, 'a': 9, 'a#': 10, 'bb': 10, 'b': 11 };
+
+                let valorAbsoluto = (oitava * 12) + (valoresNotas[notaLimpa] ?? 0);
+                valorAbsoluto += direcao;
+                valorAbsoluto = Math.max(41, Math.min(76, valorAbsoluto)); // Limites F3 a E6
+
+                const novaOitava = Math.floor(valorAbsoluto / 12);
+                const indiceNota = valorAbsoluto % 12;
+                const arrayNotasSustenidas = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+
+                const pitchBase = arrayNotasSustenidas[indiceNota] + '/' + novaOitava;
+                const pitchFinal = this.getEnarmonicPitch(pitchBase);
+
+                this.currentData[this.persistentSelectedIndex].notes = [pitchFinal];
+                this.lastUsedPitch = pitchFinal;
+                this.draw();
+            }
+
+            shiftOctaveAll(direction) {
+                let changed = false;
+                const valoresNotas = { 'c': 0, 'c#': 1, 'db': 1, 'd': 2, 'd#': 3, 'eb': 3, 'e': 4, 'f': 5, 'f#': 6, 'gb': 6, 'g': 7, 'g#': 8, 'ab': 8, 'a': 9, 'a#': 10, 'bb': 10, 'b': 11 };
+                const arrayNotasSustenidas = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+
+                this.currentData.forEach(item => {
+                    if (!item.rest) {
+                        item.notes = item.notes.map(note => {
+                            const partes = note.split('/');
+                            if (partes.length === 2) {
+                                const notaLimpa = partes[0].toLowerCase();
+                                let octave = parseInt(partes[1], 10);
+                                octave += direction;
+
+                                let valorAbsoluto = (octave * 12) + (valoresNotas[notaLimpa] ?? 0);
+                                let clampValor = Math.max(41, Math.min(76, valorAbsoluto));
+
+                                if (clampValor !== (parseInt(partes[1], 10) * 12 + (valoresNotas[notaLimpa] ?? 0))) {
+                                    changed = true;
+                                }
+
+                                const novaOitava = Math.floor(clampValor / 12);
+                                const indiceNota = clampValor % 12;
+                                const pitchBase = arrayNotasSustenidas[indiceNota] + '/' + novaOitava;
+                                return this.getEnarmonicPitch(pitchBase);
+                            }
+                            return note;
+                        });
+                    }
+                });
+
+                if (changed) {
+                    this.draw();
+                    this.centralizarNoCursor();
+                    this.atualizarCamposExportacao();
+                }
+            }
+
+            centralizarNoCursor() {
+                const noteX = this.noteXPositions[this.persistentSelectedIndex];
+                const noteY = this.noteYPositions[this.persistentSelectedIndex];
+                if (noteX == null || noteY == null) return;
+
+                const wrapper = document.getElementById('score-scroll-area');
+                if (!wrapper) return;
+
+                const offsetX = wrapper.clientWidth * 0.35;
+                const offsetY = wrapper.clientHeight * 0.35;
+                wrapper.scrollTo({
+                    left: Math.max(0, noteX - offsetX),
+                    top: Math.max(0, noteY - offsetY),
+                    behavior: 'smooth'
+                });
+            }
+
+            addNewNote() {
+                let repassarQuebraDeLinha = false;
+                let notasParaCopiar = ["b/4"];
+                let isRest = false;
+
+                if (this.persistentSelectedIndex >= 0) {
+                    const notaAtual = this.currentData[this.persistentSelectedIndex];
+                    if (notaAtual.lineBreak) {
+                        notaAtual.lineBreak = false;
+                        repassarQuebraDeLinha = true;
+                    }
+                    if (notaAtual.rest) {
+                        notasParaCopiar = [this.lastUsedPitch || "b/4"];
+                    } else {
+                        notasParaCopiar = [...notaAtual.notes];
+                    }
+                } else {
+                    notasParaCopiar = [this.lastUsedPitch || "b/4"];
+                }
+
+                this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
+                    notes: notasParaCopiar,
+                    chord: "", lyric: "", bar: false, rest: isRest, tie: false, lineBreak: repassarQuebraDeLinha
+                });
+
+                this.persistentSelectedIndex++;
+                this.selectionStart = this.persistentSelectedIndex;
+                this.selectionEnd = this.persistentSelectedIndex;
+                this.draw();
+                this.centralizarNoCursor();
+            }
+
+            addRest() {
+                let repassarQuebraDeLinha = false;
+                if (this.persistentSelectedIndex >= 0 && this.currentData[this.persistentSelectedIndex].lineBreak) {
+                    this.currentData[this.persistentSelectedIndex].lineBreak = false;
+                    repassarQuebraDeLinha = true;
+                }
+
+                this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
+                    notes: ["b/4"],
+                    chord: "", lyric: "", bar: false, rest: true, tie: false, lineBreak: repassarQuebraDeLinha
+                });
+
+                this.persistentSelectedIndex++;
+                this.selectionStart = this.persistentSelectedIndex;
+                this.selectionEnd = this.persistentSelectedIndex;
+                this.draw();
+                this.centralizarNoCursor();
+            }
+
+            toggleTie() {
+                if (this.persistentSelectedIndex === -1) return;
+                this.currentData[this.persistentSelectedIndex].tie = !this.currentData[this.persistentSelectedIndex].tie;
+                this.draw();
+                this.atualizarCamposExportacao();
+            }
+
+            toggleLineBreak() {
+                if (this.persistentSelectedIndex === -1) return;
+                this.currentData[this.persistentSelectedIndex].lineBreak = !this.currentData[this.persistentSelectedIndex].lineBreak;
+                this.draw();
+                this.atualizarCamposExportacao();
+            }
+
+            toggleBar() {
+                if (this.persistentSelectedIndex === -1) return;
+                this.currentData[this.persistentSelectedIndex].bar = !this.currentData[this.persistentSelectedIndex].bar;
+                this.draw();
+                this.atualizarCamposExportacao();
+            }
+
+            deleteNoteAtCursor() {
+                const start = this.selectionStart ?? this.persistentSelectedIndex;
+                const end = this.selectionEnd ?? this.persistentSelectedIndex;
+                const minSel = Math.min(start, end);
+                const maxSel = Math.max(start, end);
+
+                if (minSel !== maxSel) {
+                    this.currentData.splice(minSel, maxSel - minSel + 1);
+                    if (this.currentData.length === 0) {
+                        this.currentData = [{ notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false }];
+                    }
+                    this.persistentSelectedIndex = Math.min(minSel, this.currentData.length - 1);
+                } else {
+                    if (this.currentData.length <= 1) {
+                        this.currentData[0] = { notes: ["b/4"], chord: "", lyric: "", bar: false, rest: false, tie: false, lineBreak: false };
+                    } else {
+                        const indexAnterior = this.persistentSelectedIndex - 1;
+                        if (this.persistentSelectedIndex > 0 && this.currentData[indexAnterior].lineBreak) {
+                            this.currentData[indexAnterior].lineBreak = false;
+                        } else {
+                            this.currentData.splice(this.persistentSelectedIndex, 1);
+                            if (this.persistentSelectedIndex >= this.currentData.length) {
+                                this.persistentSelectedIndex = this.currentData.length - 1;
+                            }
+                        }
+                    }
+                }
+
+                this.selectionStart = this.persistentSelectedIndex;
+                this.selectionEnd = this.persistentSelectedIndex;
+                this.draw();
+                this.centralizarNoCursor();
+            }
+
+            bindClickNotasEditor() {
+                const target = document.getElementById('vexflow-target');
+                if (!target) return;
+
+                // Remover ouvintes antigos
+                const notas = target.querySelectorAll('.vf-stavenote');
+                notas.forEach((notaEl, index) => {
+                    notaEl.onclick = (e) => {
+                        e.stopPropagation();
+                        if (e.shiftKey) {
+                            this.selectionEnd = index;
+                        } else {
+                            this.selectionStart = index;
+                            this.selectionEnd = index;
+                        }
+                        this.persistentSelectedIndex = index;
+                        this.draw();
+                    };
+                });
+            }
+
+            updateFloatingInputs() {
+                const container = document.getElementById('floating-inputs-container');
+                const chordInput = document.getElementById('floating-chord');
+                const lyricInput = document.getElementById('floating-lyric');
+                const scoreContainer = document.getElementById('score-container');
+
+                if (!container || !chordInput || !lyricInput || !scoreContainer) return;
+
+                if (this.persistentSelectedIndex >= 0 && this.persistentSelectedIndex < this.currentData.length) {
+                    const notasRenderizadas = document.querySelectorAll('#vexflow-target .vf-stavenote');
+                    const notaAtualEl = notasRenderizadas[this.persistentSelectedIndex];
+
+                    if (notaAtualEl) {
+                        const rectNota = notaAtualEl.getBoundingClientRect();
+                        const rectContainer = scoreContainer.getBoundingClientRect();
+
+                        const xPos = (rectNota.left - rectContainer.left) + (rectNota.width / 2);
+                        const yBase = (rectNota.top - rectContainer.top);
+
+                        container.style.display = 'block';
+                        chordInput.style.left = xPos + 'px';
+                        chordInput.style.top = (yBase - 45) + 'px';
+
+                        lyricInput.style.left = xPos + 'px';
+                        lyricInput.style.top = (yBase + 110) + 'px';
+
+                        const currentNote = this.currentData[this.persistentSelectedIndex];
+                        if (document.activeElement !== chordInput) chordInput.value = currentNote.chord || '';
+                        if (document.activeElement !== lyricInput) lyricInput.value = currentNote.lyric || '';
+                    } else {
+                        container.style.display = 'none';
+                    }
+                } else {
+                    container.style.display = 'none';
+                }
+            }
+
+            atualizarCamposExportacao() {
+                const key = this.getCurrentKey();
+                const title = document.getElementById('tituloInput').value || 'Minha Partitura';
+                const comp = document.getElementById('compassoSelect').value || '4/4';
+
+                // Código ABC
+                const abcStr = convertToABC(this.currentData, key, title, comp);
+                document.getElementById('abc-export-textarea').value = abcStr;
+
+                // Formato Legado / Salvamento customizado
+                const customStr = this.obterDadosParaSalvar();
+                document.getElementById('custom-export-textarea').value = customStr;
+
+                // Renderização ao vivo na aba do player ABCJS
+                renderAbcjsLivePreview(abcStr);
+            }
+
+            draw() {
+                this.convertAccidentalsToKey();
+                const target = document.getElementById('vexflow-target');
+                if (!target) return;
+                target.innerHTML = "";
+
+                const staveHeight = 150;
+                const currentKey = this.getCurrentKey();
+
+                const lines = [];
+                let currentLine = [];
+                this.currentData.forEach((data, index) => {
+                    currentLine.push({ data, index });
+                    if (data.lineBreak && index !== this.currentData.length - 1) {
+                        lines.push(currentLine);
+                        currentLine = [];
+                    }
+                });
+                if (currentLine.length > 0) {
+                    lines.push(currentLine);
+                }
+
+                const staveNotesRef = [];
+                const tickablesByIndex = new Array(this.currentData.length);
+                const lyricFontSize = 12;
+
+                const lineDataObjects = lines.map(line => {
+                    let spaceNeeded = 0;
+
+                    const tickables = line.flatMap(item => {
+                        const { data, index } = item;
+                        let noteWidth = 60;
+
+                        if (data.lyric) {
+                            noteWidth = Math.max(noteWidth, data.lyric.length * (lyricFontSize * 0.75));
+                        }
+                        if (data.chord) {
+                            noteWidth = Math.max(noteWidth, data.chord.length * 10);
+                        }
+                        if (data.bar) noteWidth += 20;
+
+                        spaceNeeded += noteWidth;
+
+                        const note = new this.vf.StaveNote({
+                            keys: data.rest ? ["b/4"] : data.notes,
+                            duration: data.rest ? "qr" : "q"
+                        });
+
+                        staveNotesRef.push({ noteObj: note, dataObj: data });
+                        tickablesByIndex[index] = note;
+
+                        if (note.getStem()) note.getStem().hide = true;
+
+                        if (data.chord && index !== this.persistentSelectedIndex) {
+                            note.addModifier(new this.vf.ChordSymbol().setFont('Roboto', 14, 'bold').addText(data.chord), 0);
+                        }
+
+                        if (data.lyric && index !== this.persistentSelectedIndex) {
+                            note.addModifier(new this.vf.Annotation(data.lyric)
+                                .setFont('Roboto', lyricFontSize, 'italic')
+                                .setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
+                        }
+
+                        // Estilo do Cursor
+                        const start = this.selectionStart ?? this.persistentSelectedIndex ?? 0;
+                        const end = this.selectionEnd ?? this.persistentSelectedIndex ?? 0;
+                        const minSel = Math.min(start, end);
+                        const maxSel = Math.max(start, end);
+
+                        if (index >= minSel && index <= maxSel) {
+                            if (index === this.persistentSelectedIndex) {
+                                note.setStyle({ fillStyle: "#16a34a", strokeStyle: "#16a34a" }); // Verde do Cursor
+                            } else {
+                                note.setStyle({ fillStyle: "#0284c7", strokeStyle: "#0284c7" }); // Azul seleção múltipla
+                            }
+                        }
+
+                        return data.bar ? [note, new this.vf.BarNote()] : [note];
+                    });
+
+                    const calculatedWidth = spaceNeeded + 150;
+                    const finalWidth = Math.max(document.getElementById('score-scroll-area').clientWidth - 80, calculatedWidth);
+
+                    const voice = new this.vf.Voice({ num_beats: line.length, beat_value: 4 }).setStrict(false);
+                    voice.addTickables(tickables);
+
+                    return { voice, finalWidth };
+                });
+
+                let maxWidth = 0;
+                lineDataObjects.forEach(obj => {
+                    if (obj.finalWidth > maxWidth) maxWidth = obj.finalWidth;
+                });
+
+                const renderer = new this.vf.Renderer(target, this.vf.Renderer.Backends.SVG);
+                renderer.resize(maxWidth + 50, (lines.length * staveHeight) + 50);
+                const context = renderer.getContext();
+
+                let currentY = 40;
+                lineDataObjects.forEach(obj => {
+                    const stave = new this.vf.Stave(10, currentY, obj.finalWidth);
+                    stave.addClef("treble").addKeySignature(currentKey).setContext(context).draw();
+                    this.vf.Accidental.applyAccidentals([obj.voice], currentKey);
+
+                    new this.vf.Formatter().joinVoices([obj.voice]).format([obj.voice], obj.finalWidth - 130);
+                    obj.voice.draw(context, stave);
+
+                    currentY += staveHeight;
+                });
+
+                // Renderiza as Ligaduras (Ties)
+                const tiesToDraw = [];
+                for (let i = 0; i < staveNotesRef.length; i++) {
+                    if (staveNotesRef[i].dataObj.tie) {
+                        const firstNote = staveNotesRef[i].noteObj;
+                        const tie = new this.vf.StaveTie({
+                            first_note: firstNote, last_note: null, first_indices: [0]
+                        });
+                        try {
+                            if (firstNote && firstNote.getTickContext()) {
+                                const firstX = firstNote.getTieRightX();
+                                const staveEndX = firstNote.getStave().getTieEndX();
+                                tie.render_options.first_x_shift = -8;
+                                tie.render_options.last_x_shift = (firstX + 25) - staveEndX;
+                                tie.render_options.cp1 = 4;
+                                tie.render_options.cp2 = 8;
+                                tiesToDraw.push(tie);
+                            }
+                        } catch (e) { }
+                    }
+                }
+                tiesToDraw.forEach(t => t.setContext(context).draw());
+
+                this.noteXPositions = tickablesByIndex.map(n => n ? n.getAbsoluteX() : 0);
+                this.noteYPositions = tickablesByIndex.map(n => n ? n.getStave().getYForLine(0) : 0);
+
+                this.updateFloatingInputs();
+                if (this.onEditDrawn) this.onEditDrawn();
+            }
+        }
+
+        // --- SISTEMA DE CONTROLE DE TABS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            });
+
+            const activeBtn = document.getElementById('tab-btn-' + tabId);
+            activeBtn.classList.remove('border-transparent', 'text-slate-500');
+            activeBtn.classList.add('border-blue-500', 'text-blue-600');
+        }
+
+        // --- SISTEMA DE AUDIO & SYNTH ABCJS ---
+        let abcjsVisualObj = null;
+        let abcjsSynthController = null;
+
+        function renderAbcjsLivePreview(abcStr) {
+            if (typeof ABCJS === 'undefined') return;
+            abcjsVisualObj = ABCJS.renderAbc("abcjs-paper", abcStr, {
+                responsive: "resize"
+            })[0];
+            setupAbcjsAudio();
+        }
+
+        async function setupAbcjsAudio() {
+            if (typeof ABCJS === 'undefined' || !abcjsVisualObj) return;
+
+            const audioContainer = document.getElementById("abcjs-audio-container");
+            audioContainer.innerHTML = "";
+
+            try {
+                if (ABCJS.synth.supportsAudio()) {
+                    abcjsSynthController = new ABCJS.synth.SynthController();
+                    abcjsSynthController.load("#abcjs-audio-container", null, {
+                        displayLoop: true,
+                        displayRestart: true,
+                        displayPlay: true,
+                        displayProgress: true,
+                        displayWarp: true
+                    });
+
+                    const createSynth = new ABCJS.synth.CreateSynth();
+                    await createSynth.init({ visualObj: abcjsVisualObj });
+                    await abcjsSynthController.setTune(abcjsVisualObj, false, {});
+                } else {
+                    audioContainer.innerHTML = "<p class='text-red-500 text-xs'>AudioContext indisponível no navegador.</p>";
+                }
+            } catch (e) {
+                console.warn("Falha ao preparar o sintetizador MIDI:", e);
+            }
+        }
+
+        // --- EXPORTAÇÃO E DOWNLOADS ---
+        function copyToClipboard(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            textarea.select();
+            document.execCommand('copy');
+            alert("Copiado com sucesso para a Área de Transferência!");
+        }
+
+        function downloadTextFile(filename, text) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        function downloadABCFile() {
+            const text = document.getElementById('abc-export-textarea').value;
+            const title = document.getElementById('tituloInput').value || 'partitura';
+            downloadTextFile(`${title.toLowerCase().replace(/\s+/g, '_')}.abc`, text);
+        }
+
+        function downloadBackupFile() {
+            const text = document.getElementById('custom-export-textarea').value;
+            const title = document.getElementById('tituloInput').value || 'partitura';
+            downloadTextFile(`${title.toLowerCase().replace(/\s+/g, '_')}.orgao`, text);
+        }
+
+        // --- IMPORTADOR DE DADOS ---
+        function carregarFormatoAntigo() {
+            const text = document.getElementById('custom-export-textarea').value.trim();
+            if (!text) {
+                alert("Por favor, cole os dados de salvamento antigos antes de importar.");
+                return;
+            }
+            const lines = text.split('\n').filter(l => l.trim() !== '');
+            if (lines.length === 0) return;
+
+            editor.currentData = lines.map(line => editor.normalizeItem(line));
+            editor.persistentSelectedIndex = 0;
+            editor.selectionStart = 0;
+            editor.selectionEnd = 0;
+            editor.draw();
+            editor.atualizarCamposExportacao();
+            alert("Partitura importada e convertida com sucesso!");
+        }
+
+        // --- INICIALIZAÇÃO DO APP COM UMA MELODIA DEMONSTRATIVA ---
+        const musicaDemonstrativa = [
+            "[C]c/4@Bri-", "c/4@lha,", "[G]g/4@bri-", "g/4@lha,", "[Am]a/4@es-", "a/4@tre-", "[G]g/4@li-", "R|b/4@nha,", "|",
+            "[F]f/4@lá", "f/4@no", "[C]e/4@céu,", "e/4@es-", "[G]d/4@tou", "d/4@a-", "[C]c/4@lhando."
+        ];
+
+        let editor = null;
+        window.onload = () => {
+            editor = new PartituraEditor(MusicTheory);
+
+            // Carrega música de demonstração
+            editor.currentData = musicaDemonstrativa.map(m => editor.normalizeItem(m));
+            editor.persistentSelectedIndex = 0;
+            editor.draw();
+            editor.atualizarCamposExportacao();
+
+            // Ouvintes para Inputs Principais
+            document.getElementById('tituloInput').addEventListener('input', () => editor.atualizarCamposExportacao());
+            document.getElementById('tomSelect').addEventListener('change', () => {
+                editor.draw();
+                editor.atualizarCamposExportacao();
+            });
+            document.getElementById('compassoSelect').addEventListener('change', () => {
+                editor.draw();
+                editor.atualizarCamposExportacao();
+            });
+        };
+    </script>
+</body>
+</html>
