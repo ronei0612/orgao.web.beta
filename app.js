@@ -52,7 +52,8 @@ class LanguageManager {
 
     async loadTranslations() {
         try {
-            const response = await fetch('translations.json');
+            // Aponta diretamente para o local absoluto no seu servidor beta
+            const response = await fetch('https://roneicostasoares.com.br/orgao.web.beta/translations.json');
 
             if (!response.ok) {
                 throw new Error('Falha no carregamento do arquivo JSON');
@@ -770,8 +771,8 @@ class ChordManager {
         this.btnKeyDown = document.getElementById('btn-key-down');
         this.btnKeyUp = document.getElementById('btn-key-up');
 
-        this.notesSharp = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-        this.notesFlat = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+        // Escala única baseada na regra: somente C e F têm sustenidos (#), demais são bemóis (b)
+        this.notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
 
         this.init();
     }
@@ -823,16 +824,13 @@ class ChordManager {
     }
 
     transposeChords(keyOffset) {
-        const selectedText = this.keySelect.options[this.keySelect.selectedIndex].text;
-        const useFlats = selectedText.includes('b') || this.keySelect.value === '5'; // 5 é Fá
-        const currentScale = useFlats ? this.notesFlat : this.notesSharp;
-
+        // Agora aplicamos diretamente a escala unificada "this.notes" para os botões
         this.chordBtns.forEach(btn => {
             const baseInterval = parseInt(btn.getAttribute('data-interval'), 10);
             const chordType = btn.getAttribute('data-type');
 
             const newIndex = (baseInterval + keyOffset) % 12;
-            const newNote = currentScale[newIndex];
+            const newNote = this.notes[newIndex];
 
             btn.innerText = `${newNote}${chordType}`;
         });
