@@ -235,13 +235,11 @@ class ViewManager {
         this.btnSave = document.getElementById('btn-action-save');
         this.btnCancel = document.getElementById('btn-action-cancel');
 
+        this.btnAddSheetMusic = document.getElementById('btn-add-sheet-music');
+
         this.initPasteHandling();
     }
 
-    /** 
-     * Intercepta a "colagem" e remove a formatação HTML, deixando apenas plain text.
-     * Isso garante que bibliotecas como VexFlow não quebrem ao processar as notações no futuro.
-     */
     initPasteHandling() {
         this.mainDisplay.addEventListener('paste', (e) => {
             e.preventDefault();
@@ -293,6 +291,11 @@ class ViewManager {
 
             this.btnSave.classList.remove('d-none');
             this.btnCancel.classList.remove('d-none');
+
+            if (this.btnAddSheetMusic) {
+                this.btnAddSheetMusic.classList.remove('d-none');
+                this.btnAddSheetMusic.classList.add('d-flex');
+            }
         } else {
             this.inputTitle.classList.add('d-none');
             this.wrapperSelect.classList.remove('d-none');
@@ -304,6 +307,11 @@ class ViewManager {
             this.btnAdd.classList.add('d-none');
             this.btnEdit.classList.add('d-none');
             this.btnDelete.classList.add('d-none');
+
+            if (this.btnAddSheetMusic) {
+                this.btnAddSheetMusic.classList.add('d-none');
+                this.btnAddSheetMusic.classList.remove('d-flex');
+            }
         }
     }
 
@@ -326,6 +334,265 @@ class ViewManager {
             title: this.inputTitle.value.trim(),
             content: this.mainDisplay.innerHTML
         };
+    }
+}
+
+/**
+ * Editor Interativo de Partituras (Integração VexFlow)
+ */
+class SheetMusicEditor {
+    constructor() {
+        this.overlay = document.getElementById('sm-editor-overlay');
+        this.target = document.getElementById('vexflow-target');
+        this.vf = window.Vex.Flow;
+        this.currentData = [];
+        this.persistentSelectedIndex = 0;
+        this.activeBlock = null;
+        this.onConfirm = null;
+        this.isActive = false;
+
+        this.initUI();
+    }
+
+    initUI() {
+        document.getElementById('sm-btn-prev').onclick = () => this.navegarCursor(-1);
+        document.getElementById('sm-btn-next').onclick = () => this.navegarCursor(1);
+        document.getElementById('sm-btn-up').onclick = () => this.alterarAltura(1);
+        document.getElementById('sm-btn-down').onclick = () => this.alterarAltura(-1);
+        document.getElementById('sm-btn-add').onclick = () => this.addNewNote();
+        document.getElementById('sm-btn-rest').onclick = () => this.addRest();
+        document.getElementById('sm-btn-tie').onclick = () => this.toggleTie();
+        document.getElementById('sm-btn-delete').onclick = () => this.deleteNote();
+        document.getElementById('sm-btn-oct-up').onclick = () => this.shiftOctave(1);
+        document.getElementById('sm-btn-oct-down').onclick = () => this.shiftOctave(-1);
+
+        document.getElementById('sm-btn-confirm').onclick = () => this.confirmarEdicao();
+
+        const inputChord = document.getElementById('sm-input-chord');
+        const inputLyric = document.getElementById('sm-input-lyric');
+
+        const updateInput = (type, val) => {
+            if (this.persistentSelectedIndex >= 0) {
+                this.currentData[this.persistentSelectedIndex][type] = val;
+                this.draw();
+            }
+        };
+
+        if (inputChord && inputLyric) {
+            inputChord.addEventListener('input', e => updateInput('chord', e.target.value));
+            inputLyric.addEventListener('input', e => updateInput('lyric', e.target.value));
+        }
+
+        // Atalhos de teclado quando o editor está aberto
+        document.addEventListener('keydown', (e) => {
+            if (!this.isActive) return;
+            if (e.target.tagName.toLowerCase() === 'input') return;
+
+            switch (e.key) {
+                case 'ArrowUp': e.preventDefault(); this.alterarAltura(1); break;
+                case 'ArrowDown': e.preventDefault(); this.alterarAltura(-1); break;
+                case 'ArrowLeft': e.preventDefault(); this.navegarCursor(-1); break;
+                case 'ArrowRight': e.preventDefault(); this.navegarCursor(1); break;
+                case 'Enter': e.preventDefault(); this.addNewNote(); break;
+                case 'Backspace':
+                case 'Delete': e.preventDefault(); this.deleteNote(); break;
+            }
+        });
+    }
+
+    open(existingData, existingBlock, onConfirm) {
+        this.onConfirm = onConfirm;
+        this.activeBlock = existingBlock;
+
+        if (existingData && existingData.length > 0) {
+            this.currentData = JSON.parse(JSON.stringify(existingData));
+        } else {
+            // Nota padrão inicial (Dó4)
+            this.currentData = [{ notes: ["c/4"], chord: "", lyric: "", rest: false, tie: false }];
+        }
+
+        this.persistentSelectedIndex = this.currentData.length - 1;
+        this.isActive = true;
+        this.overlay.classList.remove('d-none');
+        this.overlay.classList.add('d-flex');
+        this.draw();
+    }
+
+    close() {
+        this.isActive = false;
+        this.overlay.classList.add('d-none');
+        this.overlay.classList.remove('d-flex');
+    }
+
+    confirmarEdicao() {
+        const svgElement = this.draw(true); // renderiza limpo sem os cursores e inputs
+        if (this.onConfirm) {
+            this.onConfirm(svgElement, this.currentData, this.activeBlock);
+        }
+        this.close();
+    }
+
+    navegarCursor(dir) {
+        let novoIndex = this.persistentSelectedIndex + dir;
+        if (novoIndex >= 0 && novoIndex < this.currentData.length) {
+            this.persistentSelectedIndex = novoIndex;
+            this.draw();
+        }
+    }
+
+    alterarAltura(direcao) {
+        if (this.currentData[this.persistentSelectedIndex].rest) return;
+        const notaAtual = this.currentData[this.persistentSelectedIndex].notes[0];
+        const partes = notaAtual.split('/');
+
+        const valoresNotas = { 'c': 0, 'c#': 1, 'd': 2, 'd#': 3, 'e': 4, 'f': 5, 'f#': 6, 'g': 7, 'g#': 8, 'a': 9, 'a#': 10, 'b': 11 };
+        const arraySustenidos = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'];
+
+        let valorAbsoluto = (parseInt(partes[1], 10) * 12) + (valoresNotas[partes[0].toLowerCase().replace('b', '#')] ?? 0);
+        valorAbsoluto += direcao;
+        valorAbsoluto = Math.max(41, Math.min(76, valorAbsoluto)); // Limite F3 a E6
+
+        const novaOitava = Math.floor(valorAbsoluto / 12);
+        const indiceNota = valorAbsoluto % 12;
+
+        this.currentData[this.persistentSelectedIndex].notes = [arraySustenidos[indiceNota] + '/' + novaOitava];
+        this.draw();
+    }
+
+    shiftOctave(direcao) {
+        this.currentData.forEach(item => {
+            if (!item.rest) {
+                item.notes = item.notes.map(note => {
+                    const partes = note.split('/');
+                    let oitava = parseInt(partes[1], 10) + direcao;
+                    oitava = Math.max(3, Math.min(6, oitava));
+                    return partes[0] + '/' + oitava;
+                });
+            }
+        });
+        this.draw();
+    }
+
+    addNewNote() {
+        const lastNote = this.currentData[this.persistentSelectedIndex];
+        const newPitch = lastNote && !lastNote.rest ? lastNote.notes[0] : "c/4";
+
+        this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
+            notes: [newPitch], chord: "", lyric: "", rest: false, tie: false
+        });
+        this.persistentSelectedIndex++;
+        this.draw();
+    }
+
+    addRest() {
+        this.currentData.splice(this.persistentSelectedIndex + 1, 0, {
+            notes: ["b/4"], chord: "", lyric: "", rest: true, tie: false
+        });
+        this.persistentSelectedIndex++;
+        this.draw();
+    }
+
+    toggleTie() {
+        this.currentData[this.persistentSelectedIndex].tie = !this.currentData[this.persistentSelectedIndex].tie;
+        this.draw();
+    }
+
+    deleteNote() {
+        if (this.currentData.length <= 1) {
+            this.currentData[0] = { notes: ["c/4"], chord: "", lyric: "", rest: false, tie: false };
+        } else {
+            this.currentData.splice(this.persistentSelectedIndex, 1);
+            if (this.persistentSelectedIndex >= this.currentData.length) {
+                this.persistentSelectedIndex = this.currentData.length - 1;
+            }
+        }
+        this.draw();
+    }
+
+    draw(clean = false) {
+        this.target.innerHTML = "";
+        const inputsWrapper = document.getElementById('sm-floating-inputs');
+        const staveHeight = 150;
+        let spaceNeeded = 0;
+        const staveNotesRef = [];
+
+        const tickables = this.currentData.map((data, index) => {
+            let noteWidth = 60;
+            if (data.lyric) noteWidth = Math.max(noteWidth, data.lyric.length * 10);
+            if (data.chord) noteWidth = Math.max(noteWidth, data.chord.length * 12);
+            spaceNeeded += noteWidth;
+
+            const note = new this.vf.StaveNote({
+                keys: data.rest ? ["b/4"] : data.notes,
+                duration: data.rest ? "qr" : "q"
+            });
+
+            staveNotesRef.push({ noteObj: note, dataObj: data });
+            if (note.getStem()) note.getStem().hide = true;
+
+            const shouldRenderText = clean || index !== this.persistentSelectedIndex;
+
+            if (data.chord && shouldRenderText) {
+                note.addModifier(new this.vf.ChordSymbol().setFont('Arial', 14, 'bold').addText(data.chord), 0);
+            }
+            if (data.lyric && shouldRenderText) {
+                note.addModifier(new this.vf.Annotation(data.lyric).setFont('Arial', 12, 'italic').setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
+            }
+
+            if (!clean && index === this.persistentSelectedIndex) {
+                note.setStyle({ fillStyle: "#198754", strokeStyle: "#198754" });
+            }
+            return note;
+        });
+
+        const finalWidth = Math.max(400, spaceNeeded + 100);
+        const voice = new this.vf.Voice({ num_beats: this.currentData.length, beat_value: 4 }).setStrict(false);
+        voice.addTickables(tickables);
+
+        const renderer = new this.vf.Renderer(this.target, this.vf.Renderer.Backends.SVG);
+        renderer.resize(finalWidth + 40, staveHeight);
+        const context = renderer.getContext();
+
+        const stave = new this.vf.Stave(10, 20, finalWidth);
+        stave.addClef("treble").setContext(context).draw();
+
+        this.vf.Accidental.applyAccidentals([voice], 'C');
+        new this.vf.Formatter().joinVoices([voice]).format([voice], finalWidth - 60);
+        voice.draw(context, stave);
+
+        staveNotesRef.forEach((ref) => {
+            if (ref.dataObj.tie) {
+                new this.vf.StaveTie({ first_note: ref.noteObj, last_note: null, first_indices: [0] })
+                    .setContext(context).draw();
+            }
+        });
+
+        if (!clean) {
+            const activeNoteObj = tickables[this.persistentSelectedIndex];
+            if (activeNoteObj) {
+                const xPos = activeNoteObj.getAbsoluteX();
+                inputsWrapper.style.display = 'block';
+                inputsWrapper.style.left = xPos + 'px';
+
+                const current = this.currentData[this.persistentSelectedIndex];
+                const iChord = document.getElementById('sm-input-chord');
+                const iLyric = document.getElementById('sm-input-lyric');
+
+                if (document.activeElement !== iChord) iChord.value = current.chord || '';
+                if (document.activeElement !== iLyric) iLyric.value = current.lyric || '';
+            }
+        } else {
+            if (inputsWrapper) inputsWrapper.style.display = 'none';
+        }
+
+        if (!clean) {
+            const wrapper = document.getElementById('score-scroll-area');
+            const activeX = tickables[this.persistentSelectedIndex]?.getAbsoluteX() || 0;
+            const offset = wrapper.clientWidth / 2;
+            wrapper.scrollTo({ left: Math.max(0, activeX - offset), behavior: 'smooth' });
+        }
+
+        return this.target.querySelector('svg').cloneNode(true);
     }
 }
 
@@ -664,16 +931,20 @@ class RepertoireController {
         }
 
         this.modal.show('confirmSaveTitle', 'confirmSaveBody', () => {
+            let savedSong;
             if (this.currentMode === 'add') {
-                const newSong = this.db.addSong(title, content);
-                this.currentSongId = newSong.id;
+                savedSong = this.db.addSong(title, content);
+                this.currentSongId = savedSong.id;
             } else {
-                this.db.updateSong(this.currentSongId, title, content);
+                savedSong = this.db.updateSong(this.currentSongId, title, content);
             }
 
             this.currentMode = 'view';
             this.refreshSelectOptions();
             this.ts.setValue(this.currentSongId, true);
+
+            // CORREÇÃO: Força a interface a sair do modo de edição e carregar o novo conteúdo
+            this.view.showRepertoire(savedSong ? savedSong.content : '');
         });
     }
 }
@@ -993,7 +1264,7 @@ class MobileExperienceManager {
     }
 
     init() {
-        // Usando capture: true para garantir que o evento seja pego antes de qualquer biblioteca (como o TomSelect) anular o clique
+        // Usando capture: true para garantir que o evento seja pego antes de qualquer biblioteca anular o clique
         ['click', 'touchstart'].forEach(eventType => {
             document.addEventListener(eventType, () => this.enableMobileExperience(), { capture: true, passive: true });
         });
@@ -1003,7 +1274,6 @@ class MobileExperienceManager {
     }
 
     isMobileDevice() {
-        // Consideramos mobile se a tela for menor que 768px E o dispositivo suportar toque
         return window.innerWidth <= 768 && navigator.maxTouchPoints > 0;
     }
 
@@ -1059,7 +1329,6 @@ class MobileExperienceManager {
 
 /**
  * Classe Central de Teoria Musical
- * Fonte única de verdade para notas, escalas, intervalos e cálculos harmônicos.
  */
 class MusicTheory {
     constructor() {
@@ -1128,8 +1397,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const languageManager = new LanguageManager(tomSelectInstance);
     const modalManager = new ModalManager(languageManager);
     const backupManager = new BackupManager(dbManager);
-
-    // --> NOVA CLASSE INICIALIZADA AQUI <--
     const musicTheory = new MusicTheory();
 
     // Core Controllers (Lógica de Negócios Central)
@@ -1140,11 +1407,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const bpmManager = new BpmManager();
     const playbackManager = new PlaybackManager();
     const notePhaseManager = new NotePhaseManager();
-
-    // --> PASSANDO A musicTheory PARA OS MANAGERS <--
     const chordManager = new ChordManager(playbackManager, musicTheory);
     const pianoManager = new PianoManager(musicTheory);
 
-    // Experiência em Dispositivos Móveis
-    const mobileExperienceManager = new MobileExperienceManager();
+    // --> INICIALIZANDO O EDITOR DE PARTITURA <--
+    const sheetMusicEditor = new SheetMusicEditor();
+
+    // Evento do botão Flutuante "🎼" para adicionar nova partitura
+    if (viewManager.btnAddSheetMusic) {
+        viewManager.btnAddSheetMusic.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            sheetMusicEditor.open(null, null, (svgElement, currentData, existingBlock) => {
+                insertSheetMusicBlock(svgElement, currentData, existingBlock);
+            });
+        });
+    }
+
+    // Evento de Clique no Main Display para EDITAR uma partitura já existente
+    viewManager.mainDisplay.addEventListener('click', (e) => {
+        // Se estiver em modo de edição
+        if (viewManager.mainDisplay.getAttribute('contenteditable') === 'true') {
+            const block = e.target.closest('.sheet-music-block');
+            if (block) {
+                const data = JSON.parse(decodeURIComponent(block.dataset.score));
+                sheetMusicEditor.open(data, block, (svgElement, currentData, existingBlock) => {
+                    insertSheetMusicBlock(svgElement, currentData, existingBlock);
+                });
+            }
+        }
+    });
+
+    // Função que insere ou atualiza o bloco da partitura no editor de texto
+    function insertSheetMusicBlock(svgElement, data, existingBlock) {
+        if (existingBlock) {
+            // Atualizando um bloco que já existe
+            existingBlock.dataset.score = encodeURIComponent(JSON.stringify(data));
+            existingBlock.innerHTML = '';
+            existingBlock.appendChild(svgElement);
+            return;
+        }
+
+        // Criando um novo bloco
+        const block = document.createElement('div');
+        block.className = 'sheet-music-block';
+        block.contentEditable = 'false'; // Fundamental para não quebrar a formatação do SVG
+        block.dataset.score = encodeURIComponent(JSON.stringify(data));
+        block.appendChild(svgElement);
+
+        viewManager.mainDisplay.focus();
+
+        // Colocando o bloco cirurgicamente onde estava o cursor piscando
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) { // <-- Correção aplicada aqui
+            const range = sel.getRangeAt(0);
+
+            // Só insere se o cursor estiver dentro da área de texto
+            if (viewManager.mainDisplay.contains(range.commonAncestorContainer)) {
+                range.collapse(false);
+                range.insertNode(block);
+
+                // Insere um espaço invisível após o bloco para permitir continuar digitando naturalmente
+                const spaceNode = document.createTextNode('\u200B');
+                range.setStartAfter(block);
+                range.insertNode(spaceNode);
+                range.setStartAfter(spaceNode);
+                range.collapse(true);
+
+                sel.removeAllRanges();
+                sel.addRange(range);
+                return;
+            }
+        }
+
+        // Se não houver seleção válida, joga no final do texto
+        viewManager.mainDisplay.appendChild(block);
+        viewManager.mainDisplay.appendChild(document.createTextNode('\u200B'));
+    }
 });

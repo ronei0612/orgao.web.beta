@@ -190,47 +190,47 @@ body {
 
 /* Paleta de Cores Modernas dos Acordes */
 .bg-degree-gray {
-    --chord-bg: #788290; /* Cinza Ardósia Neutro */
+    --chord-bg: #788290;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-minor-rel {
-    --chord-bg: #b095e6; /* Violeta Suave (Ponte visual com o Am) */
+    --chord-bg: #b095e6;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-1 {
-    --chord-bg: #4c8ade; /* Azul Suave */
+    --chord-bg: #4c8ade;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-6 {
-    --chord-bg: #8056d6; /* Roxo Moderno (Am) */
+    --chord-bg: #8056d6;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-4 {
-    --chord-bg: #d16baf; /* Rosa Antigo */
+    --chord-bg: #d16baf;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-2 {
-    --chord-bg: #e06c6c; /* Vermelho Terroso / Salmão */
+    --chord-bg: #e06c6c;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-5 {
-    --chord-bg: #e88d4f; /* Laranja Pêssego */
+    --chord-bg: #e88d4f;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-3 {
-    --chord-bg: #d9aa45; /* Amarelo Mostarda */
+    --chord-bg: #d9aa45;
     background-color: var(--chord-bg);
 }
 
 .bg-degree-3-rel {
-    --chord-bg: #9c67d6; /* Roxo Vibrante/Quente (Ponte de tensão para o Am) */
+    --chord-bg: #9c67d6;
     background-color: var(--chord-bg);
 }
 
@@ -268,7 +268,6 @@ body {
     max-width: 100px;
 }
 
-/* Nova regra para ajustar a largura dos botões do BPM */
 .btn-bpm {
     min-width: 48px;
 }
@@ -279,6 +278,82 @@ body {
 
 .input-group > .btn {
     transition: all 0.15s ease-in-out;
+}
+
+/* --- Editor de Partitura (Visual e Blocos Gerados) --- */
+
+/* Caixa (Bloco) gerada dentro do texto */
+.sheet-music-block {
+    display: inline-flex;
+    border: 2px dashed #b8b8b8;
+    padding: 10px 15px;
+    margin: 10px 5px;
+    background: #fffdf5;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    max-width: 95%;
+    overflow-x: auto;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+}
+
+    .sheet-music-block:hover {
+        border-color: #0b8e8e;
+        background: #f0fdfa;
+    }
+
+    .sheet-music-block svg {
+        pointer-events: none; /* Previne que o SVG bloqueie cliques no bloco */
+    }
+
+/* Barras de Ferramentas do Editor */
+.sm-toolbar {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.sm-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+    .sm-btn:hover {
+        background: #f8f9fa;
+        border-color: #dee2e6;
+        transform: scale(1.05);
+    }
+
+    .sm-btn:active {
+        transform: scale(0.95);
+    }
+
+.text-purple {
+    color: #8a2be2 !important;
+}
+
+/* Inputs Flutuantes (Cifra/Letra) */
+.sm-floating-input {
+    width: 70px;
+    border: 2px solid #0d6efd !important;
+    padding: 2px 4px;
+    font-size: 14px;
+    position: absolute;
+    transform: translateX(-50%);
+    z-index: 10;
 }
 
 /* 🎹 TECLADO DE PIANO COM SCROLL DINÂMICO 🎹 */
@@ -399,7 +474,9 @@ body {
     }
 }
 
-/* MODO ESCURO */
+/* ========================================= */
+/*               MODO ESCURO                 */
+/* ========================================= */
 [data-bs-theme="dark"] body {
     background-color: #121212;
 }
@@ -472,4 +549,35 @@ body {
 
 [data-bs-theme="dark"] .scroll-shadow-right {
     background: linear-gradient(to left, rgba(0,0,0,0.6), transparent);
+}
+
+/* Sheet Music (Partitura) Modo Escuro */
+[data-bs-theme="dark"] .sheet-music-block {
+    background: #2b2b2b;
+    border-color: #555;
+}
+
+    [data-bs-theme="dark"] .sheet-music-block:hover {
+        background: #333;
+        border-color: #0b8e8e;
+    }
+
+[data-bs-theme="dark"] .sm-toolbar {
+    background: rgba(43, 48, 53, 0.95);
+    border-color: #495057;
+}
+
+[data-bs-theme="dark"] .sm-btn:hover {
+    background: #343a40;
+    border-color: #495057;
+}
+
+[data-bs-theme="dark"] #sm-editor-overlay {
+    background: #1e1e1e !important;
+}
+
+/* Inverte as notas pretas para branco suave no SVG em tema escuro */
+[data-bs-theme="dark"] .sheet-music-block svg,
+[data-bs-theme="dark"] #vexflow-target svg {
+    filter: invert(0.85) hue-rotate(180deg);
 }
