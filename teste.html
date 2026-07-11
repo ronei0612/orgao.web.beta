@@ -63,18 +63,7 @@
                 <div class="input-group">
                     <button class="btn btn-teal px-3" id="btn-key-down"><i class="fas fa-minus"></i></button>
                     <select class="form-select text-center fw-bold" id="key-select">
-                        <option value="0">C</option>
-                        <option value="1">C#</option>
-                        <option value="2">D</option>
-                        <option value="3">Eb</option>
-                        <option value="4">E</option>
-                        <option value="5">F</option>
-                        <option value="6">F#</option>
-                        <option value="7">G</option>
-                        <option value="8">Ab</option> <!-- Alterado de G# para Ab -->
-                        <option value="9">A</option>
-                        <option value="10">Bb</option>
-                        <option value="11">B</option>
+                        <!-- As options (C, C#, D...) serão geradas dinamicamente pelo JS -->
                     </select>
                     <button class="btn btn-teal px-3" id="btn-key-up"><i class="fas fa-plus"></i></button>
                 </div>
@@ -132,21 +121,21 @@
         <div class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
             <!-- Linha de cima (Empréstimos e Relativos) -->
             <div class="d-flex justify-content-center gap-2">
-                <button class="chord-btn bg-degree-gray" data-interval="10" data-type="">Bb</button>
-                <button class="chord-btn bg-degree-minor-rel" data-interval="9" data-type="">A</button>
-                <button class="chord-btn bg-degree-gray" data-interval="11" data-type="°">B°</button>
+                <button class="chord-btn bg-degree-gray" data-interval="10" data-type=""></button>
+                <button class="chord-btn bg-degree-minor-rel" data-interval="9" data-type=""></button>
+                <button class="chord-btn bg-degree-gray" data-interval="11" data-type="°"></button>
                 <!-- Acorde E puxando a paleta de cores do Am (Tensão para o Lá menor) -->
-                <button class="chord-btn bg-degree-3-rel" data-interval="4" data-type="">E</button>
-                <button class="chord-btn bg-degree-gray" data-interval="2" data-type="">D</button>
+                <button class="chord-btn bg-degree-3-rel" data-interval="4" data-type=""></button>
+                <button class="chord-btn bg-degree-gray" data-interval="2" data-type=""></button>
             </div>
             <!-- Linha de baixo (Campo Harmônico Principal) -->
             <div class="d-flex justify-content-center flex-wrap gap-2">
-                <button class="chord-btn bg-degree-1" data-interval="0" data-type="">C</button>
-                <button class="chord-btn bg-degree-6" data-interval="9" data-type="m">Am</button>
-                <button class="chord-btn bg-degree-4" data-interval="5" data-type="">F</button>
-                <button class="chord-btn bg-degree-2" data-interval="2" data-type="m">Dm</button>
-                <button class="chord-btn bg-degree-5" data-interval="7" data-type="">G</button>
-                <button class="chord-btn bg-degree-3" data-interval="4" data-type="m">Em</button>
+                <button class="chord-btn bg-degree-1" data-interval="0" data-type=""></button>
+                <button class="chord-btn bg-degree-6" data-interval="9" data-type="m"></button>
+                <button class="chord-btn bg-degree-4" data-interval="5" data-type=""></button>
+                <button class="chord-btn bg-degree-2" data-interval="2" data-type="m"></button>
+                <button class="chord-btn bg-degree-5" data-interval="7" data-type=""></button>
+                <button class="chord-btn bg-degree-3" data-interval="4" data-type="m"></button>
             </div>
         </div>
 

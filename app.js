@@ -766,20 +766,24 @@ class NotePhaseManager {
 }
 
 class ChordManager {
-    constructor(playbackManager) {
+    constructor(playbackManager, musicTheory) {
         this.playbackManager = playbackManager;
+        this.musicTheory = musicTheory; // Dependência injetada
         this.chordBtns = document.querySelectorAll('.chord-btn');
         this.keySelect = document.getElementById('key-select');
         this.btnKeyDown = document.getElementById('btn-key-down');
         this.btnKeyUp = document.getElementById('btn-key-up');
 
-        // Escala única baseada na regra: somente C e F têm sustenidos (#), demais são bemóis (b)
-        this.notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
-
         this.init();
     }
 
     init() {
+        // 1. Popula dinamicamente as opções do Select (Tons)
+        this.populateKeySelect();
+
+        // 2. Preenche os botões de acordes pela primeira vez (Tom base = C, índice 0)
+        this.transposeChords(0);
+
         this.playbackManager.onStop(() => this.clearActiveChords());
 
         this.chordBtns.forEach(btn => {
@@ -794,11 +798,29 @@ class ChordManager {
         this.btnKeyUp.addEventListener('click', () => this.changeKeyStep(1));
     }
 
+    /**
+     * Consome a classe MusicTheory para gerar o HTML das options de tonalidade
+     */
+    populateKeySelect() {
+        if (!this.keySelect) return;
+
+        this.keySelect.innerHTML = ''; // Limpa qualquer resíduo HTML
+
+        this.musicTheory.notes.forEach((note, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = note;
+            this.keySelect.appendChild(option);
+        });
+
+        // Define Dó (C) como tom inicial
+        this.keySelect.value = "0";
+    }
+
     handleChordClick(btn) {
         if (btn.classList.contains('active')) {
-            // Reinicia a animação caso clique de novo em um botão já ativo
             btn.classList.remove('repress-anim');
-            void btn.offsetWidth; // Gatilho de Reflow para forçar a animação
+            void btn.offsetWidth;
             btn.classList.add('repress-anim');
         } else {
             this.clearActiveChords();
@@ -826,21 +848,20 @@ class ChordManager {
     }
 
     transposeChords(keyOffset) {
-        // Agora aplicamos diretamente a escala unificada "this.notes" para os botões
         this.chordBtns.forEach(btn => {
             const baseInterval = parseInt(btn.getAttribute('data-interval'), 10);
             const chordType = btn.getAttribute('data-type');
 
-            const newIndex = (baseInterval + keyOffset) % 12;
-            const newNote = this.notes[newIndex];
-
+            // Consumindo o método centralizado da classe MusicTheory
+            const newNote = this.musicTheory.transposeNote(baseInterval, keyOffset);
             btn.innerText = `${newNote}${chordType}`;
         });
     }
 }
 
 class PianoManager {
-    constructor() {
+    constructor(musicTheory) {
+        this.musicTheory = musicTheory; // Dependência injetada
         this.container = document.getElementById('piano-container');
         this.shadowLeft = document.querySelector('.scroll-shadow-left');
         this.shadowRight = document.querySelector('.scroll-shadow-right');
@@ -862,14 +883,9 @@ class PianoManager {
         piano.innerHTML = '';
 
         const octaves = [3, 4, 5];
-        const pattern = [
-            { note: 'C', type: 'white' }, { note: 'C#', type: 'black' },
-            { note: 'D', type: 'white' }, { note: 'D#', type: 'black' },
-            { note: 'E', type: 'white' }, { note: 'F', type: 'white' },
-            { note: 'F#', type: 'black' }, { note: 'G', type: 'white' },
-            { note: 'G#', type: 'black' }, { note: 'A', type: 'white' },
-            { note: 'A#', type: 'black' }, { note: 'B', type: 'white' }
-        ];
+
+        // Consumindo o padrão gerado centralmente
+        const pattern = this.musicTheory.getPianoPattern();
 
         octaves.forEach(octave => {
             pattern.forEach(n => {
@@ -1042,6 +1058,58 @@ class MobileExperienceManager {
 }
 
 /**
+ * Classe Central de Teoria Musical
+ * Fonte única de verdade para notas, escalas, intervalos e cálculos harmônicos.
+ */
+class MusicTheory {
+    constructor() {
+        // Escala unificada baseada na regra: somente C e F têm sustenidos (#), demais são bemóis (b)
+        this.notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+        // Padrão estrutural de uma oitava no teclado (0 a 11)
+        this.pianoPattern = [
+            { index: 0, type: 'white' }, // C
+            { index: 1, type: 'black' }, // C#
+            { index: 2, type: 'white' }, // D
+            { index: 3, type: 'black' }, // Eb (Antigo D#)
+            { index: 4, type: 'white' }, // E
+            { index: 5, type: 'white' }, // F
+            { index: 6, type: 'black' }, // F#
+            { index: 7, type: 'white' }, // G
+            { index: 8, type: 'black' }, // Ab (Antigo G#)
+            { index: 9, type: 'white' }, // A
+            { index: 10, type: 'black' },// Bb (Antigo A#)
+            { index: 11, type: 'white' } // B
+        ];
+    }
+
+    /**
+     * Retorna a nota correspondente a um índice, garantindo que o ciclo de 12 se repita.
+     */
+    getNoteByIndex(index) {
+        const normalizedIndex = ((index % 12) + 12) % 12;
+        return this.notes[normalizedIndex];
+    }
+
+    /**
+     * Calcula a transposição a partir de um intervalo base e um deslocamento (keyOffset).
+     */
+    transposeNote(baseInterval, offset) {
+        return this.getNoteByIndex(baseInterval + offset);
+    }
+
+    /**
+     * Retorna o padrão visual de teclas de piano, já preenchido com as notas corretas.
+     */
+    getPianoPattern() {
+        return this.pianoPattern.map(key => ({
+            note: this.notes[key.index],
+            type: key.type
+        }));
+    }
+}
+
+/**
  * Inicialização Principal (Injeção de Dependências)
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -1061,6 +1129,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalManager = new ModalManager(languageManager);
     const backupManager = new BackupManager(dbManager);
 
+    // --> NOVA CLASSE INICIALIZADA AQUI <--
+    const musicTheory = new MusicTheory();
+
     // Core Controllers (Lógica de Negócios Central)
     const repertoireController = new RepertoireController(tomSelectInstance, dbManager, viewManager, modalManager, backupManager);
     const liturgyManager = new LiturgyManager(tomSelectInstance, viewManager);
@@ -1069,8 +1140,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const bpmManager = new BpmManager();
     const playbackManager = new PlaybackManager();
     const notePhaseManager = new NotePhaseManager();
-    const chordManager = new ChordManager(playbackManager);
-    const pianoManager = new PianoManager();
+
+    // --> PASSANDO A musicTheory PARA OS MANAGERS <--
+    const chordManager = new ChordManager(playbackManager, musicTheory);
+    const pianoManager = new PianoManager(musicTheory);
 
     // Experiência em Dispositivos Móveis
     const mobileExperienceManager = new MobileExperienceManager();
