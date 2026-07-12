@@ -236,6 +236,7 @@ class ViewManager {
         this.btnCancel = document.getElementById('btn-action-cancel');
 
         this.btnAddSheetMusic = document.getElementById('btn-add-sheet-music');
+        this.onHydrateScores = null; // Callback para renderizar SVGs ao carregar texto do banco
 
         this.initPasteHandling();
     }
@@ -265,6 +266,8 @@ class ViewManager {
         this.mainDisplay.setAttribute('contenteditable', 'false');
         this.mainDisplay.innerHTML = content;
 
+        if (this.onHydrateScores) this.onHydrateScores(); // Dispara o desenho dos SVGs
+
         this.toggleEditTopBar(false);
     }
 
@@ -273,8 +276,10 @@ class ViewManager {
         this.mainDisplay.classList.remove('d-none');
         this.mainDisplay.setAttribute('contenteditable', 'true');
         this.mainDisplay.innerHTML = content;
-        this.mainDisplay.focus();
 
+        if (this.onHydrateScores) this.onHydrateScores(); // Dispara o desenho dos SVGs
+
+        this.mainDisplay.focus();
         this.inputTitle.value = title;
         this.toggleEditTopBar(true);
     }
@@ -330,10 +335,169 @@ class ViewManager {
     }
 
     getEditorData() {
+        // Clona o elemento em memória para podermos manipular sem afetar a tela
+        const clone = this.mainDisplay.cloneNode(true);
+
+        // --- 1. MÁGICA: Auto-formatação de Cifras ---
+        this.autoFormatChords(clone);
+
+        // --- 2. MÁGICA: Limpeza dos SVGs (Salva apenas a Div com data-score) ---
+        const blocks = clone.querySelectorAll('.sheet-music-block');
+        blocks.forEach(block => {
+            block.innerHTML = '';
+        });
+
         return {
             title: this.inputTitle.value.trim(),
-            content: this.mainDisplay.innerHTML
+            content: clone.innerHTML // Retorna o código limpo, leve e formatado!
         };
+    }
+
+    // Motor Inteligente que encontra linhas de acordes e coloca em negrito
+    autoFormatChords(root) {
+        // 1. Remove tags <b> ou <strong> que já existam para não ter negrito duplo
+        const existingBold = root.querySelectorAll('b, strong');
+        existingBold.forEach(b => {
+            const fragment = document.createDocumentFragment();
+            while (b.firstChild) fragment.appendChild(b.firstChild);
+            b.parentNode.replaceChild(fragment, b);
+        });
+
+        // 2. Expressão Regular (Regex) Suprema de Acordes e Lista de Exceções
+        const chordRegex = /^[CDEFGAB][#b]?(m|M|maj|dim|aug|sus)?\d*(?:\(?[#b]?\d+\)?)?(?:\/[CDEFGAB][#b]?)?$/;
+        const exceptions = ['intro', 'solo', 'refrão', 'refrao', 'ponte', 'bis', 'pausa', 'fim', 'coda'];
+
+        const isChordLine = (text) => {
+            if (!text || text.trim() === '') return false;
+            const tokens = text.trim().split(/\s+/);
+
+            let hasChord = false;
+            for (let token of tokens) {
+                // Limpa símbolos ao redor da palavra (ex: "Intro:", "(2x)", "|")
+                const cleanToken = token.toLowerCase().replace(/[()[\]:,|]/g, '');
+
+                if (cleanToken === '') continue; // Era só um símbolo
+
+                if (chordRegex.test(token)) {
+                    hasChord = true;
+                } else if (!exceptions.includes(cleanToken) && !/^\d+x$/.test(cleanToken)) {
+                    // Se a palavra não é acorde, não está nas exceções e não é "2x", "3x"...
+                    return false; // A linha falhou, é uma linha de texto/letra normal
+                }
+            }
+            return hasChord; // É linha de cifra se passou no teste e tem ao menos 1 acorde
+        };
+
+        // 3. Varrer a árvore HTML buscando as linhas
+        let currentLineNodes = [];
+        let currentLineText = "";
+
+        const processLine = () => {
+            if (isChordLine(currentLineText)) {
+                // É linha de cifra! Pega os nós de texto dessa linha e bota <b> nos acordes
+                currentLineNodes.forEach(node => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        // Divide pelos espaços mantendo a exata formatação (importante para alinhar a cifra)
+                        const parts = node.nodeValue.split(/(\s+)/);
+                        const fragment = document.createDocumentFragment();
+
+                        parts.forEach(part => {
+                            if (part.trim() !== '' && chordRegex.test(part)) {
+                                const b = document.createElement('b');
+                                b.textContent = part;
+                                fragment.appendChild(b);
+                            } else {
+                                fragment.appendChild(document.createTextNode(part));
+                            }
+                        });
+                        node.parentNode.replaceChild(fragment, node);
+                    }
+                });
+            }
+            currentLineNodes = [];
+            currentLineText = "";
+        };
+
+        const walk = (node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                // Se for quebra de linha ou bloco (DIV, P, BR), processa a linha anterior
+                const isBlock = ['DIV', 'P', 'BR', 'LI', 'UL', 'OL', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName);
+
+                if (isBlock) processLine();
+
+                // Se for um bloco de partitura, tratamos como "texto inválido" para forçar o cancelamento 
+                // da detecção de cifra nessa linha (evita bugar a linha)
+                if (node.classList && node.classList.contains('sheet-music-block')) {
+                    currentLineText += " [PARTITURA] ";
+                    return;
+                }
+
+                // Desce nas ramificações (filhos)
+                node.childNodes.forEach(walk);
+
+                if (isBlock) processLine();
+
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                currentLineNodes.push(node);
+                currentLineText += node.nodeValue;
+            }
+        };
+
+        walk(root);
+        processLine(); // Processa a última linha que sobrou
+    }
+}
+
+class ScoreCodec {
+    static encode(data) {
+        return data.map(item => {
+            if (item.bar) return '|';
+            if (item.rest) return 'R';
+
+            let str = item.notes[0].replace('/', ''); // Transforma "c/4" em "c4"
+
+            if (item.chord) str += `[${item.chord}]`; // Cifra
+            if (item.lyric) str += `@${item.lyric}`;  // Letra (Novo padrão com @)
+            if (item.tie) str += `~`;                 // Ligadura
+
+            return str;
+        }).join(' ');
+    }
+
+    static decode(str) {
+        if (!str || !str.trim()) return [];
+
+        return str.trim().split(/\s+/).map(token => {
+            // Decodifica a barra de compasso
+            if (token === '|') {
+                return { notes: ["b/4"], chord: "", lyric: "", rest: false, tie: false, bar: true };
+            }
+            // Decodifica a Pausa
+            if (token === 'R') {
+                return { notes: ["b/4"], chord: "", lyric: "", rest: true, tie: false, bar: false };
+            }
+
+            // Lê a nota (Ex: c4, f#5, bb4)
+            const pitchMatch = token.match(/^([a-gA-G][#b]?)(\d)/);
+            let notes = ["c/4"];
+            if (pitchMatch) {
+                notes = [`${pitchMatch[1].toLowerCase()}/${pitchMatch[2]}`];
+            }
+
+            // Lê a cifra, letra (parando se encontrar o ~) e ligadura
+            const chordMatch = token.match(/\[(.*?)\]/);
+            const lyricMatch = token.match(/@([^~]*)/);
+            const isTie = token.includes('~');
+
+            return {
+                notes: notes,
+                chord: chordMatch ? chordMatch[1] : "",
+                lyric: lyricMatch ? lyricMatch[1] : "",
+                rest: false,
+                tie: isTie,
+                bar: false
+            };
+        });
     }
 }
 
@@ -593,6 +757,61 @@ class SheetMusicEditor {
         }
 
         return this.target.querySelector('svg').cloneNode(true);
+    }
+
+    // Desenha um SVG isolado sem usar a interface do editor (para quando a música é carregada da memória)
+    generateSvgFromData(data) {
+        const tempDiv = document.createElement('div');
+        const staveHeight = 150;
+        let spaceNeeded = 0;
+        const staveNotesRef = [];
+
+        // flatMap porque o compasso (bar) adiciona um novo elemento visual no array
+        const tickables = data.flatMap((d) => {
+            let noteWidth = 60;
+            if (d.lyric) noteWidth = Math.max(noteWidth, d.lyric.length * 10);
+            if (d.chord) noteWidth = Math.max(noteWidth, d.chord.length * 12);
+            if (d.bar) noteWidth += 20;
+
+            spaceNeeded += noteWidth;
+
+            const note = new this.vf.StaveNote({
+                keys: d.rest ? ["b/4"] : d.notes,
+                duration: d.rest ? "qr" : "q"
+            });
+
+            staveNotesRef.push({ noteObj: note, dataObj: d });
+            if (note.getStem()) note.getStem().hide = true;
+
+            if (d.chord) note.addModifier(new this.vf.ChordSymbol().setFont('Arial', 14, 'bold').addText(d.chord), 0);
+            if (d.lyric) note.addModifier(new this.vf.Annotation(d.lyric).setFont('Arial', 12, 'italic').setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
+
+            return d.bar ? [note, new this.vf.BarNote()] : [note];
+        });
+
+        const finalWidth = Math.max(400, spaceNeeded + 100);
+        const voice = new this.vf.Voice({ num_beats: data.length, beat_value: 4 }).setStrict(false);
+        voice.addTickables(tickables);
+
+        const renderer = new this.vf.Renderer(tempDiv, this.vf.Renderer.Backends.SVG);
+        renderer.resize(finalWidth + 40, staveHeight);
+        const context = renderer.getContext();
+
+        const stave = new this.vf.Stave(10, 20, finalWidth);
+        stave.addClef("treble").setContext(context).draw();
+
+        this.vf.Accidental.applyAccidentals([voice], 'C');
+        new this.vf.Formatter().joinVoices([voice]).format([voice], finalWidth - 60);
+        voice.draw(context, stave);
+
+        staveNotesRef.forEach((ref) => {
+            if (ref.dataObj.tie) {
+                new this.vf.StaveTie({ first_note: ref.noteObj, last_note: null, first_indices: [0] })
+                    .setContext(context).draw();
+            }
+        });
+
+        return tempDiv.querySelector('svg'); // Retorna apenas a imagem final SVG
     }
 }
 
@@ -1413,6 +1632,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --> INICIALIZANDO O EDITOR DE PARTITURA <--
     const sheetMusicEditor = new SheetMusicEditor();
 
+    // A MÁGICA DO CARREGAMENTO: Hidrata as partituras vazias transformando data-score em SVG visual
+    viewManager.onHydrateScores = () => {
+        const blocks = viewManager.mainDisplay.querySelectorAll('.sheet-music-block');
+        blocks.forEach(block => {
+            // Se a div está vazia (acabou de vir limpa do LocalStorage)
+            if (block.innerHTML.trim() === '') {
+                const data = ScoreCodec.decode(block.dataset.score);
+                const svg = sheetMusicEditor.generateSvgFromData(data);
+                if (svg) block.appendChild(svg);
+            }
+        });
+    };
+
     // Evento do botão Flutuante "🎼" para adicionar nova partitura
     if (viewManager.btnAddSheetMusic) {
         viewManager.btnAddSheetMusic.addEventListener('click', (e) => {
@@ -1424,13 +1656,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Evento de Clique no Main Display para EDITAR uma partitura já existente
+    // Evento de Clique no Main Display para EDITAR uma partitura
     viewManager.mainDisplay.addEventListener('click', (e) => {
-        // Se estiver em modo de edição
         if (viewManager.mainDisplay.getAttribute('contenteditable') === 'true') {
             const block = e.target.closest('.sheet-music-block');
             if (block) {
-                const data = JSON.parse(decodeURIComponent(block.dataset.score));
+                // A MÁGICA AQUI: Decodificando a string limpa para o VexFlow
+                const data = ScoreCodec.decode(block.dataset.score);
                 sheetMusicEditor.open(data, block, (svgElement, currentData, existingBlock) => {
                     insertSheetMusicBlock(svgElement, currentData, existingBlock);
                 });
@@ -1438,36 +1670,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Função que insere ou atualiza o bloco da partitura no editor de texto
     function insertSheetMusicBlock(svgElement, data, existingBlock) {
+        // A MÁGICA AQUI 2: Codificando os dados para salvar limpo no HTML
+        const compactString = ScoreCodec.encode(data);
+
         if (existingBlock) {
-            // Atualizando um bloco que já existe
-            existingBlock.dataset.score = encodeURIComponent(JSON.stringify(data));
+            existingBlock.dataset.score = compactString;
             existingBlock.innerHTML = '';
             existingBlock.appendChild(svgElement);
             return;
         }
 
-        // Criando um novo bloco
         const block = document.createElement('div');
         block.className = 'sheet-music-block';
-        block.contentEditable = 'false'; // Fundamental para não quebrar a formatação do SVG
-        block.dataset.score = encodeURIComponent(JSON.stringify(data));
+        block.contentEditable = 'false';
+        block.dataset.score = compactString; // Salva super limpo
         block.appendChild(svgElement);
 
         viewManager.mainDisplay.focus();
 
-        // Colocando o bloco cirurgicamente onde estava o cursor piscando
         const sel = window.getSelection();
-        if (sel.rangeCount > 0) { // <-- Correção aplicada aqui
+        if (sel.rangeCount > 0) {
             const range = sel.getRangeAt(0);
-
-            // Só insere se o cursor estiver dentro da área de texto
             if (viewManager.mainDisplay.contains(range.commonAncestorContainer)) {
                 range.collapse(false);
                 range.insertNode(block);
 
-                // Insere um espaço invisível após o bloco para permitir continuar digitando naturalmente
                 const spaceNode = document.createTextNode('\u200B');
                 range.setStartAfter(block);
                 range.insertNode(spaceNode);
@@ -1480,7 +1708,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Se não houver seleção válida, joga no final do texto
         viewManager.mainDisplay.appendChild(block);
         viewManager.mainDisplay.appendChild(document.createTextNode('\u200B'));
     }
