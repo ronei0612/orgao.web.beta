@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
+    <!-- VexFlow (Partituras) -->
+    <script src="https://cdn.jsdelivr.net/npm/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -101,9 +105,56 @@
             </div>
         </div>
 
-        <!-- Displays Principais (Letra/Partitura vs Liturgia) -->
-        <div class="main-display flex-grow-1 mb-1" id="main-display" contenteditable="false"></div>
-        <iframe class="main-iframe flex-grow-1 d-none mb-2" id="main-iframe" src=""></iframe>
+        <!-- Displays Principais (Letra/Partitura vs Liturgia) com Wrapper -->
+        <div class="position-relative flex-grow-1 d-flex flex-column mb-1 overflow-hidden" id="main-area-wrapper">
+            <div class="main-display flex-grow-1" id="main-display" contenteditable="false"></div>
+            <iframe class="main-iframe flex-grow-1 d-none" id="main-iframe" src=""></iframe>
+
+            <!-- Botão Flutuante (Visível apenas em edição) -->
+            <button class="btn btn-teal rounded-circle shadow d-none align-items-center justify-content-center" id="btn-add-sheet-music" title="Adicionar Partitura" style="position: absolute; bottom: 15px; right: 15px; width: 50px; height: 50px; font-size: 24px; z-index: 10;">
+                🎼
+            </button>
+
+            <!-- Overlay do Editor de Partituras -->
+            <div id="sm-editor-overlay" class="d-none flex-column" style="position: absolute; top:0; left:0; right:0; bottom:0; background: #fdfdfd; z-index: 100;">
+
+                <div id="score-scroll-area" class="flex-grow-1 position-relative overflow-auto d-flex align-items-center justify-content-center" style="min-height: 250px;">
+                    <div id="score-container" class="position-relative pt-5 pb-5">
+                        <div id="vexflow-target"></div>
+
+                        <!-- Inputs Flutuantes Acoplados na Nota -->
+                        <div id="sm-floating-inputs" style="display: none; pointer-events: none;">
+                            <input type="text" id="sm-input-chord" class="form-control text-center fw-bold text-dark shadow-sm sm-floating-input" placeholder="Cifra" style="pointer-events: auto; top: 0;">
+                            <input type="text" id="sm-input-lyric" class="form-control text-center fst-italic text-secondary shadow-sm sm-floating-input" placeholder="Letra" style="pointer-events: auto; bottom: 0;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barra Superior (Navegação) -->
+                <div class="position-absolute top-0 start-50 translate-middle-x mt-3 d-flex gap-2 sm-toolbar">
+                    <button class="sm-btn text-success fw-bold" id="sm-btn-prev" title="Anterior">◀</button>
+                    <button class="sm-btn text-success fw-bold" id="sm-btn-up" title="Subir">▲</button>
+                    <button class="sm-btn text-success fw-bold" id="sm-btn-down" title="Descer">▼</button>
+                    <button class="sm-btn text-success fw-bold" id="sm-btn-next" title="Próxima">▶</button>
+                </div>
+
+                <!-- Barra Lateral Direita (Ações) -->
+                <div class="position-absolute top-50 end-0 translate-middle-y me-2 d-flex flex-column gap-2 sm-toolbar">
+                    <button class="sm-btn fw-bold text-success fs-5" id="sm-btn-add" title="Adicionar Nota">+♪</button>
+                    <button class="sm-btn fw-bold text-dark fs-4" id="sm-btn-rest" title="Adicionar Pausa">𝄽</button>
+                    <button class="sm-btn fw-bold text-primary fs-4" id="sm-btn-tie" title="Ligar Nota">‿</button>
+                    <button class="sm-btn text-danger" id="sm-btn-delete" title="Apagar Nota"><i class="fas fa-backspace"></i></button>
+                </div>
+
+                <!-- Barra Inferior (Oitava e Confirmar) -->
+                <div class="position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex gap-2 align-items-center sm-toolbar">
+                    <button class="sm-btn fw-bold text-purple" id="sm-btn-oct-up">↑8ª</button>
+                    <button class="sm-btn fw-bold text-purple" id="sm-btn-oct-down">↓8ª</button>
+                    <div class="vr mx-1"></div>
+                    <button class="sm-btn fw-bold text-success fs-5" id="sm-btn-confirm" title="Concluir Edição">✅</button>
+                </div>
+            </div>
+        </div>
 
         <div class="input-group mb-2 flex-nowrap flex-shrink-0">
             <select class="form-select text-secondary" id="rhythm-select">
