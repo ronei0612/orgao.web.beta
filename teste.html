@@ -50,6 +50,10 @@
                 <a href="#" class="text-decoration-none link-primary py-1" data-bs-toggle="modal" data-bs-target="#importModal">
                     <i class="fas fa-upload me-2"></i><span data-i18n="importRepertoire">Importar um Repertório</span>
                 </a>
+                <!-- NOVO BOTÃO RESTAURAR -->
+                <a href="#" class="text-decoration-none link-danger py-1 mt-2 border-top pt-2" id="btn-restore">
+                    <i class="fas fa-trash-alt me-2"></i><span data-i18n="restoreApp">Restaurar Aplicativo</span>
+                </a>
             </div>
         </div>
     </div>
@@ -262,6 +266,18 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancelar</button>
                     <button type="button" class="btn btn-teal d-none" id="btn-confirm-import" data-i18n="importRepertoire">Importar</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast de Nova Versão -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+        <div id="updateToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="updateToastMessage">
+                    <!-- A mensagem entrará aqui -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
     </div>

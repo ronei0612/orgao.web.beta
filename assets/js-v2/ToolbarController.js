@@ -11,6 +11,7 @@ class ToolbarController {
         this.initPlayback();
         this.initNotePhase();
         this.initLiturgy();
+        this.initRestore();
     }
 
     // --- CONTROLE DE BPM ---
@@ -103,5 +104,43 @@ class ToolbarController {
                 if (this.view) this.view.showLiturgy();
             });
         }
+    }
+
+    initRestore() {
+        const btnRestore = document.getElementById('btn-restore');
+        if (!btnRestore) return;
+
+        btnRestore.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Usamos a Modal que já criamos para segurança
+            this.view.modalManager.show(
+                'Atenção',
+                'Isso vai apagar TODO o seu repertório e configurações. O aplicativo voltará ao estado de fábrica. Deseja continuar?',
+                async () => {
+                    // 1. Limpa o LocalStorage
+                    localStorage.clear();
+
+                    // 2. Desregistra os Service Workers
+                    if ('serviceWorker' in navigator) {
+                        const regs = await navigator.serviceWorker.getRegistrations();
+                        for (let reg of regs) {
+                            await reg.unregister();
+                        }
+                    }
+
+                    // 3. Limpa completamente a API de Cache do navegador
+                    if ('caches' in window) {
+                        const keys = await caches.keys();
+                        for (let key of keys) {
+                            await caches.delete(key);
+                        }
+                    }
+
+                    // 4. Hard Refresh forçado na página
+                    window.location.reload();
+                }
+            );
+        });
     }
 }

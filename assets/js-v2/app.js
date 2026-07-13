@@ -330,4 +330,26 @@ document.addEventListener('DOMContentLoaded', () => {
         viewManager.mainDisplay.appendChild(block);
         viewManager.mainDisplay.appendChild(document.createElement('br'));
     }
+
+    // --- 0. SERVICE WORKER E ATUALIZAÇÕES ---
+    if ('serviceWorker' in navigator) {
+        // Registra o Service Worker
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Falhou: ', err));
+
+        // Escuta a mensagem de que uma nova versão foi ativada
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'UPDATE_INSTALLED') {
+                // Checa se o SW estava no controle antes de avisar (evita o aviso na primeira visita do usuário na vida)
+                if (navigator.serviceWorker.controller) {
+                    const toastEl = document.getElementById('updateToast');
+                    const msgEl = document.getElementById('updateToastMessage');
+                    if (toastEl && msgEl) {
+                        msgEl.innerText = `Nova versão atualizada com sucesso: ${event.data.version} 🚀`;
+                        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                        toast.show();
+                    }
+                }
+            }
+        });
+    }
 });
