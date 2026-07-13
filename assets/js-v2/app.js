@@ -1,3 +1,7 @@
+// --- CONFIGURAÇÕES GLOBAIS DO APLICATIVO ---
+const APP_VERSION = 'v1.0.1';
+const APP_UPDATE_DATE = '13 de Julho de 2026';
+
 class ViewManager {
     constructor() {
         this.mainDisplay = document.getElementById('main-display');
@@ -228,6 +232,9 @@ class RepertoireController {
 
 // INICIALIZAÇÃO PRINCIPAL DO SISTEMA
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Inicia o Logger o mais rápido possível para pegar todos os erros
+    const loggerManager = new LoggerManager(APP_VERSION, APP_UPDATE_DATE);
 
     // 1. Bibliotecas e Banco
     const tomSelectInstance = new TomSelect("#song-select", {
