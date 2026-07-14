@@ -5,6 +5,7 @@ const CACHE_NAME = `orgao-cache-${APP_VERSION}`;
 const ASSETS_TO_CACHE = [
     './teste.html',
     './style.css',
+    './santamissa.html',
     './assets/js-v2/TextFormatter.js',
     './assets/js-v2/DatabaseManager.js',
     './assets/js-v2/PreferencesManager.js',

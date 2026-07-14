@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ordinário da Santa Missa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: transparent; /* Pega a cor do iframe do app principal */
+            padding: 20px 10px;
+        }
+
+        h1, h2, h3 {
+            color: #0b8e8e;
+            font-weight: bold;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(11, 142, 142, 0.2);
+            padding-bottom: 5px;
+        }
+
+        [data-bs-theme="dark"] h1, [data-bs-theme="dark"] h2, [data-bs-theme="dark"] h3 {
+            color: #17a2b8;
+            border-bottom: 2px solid rgba(23, 162, 184, 0.2);
+        }
+
+        .rubrica {
+            color: #dc3545; /* Vermelho litúrgico para instruções */
+            font-style: italic;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        [data-bs-theme="dark"] .rubrica {
+            color: #ff6b6b;
+        }
+
+        .fala-padre {
+            font-weight: bold;
+        }
+
+        .fala-povo {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        [data-bs-theme="dark"] .fala-povo {
+            color: #5bc0de;
+        }
+
+        .bloco {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container pb-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="m-0 border-0">Ordinário da Missa</h1>
+            <button id="btnLiturgiaDiaria" class="btn btn-outline-primary btn-sm fw-bold">📖 Ir para Liturgia Diária</button>
+        </div>
+
+        <!-- RITOS INICIAIS -->
+        <h2>Ritos Iniciais</h2>
+        <div class="bloco">
+            <p class="rubrica">1. Reunido o povo, o sacerdote dirige-se com os ministros ao altar, enquanto se executa o canto de entrada. Terminado o canto, todos fazem o sinal da cruz:</p>
+            <p class="fala-padre">Em nome do Pai e do Filho e do Espírito Santo.</p>
+            <p class="fala-povo">Amém.</p>
+        </div>
+
+        <div class="bloco">
+            <p class="rubrica">2. O sacerdote, abrindo os braços, saúda o povo:</p>
+            <p class="fala-padre">A graça de nosso Senhor Jesus Cristo, o amor do Pai e a comunhão do Espírito Santo estejam convosco.</p>
+            <p class="fala-povo">Bendito seja Deus, que nos reuniu no amor de Cristo.</p>
+            <p class="rubrica">Ou:</p>
+            <p class="fala-padre">O Senhor esteja convosco.</p>
+            <p class="fala-povo">Ele está no meio de nós.</p>
+        </div>
+
+        <!-- ATO PENITENCIAL -->
+        <h2>Ato Penitencial</h2>
+        <div class="bloco">
+            <p class="rubrica">O sacerdote convida os fiéis:</p>
+            <p class="fala-padre">Irmãos e irmãs, reconheçamos os nossos pecados, para celebrarmos dignamente os santos mistérios.</p>
+
+            <h3 class="fs-5 mt-4">Primeira fórmula (Confiteor)</h3>
+            <p class="fala-povo">Confesso a Deus todo-poderoso e a vós, irmãos e irmãs, que pequei muitas vezes por pensamentos e palavras, atos e omissões, <span class="rubrica">(batendo no peito)</span> por minha culpa, minha culpa, minha tão grande culpa. E peço à Virgem Maria, aos Anjos e Santos e a vós, irmãos e irmãs, que rogueis por mim a Deus, nosso Senhor.</p>
+
+            <h3 class="fs-5 mt-4">Terceira fórmula (Invocação)</h3>
+            <p class="fala-padre">Senhor, que viestes salvar os corações arrependidos, tende piedade de nós.</p>
+            <p class="fala-povo">Senhor, tende piedade de nós.</p>
+            <p class="fala-padre">Cristo, que viestes chamar os pecadores, tende piedade de nós.</p>
+            <p class="fala-povo">Cristo, tende piedade de nós.</p>
+            <p class="fala-padre">Senhor, que intercedeis por nós junto do Pai, tende piedade de nós.</p>
+            <p class="fala-povo">Senhor, tende piedade de nós.</p>
+
+            <p class="rubrica">Absolvição sacerdotal:</p>
+            <p class="fala-padre">Deus todo-poderoso tenha compaixão de nós, perdoe os nossos pecados e nos conduza à vida eterna.</p>
+            <p class="fala-povo">Amém.</p>
+        </div>
+
+        <!-- GLÓRIA -->
+        <h2>Hino de Louvor</h2>
+        <div class="bloco">
+            <p class="fala-povo">
+                Glória a Deus nas alturas, e paz na terra aos homens por Ele amados.<br>
+                Senhor Deus, rei dos céus, Deus Pai todo-poderoso.<br>
+                Nós vos louvamos, nós vos bendizemos, nós vos adoramos, nós vos glorificamos,<br>
+                nós vos damos graças por vossa imensa glória.<br>
+                Senhor Jesus Cristo, Filho Unigênito,<br>
+                Senhor Deus, Cordeiro de Deus, Filho de Deus Pai.<br>
+                Vós que tirais o pecado do mundo, tende piedade de nós.<br>
+                Vós que tirais o pecado do mundo, acolhei a nossa súplica.<br>
+                Vós que estais à direita do Pai, tende piedade de nós.<br>
+                Só Vós sois o Santo, só vós, o Senhor, só vós, o Altíssimo, Jesus Cristo,<br>
+                com o Espírito Santo, na glória de Deus Pai. Amém.
+            </p>
+        </div>
+
+        <!-- LITURGIA DA PALAVRA -->
+        <h2>Liturgia da Palavra</h2>
+        <div class="bloco">
+            <h3 class="fs-5">Profissão de Fé (Credo)</h3>
+            <p class="fala-povo">
+                Creio em Deus Pai todo-poderoso, Criador do céu e da terra.<br>
+                E em Jesus Cristo, seu único Filho, nosso Senhor,<br>
+                <span class="rubrica">(Todos se inclinam)</span> que foi concebido pelo poder do Espírito Santo, nasceu da Virgem Maria,<br>
+                padeceu sob Pôncio Pilatos, foi crucificado, morto e sepultado,<br>
+                desceu à mansão dos mortos, ressuscitou ao terceiro dia, subiu aos céus,<br>
+                está sentado à direita de Deus Pai todo-poderoso, donde há de vir a julgar os vivos e os mortos.<br>
+                Creio no Espírito Santo, na santa Igreja Católica, na comunhão dos santos,<br>
+                na remissão dos pecados, na ressurreição da carne e na vida eterna. Amém.
+            </p>
+        </div>
+
+        <!-- LITURGIA EUCARÍSTICA -->
+        <h2>Liturgia Eucarística</h2>
+        <div class="bloco">
+            <p class="rubrica">Apresentação das Oferendas:</p>
+            <p class="fala-padre">Bendito sejais, Senhor, Deus do universo, pelo pão que recebemos...</p>
+            <p class="fala-povo">Bendito seja Deus para sempre!</p>
+            <br>
+            <p class="fala-padre">Orai, irmãos e irmãs, para que o meu e o vosso sacrifício seja aceito por Deus Pai todo-poderoso.</p>
+            <p class="fala-povo">Receba o Senhor por tuas mãos este sacrifício, para glória do seu nome, para nosso bem e de toda a sua santa Igreja.</p>
+        </div>
+
+        <h2>Oração Eucarística</h2>
+        <div class="bloco">
+            <p class="fala-padre">O Senhor esteja convosco.</p>
+            <p class="fala-povo">Ele está no meio de nós.</p>
+            <p class="fala-padre">Corações ao alto.</p>
+            <p class="fala-povo">O nosso coração está em Deus.</p>
+            <p class="fala-padre">Demos graças ao Senhor, nosso Deus.</p>
+            <p class="fala-povo">É nosso dever e nossa salvação.</p>
+            <br>
+            <p class="rubrica">Após o Prefácio:</p>
+            <p class="fala-povo">Santo, Santo, Santo, Senhor, Deus do universo. O céu e a terra proclamam a vossa glória. Hosana nas alturas! Bendito o que vem em nome do Senhor! Hosana nas alturas!</p>
+            <br>
+            <p class="rubrica">Aclamação Memorial (Após a consagração):</p>
+            <p class="fala-padre">Mistério da fé!</p>
+            <p class="fala-povo">Anunciamos Senhor, a vossa morte, e proclamamos a vossa ressurreição. Vinde Senhor Jesus!</p>
+            <br>
+            <p class="rubrica">Doxologia Final:</p>
+            <p class="fala-padre">Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda honra e toda glória, por todos os séculos dos séculos.</p>
+            <p class="fala-povo">Amém.</p>
+        </div>
+
+        <!-- RITO DA COMUNHÃO -->
+        <h2>Rito da Comunhão</h2>
+        <div class="bloco">
+            <p class="rubrica">Oração do Senhor:</p>
+            <p class="fala-povo">Pai nosso que estais nos céus...</p>
+            <p class="fala-padre">Livrai-nos de todos os males, ó Pai...</p>
+            <p class="fala-povo">Vosso é o reino, o poder e a glória para sempre.</p>
+            <br>
+            <p class="fala-padre">A paz do Senhor esteja sempre convosco.</p>
+            <p class="fala-povo">O amor de Cristo nos uniu.</p>
+            <br>
+            <p class="rubrica">Fração do Pão:</p>
+            <p class="fala-povo">
+                Cordeiro de Deus, que tirais o pecado do mundo, tende piedade de nós.<br>
+                Cordeiro de Deus, que tirais o pecado do mundo, tende piedade de nós.<br>
+                Cordeiro de Deus, que tirais o pecado do mundo, dai-nos a paz.
+            </p>
+            <br>
+            <p class="fala-padre">Eis o Cordeiro de Deus, que tira o pecado do mundo.</p>
+            <p class="fala-povo">Senhor, eu não sou digno(a) de que entreis em minha morada, mas dizei uma palavra e serei salvo(a).</p>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT INTELIGENTE: SINCRONIZA O TEMA E COMUNICA COM O PAI -->
+    <script>
+    // Sincroniza o modo escuro com a página principal
+    function syncTheme() {
+        try {
+            const parentTheme = window.parent.document.documentElement.getAttribute('data-bs-theme');
+            document.documentElement.setAttribute('data-bs-theme', parentTheme || 'light');
+        } catch(e) {
+            const localTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', localTheme);
+        }
+    }
+    syncTheme(); // Roda ao abrir
+
+    // Fica espiando se o usuário clicou na lua/sol lá no app principal
+    try {
+        const observer = new MutationObserver(syncTheme);
+        observer.observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+    } catch(e) {}
+
+    // Botão para voltar para a Liturgia Diária
+    document.getElementById('btnLiturgiaDiaria').addEventListener('click', () => {
+        window.parent.postMessage('mostrarLiturgiaDiaria', '*');
+    });
+    </script>
+
+</body>
+</html>
