@@ -76,8 +76,9 @@
         <div class="row g-1 align-items-center mb-1 flex-shrink-0">
             <div class="col-12 col-md-auto d-flex gap-1 align-items-center">
 
-                <button class="btn-menu-icon flex-shrink-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
-                    <i class="fas fa-bars icon-menu"></i>
+                <!-- Troque o botão do menu por este: -->
+                <button class="btn-menu-icon flex-shrink-0" id="btn-main-menu">
+                    <i class="fas fa-bars icon-menu" id="main-menu-icon" style="transition: color 0.3s;"></i>
                 </button>
 
                 <div class="input-group">
@@ -179,30 +180,40 @@
             <button class="btn btn-secondary fw-bold px-4" data-i18n="organ">ÓRGÃO</button>
         </div>
 
-        <div class="d-flex justify-content-center gap-3 mb-2 flex-shrink-0">
+        <!-- Troque a linha do botão Play/Music por esta: -->
+        <div class="d-flex justify-content-center align-items-center gap-3 mb-2 flex-shrink-0">
+            <button class="btn btn-link text-secondary fs-4 d-none p-0" id="btn-prev-chord" title="Cifra Anterior"><i class="fas fa-step-backward"></i></button>
             <button class="btn-circle btn-play" id="btn-play"><i class="fas fa-play" id="icon-play"></i></button>
+            <button class="btn btn-link text-secondary fs-4 d-none p-0" id="btn-next-chord" title="Próxima Cifra"><i class="fas fa-step-forward"></i></button>
             <button class="btn-circle btn-music" id="btn-music"><i class="bi bi-music-note" id="icon-music"></i></button>
         </div>
 
         <!-- Acordes -->
-        <div class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
+        <!-- Coloque este ID (chord-degrees-panel) na div que engloba TODAS as bolinhas de acordes -->
+        <div id="chord-degrees-panel" class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
             <!-- Linha de cima (Empréstimos e Relativos) -->
             <div class="d-flex justify-content-center gap-2">
-                <button class="chord-btn bg-degree-gray" data-interval="10" data-type=""></button>
-                <button class="chord-btn bg-degree-minor-rel" data-interval="9" data-type=""></button>
-                <button class="chord-btn bg-degree-gray" data-interval="11" data-type="°"></button>
-                <!-- Acorde E puxando a paleta de cores do Am (Tensão para o Lá menor) -->
-                <button class="chord-btn bg-degree-3-rel" data-interval="4" data-type=""></button>
-                <button class="chord-btn bg-degree-gray" data-interval="2" data-type=""></button>
-            </div>
-            <!-- Linha de baixo (Campo Harmônico Principal) -->
-            <div class="d-flex justify-content-center flex-wrap gap-2">
-                <button class="chord-btn bg-degree-1" data-interval="0" data-type=""></button>
-                <button class="chord-btn bg-degree-6" data-interval="9" data-type="m"></button>
-                <button class="chord-btn bg-degree-4" data-interval="5" data-type=""></button>
-                <button class="chord-btn bg-degree-2" data-interval="2" data-type="m"></button>
-                <button class="chord-btn bg-degree-5" data-interval="7" data-type=""></button>
-                <button class="chord-btn bg-degree-3" data-interval="4" data-type="m"></button>
+                <!-- ... botões ... -->
+                <div class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
+                    <!-- Linha de cima (Empréstimos e Relativos) -->
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="chord-btn bg-degree-gray" data-interval="10" data-type=""></button>
+                        <button class="chord-btn bg-degree-minor-rel" data-interval="9" data-type=""></button>
+                        <button class="chord-btn bg-degree-gray" data-interval="11" data-type="°"></button>
+                        <!-- Acorde E puxando a paleta de cores do Am (Tensão para o Lá menor) -->
+                        <button class="chord-btn bg-degree-3-rel" data-interval="4" data-type=""></button>
+                        <button class="chord-btn bg-degree-gray" data-interval="2" data-type=""></button>
+                    </div>
+                    <!-- Linha de baixo (Campo Harmônico Principal) -->
+                    <div class="d-flex justify-content-center flex-wrap gap-2">
+                        <button class="chord-btn bg-degree-1" data-interval="0" data-type=""></button>
+                        <button class="chord-btn bg-degree-6" data-interval="9" data-type="m"></button>
+                        <button class="chord-btn bg-degree-4" data-interval="5" data-type=""></button>
+                        <button class="chord-btn bg-degree-2" data-interval="2" data-type="m"></button>
+                        <button class="chord-btn bg-degree-5" data-interval="7" data-type=""></button>
+                        <button class="chord-btn bg-degree-3" data-interval="4" data-type="m"></button>
+                    </div>
+                </div>
             </div>
         </div>
 

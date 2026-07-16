@@ -47,7 +47,15 @@ class ChordManager {
         this.chordBtns.forEach(btn => btn.addEventListener('click', () => this.handleChordClick(btn)));
 
         if (this.keySelect) {
-            this.keySelect.addEventListener('change', (e) => this.transposeChords(parseInt(e.target.value, 10)));
+            this.keySelect.addEventListener('change', (e) => {
+                const val = e.target.value;
+                // 1. Descobre em qual tela estamos e salva no sessionStorage
+                const currentContext = sessionStorage.getItem('app_context') || 'ACORDES';
+                sessionStorage.setItem(`key_${currentContext}`, val);
+
+                // 2. Transpõe as bolinhas
+                this.transposeChords(parseInt(val, 10));
+            });
         }
 
         this.btnKeyDown?.addEventListener('click', () => this.changeKeyStep(-1));

@@ -126,38 +126,114 @@ class RepertoireController {
         this.currentMode = 'view';
         this.currentSongId = null;
 
+        // Estado do Vai-e-Vem Rápido
+        this.quickReturnTarget = null; // Guarda se estamos indo para 'LITURGIA' ou 'MISSA'
+        this.isViewingTarget = false;  // true = Vendo a missa | false = Vendo a música
+
+        this.chordNodes = [];
+        this.currentChordIndex = -1;
+
         backupManager.onImportComplete = () => this.refreshSelectOptions();
 
         this.initEvents();
         this.refreshSelectOptions();
+        this.changeContext('ACORDES');
+    }
+
+    changeContext(newContext) {
+        sessionStorage.setItem('app_context', newContext);
+        const savedKey = sessionStorage.getItem(`key_${newContext}`) || "0";
+        const keySelect = document.getElementById('key-select');
+        if (keySelect && keySelect.value !== savedKey) {
+            keySelect.value = savedKey;
+            keySelect.dispatchEvent(new Event('change'));
+        }
     }
 
     initEvents() {
+        const btnMenu = document.getElementById('btn-main-menu');
+        const tsWrapper = document.getElementById('wrapper-song-select');
+        const panelAcordes = document.getElementById('chord-degrees-panel');
+        const btnPrevChord = document.getElementById('btn-prev-chord');
+        const btnNextChord = document.getElementById('btn-next-chord');
+
+        // 1. Clique no Menu (Voltar pra Missa ou Abrir Menu)
+        btnMenu.addEventListener('click', () => {
+            if (this.quickReturnTarget && !this.isViewingTarget) {
+                // Clicou no Menu AZUL: Corre de volta pra Missa!
+                this.showQuickReturnTarget();
+            } else {
+                // Abre o menu lateral normalmente
+                const offcanvasEl = document.getElementById('sideMenu');
+                bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).show();
+            }
+        });
+
+        // 2. Clique no Select Disfarçado (Voltar pra Música)
+        tsWrapper.addEventListener('click', (e) => {
+            if (this.quickReturnTarget && this.isViewingTarget) {
+                // Bloqueia a abertura do dropdown e volta pro Santo!
+                e.preventDefault();
+                e.stopPropagation();
+                this.showSongFromQuickReturn();
+            }
+        });
+
+        // Ouve o menu (Liturgia e Missa)
+        document.getElementById('btn-liturgy')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            bootstrap.Offcanvas.getInstance(document.getElementById('sideMenu'))?.hide();
+            this.activateQuickReturn('LITURGIA');
+        });
+
+        document.getElementById('btn-santamissa')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            bootstrap.Offcanvas.getInstance(document.getElementById('sideMenu'))?.hide();
+            this.activateQuickReturn('MISSA');
+        });
+
+        // Ao selecionar algo de verdade no select
         this.ts.on('change', (selectedId) => {
-            this.currentSongId = selectedId;
-            if (selectedId || selectedId === '') {
+            this.cancelQuickReturn();
+
+            if (selectedId === 'ACORDES' || !selectedId) {
+                panelAcordes.classList.remove('d-none');
+                btnPrevChord.classList.add('d-none');
+                btnNextChord.classList.add('d-none');
+
+                this.currentSongId = null;
+                this.view.showRepertoire('');
+                this.changeContext('ACORDES');
+                this.ts.removeOption('ACORDES');
+                this.ts.clear(true);
+            } else {
+                panelAcordes.classList.add('d-none');
+                btnPrevChord.classList.remove('d-none');
+                btnNextChord.classList.remove('d-none');
+
+                this.currentSongId = selectedId;
                 const song = this.db.getSongById(selectedId);
                 this.view.showRepertoire(song ? song.content : '');
+                this.changeContext('ACORDES');
+                this.initHighlights();
+                this.ts.addOption({ value: 'ACORDES', text: 'Acordes', isTop: 1 });
             }
         });
 
-        this.ts.on('dropdown_open', () => this.view.toggleInlineActions(false));
-
-        this.view.btnToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.view.toggleInlineActions(true);
+        this.ts.on('dropdown_open', () => {
+            this.cancelQuickReturn();
+            this.view.toggleInlineActions(false);
         });
 
+        // Ações de CRUD
+        this.view.btnToggle.addEventListener('click', (e) => { e.stopPropagation(); this.view.toggleInlineActions(true); });
         document.addEventListener('click', (e) => {
             const isAction = e.target.closest('#btn-action-add') || e.target.closest('#btn-action-edit') || e.target.closest('#btn-action-delete') || e.target.closest('#btn-action-toggle');
-            if (!this.view.btnAdd.classList.contains('d-none') && !isAction) {
-                this.view.toggleInlineActions(false);
-            }
+            if (!this.view.btnAdd.classList.contains('d-none') && !isAction) this.view.toggleInlineActions(false);
         });
 
         this.view.btnAdd.addEventListener('click', () => this.handleEditRequest(true));
         this.view.btnEdit.addEventListener('click', () => this.handleEditRequest(false));
-
         this.view.btnDelete.addEventListener('click', () => {
             if (!this.currentSongId) return;
             this.modal.show('confirmDeleteTitle', 'confirmDeleteBody', () => {
@@ -167,7 +243,6 @@ class RepertoireController {
                 this.view.showRepertoire('');
             });
         });
-
         this.view.btnSave.addEventListener('click', () => this.handleSave());
         this.view.btnCancel.addEventListener('click', () => {
             this.modal.show('confirmCancelTitle', 'confirmCancelBody', () => {
@@ -176,14 +251,106 @@ class RepertoireController {
                 this.view.showRepertoire(song ? song.content : '');
             });
         });
+
+        // Lógica de Highlight
+        btnPrevChord.addEventListener('click', () => this.navigateChord(-1));
+        btnNextChord.addEventListener('click', () => this.navigateChord(1));
+    }
+
+    // ==========================================
+    // MÁGICA DO VAI-E-VEM
+    // ==========================================
+
+    activateQuickReturn(target) {
+        this.quickReturnTarget = target;
+        // Se não tem música tocando, só vai pra tela pedida normalmente
+        if (!this.currentSongId || this.currentSongId === 'ACORDES') {
+            this.quickReturnTarget = null;
+            this.forceShowTarget(target);
+            return;
+        }
+        // Se tem música, arma a armadilha do vai e vem
+        this.showQuickReturnTarget();
+    }
+
+    forceShowTarget(target) {
+        this.changeContext(target);
+        if (target === 'LITURGIA') {
+            this.view.showLiturgy();
+        } else {
+            this.view.mainDisplay.classList.add('d-none');
+            this.view.mainIframe.classList.remove('d-none');
+            this.view.mainIframe.src = "./santamissa.html";
+        }
+    }
+
+    showQuickReturnTarget() {
+        this.isViewingTarget = true;
+        this.forceShowTarget(this.quickReturnTarget);
+
+        // UI: Menu Preto e Select Disfarçado
+        document.getElementById('main-menu-icon').classList.remove('menu-teal');
+        document.getElementById('wrapper-song-select').classList.add('ts-fake-button');
+    }
+
+    showSongFromQuickReturn() {
+        this.isViewingTarget = false;
+
+        // UI: Menu AZUL e Select Normal
+        document.getElementById('main-menu-icon').classList.add('menu-teal');
+        document.getElementById('wrapper-song-select').classList.remove('ts-fake-button');
+
+        // Mostra o Santo!
+        const song = this.db.getSongById(this.currentSongId);
+        this.view.showRepertoire(song ? song.content : '');
+        this.changeContext('ACORDES');
+        this.initHighlights();
+    }
+
+    cancelQuickReturn() {
+        this.quickReturnTarget = null;
+        this.isViewingTarget = false;
+        document.getElementById('main-menu-icon').classList.remove('menu-teal');
+        document.getElementById('wrapper-song-select').classList.remove('ts-fake-button');
+    }
+
+    // ==========================================
+
+    initHighlights() {
+        this.chordNodes = Array.from(this.view.mainDisplay.querySelectorAll('b, strong'));
+        this.currentChordIndex = -1;
+        this.chordNodes.forEach(node => node.classList.remove('chord-highlight'));
+    }
+
+    navigateChord(direction) {
+        if (!this.chordNodes || this.chordNodes.length === 0) return;
+
+        if (this.currentChordIndex >= 0 && this.currentChordIndex < this.chordNodes.length) {
+            this.chordNodes[this.currentChordIndex].classList.remove('chord-highlight');
+        }
+
+        this.currentChordIndex += direction;
+
+        if (this.currentChordIndex < 0) this.currentChordIndex = 0;
+        if (this.currentChordIndex >= this.chordNodes.length) this.currentChordIndex = this.chordNodes.length - 1;
+
+        const targetNode = this.chordNodes[this.currentChordIndex];
+        if (targetNode) {
+            targetNode.classList.add('chord-highlight');
+            targetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 
     refreshSelectOptions() {
         this.ts.clear(true);
         this.ts.clearOptions();
-        this.db.getSongs().forEach(song => this.ts.addOption({ value: song.id, text: song.title }));
+        this.db.getSongs().forEach(song => this.ts.addOption({ value: song.id, text: song.title, isTop: 0 }));
+
         if (this.currentSongId && this.db.getSongById(this.currentSongId)) {
+            this.ts.addOption({ value: 'ACORDES', text: 'Acordes', isTop: 1 });
             this.ts.setValue(this.currentSongId, true);
+        } else {
+            this.ts.clear(true);
         }
     }
 
@@ -195,9 +362,14 @@ class RepertoireController {
             return;
         }
 
+        document.getElementById('chord-degrees-panel').classList.add('d-none');
+        document.getElementById('btn-prev-chord').classList.remove('d-none');
+        document.getElementById('btn-next-chord').classList.remove('d-none');
+
         if (isNew) {
             this.currentSongId = null;
-            this.ts.setValue('', true);
+            this.ts.removeOption('ACORDES');
+            this.ts.clear(true);
             this.view.enterEditMode('', '');
         } else {
             const song = this.db.getSongById(this.currentSongId);
@@ -226,6 +398,7 @@ class RepertoireController {
             this.refreshSelectOptions();
             this.ts.setValue(this.currentSongId, true);
             this.view.showRepertoire(savedSong ? savedSong.content : '');
+            this.initHighlights();
         });
     }
 }
@@ -238,9 +411,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Bibliotecas e Banco
     const tomSelectInstance = new TomSelect("#song-select", {
-        create: false, sortField: { field: "text", direction: "asc" },
-        placeholder: "Escolha a Música...", allowEmptyOption: false
+        create: false,
+        // 1. MÁGICA: Ordena primeiro pelo isTop (1 = topo), depois pelo alfabeto
+        sortField: [
+            { field: "isTop", direction: "desc" },
+            { field: "text", direction: "asc" }
+        ],
+        placeholder: "Escolha a Música...",
+        allowEmptyOption: false,
+        render: {
+            option: function (data, escape) {
+                if (data.value === 'ACORDES') return `<div><span style="font-style: italic; color: #6c757d;">${escape(data.text)}</span></div>`;
+                return `<div>${escape(data.text)}</div>`;
+            },
+            item: function (data, escape) {
+                if (data.value === 'ACORDES') return `<div><span style="font-style: italic; color: #6c757d;">${escape(data.text)}</span></div>`;
+                return `<div>${escape(data.text)}</div>`;
+            }
+        },
+        onDropdownOpen: function () { this.control_input.placeholder = "🔍 Digite para pesquisar..."; },
+        onDropdownClose: function () { this.control_input.placeholder = ""; }
     });
+
     const dbManager = new DatabaseManager();
 
     // 2. Controladores UI

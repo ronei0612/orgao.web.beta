@@ -10,8 +10,6 @@ class ToolbarController {
         this.initBpm();
         this.initPlayback();
         this.initNotePhase();
-        this.initLiturgy();
-        this.initSantaMissa();
         this.initRestore();
     }
 
@@ -86,27 +84,6 @@ class ToolbarController {
         }
     }
 
-    // --- LITURGIA DIÁRIA ---
-    initLiturgy() {
-        const btnLiturgy = document.getElementById('btn-liturgy');
-        if (btnLiturgy) {
-            btnLiturgy.addEventListener('click', (e) => {
-                e.preventDefault();
-
-                // Fecha menu lateral se estiver aberto
-                const offcanvasEl = document.getElementById('sideMenu');
-                if (offcanvasEl) {
-                    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasEl);
-                    if (offcanvasInstance) offcanvasInstance.hide();
-                }
-
-                // Limpa seleção do select e mostra o Iframe
-                if (this.ts) this.ts.setValue('', true);
-                if (this.view) this.view.showLiturgy();
-            });
-        }
-    }
-
     initRestore() {
         const btnRestore = document.getElementById('btn-restore');
         if (!btnRestore) return;
@@ -142,42 +119,6 @@ class ToolbarController {
                     window.location.reload();
                 }
             );
-        });
-    }
-
-    // --- SANTA MISSA E COMUNICAÇÃO DE IFRAME ---
-    initSantaMissa() {
-        const btnSantaMissa = document.getElementById('btn-santamissa');
-
-        // Ação de clicar no botão "Santa Missa" no menu principal
-        if (btnSantaMissa) {
-            btnSantaMissa.addEventListener('click', (e) => {
-                e.preventDefault();
-
-                // Fecha menu lateral
-                const offcanvasEl = document.getElementById('sideMenu');
-                if (offcanvasEl) {
-                    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasEl);
-                    if (offcanvasInstance) offcanvasInstance.hide();
-                }
-
-                // Limpa o select de músicas e joga o HTML interno no iframe
-                if (this.ts) this.ts.setValue('', true);
-                if (this.view) {
-                    this.view.mainDisplay.classList.add('d-none');
-                    this.view.mainIframe.classList.remove('d-none');
-                    this.view.mainIframe.src = "./santamissa.html";
-                }
-            });
-        }
-
-        // Ouvinte de Mensagens do Iframe (Para voltar da Missa pra Liturgia)
-        window.addEventListener('message', (event) => {
-            if (event.data === 'mostrarLiturgiaDiaria') {
-                if (this.view) {
-                    this.view.mainIframe.src = "https://liturgiadiaria.edicoescnbb.com.br/";
-                }
-            }
         });
     }
 }
