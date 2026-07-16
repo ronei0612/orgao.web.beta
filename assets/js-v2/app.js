@@ -196,6 +196,9 @@ class RepertoireController {
         this.ts.on('change', (selectedId) => {
             this.cancelQuickReturn();
 
+            // ---> CORREÇÃO AQUI <---
+            this.ts.blur(); // Tira o foco da caixa forçando o nome da música a aparecer
+
             if (selectedId === 'ACORDES' || !selectedId) {
                 panelAcordes.classList.remove('d-none');
                 btnPrevChord.classList.add('d-none');
@@ -296,15 +299,16 @@ class RepertoireController {
     showSongFromQuickReturn() {
         this.isViewingTarget = false;
 
-        // UI: Menu AZUL e Select Normal
         document.getElementById('main-menu-icon').classList.add('menu-teal');
         document.getElementById('wrapper-song-select').classList.remove('ts-fake-button');
 
-        // Mostra o Santo!
         const song = this.db.getSongById(this.currentSongId);
         this.view.showRepertoire(song ? song.content : '');
         this.changeContext('ACORDES');
         this.initHighlights();
+
+        // ---> CORREÇÃO AQUI <---
+        this.ts.blur(); // Remove qualquer foco que tenha ficado no botão
     }
 
     cancelQuickReturn() {
