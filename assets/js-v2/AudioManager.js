@@ -3,11 +3,17 @@ class AudioManager {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContext();
 
-        this.buffers = {}; // Memória RAM de áudios carregados
+        this.buffers = {}; // Memória RAM
         this.activeNodes = [];
         this.baseURL = "https://roneicostasoares.com.br/orgao.web.beta/assets/audio/";
+
         this.chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        this.enarmonics = { 'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#' };
+
         this.isPreloaded = false;
+
+        this.attackTime = 0.2;
+        this.releaseTime = 0.2;
     }
 
     async resumeContext() {
@@ -16,7 +22,6 @@ class AudioManager {
         }
     }
 
-    // --- NOVO: PUXA TODOS OS ÁUDIOS PRA MEMÓRIA RAM ASSIM QUE O SITE ABRE ---
     async preloadAll() {
         if (this.isPreloaded) return;
 
@@ -35,24 +40,20 @@ class AudioManager {
             });
         });
 
-        // Baixa todos os 72 arquivos em segundo plano
-        Promise.all(urlsToFetch.map(url => this.getAudioBuffer(url))).then(() => {
+        Promise.allSettled(urlsToFetch.map(url => this.getAudioBuffer(url))).then(() => {
             this.isPreloaded = true;
-            console.log("⚡ [ÁUDIO] Todos os sons do Órgão e Strings estão carregados na memória RAM!");
         });
     }
 
     normalizeNoteForFile(noteStr) {
         let note = noteStr.toUpperCase();
-        const enarmonics = { 'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#' };
-        if (enarmonics[note]) note = enarmonics[note];
+        if (this.enarmonics[note]) note = this.enarmonics[note];
         return note.toLowerCase().replace('#', '_');
     }
 
     getNoteIndex(noteStr) {
         let note = noteStr.toUpperCase();
-        const enarmonics = { 'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#' };
-        if (enarmonics[note]) note = enarmonics[note];
+        if (this.enarmonics[note]) note = this.enarmonics[note];
         return this.chromaticScale.indexOf(note);
     }
 
@@ -71,7 +72,9 @@ class AudioManager {
     }
 
     parseChord(chordStr) {
-        const match = chordStr.match(/^([CDEFGAB][#b]?)(.*?)(?:\/([CDEFGAB][#b]?))?$/i);
+        const cleanChord = chordStr.replace(/\s+/g, '');
+        const match = cleanChord.match(/^([CDEFGAB][#b]?)(.*?)(?:\/([CDEFGAB][#b]?))?$/i);
+
         if (!match) return null;
         return { root: match[1], suffix: match[2], bass: match[3] || match[1] };
     }
@@ -92,24 +95,23 @@ class AudioManager {
             playlist.push({ instrument: 'Strings', fileName: `strings_${bassFileNote}3.ogg` });
         }
 
-        // 2. ACORDE (Oitavas 4 e 5)
+        // 2. ACORDE (Oitavas 4 e 5 - Comportamento de Teclado Arranjador Compacto)
         intervals.forEach(interval => {
             let noteAbs = rootIndex + interval;
-            let octaveOffset = Math.floor(noteAbs / 12);
-            let noteClassIndex = noteAbs % 12;
+            let noteClassIndex = noteAbs % 12; // Pega apenas o nome da nota (0 a 11)
             let noteFile = this.normalizeNoteForFile(this.chromaticScale[noteClassIndex]);
 
-            playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}${4 + octaveOffset}.ogg` });
+            // Fase 1 e 2: Todas as notas cravadas na oitava 4 (antigo _baixo)
+            playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}4.ogg` });
 
             if (phase >= 2) {
-                playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}${4 + octaveOffset}.ogg` });
+                playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}4.ogg` });
             }
 
+            // Fase 3: Todas as notas cravadas na oitava 5 (antigo arquivo sem sufixo)
             if (phase === 3) {
-                if (4 + octaveOffset === 4) {
-                    playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}5.ogg` });
-                    playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}5.ogg` });
-                }
+                playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}5.ogg` });
+                playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}5.ogg` });
             }
         });
 
@@ -127,39 +129,45 @@ class AudioManager {
             this.buffers[url] = audioBuffer;
             return audioBuffer;
         } catch (e) {
-            console.warn(`Aviso: Arquivo de áudio não encontrado: ${url}`);
+            console.warn(`Aviso: Áudio ignorado ou ausente: ${url}`);
             return null;
         }
     }
 
     stopAll() {
-        const fadeOutTime = 0.4;
         this.activeNodes.forEach(node => {
             try {
-                node.gainNode.gain.setValueAtTime(node.gainNode.gain.value, this.ctx.currentTime);
-                node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + fadeOutTime);
-                node.source.stop(this.ctx.currentTime + fadeOutTime + 0.05);
+                const currentGain = node.gainNode.gain.value;
+                node.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
+                node.gainNode.gain.setValueAtTime(currentGain, this.ctx.currentTime);
+
+                // ---> AJUSTE PONTO 2: O RELEASE GERAL DE 0.2s <---
+                node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + this.releaseTime);
+                node.source.stop(this.ctx.currentTime + this.releaseTime + 0.05);
             } catch (e) { }
         });
         this.activeNodes = [];
     }
 
-    // --- TOCAR ACORDE INSTANTÂNEO ---
     async playChord(chordStr, phase) {
         await this.resumeContext();
         this.stopAll();
 
         const playlist = this.buildPlayList(chordStr, phase);
+        if (playlist.length === 0) return;
 
-        // 1. Pega todas as notas salvas da RAM em paralelo
+        // console.log(`\n🔵 [MOTOR NOVO] Acorde: ${chordStr} | Fase: ${phase}`);
+        // playlist.forEach(item => {
+        //     console.log(`   -> ${item.instrument}: ${item.fileName}`);
+        // });
+
         const loadedSamples = await Promise.all(playlist.map(async (item) => {
             const url = `${this.baseURL}${item.instrument}/${item.fileName}`;
             const buffer = await this.getAudioBuffer(url);
             return { buffer, instrument: item.instrument };
         }));
 
-        // 2. Dispara TODAS no mesmo instante atômico da placa de som
-        const startTime = this.ctx.currentTime + 0.01; // 10ms de sincronização perfeita
+        const startTime = this.ctx.currentTime + 0.01;
 
         loadedSamples.forEach(({ buffer, instrument }) => {
             if (!buffer) return;
@@ -169,10 +177,12 @@ class AudioManager {
 
             const gainNode = this.ctx.createGain();
             let baseVolume = 1.0;
-            //const baseVolume = instrument === 'Strings' ? 0.5 : 0.8;
+            baseVolume = instrument === 'Strings' ? baseVolume / 1.25 : baseVolume;
 
             gainNode.gain.setValueAtTime(0, startTime);
-            gainNode.gain.linearRampToValueAtTime(baseVolume, startTime + 0.05);
+
+            // ---> AJUSTE PONTO 2: O ATTACK LENTO (0.2s) PARA AMBOS OS INSTRUMENTOS <---
+            gainNode.gain.linearRampToValueAtTime(baseVolume, startTime + this.attackTime);
 
             source.connect(gainNode);
             gainNode.connect(this.ctx.destination);
