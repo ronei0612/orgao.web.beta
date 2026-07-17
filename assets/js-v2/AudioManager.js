@@ -26,7 +26,7 @@ class AudioManager {
         if (this.isPreloaded) return;
 
         const fileNotes = ['c', 'c_', 'd', 'd_', 'e', 'f', 'f_', 'g', 'g_', 'a', 'a_', 'b'];
-        const octaves = [3, 4, 5];
+        const octaves = [2, 3, 4];
         const instruments = ['Orgao', 'Strings'];
 
         const urlsToFetch = [];
@@ -88,30 +88,30 @@ class AudioManager {
 
         let playlist = [];
 
-        // 1. BAIXO (Oitava 3)
+        // 1. BAIXO (Agora na Oitava 2)
         const bassFileNote = this.normalizeNoteForFile(parsed.bass);
-        playlist.push({ instrument: 'Orgao', fileName: `orgao_${bassFileNote}3.ogg` });
+        playlist.push({ instrument: 'Orgao', fileName: `orgao_${bassFileNote}2.ogg` });
         if (phase >= 2) {
-            playlist.push({ instrument: 'Strings', fileName: `strings_${bassFileNote}3.ogg` });
+            playlist.push({ instrument: 'Strings', fileName: `strings_${bassFileNote}2.ogg` });
         }
 
-        // 2. ACORDE (Oitavas 4 e 5 - Comportamento de Teclado Arranjador Compacto)
+        // 2. ACORDE (Agora nas Oitavas 3 e 4)
         intervals.forEach(interval => {
             let noteAbs = rootIndex + interval;
-            let noteClassIndex = noteAbs % 12; // Pega apenas o nome da nota (0 a 11)
+            let noteClassIndex = noteAbs % 12; // Trava para não subir de oitava
             let noteFile = this.normalizeNoteForFile(this.chromaticScale[noteClassIndex]);
 
-            // Fase 1 e 2: Todas as notas cravadas na oitava 4 (antigo _baixo)
-            playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}4.ogg` });
+            // Fase 1 e 2: Todas as notas cravadas na oitava 3 (antigo 4)
+            playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}3.ogg` });
 
             if (phase >= 2) {
-                playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}4.ogg` });
+                playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}3.ogg` });
             }
 
-            // Fase 3: Todas as notas cravadas na oitava 5 (antigo arquivo sem sufixo)
+            // Fase 3: Todas as notas cravadas na oitava 4 (antigo 5)
             if (phase === 3) {
-                playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}5.ogg` });
-                playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}5.ogg` });
+                playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}4.ogg` });
+                playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}4.ogg` });
             }
         });
 
