@@ -507,6 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Motores Musicais e Audio
     const musicTheory = new MusicTheory();
     const audioManager = new AudioManager();
+    audioManager.preloadAll(); // <- MÁGICA: Baixa todos os sons na RAM em segundo plano!
 
     // --> ATUALIZADO AQUI (Passando o audioManager) <--
     const chordManager = new ChordManager(toolbar, musicTheory, audioManager);
