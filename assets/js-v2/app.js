@@ -117,27 +117,46 @@ class ViewManager {
 }
 
 class RepertoireController {
-    constructor(ts, dbManager, viewManager, modalManager, backupManager) {
+    constructor(ts, dbManager, viewManager, modalManager, backupManager, toolbarController, audioManager) {
         this.ts = ts;
         this.db = dbManager;
         this.view = viewManager;
         this.modal = modalManager;
+        this.toolbar = toolbarController;
+        this.audio = audioManager;
 
         this.currentMode = 'view';
         this.currentSongId = null;
 
-        // Estado do Vai-e-Vem Rápido
-        this.quickReturnTarget = null; // Guarda se estamos indo para 'LITURGIA' ou 'MISSA'
-        this.isViewingTarget = false;  // true = Vendo a missa | false = Vendo a música
+        this.quickReturnTarget = null;
+        this.isViewingTarget = false;
 
         this.chordNodes = [];
         this.currentChordIndex = -1;
 
         backupManager.onImportComplete = () => this.refreshSelectOptions();
 
+        // Se o usuário clicar em Stop, silencia o mundo
+        this.toolbar.onStop(() => {
+            this.audio.stopAll();
+        });
+
+        // ---> A MÁGICA NOVA ENTRA AQUI <---
+        // Se o usuário clicar em Play e tiver uma música rolando, toca o acorde atual
+        this.toolbar.onPlay(() => {
+            if (this.currentSongId && this.currentSongId !== 'ACORDES' && this.currentChordIndex >= 0) {
+                this.jumpToChord(this.currentChordIndex, true);
+            }
+        });
+
         this.initEvents();
         this.refreshSelectOptions();
         this.changeContext('ACORDES');
+
+        // Se o usuário clicar em Stop, silencia o mundo
+        this.toolbar.onStop(() => {
+            this.audio.stopAll();
+        });
     }
 
     changeContext(newContext) {
@@ -323,26 +342,64 @@ class RepertoireController {
     initHighlights() {
         this.chordNodes = Array.from(this.view.mainDisplay.querySelectorAll('b, strong'));
         this.currentChordIndex = -1;
-        this.chordNodes.forEach(node => node.classList.remove('chord-highlight'));
+
+        this.chordNodes.forEach((node, index) => {
+            node.classList.remove('chord-highlight');
+
+            // Torna a cifra clicável com o mouse/dedo!
+            node.style.cursor = 'pointer';
+            node.onclick = (e) => {
+                e.stopPropagation();
+                // O "true" indica que, se o botão Play estiver ativo, deve fazer o som
+                this.jumpToChord(index, true);
+            };
+        });
+
+        // MÁGICA: Seleciona o primeiro acorde automaticamente ao carregar a música
+        if (this.chordNodes.length > 0) {
+            // "false" para apenas selecionar visualmente sem dar susto disparando o áudio
+            this.jumpToChord(0, false);
+        }
+    }
+
+    // Função central que gerencia o Pulo para qualquer acorde
+    jumpToChord(index, playAudio = true) {
+        if (!this.chordNodes || this.chordNodes.length === 0) return;
+
+        // Remove a cor do acorde antigo
+        if (this.currentChordIndex >= 0 && this.currentChordIndex < this.chordNodes.length) {
+            this.chordNodes[this.currentChordIndex].classList.remove('chord-highlight');
+        }
+
+        this.currentChordIndex = index;
+        const targetNode = this.chordNodes[this.currentChordIndex];
+
+        if (targetNode) {
+            targetNode.classList.add('chord-highlight');
+            targetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Toca a música apenas se o Play estiver verde e for permitido
+            if (playAudio && this.toolbar.isPlaying) {
+                const chordText = targetNode.innerText;
+                const phase = this.toolbar.musicPhase;
+                this.audio.playChord(chordText, phase);
+            }
+        }
     }
 
     navigateChord(direction) {
         if (!this.chordNodes || this.chordNodes.length === 0) return;
 
-        if (this.currentChordIndex >= 0 && this.currentChordIndex < this.chordNodes.length) {
-            this.chordNodes[this.currentChordIndex].classList.remove('chord-highlight');
+        let nextIndex = this.currentChordIndex + direction;
+
+        // Lógica de LOOP (Ir do último pro primeiro e vice-versa)
+        if (nextIndex < 0) {
+            nextIndex = this.chordNodes.length - 1; // Voltou do começo, vai pro final
+        } else if (nextIndex >= this.chordNodes.length) {
+            nextIndex = 0; // Passou do final, volta pro começo
         }
 
-        this.currentChordIndex += direction;
-
-        if (this.currentChordIndex < 0) this.currentChordIndex = 0;
-        if (this.currentChordIndex >= this.chordNodes.length) this.currentChordIndex = this.chordNodes.length - 1;
-
-        const targetNode = this.chordNodes[this.currentChordIndex];
-        if (targetNode) {
-            targetNode.classList.add('chord-highlight');
-            targetNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        this.jumpToChord(nextIndex, true);
     }
 
     refreshSelectOptions() {
@@ -447,14 +504,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toolbar = new ToolbarController(viewManager, tomSelectInstance);
 
-    // 3. Motores Musicais
+    // 3. Motores Musicais e Audio
     const musicTheory = new MusicTheory();
-    const chordManager = new ChordManager(toolbar, musicTheory);
+    const audioManager = new AudioManager();
+    audioManager.preloadAll(); // <- MÁGICA: Baixa todos os sons na RAM em segundo plano!
+
+    // --> ATUALIZADO AQUI (Passando o audioManager) <--
+    const chordManager = new ChordManager(toolbar, musicTheory, audioManager);
     const pianoManager = new PianoManager(musicTheory);
     const sheetMusicEditor = new SheetMusicEditor();
 
-    // 4. Cérebro da Tela
-    const repertoireController = new RepertoireController(tomSelectInstance, dbManager, viewManager, modalManager, backupManager);
+    // O Cérebro da Tela recebe novos poderes
+    const repertoireController = new RepertoireController(
+        tomSelectInstance, dbManager, viewManager, modalManager, backupManager,
+        toolbar, audioManager // <- PASSANDO PRA ELE AQUI
+    );
 
     // --- MÁGICA DE PARTITURAS ---
     // Renderiza ao carregar do banco

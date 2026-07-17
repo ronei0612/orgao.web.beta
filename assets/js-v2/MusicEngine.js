@@ -26,9 +26,11 @@ class MusicTheory {
 }
 
 class ChordManager {
-    constructor(toolbarController, musicTheory) {
-        this.toolbar = toolbarController; // Usamos o Toolbar agora para dar play
+    // 1. ADICIONADO O audioManager NO CONSTRUTOR
+    constructor(toolbarController, musicTheory, audioManager) {
+        this.toolbar = toolbarController;
         this.theory = musicTheory;
+        this.audio = audioManager;
 
         this.chordBtns = document.querySelectorAll('.chord-btn');
         this.keySelect = document.getElementById('key-select');
@@ -76,6 +78,11 @@ class ChordManager {
     }
 
     handleChordClick(btn) {
+        // 2. MÁGICA: Toca o som SEMPRE que clicar, mesmo se já estiver ativo
+        const chordText = btn.innerText;
+        const phase = this.toolbar.musicPhase;
+        this.audio.playChord(chordText, phase);
+
         if (btn.classList.contains('active')) {
             btn.classList.remove('repress-anim');
             void btn.offsetWidth;

@@ -39,6 +39,8 @@ class ToolbarController {
     initPlayback() {
         this.btnPlay = document.getElementById('btn-play');
         this.iconPlay = document.getElementById('icon-play');
+        this.onStopCallbacks = [];
+        this.onPlayCallbacks = []; // <- NOVA LISTA DE PLAY
 
         if (this.btnPlay) {
             this.btnPlay.addEventListener('click', () => this.setPlayState(!this.isPlaying));
@@ -46,7 +48,11 @@ class ToolbarController {
     }
 
     onStop(callback) {
-        this.onStopCallback = callback;
+        this.onStopCallbacks.push(callback);
+    }
+
+    onPlay(callback) {
+        this.onPlayCallbacks.push(callback); // <- NOVO REGISTRADOR
     }
 
     setPlayState(state) {
@@ -54,10 +60,15 @@ class ToolbarController {
         if (this.isPlaying) {
             this.btnPlay.classList.add('playing');
             this.iconPlay.classList.replace('fa-play', 'fa-stop');
+
+            // AVISA QUE O PLAY COMEÇOU
+            this.onPlayCallbacks.forEach(cb => cb());
         } else {
             this.btnPlay.classList.remove('playing');
             this.iconPlay.classList.replace('fa-stop', 'fa-play');
-            if (this.onStopCallback) this.onStopCallback();
+
+            // AVISA QUE PAROU
+            this.onStopCallbacks.forEach(cb => cb());
         }
     }
 

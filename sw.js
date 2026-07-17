@@ -14,6 +14,7 @@ const ASSETS_TO_CACHE = [
     './assets/js-v2/BackupManager.js',
     './assets/js-v2/ModalManager.js',
     './assets/js-v2/ToolbarController.js',
+    './assets/js-v2/AudioManager.js',
     './assets/js-v2/app.js'
 ];
 
