@@ -10,7 +10,6 @@ class ToolbarController {
         this.initBpm();
         this.initPlayback();
         this.initNotePhase();
-        this.initLiturgy();
         this.initRestore();
     }
 
@@ -81,27 +80,6 @@ class ToolbarController {
                     this.iconMusic.className = 'music-emoji';
                     this.iconMusic.innerText = '🎶';
                 }
-            });
-        }
-    }
-
-    // --- LITURGIA DIÁRIA ---
-    initLiturgy() {
-        const btnLiturgy = document.getElementById('btn-liturgy');
-        if (btnLiturgy) {
-            btnLiturgy.addEventListener('click', (e) => {
-                e.preventDefault();
-
-                // Fecha menu lateral se estiver aberto
-                const offcanvasEl = document.getElementById('sideMenu');
-                if (offcanvasEl) {
-                    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasEl);
-                    if (offcanvasInstance) offcanvasInstance.hide();
-                }
-
-                // Limpa seleção do select e mostra o Iframe
-                if (this.ts) this.ts.setValue('', true);
-                if (this.view) this.view.showLiturgy();
             });
         }
     }
