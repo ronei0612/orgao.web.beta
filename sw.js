@@ -3,19 +3,19 @@ const CACHE_NAME = `orgao-cache-${APP_VERSION}`;
 
 // Lista de arquivos vitais para o site abrir sem internet
 const ASSETS_TO_CACHE = [
-    './teste.html',
-    './style.css',
+    './index.html',
+    './assets/css/style.css',
     './santamissa.html',
-    './assets/js-v2/TextFormatter.js',
-    './assets/js-v2/DatabaseManager.js',
-    './assets/js-v2/PreferencesManager.js',
-    './assets/js-v2/MusicEngine.js',
-    './assets/js-v2/SheetMusicEngine.js',
-    './assets/js-v2/BackupManager.js',
-    './assets/js-v2/ModalManager.js',
-    './assets/js-v2/ToolbarController.js',
-    './assets/js-v2/AudioManager.js',
-    './assets/js-v2/app.js'
+    './assets/js/TextFormatter.js',
+    './assets/js/DatabaseManager.js',
+    './assets/js/PreferencesManager.js',
+    './assets/js/MusicEngine.js',
+    './assets/js/SheetMusicEngine.js',
+    './assets/js/BackupManager.js',
+    './assets/js/ModalManager.js',
+    './assets/js/ToolbarController.js',
+    './assets/js/AudioManager.js',
+    './assets/js/app.js'
 ];
 
 // INSTALAÇÃO: Baixa os arquivos novos

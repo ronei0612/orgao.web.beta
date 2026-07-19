@@ -4,7 +4,12 @@ class AudioManager {
         this.ctx = new AudioContext();
 
         this.buffers = {}; // Memória RAM
-        this.activeNodes = [];
+
+        // Isolamento de canais de áudio
+        this.activeChordNodes = [];
+        this.activeFluteNodes = [];
+        this.activePianoFluteNodes = {};
+
         this.baseURL = "https://roneicostasoares.com.br/orgao.web.beta/assets/audio/";
 
         this.chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -31,12 +36,21 @@ class AudioManager {
 
         const urlsToFetch = [];
 
+        // Preload de Órgão e Strings
         instruments.forEach(inst => {
             octaves.forEach(oct => {
                 fileNotes.forEach(note => {
                     const instPrefix = inst === 'Orgao' ? 'orgao' : 'strings';
                     urlsToFetch.push(`${this.baseURL}${inst}/${instPrefix}_${note}${oct}.ogg`);
                 });
+            });
+        });
+
+        // Preload de Flauta (Oitavas 4, 5 e 6)
+        const fluteOctaves = [4, 5, 6];
+        fluteOctaves.forEach(oct => {
+            fileNotes.forEach(note => {
+                urlsToFetch.push(`${this.baseURL}studio/Flauta/flauta_${note}${oct}.ogg`);
             });
         });
 
@@ -88,27 +102,23 @@ class AudioManager {
 
         let playlist = [];
 
-        // 1. BAIXO (Agora na Oitava 2)
         const bassFileNote = this.normalizeNoteForFile(parsed.bass);
         playlist.push({ instrument: 'Orgao', fileName: `orgao_${bassFileNote}2.ogg` });
         if (phase >= 2) {
             playlist.push({ instrument: 'Strings', fileName: `strings_${bassFileNote}2.ogg` });
         }
 
-        // 2. ACORDE (Agora nas Oitavas 3 e 4)
         intervals.forEach(interval => {
             let noteAbs = rootIndex + interval;
-            let noteClassIndex = noteAbs % 12; // Trava para não subir de oitava
+            let noteClassIndex = noteAbs % 12;
             let noteFile = this.normalizeNoteForFile(this.chromaticScale[noteClassIndex]);
 
-            // Fase 1 e 2: Todas as notas cravadas na oitava 3 (antigo 4)
             playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}3.ogg` });
 
             if (phase >= 2) {
                 playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}3.ogg` });
             }
 
-            // Fase 3: Todas as notas cravadas na oitava 4 (antigo 5)
             if (phase === 3) {
                 playlist.push({ instrument: 'Orgao', fileName: `orgao_${noteFile}4.ogg` });
                 playlist.push({ instrument: 'Strings', fileName: `strings_${noteFile}4.ogg` });
@@ -134,32 +144,50 @@ class AudioManager {
         }
     }
 
-    stopAll() {
-        this.activeNodes.forEach(node => {
+    // --- CONTROLE DOS CHANNELS DE ÁUDIO ---
+
+    stopChordLoop() {
+        this.activeChordNodes.forEach(node => {
             try {
                 const currentGain = node.gainNode.gain.value;
                 node.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
                 node.gainNode.gain.setValueAtTime(currentGain, this.ctx.currentTime);
-
-                // ---> AJUSTE PONTO 2: O RELEASE GERAL DE 0.2s <---
                 node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + this.releaseTime);
                 node.source.stop(this.ctx.currentTime + this.releaseTime + 0.05);
             } catch (e) { }
         });
-        this.activeNodes = [];
+        this.activeChordNodes = [];
     }
+
+    stopActiveFluteNotes() {
+        this.activeFluteNodes.forEach(node => {
+            try {
+                const currentGain = node.gainNode.gain.value;
+                node.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
+                node.gainNode.gain.setValueAtTime(currentGain, this.ctx.currentTime);
+                node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + this.releaseTime);
+                node.source.stop(this.ctx.currentTime + this.releaseTime + 0.05);
+            } catch (e) { }
+        });
+        this.activeFluteNodes = [];
+    }
+
+    stopAll() {
+        this.stopChordLoop();
+        this.stopActiveFluteNotes();
+        Object.keys(this.activePianoFluteNodes).forEach(note => {
+            this.stopPianoFluteNote(note);
+        });
+    }
+
+    // --- EMISSÃO DOS SONS ---
 
     async playChord(chordStr, phase) {
         await this.resumeContext();
-        this.stopAll();
+        this.stopChordLoop(); // Só encerra os loops do órgão e string
 
         const playlist = this.buildPlayList(chordStr, phase);
         if (playlist.length === 0) return;
-
-        // console.log(`\n🔵 [MOTOR NOVO] Acorde: ${chordStr} | Fase: ${phase}`);
-        // playlist.forEach(item => {
-        //     console.log(`   -> ${item.instrument}: ${item.fileName}`);
-        // });
 
         const loadedSamples = await Promise.all(playlist.map(async (item) => {
             const url = `${this.baseURL}${item.instrument}/${item.fileName}`;
@@ -174,14 +202,13 @@ class AudioManager {
 
             const source = this.ctx.createBufferSource();
             source.buffer = buffer;
+            source.loop = true; // Órgão e strings tocam em loop contínuo!
 
             const gainNode = this.ctx.createGain();
             let baseVolume = 1.0;
             baseVolume = instrument === 'Strings' ? baseVolume / 1.25 : baseVolume;
 
             gainNode.gain.setValueAtTime(0, startTime);
-
-            // ---> AJUSTE PONTO 2: O ATTACK LENTO (0.2s) PARA AMBOS OS INSTRUMENTOS <---
             gainNode.gain.linearRampToValueAtTime(baseVolume, startTime + this.attackTime);
 
             source.connect(gainNode);
@@ -189,7 +216,84 @@ class AudioManager {
 
             source.start(startTime);
 
-            this.activeNodes.push({ source, gainNode });
+            this.activeChordNodes.push({ source, gainNode });
         });
+    }
+
+    async playFluteNote(noteStr) {
+        await this.resumeContext();
+        this.stopActiveFluteNotes();
+
+        const parts = noteStr.split('/');
+        const fileNote = this.normalizeNoteForFile(parts[0]);
+        const octave = parts[1];
+        const fileName = `flauta_${fileNote}${octave}.ogg`;
+        const url = `${this.baseURL}studio/Flauta/${fileName}`;
+
+        const buffer = await this.getAudioBuffer(url);
+        if (!buffer) return;
+
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = false; // Toque longo, sem loop infinito
+
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(1.0, this.ctx.currentTime + 0.1);
+
+        source.connect(gainNode);
+        gainNode.connect(this.ctx.destination);
+
+        source.start(this.ctx.currentTime);
+
+        this.activeFluteNodes.push({ source, gainNode });
+    }
+
+    // --- FLUTA DE TECLADO (SUSTAIN E RELEASE NATÍVEIS) ---
+
+    async startPianoFluteNote(noteAndOctave) {
+        await this.resumeContext();
+
+        if (this.activePianoFluteNodes[noteAndOctave]) return; // Evita loopings se já estiver ativo
+
+        const match = noteAndOctave.match(/^([CDEFGAB][#b]?)(\d)$/i);
+        if (!match) return;
+
+        const fileNote = this.normalizeNoteForFile(match[1]);
+        const octave = match[2];
+        const fileName = `flauta_${fileNote}${octave}.ogg`;
+        const url = `${this.baseURL}studio/Flauta/${fileName}`;
+
+        const buffer = await this.getAudioBuffer(url);
+        if (!buffer) return;
+
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = false;
+
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(1.0, this.ctx.currentTime + 0.05); // Attack rápido
+
+        source.connect(gainNode);
+        gainNode.connect(this.ctx.destination);
+
+        source.start(this.ctx.currentTime);
+
+        this.activePianoFluteNodes[noteAndOctave] = { source, gainNode };
+    }
+
+    stopPianoFluteNote(noteAndOctave) {
+        const node = this.activePianoFluteNodes[noteAndOctave];
+        if (node) {
+            try {
+                const currentGain = node.gainNode.gain.value;
+                node.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
+                node.gainNode.gain.setValueAtTime(currentGain, this.ctx.currentTime);
+                node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + this.releaseTime); // Release suave de 0.2s
+                node.source.stop(this.ctx.currentTime + this.releaseTime + 0.05);
+            } catch (e) { }
+            delete this.activePianoFluteNodes[noteAndOctave];
+        }
     }
 }
