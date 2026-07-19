@@ -689,3 +689,8 @@ body {
     background: rgba(43, 48, 53, 0.95);
     border-color: #495057;
 }
+
+/* Bloqueia interações indesejadas com os botões enquanto o painel estiver sendo arrastado */
+.floating-controls.is-dragging button {
+    pointer-events: none !important;
+}
