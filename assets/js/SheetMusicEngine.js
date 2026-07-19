@@ -292,14 +292,14 @@ class SheetMusicEditor {
         }
     }
 
-    // Método para desenhar de forma invisível na página principal
-    drawStandalone(data) {
+    // Adicionado parâmetro opcional 'highlightIndex' para colorir de verde a nota atual na página principal
+    drawStandalone(data, highlightIndex = -1) {
         const tempDiv = document.createElement('div');
         const staveHeight = 150;
         let spaceNeeded = 0;
         const staveNotesRef = [];
 
-        const tickables = data.flatMap((d) => {
+        const tickables = data.flatMap((d, index) => {
             let noteWidth = 60;
             if (d.lyric) noteWidth = Math.max(noteWidth, d.lyric.length * 10);
             if (d.chord) noteWidth = Math.max(noteWidth, d.chord.length * 12);
@@ -317,6 +317,11 @@ class SheetMusicEditor {
 
             if (d.chord) note.addModifier(new this.vf.ChordSymbol().setFont('Arial', 14, 'bold').addText(d.chord), 0);
             if (d.lyric) note.addModifier(new this.vf.Annotation(d.lyric).setFont('Arial', 12, 'italic').setVerticalJustification(this.vf.Annotation.VerticalJustify.BOTTOM), 0);
+
+            // Aplica cor verde se for a nota atual selecionada pelo Avançar/Retroceder
+            if (index === highlightIndex) {
+                note.setStyle({ fillStyle: "#198754", strokeStyle: "#198754" });
+            }
 
             return d.bar ? [note, new this.vf.BarNote()] : [note];
         });

@@ -637,3 +637,26 @@ body {
 .ts-wrapper.focus .ts-control input {
     width: 100% !important;
 }
+
+/* ========================================= */
+/*       CONTROLES FLUTUANTES (DRAG)         */
+/* ========================================= */
+.floating-controls {
+    position: fixed !important;
+    z-index: 1050;
+    background-color: #ffffff;
+    border: 2px solid #adb5bd;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 50px;
+    padding: 10px 20px;
+    cursor: move;
+    user-select: none;
+    touch-action: none; /* Crucial para evitar scroll da tela no celular ao arrastar */
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+[data-bs-theme="dark"] .floating-controls {
+    background-color: #2b3035;
+    border-color: #495057;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}

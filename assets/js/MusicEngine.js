@@ -26,7 +26,6 @@ class MusicTheory {
 }
 
 class ChordManager {
-    // 1. ADICIONADO O audioManager NO CONSTRUTOR
     constructor(toolbarController, musicTheory, audioManager) {
         this.toolbar = toolbarController;
         this.theory = musicTheory;
@@ -51,11 +50,8 @@ class ChordManager {
         if (this.keySelect) {
             this.keySelect.addEventListener('change', (e) => {
                 const val = e.target.value;
-                // 1. Descobre em qual tela estamos e salva no sessionStorage
                 const currentContext = sessionStorage.getItem('app_context') || 'ACORDES';
                 sessionStorage.setItem(`key_${currentContext}`, val);
-
-                // 2. Transpõe as bolinhas
                 this.transposeChords(parseInt(val, 10));
             });
         }
@@ -78,7 +74,6 @@ class ChordManager {
     }
 
     handleChordClick(btn) {
-        // 2. MÁGICA: Toca o som SEMPRE que clicar, mesmo se já estiver ativo
         const chordText = btn.innerText;
         const phase = this.toolbar.musicPhase;
         this.audio.playChord(chordText, phase);
@@ -141,7 +136,8 @@ class PianoManager {
         if (!piano) return;
         piano.innerHTML = '';
 
-        const octaves = [3, 4, 5];
+        // Alterado de [3, 4, 5] para [4, 5] para começar em C4
+        const octaves = [4, 5];
         const pattern = this.theory.getPianoPattern();
 
         octaves.forEach(octave => {
@@ -185,6 +181,12 @@ class PianoManager {
         if (key) {
             this.activeKey = key;
             key.classList.add('pressed');
+
+            // Dispara o som de flauta com sustentação
+            const noteText = key.querySelector('span')?.innerText;
+            if (noteText && window.audioManager) {
+                window.audioManager.startPianoFluteNote(noteText);
+            }
         }
     }
 
@@ -193,7 +195,15 @@ class PianoManager {
         const walk = (pageX - this.container.offsetLeft - this.startX);
         if (Math.abs(walk) > 5) {
             this.container.scrollLeft = this.scrollLeft - walk;
-            if (this.activeKey) this.activeKey.classList.remove('pressed');
+            if (this.activeKey) {
+                this.activeKey.classList.remove('pressed');
+                // Interrompe o som se o arrasto tirar o foco da tecla
+                const noteText = this.activeKey.querySelector('span')?.innerText;
+                if (noteText && window.audioManager) {
+                    window.audioManager.stopPianoFluteNote(noteText);
+                }
+                this.activeKey = null;
+            }
         }
     }
 
@@ -201,6 +211,12 @@ class PianoManager {
         this.isDown = false;
         if (this.activeKey) {
             this.activeKey.classList.remove('pressed');
+
+            // Finaliza o som de flauta com rampa de release suave ao soltar a tecla
+            const noteText = this.activeKey.querySelector('span')?.innerText;
+            if (noteText && window.audioManager) {
+                window.audioManager.stopPianoFluteNote(noteText);
+            }
             this.activeKey = null;
         }
     }
