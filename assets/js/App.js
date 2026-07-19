@@ -131,7 +131,6 @@ class RepertoireController {
         this.quickReturnTarget = null;
         this.isViewingTarget = false;
 
-        // Estado do passo a passo unificado (Partitura vs Letra simples)
         this.playbackSteps = [];
         this.currentStepIndex = -1;
         this.hasSheetMusic = false;
@@ -143,7 +142,6 @@ class RepertoireController {
             this.audio.stopAll();
         });
 
-        // Evento ao clicar no botão Play
         this.toolbar.onPlay(() => {
             if (this.currentSongId && this.currentSongId !== 'ACORDES') {
                 if (this.currentStepIndex < 0) {
@@ -218,6 +216,9 @@ class RepertoireController {
                 this.changeContext('ACORDES');
                 this.ts.removeOption('ACORDES');
                 this.ts.clear(true);
+
+                // Desativa o painel flutuante arrastável ao voltar para Acordes
+                this.toolbar.disableFloatingControls();
             } else {
                 panelAcordes.classList.add('d-none');
                 btnPrevChord.classList.remove('d-none');
@@ -229,6 +230,9 @@ class RepertoireController {
                 this.changeContext('ACORDES');
                 this.initHighlights();
                 this.ts.addOption({ value: 'ACORDES', text: 'Acordes', isTop: 1 });
+
+                // Ativa o painel flutuante arrastável quando a música é exibida
+                this.toolbar.enableFloatingControls();
             }
         });
 
@@ -263,7 +267,6 @@ class RepertoireController {
             });
         });
 
-        // Acionadores dos botões avançar e retroceder
         btnPrevChord.addEventListener('click', () => this.navigateStep(-1));
         btnNextChord.addEventListener('click', () => this.navigateStep(1));
     }
@@ -318,21 +321,17 @@ class RepertoireController {
         document.getElementById('wrapper-song-select').classList.remove('ts-fake-button');
     }
 
-    // --- MÓDULO UNIFICADO DE REPRODUÇÃO (CIfras vs Partituras) ---
-
     initHighlights() {
         const blocks = Array.from(this.view.mainDisplay.querySelectorAll('.sheet-music-block'));
 
         if (blocks.length > 0) {
-            // Caso 1: Música com Partitura
             this.hasSheetMusic = true;
-            this.sheetMusicBlock = blocks[0]; // Usamos o primeiro bloco principal
+            this.sheetMusicBlock = blocks[0];
             this.playbackSteps = ScoreCodec.decode(this.sheetMusicBlock.dataset.score);
             this.currentStepIndex = 0;
 
             this.jumpToStep(0, false);
         } else {
-            // Caso 2: Música com letra e cifras simples
             this.hasSheetMusic = false;
             this.sheetMusicBlock = null;
             this.playbackSteps = Array.from(this.view.mainDisplay.querySelectorAll('b, strong'));
@@ -360,7 +359,6 @@ class RepertoireController {
         this.currentStepIndex = index;
 
         if (this.hasSheetMusic && this.sheetMusicBlock) {
-            // Redesenha a partitura principal destacando a nota atual de verde
             const data = ScoreCodec.decode(this.sheetMusicBlock.dataset.score);
             const svg = window.sheetMusicEditor.drawStandalone(data, index);
             if (svg) {
@@ -371,15 +369,13 @@ class RepertoireController {
             if (playAudio && this.toolbar.isPlaying) {
                 const step = this.playbackSteps[index];
 
-                // Controle da Flauta
                 if (step.rest) {
-                    this.audio.stopActiveFluteNotes(); // Silencia flauta se for uma pausa (rest)
+                    this.audio.stopActiveFluteNotes();
                 } else {
                     const fluteNote = step.notes[0];
-                    this.audio.playFluteNote(fluteNote); // Toca a nota da flauta (single shot)
+                    this.audio.playFluteNote(fluteNote);
                 }
 
-                // Controle do Acorde de Órgão/Strings (Sustenta o anterior se o passo atual for em branco)
                 let activeChord = "";
                 for (let i = index; i >= 0; i--) {
                     if (this.playbackSteps[i].chord) {
@@ -395,7 +391,6 @@ class RepertoireController {
                 }
             }
         } else {
-            // Modo Cifras no Texto
             this.playbackSteps.forEach(node => node.classList.remove('chord-highlight'));
 
             const targetNode = this.playbackSteps[index];
@@ -417,18 +412,15 @@ class RepertoireController {
         let nextIndex = this.currentStepIndex + direction;
 
         if (direction === -1) {
-            // Se retroceder e bater no limite esquerdo, trava no index 0
             if (nextIndex < 0) {
                 nextIndex = 0;
             }
         } else if (direction === 1) {
-            // Se avançar e passar do limite direito, rotaciona de volta ao index 0
             if (nextIndex >= this.playbackSteps.length) {
                 nextIndex = 0;
             }
         }
 
-        // Se o botão Play estiver ativado, emite áudio; se não, faz apenas o avanço/retrocesso visual
         this.jumpToStep(nextIndex, this.toolbar.isPlaying);
     }
 
@@ -532,16 +524,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const musicTheory = new MusicTheory();
 
-    // Motor de Audio
     const audioManager = new AudioManager();
-    window.audioManager = audioManager; // Expõe globalmente para o PianoManager usar
+    window.audioManager = audioManager;
     audioManager.preloadAll();
 
     const chordManager = new ChordManager(toolbar, musicTheory, audioManager);
     const pianoManager = new PianoManager(musicTheory);
 
     const sheetMusicEditor = new SheetMusicEditor();
-    window.sheetMusicEditor = sheetMusicEditor; // Expõe globalmente para o RepertoireController usar
+    window.sheetMusicEditor = sheetMusicEditor;
 
     const repertoireController = new RepertoireController(
         tomSelectInstance, dbManager, viewManager, modalManager, backupManager,
