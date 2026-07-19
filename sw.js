@@ -15,7 +15,7 @@ const ASSETS_TO_CACHE = [
     './assets/js/ModalManager.js',
     './assets/js/ToolbarController.js',
     './assets/js/AudioManager.js',
-    './assets/js/app.js'
+    './assets/js/App.js'
 ];
 
 // INSTALAÇÃO: Baixa os arquivos novos
