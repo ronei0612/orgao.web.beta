@@ -29,10 +29,8 @@ class ToolbarController {
     changeBpm(amount) {
         let val = parseInt(this.bpmInput.value, 10);
         if (isNaN(val)) val = 90;
-
         val += amount;
         val = Math.max(1, Math.min(999, val));
-
         this.bpmInput.value = val;
     }
 
@@ -121,13 +119,14 @@ class ToolbarController {
         });
     }
 
-    // --- MOTOR DRAG AND DROP OTIMIZADO ---
+    // --- MOTOR DRAG AND DROP INTELIGENTE ---
     initDragAndDrop() {
         const playBtn = document.getElementById('btn-play');
         if (!playBtn) return;
 
         this.playbackPanel = playBtn.parentElement;
         this.isDragging = false;
+        this.hasMoved = false; // Flag crucial para separar clique de arrasto
         this.dragStartX = 0;
         this.dragStartY = 0;
         this.panelStartX = 0;
@@ -142,7 +141,6 @@ class ToolbarController {
         if (!this.playbackPanel) return;
 
         this.playbackPanel.removeEventListener('pointerdown', this.onPointerDown);
-
         this.playbackPanel.classList.add('floating-controls');
 
         const initialLeft = (window.innerWidth - this.playbackPanel.offsetWidth) / 2;
@@ -164,6 +162,7 @@ class ToolbarController {
         this.playbackPanel.removeEventListener('pointercancel', this.onPointerUp);
 
         this.playbackPanel.classList.remove('floating-controls');
+        this.playbackPanel.classList.remove('is-dragging');
         this.playbackPanel.style.position = '';
         this.playbackPanel.style.zIndex = '';
         this.playbackPanel.style.left = '';
@@ -171,15 +170,13 @@ class ToolbarController {
         this.playbackPanel.style.margin = '';
 
         this.isDragging = false;
+        this.hasMoved = false;
     }
 
     onPointerDown(e) {
-        if (e.target.closest('button')) return;
-
-        // Impede ações padrão do celular (como zoom, seleção de texto ou scroll) enquanto arrasta
-        e.preventDefault();
-
+        // Agora o toque pode iniciar em QUALQUER lugar, inclusive no meio do botão de Play!
         this.isDragging = true;
+        this.hasMoved = false;
         this.dragStartX = e.clientX;
         this.dragStartY = e.clientY;
 
@@ -188,7 +185,6 @@ class ToolbarController {
 
         this.playbackPanel.setPointerCapture(e.pointerId);
 
-        // Vincula ouvintes de movimento no próprio elemento para arrastar de forma contínua
         this.playbackPanel.addEventListener('pointermove', this.onPointerMove);
         this.playbackPanel.addEventListener('pointerup', this.onPointerUp);
         this.playbackPanel.addEventListener('pointercancel', this.onPointerUp);
@@ -200,30 +196,55 @@ class ToolbarController {
         const deltaX = e.clientX - this.dragStartX;
         const deltaY = e.clientY - this.dragStartY;
 
-        let newLeft = this.panelStartX + deltaX;
-        let newTop = this.panelStartY + deltaY;
+        // Se o dedo mover mais de 5 pixels, o sistema tem certeza que é um arrasto e não um clique trêmulo
+        if (!this.hasMoved && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+            this.hasMoved = true;
+            this.playbackPanel.classList.add('is-dragging');
+        }
 
-        const minLeft = 10;
-        const maxLeft = window.innerWidth - this.playbackPanel.offsetWidth - 10;
-        const minTop = 10;
-        const maxTop = window.innerHeight - this.playbackPanel.offsetHeight - 10;
+        if (this.hasMoved) {
+            let newLeft = this.panelStartX + deltaX;
+            let newTop = this.panelStartY + deltaY;
 
-        newLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
-        newTop = Math.max(minTop, Math.min(maxTop, newTop));
+            const minLeft = 10;
+            const maxLeft = window.innerWidth - this.playbackPanel.offsetWidth - 10;
+            const minTop = 10;
+            const maxTop = window.innerHeight - this.playbackPanel.offsetHeight - 10;
 
-        this.playbackPanel.style.left = `${newLeft}px`;
-        this.playbackPanel.style.top = `${newTop}px`;
+            newLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+            newTop = Math.max(minTop, Math.min(maxTop, newTop));
+
+            this.playbackPanel.style.left = `${newLeft}px`;
+            this.playbackPanel.style.top = `${newTop}px`;
+        }
     }
 
     onPointerUp(e) {
         if (this.isDragging) {
             this.isDragging = false;
-            try {
-                this.playbackPanel.releasePointerCapture(e.pointerId);
-            } catch (err) { }
+
+            try { this.playbackPanel.releasePointerCapture(e.pointerId); } catch (err) { }
+
             this.playbackPanel.removeEventListener('pointermove', this.onPointerMove);
             this.playbackPanel.removeEventListener('pointerup', this.onPointerUp);
             this.playbackPanel.removeEventListener('pointercancel', this.onPointerUp);
+
+            if (this.hasMoved) {
+                // Se arrastou, bloqueia o clique para que o botão não seja ativado ao soltar o dedo
+                const preventClick = (ev) => {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    this.playbackPanel.removeEventListener('click', preventClick, true);
+                };
+                this.playbackPanel.addEventListener('click', preventClick, true);
+
+                setTimeout(() => {
+                    this.playbackPanel.classList.remove('is-dragging');
+                    this.playbackPanel.removeEventListener('click', preventClick, true);
+                }, 50);
+            }
+
+            this.hasMoved = false;
         }
     }
 }
