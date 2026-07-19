@@ -121,19 +121,18 @@ class ToolbarController {
         });
     }
 
-    // --- MOTOR DRAG AND DROP (ARRASTAR E SOLTAR) ---
+    // --- MOTOR DRAG AND DROP OTIMIZADO ---
     initDragAndDrop() {
         const playBtn = document.getElementById('btn-play');
         if (!playBtn) return;
 
-        this.playbackPanel = playBtn.parentElement; // Captura a div que contém os botões
+        this.playbackPanel = playBtn.parentElement;
         this.isDragging = false;
         this.dragStartX = 0;
         this.dragStartY = 0;
         this.panelStartX = 0;
         this.panelStartY = 0;
 
-        // Binds obrigatórios para escopo de eventos
         this.onPointerDown = this.onPointerDown.bind(this);
         this.onPointerMove = this.onPointerMove.bind(this);
         this.onPointerUp = this.onPointerUp.bind(this);
@@ -142,19 +141,16 @@ class ToolbarController {
     enableFloatingControls() {
         if (!this.playbackPanel) return;
 
-        // Limpa possíveis registros duplicados
         this.playbackPanel.removeEventListener('pointerdown', this.onPointerDown);
 
-        // Transforma o painel em elemento flutuante
         this.playbackPanel.classList.add('floating-controls');
 
-        // Posição inicial: Centralizado horizontalmente e acima do piano
         const initialLeft = (window.innerWidth - this.playbackPanel.offsetWidth) / 2;
         const initialTop = window.innerHeight - this.playbackPanel.offsetHeight - 120;
 
         this.playbackPanel.style.left = `${initialLeft}px`;
         this.playbackPanel.style.top = `${initialTop}px`;
-        this.playbackPanel.style.margin = '0'; // Zera as margens do layout antigo
+        this.playbackPanel.style.margin = '0';
 
         this.playbackPanel.addEventListener('pointerdown', this.onPointerDown);
     }
@@ -163,10 +159,10 @@ class ToolbarController {
         if (!this.playbackPanel) return;
 
         this.playbackPanel.removeEventListener('pointerdown', this.onPointerDown);
-        window.removeEventListener('pointermove', this.onPointerMove);
-        window.removeEventListener('pointerup', this.onPointerUp);
+        this.playbackPanel.removeEventListener('pointermove', this.onPointerMove);
+        this.playbackPanel.removeEventListener('pointerup', this.onPointerUp);
+        this.playbackPanel.removeEventListener('pointercancel', this.onPointerUp);
 
-        // Remove a classe e limpa os estilos inline, voltando ao fluxo do HTML normal
         this.playbackPanel.classList.remove('floating-controls');
         this.playbackPanel.style.position = '';
         this.playbackPanel.style.zIndex = '';
@@ -178,8 +174,10 @@ class ToolbarController {
     }
 
     onPointerDown(e) {
-        // Ignora o arraste caso o clique seja feito em cima de algum botão do painel
         if (e.target.closest('button')) return;
+
+        // Impede ações padrão do celular (como zoom, seleção de texto ou scroll) enquanto arrasta
+        e.preventDefault();
 
         this.isDragging = true;
         this.dragStartX = e.clientX;
@@ -188,11 +186,12 @@ class ToolbarController {
         this.panelStartX = parseInt(this.playbackPanel.style.left, 10) || 0;
         this.panelStartY = parseInt(this.playbackPanel.style.top, 10) || 0;
 
-        // Captura o cursor para manter o movimento contínuo mesmo que saia do painel
         this.playbackPanel.setPointerCapture(e.pointerId);
 
-        window.addEventListener('pointermove', this.onPointerMove);
-        window.addEventListener('pointerup', this.onPointerUp);
+        // Vincula ouvintes de movimento no próprio elemento para arrastar de forma contínua
+        this.playbackPanel.addEventListener('pointermove', this.onPointerMove);
+        this.playbackPanel.addEventListener('pointerup', this.onPointerUp);
+        this.playbackPanel.addEventListener('pointercancel', this.onPointerUp);
     }
 
     onPointerMove(e) {
@@ -204,7 +203,6 @@ class ToolbarController {
         let newLeft = this.panelStartX + deltaX;
         let newTop = this.panelStartY + deltaY;
 
-        // Limites da tela para o painel não sumir
         const minLeft = 10;
         const maxLeft = window.innerWidth - this.playbackPanel.offsetWidth - 10;
         const minTop = 10;
@@ -223,8 +221,9 @@ class ToolbarController {
             try {
                 this.playbackPanel.releasePointerCapture(e.pointerId);
             } catch (err) { }
-            window.removeEventListener('pointermove', this.onPointerMove);
-            window.removeEventListener('pointerup', this.onPointerUp);
+            this.playbackPanel.removeEventListener('pointermove', this.onPointerMove);
+            this.playbackPanel.removeEventListener('pointerup', this.onPointerUp);
+            this.playbackPanel.removeEventListener('pointercancel', this.onPointerUp);
         }
     }
 }
