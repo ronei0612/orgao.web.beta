@@ -1,5 +1,5 @@
-const APP_VERSION = 'v1.0.0'; // Mude isso para v1.0.1, v1.0.2... para forçar a atualização
-const CACHE_NAME = `orgao-cache-${APP_VERSION}`;
+const APP_VERSION = 'v1.0.1';
+const CACHE_NAME = `cache-${APP_VERSION}`;
 
 // Lista de arquivos vitais para o site abrir sem internet
 const ASSETS_TO_CACHE = [
