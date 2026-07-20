@@ -1,6 +1,7 @@
 class DatabaseManager {
-    constructor() {
-        this.STORAGE_KEY = 'songs';
+    // Agora aceita a chave como parâmetro!
+    constructor(storageKey = 'songs') {
+        this.STORAGE_KEY = storageKey;
     }
 
     getSongs() {
@@ -15,24 +16,23 @@ class DatabaseManager {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(songs));
     }
 
-    addSong(title, content) {
+    addSong(title, content, artist = '') {
         const songs = this.getSongs();
-        // ID mais seguro (Time + String aleatória)
         const safeId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
 
-        const newSong = { id: safeId, title, content };
+        const newSong = { id: safeId, title, artist, content };
         songs.push(newSong);
         this.saveSongs(songs);
 
         return newSong;
     }
 
-    updateSong(id, title, content) {
+    updateSong(id, title, content, artist = '') {
         const songs = this.getSongs();
         const index = songs.findIndex(s => s.id === id);
 
         if (index > -1) {
-            songs[index] = { ...songs[index], title, content };
+            songs[index] = { ...songs[index], title, artist, content };
             this.saveSongs(songs);
             return songs[index];
         }
@@ -50,8 +50,6 @@ class DatabaseManager {
         return songs.find(s => s.id === id);
     }
 
-    // --- NOVA REGRA DE NEGÓCIO ---
-    // Verifica se já existe uma música com este título (ignorando a si mesma na edição)
     titleExists(title, excludeId = null) {
         const songs = this.getSongs();
         return songs.some(song => {
