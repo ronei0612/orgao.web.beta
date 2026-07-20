@@ -202,6 +202,12 @@ class RepertoireController {
             this.activateQuickReturn('MISSA');
         });
 
+        document.getElementById('btn-oracoes')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            bootstrap.Offcanvas.getInstance(document.getElementById('sideMenu'))?.hide();
+            this.activateQuickReturn('ORACOES');
+        });
+
         // Ao selecionar algo de verdade no select
         this.ts.on('change', (selectedId) => {
             this.cancelQuickReturn();
@@ -286,12 +292,17 @@ class RepertoireController {
 
     forceShowTarget(target) {
         this.changeContext(target);
+
         if (target === 'LITURGIA') {
             this.view.showLiturgy();
-        } else {
+        } else if (target === 'MISSA') {
             this.view.mainDisplay.classList.add('d-none');
             this.view.mainIframe.classList.remove('d-none');
             this.view.mainIframe.src = "./assets/html/santamissa.html";
+        } else if (target === 'ORACOES') {
+            this.view.mainDisplay.classList.add('d-none');
+            this.view.mainIframe.classList.remove('d-none');
+            this.view.mainIframe.src = "./assets/html/oracoes.html";
         }
     }
 
