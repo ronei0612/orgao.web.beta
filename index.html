@@ -111,14 +111,15 @@
                     </div>
                     <input type="text" id="song-title-input" class="form-control d-none" data-i18n-placeholder="songTitlePlaceholder" placeholder="Título da música...">
 
+                    <!-- Restaurados ao padrão original para perfeito alinhamento de altura com o TomSelect -->
                     <button class="btn btn-teal px-3 force-rounded-end" id="btn-action-toggle" title="Ações"><i class="fas fa-plus"></i></button>
 
-                    <button class="btn btn-success d-none" id="btn-action-add" title="Adicionar"><i class="fas fa-file-medical"></i></button>
-                    <button class="btn btn-info text-white d-none" id="btn-action-edit" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger force-rounded-end d-none" id="btn-action-delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-success px-3 d-none" id="btn-action-add" title="Adicionar"><i class="fas fa-file-medical"></i></button>
+                    <button class="btn btn-info text-white px-3 d-none" id="btn-action-edit" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger force-rounded-end px-3 d-none" id="btn-action-delete" title="Excluir"><i class="fas fa-trash"></i></button>
 
-                    <button class="btn btn-primary d-none border-start border-white" id="btn-action-save" title="Salvar"><i class="fas fa-save"></i></button>
-                    <button class="btn btn-danger force-rounded-end d-none border-start border-white" id="btn-action-cancel" title="Cancelar"><i class="fas fa-times"></i></button>
+                    <button class="btn btn-primary d-none border-start border-white px-3" id="btn-action-save" title="Salvar"><i class="fas fa-save"></i></button>
+                    <button class="btn btn-danger force-rounded-end d-none border-start border-white px-3" id="btn-action-cancel" title="Cancelar"><i class="fas fa-times"></i></button>
                 </div>
             </div>
         </div>
@@ -191,7 +192,7 @@
 
         <!-- Acordes -->
         <!-- Coloque este ID (chord-degrees-panel) na div que engloba TODAS as bolinhas de acordes -->
-        <div id="chord-degrees-panel" class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
+        <div id="chord-degrees-panel" class="d-flex flex-column align-items-center gap-2 flex-shrink-0">
             <!-- Linha de cima (Empréstimos e Relativos) -->
             <div class="d-flex justify-content-center gap-2">
                 <!-- ... botões ... -->
@@ -240,8 +241,8 @@
                 </div>
                 <div class="modal-body py-3" id="confirmModalBody">Tem certeza?</div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" id="btn-confirm-no">Não</button>
-                    <button type="button" class="btn btn-teal btn-sm text-white" id="btn-confirm-yes">Sim</button>
+                    <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal" id="btn-confirm-no">Não</button>
+                    <button type="button" class="btn btn-primary text-white fw-bold" id="btn-confirm-yes">Sim</button>
                 </div>
             </div>
         </div>

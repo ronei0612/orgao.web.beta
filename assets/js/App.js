@@ -202,6 +202,7 @@ class RepertoireController {
             this.activateQuickReturn('MISSA');
         });
 
+        // Ao selecionar algo de verdade no select
         this.ts.on('change', (selectedId) => {
             this.cancelQuickReturn();
             this.ts.blur();
@@ -215,9 +216,12 @@ class RepertoireController {
                 this.view.showRepertoire('');
                 this.changeContext('ACORDES');
                 this.ts.removeOption('ACORDES');
-                this.ts.clear(true);
 
-                // Desativa o painel flutuante arrastável ao voltar para Acordes
+                // Limpa, restaura o placeholder e retira o foco para exibir o texto padrão
+                this.ts.clear(true);
+                this.ts.setTextboxValue('');
+                this.ts.blur();
+
                 this.toolbar.disableFloatingControls();
             } else {
                 panelAcordes.classList.add('d-none');
@@ -231,7 +235,6 @@ class RepertoireController {
                 this.initHighlights();
                 this.ts.addOption({ value: 'ACORDES', text: 'Acordes', isTop: 1 });
 
-                // Ativa o painel flutuante arrastável quando a música é exibida
                 this.toolbar.enableFloatingControls();
             }
         });
@@ -288,7 +291,7 @@ class RepertoireController {
         } else {
             this.view.mainDisplay.classList.add('d-none');
             this.view.mainIframe.classList.remove('d-none');
-            this.view.mainIframe.src = "./santamissa.html";
+            this.view.mainIframe.src = "./assets/html/santamissa.html";
         }
     }
 

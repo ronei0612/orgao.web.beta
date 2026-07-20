@@ -5,7 +5,7 @@ const CACHE_NAME = `cache-${APP_VERSION}`;
 const ASSETS_TO_CACHE = [
     './index.html',
     './assets/css/style.css',
-    './santamissa.html',
+    './assets/html/santamissa.html',
     './assets/js/TextFormatter.js',
     './assets/js/DatabaseManager.js',
     './assets/js/PreferencesManager.js',
