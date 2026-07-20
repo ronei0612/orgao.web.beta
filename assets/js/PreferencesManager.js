@@ -109,14 +109,25 @@ class PreferencesManager {
 
     async enableMobileExperience() {
         const isMobile = window.innerWidth <= 768 && navigator.maxTouchPoints > 0;
-        if (!isMobile || document.fullscreenElement || this.wakeLock) return;
+        if (!isMobile) return;
 
+        // 1. Trata o Fullscreen independentemente
         try {
-            if (!document.fullscreenElement) {
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
                 await document.documentElement.requestFullscreen().catch(() => { });
             }
-            await this.requestWakeLock();
-        } catch (e) { }
+        } catch (e) {
+            console.warn("Fullscreen não suportado ou bloqueado.", e);
+        }
+
+        // 2. Trata o WakeLock independentemente (Garante que a tela não apague, até no iPhone)
+        try {
+            if (!this.wakeLock) {
+                await this.requestWakeLock();
+            }
+        } catch (e) {
+            console.warn("WakeLock falhou.", e);
+        }
     }
 
     async requestWakeLock() {
