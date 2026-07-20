@@ -64,8 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
             currentId = song.id;
             inputTitle.value = song.title || '';
             inputArtist.value = song.artist || '';
-            // Como é contenteditable, usamos innerHTML (O TextFormatter já limpou na hora de salvar)
-            inputContent.innerHTML = song.content || '';
+
+            // MUDANÇA AQUI: Usa a inteligência antes de jogar na tela do Editor
+            inputContent.innerHTML = TextFormatter.prepareContent(song.content || '');
+
             btnDelete.classList.remove('d-none');
         }
     });

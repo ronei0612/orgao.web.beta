@@ -44,7 +44,9 @@ class ViewManager {
         this.mainIframe.classList.add('d-none');
         this.mainDisplay.classList.remove('d-none');
         this.mainDisplay.setAttribute('contenteditable', 'false');
-        this.mainDisplay.innerHTML = content;
+
+        // MUDANÇA AQUI: Passa pelo prepareContent
+        this.mainDisplay.innerHTML = TextFormatter.prepareContent(content);
 
         if (this.onHydrateScores) this.onHydrateScores();
 
@@ -55,7 +57,9 @@ class ViewManager {
         this.mainIframe.classList.add('d-none');
         this.mainDisplay.classList.remove('d-none');
         this.mainDisplay.setAttribute('contenteditable', 'true');
-        this.mainDisplay.innerHTML = content;
+
+        // MUDANÇA AQUI: Passa pelo prepareContent
+        this.mainDisplay.innerHTML = TextFormatter.prepareContent(content);
 
         if (this.onHydrateScores) this.onHydrateScores();
 
