@@ -291,7 +291,7 @@ class RepertoireController {
         } else {
             this.view.mainDisplay.classList.add('d-none');
             this.view.mainIframe.classList.remove('d-none');
-            this.view.mainIframe.src = "./santamissa.html";
+            this.view.mainIframe.src = "./assets/html/santamissa.html";
         }
     }
 
