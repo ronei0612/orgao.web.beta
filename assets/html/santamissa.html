@@ -1,904 +1,700 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <link rel="stylesheet" href="../css/frames-styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Santa Missa - Ordinário</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-papiro: #FCFBF7;
+            --cor-rubrica: #B22222; /* Vermelho litúrgico clássico */
+            --cor-texto: #212529;
+        }
+
+        body {
+            background-color: var(--bg-papiro);
+            /* Fonte nativa moderna para texto corrido (super legível) */
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--cor-texto);
+            font-size: 1.15rem;
+            line-height: 1.4;
+        }
+
+        /* Tipografia de Títulos - Fonte serifada clássica nativa */
+        h1, h2, h3, h4, h5 {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: var(--cor-rubrica);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Estilo para as rubricas (instruções litúrgicas) */
+        .rubrica {
+            color: var(--cor-rubrica);
+            font-style: italic;
+        }
+
+            .rubrica.fw-bold {
+                font-style: normal;
+            }
+    </style>
 </head>
 
 <body>
-    <h1 class="">Ritos Iniciais</h1>
-    <p class="breakline"></p>
-    <p class="brown">
-        1.
-        Reunido o povo, o sacerdote
-        dirige-se com os ministros ao altar, enquanto se executa o canto de entrada.
-    </p>
-    <p class="brown">
-        Terminado o canto de entrada, o
-        sacerdote e os fiéis, todos de pé, fazem o sinal da cruz, enquanto o sacerdote, voltado para o
-        povo, diz:
-    </p>
-    <p class="default">
-        Em nome do Pai e do Filho e do Espírito
-        Santo.
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">Amém.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        2.
-        Em seguida, o sacerdote, abrindo
-        os braços, saúda o povo com uma das seguintes fórmulas:
-    </p>
-    <p class="brown">a)</p>
-    <p class="default">A graça de nosso Senhor Jesus Cristo,</p>
-    <p class="default">o amor do Pai</p>
-    <p class="default">e a comunhão do Espírito Santo</p>
-    <p class="default">
-        estejam convosco.
-        (Cf. 2Cor 13,
-        13)
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">
-        Bendito seja Deus, que nos reuniu no amor de
-        Cristo.
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">
-        Ou, o sacerdote, abrindo os braços, diz:
-    </p>
-    <p class="brown">h)</p>
-    <p class="default">O Senhor esteja convosco.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">Ele está no meio de nós.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        3.
-        O sacerdote, diácono ou
-        outro ministro poderá, com brevíssimas palavras, introduzir os fiéis na Missa do
-        dia.
-    </p>
-    <p class="breakline"></p>
-    <h2 class="">Ato Penitencial</h2>
-    <p class="breakline"></p>
-    <p class="brown">
-        4.
-        O sacerdote convida os
-        fiéis ao ato penitencial:
-    </p>
-    <p class="default">Irmãos e irmãs,</p>
-    <p class="default">
-        reconheçamos
-        os nossos
-        pecados,
-    </p>
-    <p class="default">
-        para celebrarmos dignamente os santos
-        mistérios.
-    </p>
-    <p class="breakline"></p>
-    <h3 class="">Primeira fórmula</h3>
-    <p class="breakline"></p>
-    <p class="brown">Após um momento de silêncio, o sacerdote diz:</p>
-    <p class="default">Confessemos os nossos pecados:</p>
-    <p class="breakline"></p>
-    <p class="brown">Todos:</p>
-    <p class="bold">Confesso a Deus todo-poderoso</p>
-    <p class="bold">e a vós, irmãos e irmãs,</p>
-    <p class="bold">que pequei muitas vezes</p>
-    <p class="bold">por pensamentos e palavras,</p>
-    <p class="bold">atos e omissões,</p>
-    <p class="brown">e, batendo no peito, dizem:</p>
-    <p class="bold">
-        por minha culpa, minha culpa, minha tão grande
-        culpa,
-    </p>
-    <p class="brown">Em seguida, continuam:</p>
-    <p class="bold">E peço à Virgem Maria,</p>
-    <p class="bold">aos Anjos e Santos</p>
-    <p class="bold">e a vós, irmãos e irmãs,</p>
-    <p class="bold">que rogueis por mim a Deus, nosso Senhor.</p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-    <p class="brown">
-        Segue-se a
-        absolvição sacerdotal:
-    </p>
-    <p class="default">Deus todo-poderoso tenha compaixão de nós,</p>
-    <p class="default">perdoe os nossos pecados</p>
-    <p class="default">e nos conduza à vida eterna.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">Amém.</p>
-    <p class="breakline"></p>
-
-    <p class="brown">Seguem-se as invocações, caso já não tenham ocorrido no ato penitencial:</p>
-
-    <p class="default">Senhor, tende piedade de nós.</p>
-    <p class="bold">℟. Senhor, tende piedade de nós.</p>
-    <p class="default">Cristo, tende piedade de nós.</p>
-    <p class="bold">℟. Cristo, tende piedade de nós.</p>
-    <p class="default">Senhor, tende piedade de nós.</p>
-    <p class="bold">℟. Senhor, tende piedade de nós.</p>
-
-    <p class="breakline"></p>
-    <p class="default">Ou:</p>
-
-    <p class="default"><span class="italic">Kýrie, eléison</span></p>
-    <p class="bold">℟.<span class="italic">Kýrie, eléison</span></p>
-    <p class="default"><span class="italic">Christe, eléison</span></p>
-    <p class="bold">℟.<span class="italic">Christe, eléison</span></p>
-    <p class="default"><span class="italic">Kýrie, eléison</span></p>
-    <p class="bold">℟.<span class="italic">Kýrie, eléison</span></p>
-
-    <p class="breakline"></p>
-
-    <button type="button" class="btn btn-primary" onclick="document.getElementById('gloria').scrollIntoView({ behavior: 'smooth' })">
-        Ir para o Glória
-    </button>
-
-    <p class="breakline"></p>
-
-    <h3 class="">Segunda fórmula</h3>
-    <p class="breakline"></p>
-    <p class="brown">Após um momento de silêncio, o sacerdote diz:</p>
-    <p class="default">Tende compaixão de nós, Senhor.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo:</p>
-    <p class="bold">Porque somos pecadores.</p>
-    <p class="breakline"></p>
-    <p class="brown">O sacerdote:</p>
-    <p class="default">Manifestai, Senhor, a vossa misericórdia.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo:</p>
-    <p class="bold">E dai-nos a vossa salvação.</p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-
-    <p class="brown">
-        Segue-se a
-        absolvição sacerdotal:
-    </p>
-    <p class="default">Deus todo-poderoso tenha compaixão de nós,</p>
-    <p class="default">perdoe os nossos pecados</p>
-    <p class="default">e nos conduza à vida eterna.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">Amém.</p>
-    <p class="breakline"></p>
-    <p class="brown">Seguem-se as invocações, caso já não tenham ocorrido no ato penitencial:</p>
-
-    <p class="default">Senhor, tende piedade de nós.</p>
-    <p class="bold">℟. Senhor, tende piedade de nós.</p>
-    <p class="default">Cristo, tende piedade de nós.</p>
-    <p class="bold">℟. Cristo, tende piedade de nós.</p>
-    <p class="default">Senhor, tende piedade de nós.</p>
-    <p class="bold">℟. Senhor, tende piedade de nós.</p>
-
-    <p class="breakline"></p>
-    <p class="default">Ou:</p>
-
-    <p class="default"><span class="italic">Kýrie, eléison</span></p>
-    <p class="bold">℟.<span class="italic">Kýrie, eléison</span></p>
-    <p class="default"><span class="italic">Christe, eléison</span></p>
-    <p class="bold">℟.<span class="italic">Christe, eléison</span></p>
-    <p class="default"><span class="italic">Kýrie, eléison</span></p>
-    <p class="bold">℟.<span class="italic">Kýrie, eléison</span></p>
-
-    <p class="breakline"></p>
-
-    <button type="button" class="btn btn-primary" onclick="document.getElementById('gloria').scrollIntoView({ behavior: 'smooth' })">
-        Ir para o Glória
-    </button>
-
-    <p class="breakline"></p>
-
-    <h3 class="">Terceira fórmula</h3>
-    <p class="breakline"></p>
-    <p class="brown">
-        Após um momento de silêncio, o sacerdote, o diácono ou outro
-        ministro propõe as seguintes invocações ou outras semelhantes com Senhor,
-        tende piedade de nós.
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">Ⓑ Para o canto se pode usar a aclamação grega: <span class="italic">Kýrie, eléison.</span></p>
-    <p class="default">Senhor, que viestes salvar os corações arrependidos,</p>
-    <p class="default">tende piedade de nós.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">Senhor, tende piedade de nós.</p>
-    <p class="breakline"></p>
-    <p class="brown">O sacerdote:</p>
-    <p class="default">Cristo, que viestes chamar os pecadores,</p>
-    <p class="default">tende piedade de nós.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo:</p>
-    <p class="bold">Cristo, tende piedade de nós.</p>
-    <p class="breakline"></p>
-    <p class="brown">O sacerdote:</p>
-    <p class="default">Senhor, que intercedeis por nós junto do Pai,</p>
-    <p class="default">tende piedade de nós.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo:</p>
-    <p class="bold">Senhor, tende piedade de nós.</p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-
-    <p class="brown">
-        Segue-se a
-        absolvição sacerdotal:
-
-    </p>
-    <p class="default">Deus todo-poderoso tenha compaixão de nós,</p>
-    <p class="default">perdoe os nossos pecados</p>
-    <p class="default">e nos conduza à vida eterna.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">Amém.</p>
-
-    <p class="breakline"></p>
-
-    <section id="gloria" onclick="document.getElementById('gloria').scrollIntoView({ behavior: 'smooth' })"></section>
-
-    <h3 class="">Glória</h3>
-    <p class="breakline"></p>
-    <p class="brown">
-
-        Quando for prescrito, canta-se
-        ou recita-se em seguida o hino:
-    </p>
-    <p class="bold">Glória a Deus nas alturas,</p>
-    <p class="bold">e paz na terra aos homens por Ele amados.</p>
-    <p class="bold">Senhor Deus, rei dos céus,</p>
-    <p class="bold">Deus Pai todo-poderoso.</p>
-    <p class="bold">Nós vos louvamos,</p>
-    <p class="bold">nós vos bendizemos,</p>
-    <p class="bold">nós vos adoramos,</p>
-    <p class="bold">nós vos glorificamos,</p>
-    <p class="bold">nós vos damos graças</p>
-    <p class="bold">por vossa imensa glória.</p>
-    <p class="bold">
-        Senhor Jesus Cristo, Filho Unigênito,
-    </p>
-    <p class="bold">Senhor Deus, Cordeiro de Deus,</p>
-    <p class="bold">Filho de Deus Pai.</p>
-    <p class="bold">Vós que tirais o pecado do mundo,</p>
-    <p class="bold">tende piedade de nós.</p>
-    <p class="bold">Vós que tirais o pecado do mundo,</p>
-    <p class="bold">acolhei a nossa súplica.</p>
-    <p class="bold">
-        Vós que estais à direita do Pai,
-    </p>
-    <p class="bold">tende piedade de nós.</p>
-    <p class="bold">Só Vós sois o Santo,</p>
-    <p class="bold">só vós, o Senhor,</p>
-    <p class="bold">só vós, o Altíssimo,</p>
-    <p class="bold">Jesus Cristo,</p>
-    <p class="bold">com o Espírito Santo,</p>
-    <p class="bold">na glória de Deus Pai.</p>
-    <p class="bold">Amém.</p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-    <p class="brown">
-
-        Terminado o hino, de
-        mãos unidas, o sacerdote diz:
-    </p>
-    <p class="default">Oremos.</p>
-    <p class="brown">
-        E todos oram com o sacerdote, por algum tempo, em
-        silêncio.
-    </p>
-    <p class="brown">
-        Então o sacerdote, de braços abertos,
-        profere a oração Coleta;
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">ao terminar, o povo aclama:</p>
-    <p class="bold">Amém.</p>
-    <p class="breakline"></p>
-
-    <h1 class="">Liturgia da Palavra</h1>
-    <button type="button" class="btn btn-primary" id="btnLiturgiaDiaria">Ir para Liturgia Diária</button>
-
-    <h2>Credo</h2>
-
-    <p class="bold">Creio em Deus Pai todo-poderoso,</p>
-    <p class="bold">Criador do céu e da terra.</p>
-    <p class="bold">E em Jesus Cristo, seu único Filho, nosso Senhor,</p>
-    <p class="brown"><span class="italic">(Todos se inclinam)</span></p>
-    <p class="bold">que foi concebido pelo poder do Espírito Santo,</p>
-    <p class="bold">nasceu da Virgem Maria,</p>
-    <p class="brown"><span class="italic">(Retorna-se à posição anterior)</span></p>
-    <p class="bold">padeceu sob Pôncio Pilatos,</p>
-    <p class="bold">foi crucificado, morto e sepultado,</p>
-    <p class="bold">desceu à mansão dos mortos,</p>
-    <p class="bold">ressuscitou ao terceiro dia,</p>
-    <p class="bold">subiu aos céus,</p>
-    <p class="bold">está sentado à direita de Deus Pai todo-poderoso,</p>
-    <p class="bold">donde há de vir a julgar os vivos e os mortos.</p>
-    <p class="bold">Creio no Espírito Santo,</p>
-    <p class="bold">na santa Igreja Católica,</p>
-    <p class="bold">na comunhão dos santos,</p>
-    <p class="bold">na remissão dos pecados,</p>
-    <p class="bold">na ressurreição da carne</p>
-    <p class="bold">e na vida eterna.</p>
-    <p class="bold">Amém.</p>
-
-    <p class="breakline"></p>
-    <button type="button" class="btn btn-primary" onclick="document.getElementById('oracoes').scrollIntoView({ behavior: 'smooth' })">
-        Ir para Orações Eucarísticas
-    </button>
-
-    <h2>Niceno-Constantinopolitano</h2>
-
-    <p class="default">Creio em um só Deus, Pai todo-poderoso,</p>
-    <p class="bold">Criador do céu e da terra,</p>
-    <p class="bold">de todas as coisas visíveis e invisíveis.</p>
-    <p class="default">Creio em um só Senhor, Jesus Cristo,</p>
-    <p class="default">Filho Unigênito de Deus,</p>
-    <p class="default">nascido do Pai antes de todos os séculos:</p>
-    <p class="bold">Deus de Deus, luz da luz,</p>
-    <p class="bold">Deus verdadeiro de Deus verdadeiro,</p>
-    <p class="default">gerado, não criado,</p>
-    <p class="default">consubstancial ao Pai.</p>
-    <p class="default">Por Ele todas as coisas foram feitas.</p>
-    <p class="bold">E, por nós, homens, e para a nossa salvação,</p>
-    <p class="bold">desceu dos céus:</p>
-    <p class="brown"><span class="italic">(Todos se inclinam)</span></p>
-    <p class="default">e se encarnou pelo Espírito Santo,</p>
-    <p class="default">no seio da Virgem Maria,</p>
-    <p class="default">e se fez homem.</p>
-    <p class="brown"><span class="italic">(Retorna-se à posição anterior)</span></p>
-    <p class="bold">Também por nós foi crucificado</p>
-    <p class="bold">sob Pôncio Pilatos;</p>
-    <p class="bold">padeceu e foi sepultado.</p>
-    <p class="default">Ressuscitou ao terceiro dia,</p>
-    <p class="default">conforme as escrituras;</p>
-    <p class="bold">E subiu aos céus,</p>
-    <p class="bold">onde está sentado à direita do Pai.</p>
-    <p class="default">E de novo há de vir, em sua glória,</p>
-    <p class="default">para julgar os vivos e os mortos;</p>
-    <p class="default">e o seu reino não terá fim.</p>
-    <p class="bold">Creio no Espírito Santo,</p>
-    <p class="bold">Senhor que dá a vida,</p>
-    <p class="bold">e procede do Pai e do Filho;</p>
-    <p class="default">e com o Pai e o Filho</p>
-    <p class="default">é adorado e glorificado:</p>
-    <p class="default">Ele que falou pelos profetas.</p>
-    <p class="bold">Creio na Igreja una, santa,</p>
-    <p class="bold">católica e apostólica.</p>
-    <p class="default">Professo um só batismo</p>
-    <p class="default">para remissão dos pecados.</p>
-    <p class="bold">Espero a ressurreição dos mortos;</p>
-    <p class="default">E a vida do mundo que há de vir.</p>
-    <p class="bold">Amém.</p>
-
-    <p class="breakline"></p>
-
-    <h3>Preces</h3>
-
-    <h1 class="">Liturgia Eucarística</h1>
-
-    <p class="brown">
-        21.
-        Inicia-se o canto da preparação das
-        oferendas, enquanto os ministros colocam no altar o corporal, o sanguinho, o cálice, a pala e o
-        Missal.
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">
-        23.
-        O sacerdote, de pé junto ao altar, recebe a patena
-        com o pão em suas mãos e, levantando-a um pouco sobre o altar, diz em silêncio:
-    </p>
-    <p class="default">Bendito sejais, Senhor, Deus do universo,</p>
-    <p class="default">pelo pão que recebemos de vossa bondade,</p>
-    <p class="default">fruto da terra e do trabalho humano,</p>
-    <p class="default">que agora vos apresentamos,</p>
-    <p class="default">e para nós se vai tornar pão da vida.</p>
-    <p class="brown">Em seguida, coloca a patena com o pão sobre o corporal.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        Se o canto da preparação das oferendas não continuar, o
-        sacerdote poderá recitar em voz alta as palavras acima, e o povo acrescentar a
-        aclamação:
-    </p>
-    <p class="bold">Bendito seja Deus para sempre!</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        24.
-        O diácono ou o sacerdote coloca o vinho e um pouco
-        d água no cálice, rezando em silêncio:
-    </p>
-    <p class="default">Pelo mistério desta água e deste vinho</p>
-    <p class="default">possamos participar da divindade do vosso Filho,</p>
-    <p class="default">que se dignou assumir a nossa humanidade.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        25.
-        Em seguida, o sacerdote recebe o cálice em suas
-        mãos e, elevando-o um pouco sobre o altar, diz em silêncio:
-    </p>
-    <p class="default">Bendito sejais, Senhor, Deus do universo,</p>
-    <p class="default">pelo vinho que recebemos de vossa bondade,</p>
-    <p class="default">fruto da videira e do trabalho humano,</p>
-    <p class="default">que agora vos apresentamos,</p>
-    <p class="default">e que para nós se vai tornar vinho da salvação.</p>
-    <p class="brown">Coloca o cálice sobre o corporal.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        Se o canto da preparação das oferendas não continuar, o
-        sacerdote poderá recitar em voz alta as palavras acima, e o povo acrescentar a
-        aclamação:
-    </p>
-    <p class="bold">Bendito seja Deus para sempre!</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        26.
-        Em seguida o sacerdote, profundamente inclinado, reza em
-        silêncio:
-    </p>
-    <p class="default">De coração contrito e humilde,</p>
-    <p class="default">sejamos, Senhor, acolhidos por vós;</p>
-    <p class="default">e seja o nosso sacrifício de tal modo oferecido</p>
-    <p class="default">que vos agrade, Senhor, nosso Deus.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        27.
-        E, se for oportuno, incensa as oferendas, a cruz e o
-        altar. Depois, o diácono ou outro ministro incensa o sacerdote e o povo.
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">
-        28.
-        Em seguida, o sacerdote, de pé ao lado do altar,
-        lava as mãos, dizendo em silêncio:
-    </p>
-    <p class="default">Lavai-me, Senhor, de minhas faltas</p>
-    <p class="default">e purificai-me do meu pecado.</p>
-
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-    <h3 class="">Liturgia Eucarística</h3>
-
-    <p class="brown">
-        29.
-        Estando, depois, no meio do altar e voltado para o povo,
-        o sacerdote estende e une as mãos e diz:
-    </p>
-    <p class="default">Orai, irmãos e irmãs,</p>
-    <p class="default">
-        para que o
-        meu e o vosso
-        sacrifício seja aceito por Deus
-        Pai todo-poderoso.
-    </p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-    <p class="brown">O povo se levanta e responde:</p>
-    <p class="bold">Receba o Senhor por tuas mãos este sacrifício,</p>
-    <p class="bold">para glória do seu nome,</p>
-    <p class="bold">para nosso bem e de toda a sua santa Igreja.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        30.
-        Em seguida, abrindo os braços, o sacerdote profere
-        a oração sobre as oferendas; ao terminar, o povo aclama:
-    </p>
-    <p class="bold">Amém.</p>
-    <p class="breakline"></p>
-    <h2 class="">Oração Eucarística</h2>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-    <p class="brown">
-        31.
-        Começando a Oração
-        Eucarística, o sacerdote abre os braços e diz ou canta:
-    </p>
-    <p class="default">O Senhor esteja convosco.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo responde:</p>
-    <p class="bold">Ele está no meio de nós.</p>
-    <p class="breakline"></p>
-    <p class="brown">Erguendo as mãos, o sacerdote prossegue:</p>
-    <p class="default">Corações ao alto.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo:</p>
-    <p class="bold">O nosso coração está em Deus.</p>
-    <p class="breakline"></p>
-    <p class="brown">O sacerdote, com os braços abertos, acrescenta:</p>
-    <p class="default">Demos graças ao Senhor, nosso Deus.</p>
-    <p class="breakline"></p>
-    <p class="brown">O povo:</p>
-    <p class="bold">É nosso dever e nossa salvação.</p>
-
-    <p class="breakline"></p>
-
-    <section id="oracoes" onclick="document.getElementById('oracoes').scrollIntoView({ behavior: 'smooth' })"></section>
-
-    <h2 class="">Oração Eucarística (02) II</h2>
-    <p class="breakline"></p>
-    <p class="brown">O sacerdote, de braços abertos, reza ou canta o Prefácio:</p>
-    <p class="default">
-        Na verdade, é digno e justo, é nosso dever e salvação
-        dar-vos graças sempre e em todo lugar, Senhor, Pai santo, por vosso amado Filho, Jesus Cristo.
-    </p>
-    <p class="breakline"></p>
-    <p class="default">
-        Ele é a vossa Palavra, pela qual tudo criastes. Ele é o nosso Salvador
-        e Redentor, que se encarnou pelo Espírito Santo e nasceu da Virgem Maria. Ele, para cumprir a vossa
-        vontade e adquirir para vós um povo santo, estendeu os braços na hora da sua paixão, a
-        fim de vencer a morte e manifestar a ressurreição.
-    </p>
-    <p class="breakline"></p>
-    <p class="default">Por isso, com os Anjos e todos os Santos, proclamamos vossa glória, cantando (dizendo) a uma só voz:</p>
-    <p class="breakline"></p>
-
-    <section id="santo" onclick="document.getElementById('santo').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">
-            Ao seu final, une as mãos e, com o povo, conclui o Prefácio, cantando
-            ou em voz alta dizendo:
-        </p>
-
-        <p class="bold">Santo, Santo, Santo,</p>
-        <p class="bold">Senhor, Deus do universo.</p>
-        <p class="bold">O céu e a terra proclamam a vossa glória.</p>
-        <p class="bold">Hosana nas alturas!</p>
-        <p class="bold">Bendito o que vem em nome do Senhor!</p>
-        <p class="bold">Hosana nas alturas!</p>
-    </section>
-
-    <p class="breakline"></p>
-    <p class="brown">O sacerdote, de braços abertos, diz:</p>
-    <p class="default">
-        CP Na verdade, ó Pai, vós sois Santo,
-        fonte de toda santidade.
-    </p>
-    <p class="breakline"></p>
-
-    <section id="resposta1" onclick="document.getElementById('resposta1').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">Une as mãos e, estendendo-as sobre as oferendas, diz:</p>
-        <p class="default">CC Santificai, pois, estes dons, derramando sobre eles o vosso Espírito,</p>
-        <p class="default">a fim de que se tornem para nós o Corpo e ✠ o Sangue de nosso Senhor Jesus Cristo.</p>
-        <p class="breakline"></p>
-
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">Enviai o vosso Espírito Santo!</p>
-    </section>
-
-    <p class="breakline"></p>
-    <p class="brown">
-        O relato da instituição da Eucaristia seja proferido de modo claro e
-        audível como requer a sua natureza.
-    </p>
-    <p class="default">Estando para ser entregue e abraçando livremente a paixão,</p>
-    <p class="brown">
-        toma o pão e, mantendo-o um pouco elevado acima do altar, prossegue:
-    </p>
-    <p class="default">
-        Jesus tomou o pão, pronunciou a bênção de
-        ação de graças, partiu e o deu a seus discípulos, dizendo:
-    </p>
-    <p class="brown">inclina-se levemente</p>
-    <p class="default">
-        TOMAI, TODOS, E COMEI: ISTO é O MEU CORPO, QUE SERá ENTREGUE POR
-        VóS.
-    </p>
-    <p class="brown">
-        Mostra ao povo a hóstia consagrada, coloca-a na patena e genuflete em
-        adoração.
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">Então prossegue:</p>
-    <p class="default">Do mesmo modo, no fim da Ceia,</p>
-    <p class="brown">
-        toma o cálice nas mãos e, mantendo-o um pouco elevado acima do altar,
-        prossegue:
-    </p>
-    <p class="default">
-        ele tomou o cálice em suas mãos e, dando graças novamente, o
-        entregou a seus discípulos, dizendo:
-    </p>
-    <p class="brown">inclina-se levemente</p>
-    <p class="default">
-        TOMAI, TODOS, E BEBEI: ESTE é O CáLICE DO MEU SANGUE, O SANGUE DA NOVA
-        E ETERNA ALIANçA, QUE SERá DERRAMADO POR VóS E POR TODOS PARA REMISSãO DOS
-        PECADOS. FAZEI ISTO EM MEMóRIA DE MIM.
-    </p>
-    <p class="brown">
-        Mostra o cálice ao povo, coloca-o sobre o corporal e genuflete em
-        adoração.
-    </p>
-    <p class="breakline"></p>
-
-    <section id="memorial" onclick="document.getElementById('memorial').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">Em seguida, diz:</p>
-        <p class="default">Mistério da fé!</p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">
-            Anunciamos Senhor, a vossa morte, e proclamamos a vossa
-            ressurreição. Vinde Senhor Jesus!
-        </p>
-        <p class="breakline"></p>
-        <p class="brown">Ou</p>
-        <p class="default">Mistério da fé e do amor!</p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">
-            Todas as vezes que comemos deste pão, e bebemos deste cálice,
-            anunciamos Senhor, a vossa morte, enquanto esperamos a vossa vinda!
-        </p>
-        <p class="breakline"></p>
-        <p class="brown">Ou</p>
-        <p class="default">Mistério da fé para a salvação do mundo!</p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">
-            Salvador do mundo, salvai-nos, vós que nos libertastes pela cruz, e
-            ressurreição.
-        </p>
-    </section>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-
-    <section id="resposta2" onclick="document.getElementById('resposta2').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">O sacerdote, de braços abertos, diz:</p>
-        <p class="default">
-            CC Celebrando, pois, o memorial da morte e
-            ressurreição do vosso Filho, nós vos oferecemos, ó Pai, o Pão da vida e o
-            Cálice da salvação; e vos agradecemos porque nos tornastes dignos de estar aqui na
-            vossa presença e vos servir.
-        </p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">Aceitai, ó Senhor, a nossa oferta!</p>
-    </section>
-    <p class="breakline"></p>
-
-    <section id="resposta3" onclick="document.getElementById('resposta3').scrollIntoView({ behavior: 'smooth' })">
-        <p class="default">
-            Suplicantes, vos pedimos que, participando do Corpo e Sangue de Cristo, sejamos
-            reunidos pelo Espírito Santo num só corpo.
-        </p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">O Espírito nos una num só corpo!</p>
-    </section>
-    <p class="breakline"></p>
-
-    <section id="resposta4" onclick="document.getElementById('resposta4').scrollIntoView({ behavior: 'smooth' })">
-        <p class="default">
-            1C Lembrai-vos, ó Pai, da vossa Igreja que se
-            faz presente pelo mundo inteiro; ★ que ela
-            cresça na caridade, em comunhão com o Papa N., com o nosso Bispo N., os bispos do mundo
-            inteiro, os presbíteros, os diáconos e todos os
-            ministros do vosso povo.
-        </p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">Lembrai-vos, ó Pai, da vossa Igreja!</p>
-    </section>
-    <p class="breakline"></p>
-
-    <section id="resposta5" onclick="document.getElementById('resposta5').scrollIntoView({ behavior: 'smooth' })">
-        <p class="default">
-            2C Lembrai-vos também, na vossa
-            misericórdia, dos (outros) nossos irmãos e irmãs que adormeceram na
-            esperança da ressurreição e de todos os que partiram desta vida; acolhei-os junto a vós na luz da vossa face.
-        </p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">Concedei-lhes, ó Senhor, a luz eterna!</p>
-    </section>
-    <p class="breakline"></p>
-
-    <p class="default">
-        3C Enfim, nós vos pedimos, tende piedade de
-        todos nós e dai-nos participar da vida eterna, com a Virgem Maria, Mãe de Deus, São
-        José, seu esposo, os Apóstolos, (São N.: Santo do dia ou padroeiro) e todos os Santos que
-        neste mundo viveram na vossa amizade, a fim de
-        vos louvarmos e glorificarmos
-    </p>
-    <p class="brown">une as mãos</p>
-    <p class="default">por Jesus Cristo, vosso Filho.</p>
-    <p class="breakline"></p>
-
-    <section id="amem" onclick="document.getElementById('amem').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">Ergue a patena com a hóstia e o cálice, dizendo:</p>
-        <p class="default">
-            CP ou CC Por Cristo, com Cristo, e em Cristo, a
-            vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda honra e toda glória,
-            por todos os séculos dos séculos.
-        </p>
-        <p class="breakline"></p>
-        <p class="brown">A assembleia aclama:</p>
-        <p class="bold">Amém.</p>
-    </section>
-    <p class="breakline"></p>
-
-    <h1 class="">Rito da Comunhão</h1>
-
-    <p class="brown">
-        124.
-        Tendo colocado o cálice e a patena sobre o altar,
-        o sacerdote diz, de mãos unidas:
-    </p>
-    <p class="default">Obedientes à palavra do Salvador</p>
-    <p class="default">e formados por seu divino ensinamento,</p>
-    <p class="default">ousamos dizer:</p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-
-    <section id="pai" onclick="document.getElementById('pai').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">O sacerdote abre os braços e prossegue com o povo:</p>
-        <p class="bold">Pai nosso que estais nos céus,</p>
-        <p class="bold">santificado seja o vosso nome;</p>
-        <p class="bold">venha a nós o vosso reino,</p>
-        <p class="bold">seja feita a vossa vontade,</p>
-        <p class="bold">assim na terra como no céu.</p>
-        <p class="bold">O pão nosso de cada dia nos dai hoje;</p>
-        <p class="bold">perdoai-nos as nossas ofensas,</p>
-        <p class="bold">assim como nós perdoamos</p>
-        <p class="bold">a quem nos tem ofendido;</p>
-        <p class="bold">e não nos deixeis cair em tentação,</p>
-        <p class="bold">mas livrai-nos do mal.</p>
-    </section>
-    <p class="breakline"></p>
-
-    <section id="vosso" onclick="document.getElementById('vosso').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">
-            125.
-            O sacerdote prossegue sozinho, de braços
-            abertos:
-        </p>
-        <p class="default">Livrai-nos de todos os males, ó Pai,</p>
-        <p class="default">e dai-nos hoje a vossa paz.</p>
-        <p class="default">Ajudados pela vossa misericórdia,</p>
-        <p class="default">sejamos sempre livres do pecado</p>
-        <p class="default">e protegidos de todos os perigos,</p>
-        <p class="default">enquanto aguardamos a feliz esperança</p>
-        <p class="default">e a vinda do Nosso Salvador, Jesus Cristo.</p>
-        <p class="breakline"></p>
-        <p class="brown">O povo conclui a oração, aclamando:</p>
-        <p class="bold">Vosso é o reino,</p>
-        <p class="bold">o poder e a glória para sempre.</p>
-    </section>
-    <p class="breakline"></p>
-
-    <section id="amemRezado" onclick="document.getElementById('amemRezado').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">126. O sacerdote, de braços abertos, diz em voz alta:</p>
-        <p class="default">Senhor Jesus Cristo,</p>
-        <p class="default">dissestes aos vossos Apóstolos:</p>
-        <p class="default">eu vos deixo a paz, eu vos dou a minha paz.</p>
-        <p class="default">Não olheis os nossos pecados,</p>
-        <p class="default">mas a fé que anima vossa Igreja;</p>
-        <p class="default">dai-lhe, segundo o vosso desejo,</p>
-        <p class="default">a paz e a unidade.</p>
-        <p class="brown">O sacerdote une as mãos e conclui:</p>
-        <p class="default">Vós, que sois Deus, com o Pai e o Espírito Santo.</p>
-        <p class="breakline"></p>
-        <p class="brown">O povo responde:</p>
-        <p class="bold">Amém.</p>
-    </section>
-    <p class="breakline"></p>
-
-    <section id="amor" onclick="document.getElementById('amor').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">127. O sacerdote, voltado para o povo, estendendo e unindo as mãos, acrescenta:</p>
-        <p class="default">A paz do Senhor esteja sempre convosco.</p>
-        <p class="breakline"></p>
-        <p class="brown">O povo responde:</p>
-        <p class="bold">O amor de Cristo nos uniu.</p>
-    </section>
-    <p class="breakline"></p>
-
-    <p class="brown">
-        128.
-        Em seguida, se for oportuno, o diácono ou o
-        sacerdote diz:
-    </p>
-    <p class="default">Irmãos e irmãs,</p>
-    <p class="default">saudai-vos em Cristo Jesus.</p>
-    <p class="breakline"></p>
-    <p class="breakline"></p>
-    <p class="brown">
-        E, todos segundo o costume do lugar, manifestam uns aos outros a paz, a
-        comunhão e a caridade; o sacerdote dá a paz ao diácono e a outros ministros.
-    </p>
-    <p class="breakline"></p>
-
-    <section id="cordeiro" onclick="document.getElementById('cordeiro').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">
-            129.
-            Em seguida, o sacerdote parte o pão consagrado rezando em silêncio. Enquanto isso, canta-se ou recita-se:
-        </p>
-        <p class="bold">Cordeiro de Deus,</p>
-        <p class="bold">que tirais o pecado do mundo,</p>
-        <p class="bold">tende piedade de nós.</p>
-        <p class="bold">Cordeiro de Deus,</p>
-        <p class="bold">que tirais o pecado do mundo,</p>
-        <p class="bold">tende piedade de nós.</p>
-        <p class="bold">Cordeiro de Deus,</p>
-        <p class="bold">que tirais o pecado do mundo,</p>
-        <p class="bold">dai-nos a paz.</p>
-    </section>
-    <p class="breakline"></p>
-
-    <p class="brown">
-        Essas palavras podem ser repetidas ainda mais vezes, se a fração do
-        pão se prolongar. Contudo, na última vez se diz: dai-nos a
-        paz.
-    </p>
-    <p class="breakline"></p>
-
-    <section id="digno" onclick="document.getElementById('digno').scrollIntoView({ behavior: 'smooth' })">
-        <p class="brown">
-            132.
-            O sacerdote faz genuflexão, toma a hóstia
-            na mão e, elevando-a um pouco sobre a patena ou sobre o cálice, diz em voz alta, voltado para
-            o povo:
-        </p>
-        <p class="default">Felizes os convidados para a Ceia do Senhor.</p>
-        <p class="breakline"></p>
-        <p class="default">Eis o Cordeiro de Deus,</p>
-        <p class="default">que tira o pecado do mundo.</p>
-        <p class="breakline"></p>
-        <p class="brown">E acrescenta, com o povo, uma só vez:</p>
-        <p class="bold">Senhor, eu não sou digno(a)</p>
-        <p class="bold">de que entreis em minha morada,</p>
-        <p class="bold">mas dizei uma palavra e serei salvo(a).</p>
-    </section>
-    <p class="breakline"></p>
-
-    <p class="brown">136. Enquanto o sacerdote comunga o Corpo de Cristo, inicia-se o canto da comunhão.</p>
-
-    <h3>Canto de Comunhão</h3>
-
-    <p class="brown">137. Terminada a Comunhão, o sacerdote, o diácono ou acólito purifica a patena e o cálice.</p>
-    <p class="breakline"></p>
-    <p class="brown">
-        139.
-        Em seguida, junto ao altar ou à cadeira, o
-        sacerdote, de pé, voltado para o povo, diz de mãos unidas:
-
-    </p>
-    <p class="default">Oremos.</p>
-    <p class="brown">
-        E todos, com o sacerdote, rezam algum tempo em silêncio, se ainda não o
-        fizeram. Em seguida, o sacerdote, de braços abertos, profere a oração Depois da
-        comunhão.
-    </p>
-    <p class="breakline"></p>
-    <p class="brown">Ao terminar, o povo aclama:</p>
-    <p class="bold">Amém.</p>
-    <p class="breakline"></p>
-
-    <script src="../lib/js/Jquery/3.5.1/jquery.min.js"></script>
+    <div class="container py-0 px-0">
+
+        <h1>Ritos Iniciais</h1>
+
+        <p class="rubrica mb-2">1. Reunido o povo, o sacerdote dirige-se com os ministros ao altar, enquanto se executa o canto de entrada.</p>
+        <p class="rubrica mb-2">Terminado o canto de entrada, o sacerdote e os fiéis, todos de pé, fazem o sinal da cruz, enquanto o sacerdote, voltado para o povo, diz:</p>
+
+        <p class="mb-0">Em nome do Pai e do Filho e do Espírito Santo.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-4">Amém.</p>
+
+        <p class="rubrica mb-2">2. Em seguida, o sacerdote, abrindo os braços, saúda o povo com uma das seguintes fórmulas:</p>
+        <p class="rubrica mb-1">a)</p>
+        <p class="mb-0">A graça de nosso Senhor Jesus Cristo,</p>
+        <p class="mb-0">o amor do Pai</p>
+        <p class="mb-0">e a comunhão do Espírito Santo</p>
+        <p class="mb-0">estejam convosco. <span class="rubrica">(Cf. 2Cor 13, 13)</span></p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-4">Bendito seja Deus, que nos reuniu no amor de Cristo.</p>
+
+        <p class="rubrica mb-1">Ou, o sacerdote, abrindo os braços, diz:</p>
+        <p class="rubrica mb-1">b)</p>
+        <p class="mb-0">O Senhor esteja convosco.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-4">Ele está no meio de nós.</p>
+
+        <p class="rubrica mb-4">3. O sacerdote, diácono ou outro ministro poderá, com brevíssimas palavras, introduzir os fiéis na Missa do dia.</p>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <h2>Ato Penitencial</h2>
+
+        <p class="rubrica mb-2">4. O sacerdote convida os fiéis ao ato penitencial:</p>
+        <p class="mb-0">Irmãos e irmãs,</p>
+        <p class="mb-0">reconheçamos os nossos pecados,</p>
+        <p class="mb-4">para celebrarmos dignamente os santos mistérios.</p>
+
+        <!-- Fórmula 1 -->
+        <h3 class="text-dark">Primeira fórmula</h3>
+        <p class="rubrica mb-2">Após um momento de silêncio, o sacerdote diz:</p>
+        <p class="mb-3">Confessemos os nossos pecados:</p>
+
+        <p class="rubrica mb-1">Todos:</p>
+        <p class="fw-bold mb-0">Confesso a Deus todo-poderoso</p>
+        <p class="fw-bold mb-0">e a vós, irmãos e irmãs,</p>
+        <p class="fw-bold mb-0">que pequei muitas vezes</p>
+        <p class="fw-bold mb-0">por pensamentos e palavras,</p>
+        <p class="fw-bold mb-1">atos e omissões,</p>
+
+        <p class="rubrica mb-1">e, batendo no peito, dizem:</p>
+        <p class="fw-bold mb-1">por minha culpa, minha culpa, minha tão grande culpa,</p>
+
+        <p class="rubrica mb-1">Em seguida, continuam:</p>
+        <p class="fw-bold mb-0">E peço à Virgem Maria,</p>
+        <p class="fw-bold mb-0">aos Anjos e Santos</p>
+        <p class="fw-bold mb-0">e a vós, irmãos e irmãs,</p>
+        <p class="fw-bold mb-4">que rogueis por mim a Deus, nosso Senhor.</p>
+
+        <p class="rubrica mb-1">Segue-se a absolvição sacerdotal:</p>
+        <p class="mb-0">Deus todo-poderoso tenha compaixão de nós,</p>
+        <p class="mb-0">perdoe os nossos pecados</p>
+        <p class="mb-0">e nos conduza à vida eterna.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-4">Amém.</p>
+
+        <p class="rubrica mb-2">Seguem-se as invocações, caso já não tenham ocorrido no ato penitencial:</p>
+        <p class="mb-0">Senhor, tende piedade de nós.</p>
+        <p class="fw-bold mb-2">℟. Senhor, tende piedade de nós.</p>
+
+        <p class="mb-0">Cristo, tende piedade de nós.</p>
+        <p class="fw-bold mb-2">℟. Cristo, tende piedade de nós.</p>
+
+        <p class="mb-0">Senhor, tende piedade de nós.</p>
+        <p class="fw-bold mb-3">℟. Senhor, tende piedade de nós.</p>
+
+        <p class="mb-2">Ou:</p>
+        <p class="rubrica mb-0">Kýrie, eléison</p>
+        <p class="fw-bold mb-2">℟. Kýrie, eléison</p>
+
+        <p class="rubrica mb-0">Christe, eléison</p>
+        <p class="fw-bold mb-2">℟. Christe, eléison</p>
+
+        <p class="rubrica mb-0">Kýrie, eléison</p>
+        <p class="fw-bold mb-4">℟. Kýrie, eléison</p>
+
+        <div class="d-grid gap-2 col-md-6 mx-auto my-4">
+            <button type="button" class="btn btn-primary btn-lg shadow-sm" onclick="document.getElementById('gloria').scrollIntoView({ behavior: 'smooth' })">
+                <i class="bi bi-arrow-down-circle me-2"></i> Ir para o Glória
+            </button>
+        </div>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <!-- Fórmula 2 -->
+        <h3 class="text-dark">Segunda fórmula</h3>
+        <p class="rubrica mb-2">Após um momento de silêncio, o sacerdote diz:</p>
+        <p class="mb-0">Tende compaixão de nós, Senhor.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo:</p>
+        <p class="fw-bold mb-3">Porque somos pecadores.</p>
+
+        <p class="rubrica mb-1">O sacerdote:</p>
+        <p class="mb-0">Manifestai, Senhor, a vossa misericórdia.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo:</p>
+        <p class="fw-bold mb-4">E dai-nos a vossa salvação.</p>
+
+        <p class="rubrica mb-1">Segue-se a absolvição sacerdotal:</p>
+        <p class="mb-0">Deus todo-poderoso tenha compaixão de nós,</p>
+        <p class="mb-0">perdoe os nossos pecados</p>
+        <p class="mb-0">e nos conduza à vida eterna.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-4">Amém.</p>
+
+        <p class="rubrica mb-2">Seguem-se as invocações, caso já não tenham ocorrido no ato penitencial:</p>
+        <p class="mb-0">Senhor, tende piedade de nós.</p>
+        <p class="fw-bold mb-2">℟. Senhor, tende piedade de nós.</p>
+
+        <p class="mb-0">Cristo, tende piedade de nós.</p>
+        <p class="fw-bold mb-2">℟. Cristo, tende piedade de nós.</p>
+
+        <p class="mb-0">Senhor, tende piedade de nós.</p>
+        <p class="fw-bold mb-3">℟. Senhor, tende piedade de nós.</p>
+
+        <p class="mb-2">Ou:</p>
+        <p class="rubrica mb-0">Kýrie, eléison</p>
+        <p class="fw-bold mb-2">℟. Kýrie, eléison</p>
+
+        <p class="rubrica mb-0">Christe, eléison</p>
+        <p class="fw-bold mb-2">℟. Christe, eléison</p>
+
+        <p class="rubrica mb-0">Kýrie, eléison</p>
+        <p class="fw-bold mb-4">℟. Kýrie, eléison</p>
+
+        <div class="d-grid gap-2 col-md-6 mx-auto my-4">
+            <button type="button" class="btn btn-primary btn-lg shadow-sm" onclick="document.getElementById('gloria').scrollIntoView({ behavior: 'smooth' })">
+                <i class="bi bi-arrow-down-circle me-2"></i> Ir para o Glória
+            </button>
+        </div>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <!-- Fórmula 3 -->
+        <h3 class="text-dark">Terceira fórmula</h3>
+        <p class="rubrica mb-3">Após um momento de silêncio, o sacerdote, o diácono ou outro ministro propõe as seguintes invocações ou outras semelhantes com Senhor, tende piedade de nós.</p>
+
+        <p class="rubrica mb-2">Ⓑ Para o canto se pode usar a aclamação grega: <span class="rubrica">Kýrie, eléison.</span></p>
+        <p class="mb-0">Senhor, que viestes salvar os corações arrependidos,</p>
+        <p class="mb-0">tende piedade de nós.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-4">Senhor, tende piedade de nós.</p>
+
+        <p class="rubrica mb-1">O sacerdote:</p>
+        <p class="mb-0">Cristo, que viestes chamar os pecadores,</p>
+        <p class="mb-0">tende piedade de nós.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo:</p>
+        <p class="fw-bold mb-4">Cristo, tende piedade de nós.</p>
+
+        <p class="rubrica mb-1">O sacerdote:</p>
+        <p class="mb-0">Senhor, que intercedeis por nós junto do Pai,</p>
+        <p class="mb-0">tende piedade de nós.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo:</p>
+        <p class="fw-bold mb-4">Senhor, tende piedade de nós.</p>
+
+        <p class="rubrica mb-1">Segue-se a absolvição sacerdotal:</p>
+        <p class="mb-0">Deus todo-poderoso tenha compaixão de nós,</p>
+        <p class="mb-0">perdoe os nossos pecados</p>
+        <p class="mb-0">e nos conduza à vida eterna.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-5">Amém.</p>
+
+        <!-- Glória -->
+        <h3 id="gloria" class="text-dark">Glória</h3>
+        <p class="rubrica mb-3">Quando for prescrito, canta-se ou recita-se em seguida o hino:</p>
+
+        <p class="fw-bold mb-0">Glória a Deus nas alturas,</p>
+        <p class="fw-bold mb-0">e paz na terra aos homens por Ele amados.</p>
+        <p class="fw-bold mb-0">Senhor Deus, rei dos céus,</p>
+        <p class="fw-bold mb-0">Deus Pai todo-poderoso.</p>
+        <p class="fw-bold mb-0">Nós vos louvamos,</p>
+        <p class="fw-bold mb-0">nós vos bendizemos,</p>
+        <p class="fw-bold mb-0">nós vos adoramos,</p>
+        <p class="fw-bold mb-0">nós vos glorificamos,</p>
+        <p class="fw-bold mb-0">nós vos damos graças</p>
+        <p class="fw-bold mb-2">por vossa imensa glória.</p>
+
+        <p class="fw-bold mb-0">Senhor Jesus Cristo, Filho Unigênito,</p>
+        <p class="fw-bold mb-0">Senhor Deus, Cordeiro de Deus,</p>
+        <p class="fw-bold mb-2">Filho de Deus Pai.</p>
+
+        <p class="fw-bold mb-0">Vós que tirais o pecado do mundo,</p>
+        <p class="fw-bold mb-0">tende piedade de nós.</p>
+        <p class="fw-bold mb-0">Vós que tirais o pecado do mundo,</p>
+        <p class="fw-bold mb-2">acolhei a nossa súplica.</p>
+
+        <p class="fw-bold mb-0">Vós que estais à direita do Pai,</p>
+        <p class="fw-bold mb-2">tende piedade de nós.</p>
+
+        <p class="fw-bold mb-0">Só Vós sois o Santo,</p>
+        <p class="fw-bold mb-0">só vós, o Senhor,</p>
+        <p class="fw-bold mb-0">só vós, o Altíssimo,</p>
+        <p class="fw-bold mb-0">Jesus Cristo,</p>
+        <p class="fw-bold mb-0">com o Espírito Santo,</p>
+        <p class="fw-bold mb-0">na glória de Deus Pai.</p>
+        <p class="fw-bold mb-4">Amém.</p>
+
+        <p class="rubrica mb-1">Terminado o hino, de mãos unidas, o sacerdote diz:</p>
+        <p class="mb-3">Oremos.</p>
+
+        <p class="rubrica mb-3">E todos oram com o sacerdote, por algum tempo, em silêncio.<br>Então o sacerdote, de braços abertos, profere a oração Coleta;</p>
+
+        <p class="rubrica mb-1">ao terminar, o povo aclama:</p>
+        <p class="fw-bold mb-5">Amém.</p>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <h1>Liturgia da Palavra</h1>
+
+        <h2 class="text-dark mt-5">Credo</h2>
+        <p class="fw-bold mb-0">Creio em Deus Pai todo-poderoso,</p>
+        <p class="fw-bold mb-1">Criador do céu e da terra.</p>
+
+        <p class="fw-bold mb-0">E em Jesus Cristo, seu único Filho, nosso Senhor,</p>
+        <p class="rubrica mb-0">(Todos se inclinam)</p>
+        <p class="fw-bold mb-0">que foi concebido pelo poder do Espírito Santo,</p>
+        <p class="fw-bold mb-1">nasceu da Virgem Maria,</p>
+        <p class="rubrica mb-0">(Retorna-se à posição anterior)</p>
+
+        <p class="fw-bold mb-0">padeceu sob Pôncio Pilatos,</p>
+        <p class="fw-bold mb-0">foi crucificado, morto e sepultado,</p>
+        <p class="fw-bold mb-0">desceu à mansão dos mortos,</p>
+        <p class="fw-bold mb-0">ressuscitou ao terceiro dia,</p>
+        <p class="fw-bold mb-0">subiu aos céus,</p>
+        <p class="fw-bold mb-0">está sentado à direita de Deus Pai todo-poderoso,</p>
+        <p class="fw-bold mb-2">donde há de vir a julgar os vivos e os mortos.</p>
+
+        <p class="fw-bold mb-0">Creio no Espírito Santo,</p>
+        <p class="fw-bold mb-0">na santa Igreja Católica,</p>
+        <p class="fw-bold mb-0">na comunhão dos santos,</p>
+        <p class="fw-bold mb-0">na remissão dos pecados,</p>
+        <p class="fw-bold mb-0">na ressurreição da carne</p>
+        <p class="fw-bold mb-4">e na vida eterna. Amém.</p>
+
+        <div class="d-grid gap-2 col-md-6 mx-auto my-4">
+            <button type="button" class="btn btn-outline-primary shadow-sm" onclick="document.getElementById('oracoes').scrollIntoView({ behavior: 'smooth' })">
+                <i class="bi bi-arrow-down-circle me-2"></i> Ir direto para Oração Eucarística
+            </button>
+        </div>
+
+        <h3 class="text-dark mt-5">Niceno-Constantinopolitano</h3>
+        <p class="mb-0">Creio em um só Deus, Pai todo-poderoso,</p>
+        <p class="fw-bold mb-0">Criador do céu e da terra,</p>
+        <p class="fw-bold mb-1">de todas as coisas visíveis e invisíveis.</p>
+
+        <p class="mb-0">Creio em um só Senhor, Jesus Cristo,</p>
+        <p class="mb-0">Filho Unigênito de Deus,</p>
+        <p class="mb-0">nascido do Pai antes de todos os séculos:</p>
+        <p class="fw-bold mb-0">Deus de Deus, luz da luz,</p>
+        <p class="fw-bold mb-1">Deus verdadeiro de Deus verdadeiro,</p>
+
+        <p class="mb-0">gerado, não criado,</p>
+        <p class="mb-0">consubstancial ao Pai.</p>
+        <p class="mb-1">Por Ele todas as coisas foram feitas.</p>
+
+        <p class="fw-bold mb-0">E, por nós, homens, e para a nossa salvação,</p>
+        <p class="fw-bold mb-0">desceu dos céus:</p>
+        <p class="rubrica mb-0">(Todos se inclinam)</p>
+        <p class="mb-0">e se encarnou pelo Espírito Santo,</p>
+        <p class="mb-0">no seio da Virgem Maria,</p>
+        <p class="mb-1">e se fez homem.</p>
+        <p class="rubrica mb-0">(Retorna-se à posição anterior)</p>
+
+        <p class="fw-bold mb-0">Também por nós foi crucificado</p>
+        <p class="fw-bold mb-0">sob Pôncio Pilatos;</p>
+        <p class="fw-bold mb-1">padeceu e foi sepultado.</p>
+
+        <p class="mb-0">Ressuscitou ao terceiro dia,</p>
+        <p class="mb-1">conforme as escrituras;</p>
+
+        <p class="fw-bold mb-0">E subiu aos céus,</p>
+        <p class="fw-bold mb-1">onde está sentado à direita do Pai.</p>
+
+        <p class="mb-0">E de novo há de vir, em sua glória,</p>
+        <p class="mb-0">para julgar os vivos e os mortos;</p>
+        <p class="mb-2">e o seu reino não terá fim.</p>
+
+        <p class="fw-bold mb-0">Creio no Espírito Santo,</p>
+        <p class="fw-bold mb-0">Senhor que dá a vida,</p>
+        <p class="fw-bold mb-1">e procede do Pai e do Filho;</p>
+
+        <p class="mb-0">e com o Pai e o Filho</p>
+        <p class="mb-0">é adorado e glorificado:</p>
+        <p class="mb-2">Ele que falou pelos profetas.</p>
+
+        <p class="fw-bold mb-0">Creio na Igreja una, santa,</p>
+        <p class="fw-bold mb-1">católica e apostólica.</p>
+
+        <p class="mb-0">Professo um só batismo</p>
+        <p class="mb-2">para remissão dos pecados.</p>
+
+        <p class="fw-bold mb-0">Espero a ressurreição dos mortos;</p>
+        <p class="mb-1">E a vida do mundo que há de vir.</p>
+        <p class="fw-bold mb-5">Amém.</p>
+
+        <h3 class="text-dark mb-5">Preces da Comunidade</h3>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <h1>Liturgia Eucarística</h1>
+
+        <p class="rubrica mb-3">21. Inicia-se o canto da preparação das oferendas, enquanto os ministros colocam no altar o corporal, o sanguinho, o cálice, a pala e o Missal.</p>
+
+        <p class="rubrica mb-2">23. O sacerdote, de pé junto ao altar, recebe a patena com o pão em suas mãos e, levantando-a um pouco sobre o altar, diz em silêncio:</p>
+        <p class="mb-0">Bendito sejais, Senhor, Deus do universo,</p>
+        <p class="mb-0">pelo pão que recebemos de vossa bondade,</p>
+        <p class="mb-0">fruto da terra e do trabalho humano,</p>
+        <p class="mb-0">que agora vos apresentamos,</p>
+        <p class="mb-1">e para nós se vai tornar pão da vida.</p>
+        <p class="rubrica mb-3">Em seguida, coloca a patena com o pão sobre o corporal.</p>
+
+        <p class="rubrica mb-1">Se o canto da preparação das oferendas não continuar, o sacerdote poderá recitar em voz alta as palavras acima, e o povo acrescentar a aclamação:</p>
+        <p class="fw-bold mb-4">Bendito seja Deus para sempre!</p>
+
+        <p class="rubrica mb-2">24. O diácono ou o sacerdote coloca o vinho e um pouco d'água no cálice, rezando em silêncio:</p>
+        <p class="mb-0">Pelo mistério desta água e deste vinho</p>
+        <p class="mb-0">possamos participar da divindade do vosso Filho,</p>
+        <p class="mb-4">que se dignou assumir a nossa humanidade.</p>
+
+        <p class="rubrica mb-2">25. Em seguida, o sacerdote recebe o cálice em suas mãos e, elevando-o um pouco sobre o altar, diz em silêncio:</p>
+        <p class="mb-0">Bendito sejais, Senhor, Deus do universo,</p>
+        <p class="mb-0">pelo vinho que recebemos de vossa bondade,</p>
+        <p class="mb-0">fruto da videira e do trabalho humano,</p>
+        <p class="mb-0">que agora vos apresentamos,</p>
+        <p class="mb-1">e que para nós se vai tornar vinho da salvação.</p>
+        <p class="rubrica mb-3">Coloca o cálice sobre o corporal.</p>
+
+        <p class="rubrica mb-1">Se o canto da preparação das oferendas não continuar, o sacerdote poderá recitar em voz alta as palavras acima, e o povo acrescentar a aclamação:</p>
+        <p class="fw-bold mb-4">Bendito seja Deus para sempre!</p>
+
+        <p class="rubrica mb-2">26. Em seguida o sacerdote, profundamente inclinado, reza em silêncio:</p>
+        <p class="mb-0">De coração contrito e humilde,</p>
+        <p class="mb-0">sejamos, Senhor, acolhidos por vós;</p>
+        <p class="mb-0">e seja o nosso sacrifício de tal modo oferecido</p>
+        <p class="mb-4">que vos agrade, Senhor, nosso Deus.</p>
+
+        <p class="rubrica mb-4">27. E, se for oportuno, incensa as oferendas, a cruz e o altar. Depois, o diácono ou outro ministro incensa o sacerdote e o povo.</p>
+
+        <p class="rubrica mb-2">28. Em seguida, o sacerdote, de pé ao lado do altar, lava as mãos, dizendo em silêncio:</p>
+        <p class="mb-0">Lavai-me, Senhor, de minhas faltas</p>
+        <p class="mb-5">e purificai-me do meu pecado.</p>
+
+        <p class="rubrica mb-2">29. Estando, depois, no meio do altar e voltado para o povo, o sacerdote estende e une as mãos e diz:</p>
+        <p class="mb-0">Orai, irmãos e irmãs,</p>
+        <p class="mb-0">para que o meu e o vosso sacrifício seja aceito por Deus Pai todo-poderoso.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo se levanta e responde:</p>
+        <p class="fw-bold mb-0">Receba o Senhor por tuas mãos este sacrifício,</p>
+        <p class="fw-bold mb-0">para glória do seu nome,</p>
+        <p class="fw-bold mb-4">para nosso bem e de toda a sua santa Igreja.</p>
+
+        <p class="rubrica mb-1">30. Em seguida, abrindo os braços, o sacerdote profere a oração sobre as oferendas; ao terminar, o povo aclama:</p>
+        <p class="fw-bold mb-5">Amém.</p>
+
+
+        <h2 id="oracoes" class="text-dark">Oração Eucarística II</h2>
+
+        <p class="rubrica mb-2">31. Começando a Oração Eucarística, o sacerdote abre os braços e diz ou canta:</p>
+        <p class="mb-0">O Senhor esteja convosco.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo responde:</p>
+        <p class="fw-bold mb-3">Ele está no meio de nós.</p>
+
+        <p class="rubrica mb-1">Erguendo as mãos, o sacerdote prossegue:</p>
+        <p class="mb-0">Corações ao alto.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo:</p>
+        <p class="fw-bold mb-3">O nosso coração está em Deus.</p>
+
+        <p class="rubrica mb-1">O sacerdote, com os braços abertos, acrescenta:</p>
+        <p class="mb-0">Demos graças ao Senhor, nosso Deus.</p>
+
+        <p class="rubrica mt-3 mb-1">O povo:</p>
+        <p class="fw-bold mb-4">É nosso dever e nossa salvação.</p>
+
+        <p class="rubrica mb-2">O sacerdote, de braços abertos, reza ou canta o Prefácio:</p>
+        <p class="mb-3">Na verdade, é digno e justo, é nosso dever e salvação dar-vos graças sempre e em todo lugar, Senhor, Pai santo, por vosso amado Filho, Jesus Cristo.</p>
+        <p class="mb-3">Ele é a vossa Palavra, pela qual tudo criastes. Ele é o nosso Salvador e Redentor, que se encarnou pelo Espírito Santo e nasceu da Virgem Maria. Ele, para cumprir a vossa vontade e adquirir para vós um povo santo, estendeu os braços na hora da sua paixão, a fim de vencer a morte e manifestar a ressurreição.</p>
+        <p class="mb-4">Por isso, com os Anjos e todos os Santos, proclamamos vossa glória, cantando (dizendo) a uma só voz:</p>
+
+        <div id="santo">
+            <p class="rubrica mb-2">Ao seu final, une as mãos e, com o povo, conclui o Prefácio, cantando ou em voz alta dizendo:</p>
+            <p class="fw-bold mb-0">Santo, Santo, Santo,</p>
+            <p class="fw-bold mb-0">Senhor, Deus do universo.</p>
+            <p class="fw-bold mb-0">O céu e a terra proclamam a vossa glória.</p>
+            <p class="fw-bold mb-0">Hosana nas alturas!</p>
+            <p class="fw-bold mb-0">Bendito o que vem em nome do Senhor!</p>
+            <p class="fw-bold mb-4">Hosana nas alturas!</p>
+        </div>
+
+        <p class="rubrica mb-1">O sacerdote, de braços abertos, diz:</p>
+        <p class="mb-4">CP Na verdade, ó Pai, vós sois Santo, fonte de toda santidade.</p>
+
+        <div id="resposta1">
+            <p class="rubrica mb-1">Une as mãos e, estendendo-as sobre as oferendas, diz:</p>
+            <p class="mb-0">CC Santificai, pois, estes dons, derramando sobre eles o vosso Espírito,</p>
+            <p class="mb-0">a fim de que se tornem para nós o Corpo e ✠ o Sangue de nosso Senhor Jesus Cristo.</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-4">Enviai o vosso Espírito Santo!</p>
+        </div>
+
+        <p class="rubrica mb-2">O relato da instituição da Eucaristia seja proferido de modo claro e audível como requer a sua natureza.</p>
+        <p class="mb-2">Estando para ser entregue e abraçando livremente a paixão,</p>
+        <p class="rubrica mb-2">toma o pão e, mantendo-o um pouco elevado acima do altar, prossegue:</p>
+        <p class="mb-2">Jesus tomou o pão, pronunciou a bênção de ação de graças, partiu e o deu a seus discípulos, dizendo:</p>
+
+        <p class="rubrica mb-1">inclina-se levemente</p>
+        <p class="mb-2">TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</p>
+        <p class="rubrica mb-4">Mostra ao povo a hóstia consagrada, coloca-a na patena e genuflete em adoração.</p>
+
+        <p class="rubrica mb-2">Então prossegue:</p>
+        <p class="mb-2">Do mesmo modo, no fim da Ceia,</p>
+        <p class="rubrica mb-2">toma o cálice nas mãos e, mantendo-o um pouco elevado acima do altar, prossegue:</p>
+        <p class="mb-2">ele tomou o cálice em suas mãos e, dando graças novamente, o entregou a seus discípulos, dizendo:</p>
+
+        <p class="rubrica mb-1">inclina-se levemente</p>
+        <p class="mb-2">TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS PARA REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</p>
+        <p class="rubrica mb-4">Mostra o cálice ao povo, coloca-o sobre o corporal e genuflete em adoração.</p>
+
+        <div id="memorial">
+            <p class="rubrica mb-1">Em seguida, diz:</p>
+            <p class="mb-0">Mistério da fé!</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-4">Anunciamos Senhor, a vossa morte, e proclamamos a vossa ressurreição. Vinde Senhor Jesus!</p>
+
+            <p class="rubrica mb-1">Ou</p>
+            <p class="mb-0">Mistério da fé e do amor!</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-4">Todas as vezes que comemos deste pão, e bebemos deste cálice, anunciamos Senhor, a vossa morte, enquanto esperamos a vossa vinda!</p>
+
+            <p class="rubrica mb-1">Ou</p>
+            <p class="mb-0">Mistério da fé para a salvação do mundo!</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-5">Salvador do mundo, salvai-nos, vós que nos libertastes pela cruz, e ressurreição.</p>
+        </div>
+
+        <div id="resposta2">
+            <p class="rubrica mb-1">O sacerdote, de braços abertos, diz:</p>
+            <p class="mb-0">CC Celebrando, pois, o memorial da morte e ressurreição do vosso Filho, nós vos oferecemos, ó Pai, o Pão da vida e o Cálice da salvação; e vos agradecemos porque nos tornastes dignos de estar aqui na vossa presença e vos servir.</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-4">Aceitai, ó Senhor, a nossa oferta!</p>
+        </div>
+
+        <div id="resposta3">
+            <p class="mb-0">Suplicantes, vos pedimos que, participando do Corpo e Sangue de Cristo, sejamos reunidos pelo Espírito Santo num só corpo.</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-4">O Espírito nos una num só corpo!</p>
+        </div>
+
+        <div id="resposta4">
+            <p class="mb-0">1C Lembrai-vos, ó Pai, da vossa Igreja que se faz presente pelo mundo inteiro; ★ que ela cresça na caridade, em comunhão com o Papa N., com o nosso Bispo N., os bispos do mundo inteiro, os presbíteros, os diáconos e todos os ministros do vosso povo.</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-4">Lembrai-vos, ó Pai, da vossa Igreja!</p>
+        </div>
+
+        <div id="resposta5">
+            <p class="mb-0">2C Lembrai-vos também, na vossa misericórdia, dos (outros) nossos irmãos e irmãs que adormeceram na esperança da ressurreição e de todos os que partiram desta vida; acolhei-os junto a vós na luz da vossa face.</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-4">Concedei-lhes, ó Senhor, a luz eterna!</p>
+        </div>
+
+        <p class="mb-1">3C Enfim, nós vos pedimos, tende piedade de todos nós e dai-nos participar da vida eterna, com a Virgem Maria, Mãe de Deus, São José, seu esposo, os Apóstolos, (São N.: Santo do dia ou padroeiro) e todos os Santos que neste mundo viveram na vossa amizade, a fim de vos louvarmos e glorificarmos</p>
+        <p class="rubrica mb-1">une as mãos</p>
+        <p class="mb-4">por Jesus Cristo, vosso Filho.</p>
+
+        <div id="amem">
+            <p class="rubrica mb-1">Ergue a patena com a hóstia e o cálice, dizendo:</p>
+            <p class="mb-0">CP ou CC Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda honra e toda glória, por todos os séculos dos séculos.</p>
+
+            <p class="rubrica mt-3 mb-1">A assembleia aclama:</p>
+            <p class="fw-bold mb-5">Amém.</p>
+        </div>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <h1>Rito da Comunhão</h1>
+
+        <p class="rubrica mb-2">124. Tendo colocado o cálice e a patena sobre o altar, o sacerdote diz, de mãos unidas:</p>
+        <p class="mb-0">Obedientes à palavra do Salvador</p>
+        <p class="mb-0">e formados por seu divino ensinamento,</p>
+        <p class="mb-4">ousamos dizer:</p>
+
+        <div id="pai">
+            <p class="rubrica mb-2">O sacerdote abre os braços e prossegue com o povo:</p>
+            <p class="fw-bold mb-0">Pai nosso que estais nos céus,</p>
+            <p class="fw-bold mb-0">santificado seja o vosso nome;</p>
+            <p class="fw-bold mb-0">venha a nós o vosso reino,</p>
+            <p class="fw-bold mb-0">seja feita a vossa vontade,</p>
+            <p class="fw-bold mb-0">assim na terra como no céu.</p>
+            <p class="fw-bold mb-0">O pão nosso de cada dia nos dai hoje;</p>
+            <p class="fw-bold mb-0">perdoai-nos as nossas ofensas,</p>
+            <p class="fw-bold mb-0">assim como nós perdoamos</p>
+            <p class="fw-bold mb-0">a quem nos tem ofendido;</p>
+            <p class="fw-bold mb-0">e não nos deixeis cair em tentação,</p>
+            <p class="fw-bold mb-4">mas livrai-nos do mal.</p>
+        </div>
+
+        <div id="vosso">
+            <p class="rubrica mb-2">125. O sacerdote prossegue sozinho, de braços abertos:</p>
+            <p class="mb-0">Livrai-nos de todos os males, ó Pai,</p>
+            <p class="mb-0">e dai-nos hoje a vossa paz.</p>
+            <p class="mb-0">Ajudados pela vossa misericórdia,</p>
+            <p class="mb-0">sejamos sempre livres do pecado</p>
+            <p class="mb-0">e protegidos de todos os perigos,</p>
+            <p class="mb-0">enquanto aguardamos a feliz esperança</p>
+            <p class="mb-0">e a vinda do Nosso Salvador, Jesus Cristo.</p>
+
+            <p class="rubrica mt-3 mb-1">O povo conclui a oração, aclamando:</p>
+            <p class="fw-bold mb-0">Vosso é o reino,</p>
+            <p class="fw-bold mb-4">o poder e a glória para sempre.</p>
+        </div>
+
+        <div id="amemRezado">
+            <p class="rubrica mb-2">126. O sacerdote, de braços abertos, diz em voz alta:</p>
+            <p class="mb-0">Senhor Jesus Cristo,</p>
+            <p class="mb-0">dissestes aos vossos Apóstolos:</p>
+            <p class="mb-0">eu vos deixo a paz, eu vos dou a minha paz.</p>
+            <p class="mb-0">Não olheis os nossos pecados,</p>
+            <p class="mb-0">mas a fé que anima vossa Igreja;</p>
+            <p class="mb-0">dai-lhe, segundo o vosso desejo,</p>
+            <p class="mb-1">a paz e a unidade.</p>
+
+            <p class="rubrica mb-1">O sacerdote une as mãos e conclui:</p>
+            <p class="mb-0">Vós, que sois Deus, com o Pai e o Espírito Santo.</p>
+
+            <p class="rubrica mt-3 mb-1">O povo responde:</p>
+            <p class="fw-bold mb-4">Amém.</p>
+        </div>
+
+        <div id="amor">
+            <p class="rubrica mb-2">127. O sacerdote, voltado para o povo, estendendo e unindo as mãos, acrescenta:</p>
+            <p class="mb-0">A paz do Senhor esteja sempre convosco.</p>
+
+            <p class="rubrica mt-3 mb-1">O povo responde:</p>
+            <p class="fw-bold mb-4">O amor de Cristo nos uniu.</p>
+        </div>
+
+        <p class="rubrica mb-2">128. Em seguida, se for oportuno, o diácono ou o sacerdote diz:</p>
+        <p class="mb-0">Irmãos e irmãs,</p>
+        <p class="mb-2">saudai-vos em Cristo Jesus.</p>
+
+        <p class="rubrica mb-4">E, todos segundo o costume do lugar, manifestam uns aos outros a paz, a comunhão e a caridade; o sacerdote dá a paz ao diácono e a outros ministros.</p>
+
+        <div id="cordeiro">
+            <p class="rubrica mb-2">129. Em seguida, o sacerdote parte o pão consagrado rezando em silêncio. Enquanto isso, canta-se ou recita-se:</p>
+            <p class="fw-bold mb-0">Cordeiro de Deus,</p>
+            <p class="fw-bold mb-0">que tirais o pecado do mundo,</p>
+            <p class="fw-bold mb-2">tende piedade de nós.</p>
+
+            <p class="fw-bold mb-0">Cordeiro de Deus,</p>
+            <p class="fw-bold mb-0">que tirais o pecado do mundo,</p>
+            <p class="fw-bold mb-2">tende piedade de nós.</p>
+
+            <p class="fw-bold mb-0">Cordeiro de Deus,</p>
+            <p class="fw-bold mb-0">que tirais o pecado do mundo,</p>
+            <p class="fw-bold mb-3">dai-nos a paz.</p>
+        </div>
+
+        <p class="rubrica mb-4">Essas palavras podem ser repetidas ainda mais vezes, se a fração do pão se prolongar. Contudo, na última vez se diz: dai-nos a paz.</p>
+
+        <div id="digno">
+            <p class="rubrica mb-2">132. O sacerdote faz genuflexão, toma a hóstia na mão e, elevando-a um pouco sobre a patena ou sobre o cálice, diz em voz alta, voltado para o povo:</p>
+            <p class="mb-2">Felizes os convidados para a Ceia do Senhor.</p>
+            <p class="mb-0">Eis o Cordeiro de Deus,</p>
+            <p class="mb-0">que tira o pecado do mundo.</p>
+
+            <p class="rubrica mt-3 mb-1">E acrescenta, com o povo, uma só vez:</p>
+            <p class="fw-bold mb-0">Senhor, eu não sou digno(a)</p>
+            <p class="fw-bold mb-0">de que entreis em minha morada,</p>
+            <p class="fw-bold mb-4">mas dizei uma palavra e serei salvo(a).</p>
+        </div>
+
+        <p class="rubrica mb-4">136. Enquanto o sacerdote comunga o Corpo de Cristo, inicia-se o canto da comunhão.</p>
+
+        <h3 class="mb-4 text-dark">Canto de Comunhão</h3>
+
+        <p class="rubrica mb-4">137. Terminada a Comunhão, o sacerdote, o diácono ou acólito purifica a patena e o cálice.</p>
+
+        <p class="rubrica mb-2">139. Em seguida, junto ao altar ou à cadeira, o sacerdote, de pé, voltado para o povo, diz de mãos unidas:</p>
+        <p class="mb-2">Oremos.</p>
+        <p class="rubrica mb-2">E todos, com o sacerdote, rezam algum tempo em silêncio, se ainda não o fizeram. Em seguida, o sacerdote, de braços abertos, profere a oração Depois da comunhão.</p>
+
+        <p class="rubrica mt-3 mb-1">Ao terminar, o povo aclama:</p>
+        <p class="fw-bold mb-5">Amém.</p>
+
+    </div>
+
+    <!-- Script de rolagem em Vanilla JS -->
     <script>
-        const botao = document.getElementById('btnLiturgiaDiaria');
-
-        botao.addEventListener('click', () => {
-            window.parent.postMessage('mostrarLiturgiaDiaria', '*');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            if (scrollTop > 0) {
+                localStorage.setItem('scrollTopMissa', scrollTop);
+            }
         });
 
-        $(window).scroll(function () {
-            const scrollTop = $(this).scrollTop();
-            if (scrollTop > 0)
-                localStorage.setItem('scrollTop', scrollTop);
-        });
-
-        $(window).on('load', function () {
-            const scrollTop = localStorage.getItem('scrollTop');
-            if (scrollTop && !location.origin.includes('file:'))
-                $(window).scrollTop(parseInt(scrollTop));
+        window.addEventListener('load', () => {
+            const savedScrollTop = localStorage.getItem('scrollTopMissa');
+            if (savedScrollTop && !location.origin.includes('file:')) {
+                window.scrollTo({
+                    top: parseInt(savedScrollTop),
+                    behavior: 'auto'
+                });
+            }
         });
     </script>
 </body>
-
 </html>
