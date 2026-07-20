@@ -1,94 +1,150 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Editar Cifras.json</title>
-    <link href="./assets/lib/css/Bootstrap/4.6.2/bootstrap.min.css" rel="stylesheet">
-    <link href="./assets/lib/css/Bootstrap/bootstrap-icons/1.8.1/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="./assets/css/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de Repertório</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+    <!-- Mesmas bibliotecas do index.html -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+
+    <!-- Estilos globais (o mesmo do sistema) -->
+    <link rel="stylesheet" href="./assets/css/style.css">
 
     <style>
-        .cifras-card {
-            background-color: #23272b;
-            color: #f8f9fa;
-            border-color: #343a40;
-            margin-bottom: 1.5rem;
+        /* Ajustes específicos do editor mantendo a altura flexível */
+        .editor-container {
+            max-width: 900px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
         }
 
-        .form-label {
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
-
-        textarea.form-control {
-            font-size: 12pt;
-            font-family: Consolas, 'Courier New', Courier, monospace;
-        }
-
-        .btn-action {
-            min-width: 120px;
+        #edit-cifra {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
         }
     </style>
 </head>
-<body class="dark-mode">
-    <div class="container py-4" id="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="text-center flex-grow-1 mb-0">Editar Cifras.json</h1>
-        </div>
+<body>
 
-        <div class="mb-4 d-flex align-items-stretch">
-            <select id="cifra-select" class="form-control flex-grow-1 mr-2"></select>
-            <button id="add-btn" class="btn btn-add btn-action ml-2"><i class="bi bi-plus-square"></i></button>
-            <button id="delete-btn" class="btn btn-danger btn-action ml-2 d-none"><i class="bi bi-trash"></i></button>
-        </div>
+    <div class="editor-container">
 
-        <div id="cifra-edit-card" class="card cifras-card shadow-sm d-none">
-            <div class="card-header">
-                <h5 id="card-title">Nova Cifra</h5>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-shrink-0">
+            <h3 class="fw-bold mb-0 text-teal"><i class="fas fa-edit me-2"></i>Editor de Repertório</h3>
+            <div class="d-flex gap-2">
+                <button class="btn btn-setting-circle" id="btn-theme-toggle" title="Alternar Tema">
+                    <i class="bi bi-moon-fill fs-5" id="icon-theme"></i>
+                </button>
+                <a href="index.html" class="btn btn-setting-circle text-decoration-none" title="Voltar ao Órgão">
+                    <i class="fas fa-home fs-5"></i>
+                </a>
             </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <input type="hidden" id="edit-id" value="">
-                    <div class="col-md-7 form-group">
-                        <label class="form-label">Título</label>
-                        <input type="text" class="form-control" id="edit-titulo">
+        </div>
+
+        <!-- Barra de Ações (Selecionar / Novo / Excluir / Salvar) -->
+        <div class="row g-2 mb-3 flex-shrink-0">
+            <div class="col-md-7">
+                <select id="cifra-select" autocomplete="off" placeholder="Selecione uma música..."></select>
+            </div>
+            <div class="col-md-5 d-flex gap-2">
+                <button id="btn-add" class="btn btn-secondary flex-grow-1 fw-bold"><i class="fas fa-plus me-1"></i></button>
+                <button id="btn-save" class="btn btn-teal flex-grow-1 fw-bold"><i class="fas fa-save me-1"></i></button>
+                <button id="btn-delete" class="btn btn-danger d-none" title="Excluir"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+
+        <!-- Área de Edição -->
+        <div class="row g-2 mb-2 flex-shrink-0">
+            <div class="col-md-7">
+                <label class="form-label fw-bold mb-1">Título</label>
+                <input type="text" class="form-control" id="edit-titulo" placeholder="Ex: A Barca">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label fw-bold mb-1">Artista</label>
+                <input type="text" class="form-control" id="edit-artista" placeholder="Ex: CNBB">
+            </div>
+        </div>
+
+        <!-- Textarea ocupa todo o resto da tela -->
+        <div class="flex-grow-1 d-flex flex-column pb-3">
+            <label class="form-label fw-bold mb-1">Cifra / Letra</label>
+            <textarea class="form-control flex-grow-1" id="edit-cifra" placeholder="Cole sua música aqui..."></textarea>
+        </div>
+
+        <!-- Footer / Ferramentas Extras -->
+        <div class="d-flex justify-content-center gap-2 mb-2 flex-shrink-0 border-top pt-3">
+            <button class="btn btn-outline-info fw-bold" data-bs-toggle="modal" data-bs-target="#importModal"><i class="fas fa-upload me-2"></i>Importar</button>
+            <button class="btn btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#exportModal"><i class="fas fa-download me-2"></i>Exportar</button>
+            <button class="btn btn-outline-danger fw-bold" id="btn-clear-all"><i class="fas fa-bomb me-2"></i>Limpar Tudo</button>
+        </div>
+
+    </div>
+
+    <!-- ============================================== -->
+    <!-- MODAIS DE IMPORTAÇÃO/EXPORTAÇÃO (DO INDEX.HTML)-->
+    <!-- ============================================== -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Exportar Repertório</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-check mb-3 border-bottom pb-2">
+                        <input class="form-check-input" type="checkbox" id="export-select-all" checked>
+                        <label class="form-check-label fw-bold" for="export-select-all">Selecionar Tudo</label>
                     </div>
-                    <div class="col-md-5 form-group">
-                        <label class="form-label">Artista</label>
-                        <input type="text" class="form-control" id="edit-artista">
-                    </div>
-                    <div class="col-12 mt-2 form-group">
-                        <label class="form-label">Cifra</label>
-                        <textarea class="form-control" rows="10" id="edit-cifra"></textarea>
-                    </div>
+                    <div id="export-list" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-teal" id="btn-confirm-export">Baixar</button>
                 </div>
             </div>
         </div>
-
-        <div class="text-center mt-4">
-            <div class="d-inline-flex gap-2">
-                <button id="save-btn" class="btn btn-warning btn-action d-none"><i class="bi bi-save"></i> Salvar Edição</button>
-                <button id="import-btn" class="btn btn-info btn-action"><i class="bi bi-upload"></i> Importar JSON</button>
-                <button id="download-btn" class="btn btn-primary btn-action"><i class="bi bi-download"></i> Baixar JSON</button>
-                <button id="clear-btn" class="btn btn-danger btn-action"><i class="bi bi-trash"></i> Excluir tudo</button>
-            </div>
-        </div>
-
-        <input type="file" id="import-file-input" accept="application/json" style="display: none;">
-
-        <div id="import-cards-container" class="mt-4"></div>
     </div>
 
-    <script src="./assets/lib/js/Jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="./assets/lib/js/Bootstrap/4.6.2/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Importar Repertório</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control mb-3" type="file" id="import-file-input" accept=".json">
+                    <div id="import-selection-area" class="d-none">
+                        <div class="form-check mb-3 border-bottom pb-2">
+                            <input class="form-check-input" type="checkbox" id="import-select-all" checked>
+                            <label class="form-check-label fw-bold" for="import-select-all">Selecionar Tudo</label>
+                        </div>
+                        <div id="import-list" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-teal d-none" id="btn-confirm-import">Importar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="./assets/js/CifrasEditor.js"></script>
+    <!-- Bibliotecas JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
+    <!-- Nossos Scripts -->
+    <script src="./assets/js/DatabaseManager.js"></script>
+    <script src="./assets/js/BackupManager.js"></script>
+    <script src="./assets/js/EditorApp.js"></script>
 </body>
 </html>
