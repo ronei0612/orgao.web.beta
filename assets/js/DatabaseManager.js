@@ -1,6 +1,7 @@
 class DatabaseManager {
-    constructor() {
-        this.STORAGE_KEY = 'songs';
+    // Agora aceita a chave como parâmetro!
+    constructor(storageKey = 'songs') {
+        this.STORAGE_KEY = storageKey;
     }
 
     getSongs() {
@@ -15,7 +16,6 @@ class DatabaseManager {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(songs));
     }
 
-    // Adicionado parâmetro 'artist' (com valor padrão vazio para não quebrar o App.js)
     addSong(title, content, artist = '') {
         const songs = this.getSongs();
         const safeId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
@@ -27,7 +27,6 @@ class DatabaseManager {
         return newSong;
     }
 
-    // Adicionado parâmetro 'artist'
     updateSong(id, title, content, artist = '') {
         const songs = this.getSongs();
         const index = songs.findIndex(s => s.id === id);
