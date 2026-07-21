@@ -1,7 +1,9 @@
 class ToolbarController {
-    constructor(viewManager, tomSelectInstance) {
+    // Adicione o modalManager aqui nos parâmetros
+    constructor(viewManager, tomSelectInstance, modalManager) {
         this.view = viewManager;
         this.ts = tomSelectInstance;
+        this.modal = modalManager; // Salve ele aqui
 
         this.isPlaying = false;
         this.musicPhase = 1;
@@ -96,7 +98,8 @@ class ToolbarController {
 
         btnRestore.addEventListener('click', (e) => {
             e.preventDefault();
-            this.view.modalManager.show(
+            // Agora usamos this.modal.show
+            this.modal.show(
                 'Atenção',
                 'Isso vai apagar TODO o seu repertório e configurações. O aplicativo voltará ao estado de fábrica. Deseja continuar?',
                 async () => {

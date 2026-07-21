@@ -745,7 +745,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewManager = new ViewManager();
     const backupManager = new BackupManager(dbManager);
 
-    const toolbar = new ToolbarController(viewManager, tomSelectInstance);
+    // MUDANÇA AQUI: Adicione o modalManager como o 3º parâmetro
+    const toolbar = new ToolbarController(viewManager, tomSelectInstance, modalManager);
 
     const musicTheory = new MusicTheory();
     window.musicTheory = musicTheory; // ADICIONE ESTA LINHA AQUI!
