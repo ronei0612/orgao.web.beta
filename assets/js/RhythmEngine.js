@@ -227,35 +227,64 @@ class RhythmEngine {
         if (!parsed) return null;
 
         const rootIdx = window.musicTheory.getNoteIndex(parsed.root);
+
+        // Intervalos: 0 (Fundamental), 1 (Terça), 2 (Quinta)
         const intervals = [0, 4, 7];
         if (parsed.suffix.includes('m')) intervals[1] = 3;
         if (parsed.suffix.includes('dim') || parsed.suffix.includes('°')) { intervals[1] = 3; intervals[2] = 6; }
         if (parsed.suffix.includes('aug') || parsed.suffix.includes('+')) { intervals[2] = 8; }
 
         const bassStr = this.audio.normalizeNoteForFile(parsed.bass);
-        const n1 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[0]) % 12]); // Fundamental
-        const n2 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[1]) % 12]); // Terça
-        const n3 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[2]) % 12]); // Quinta
-
         const prefix = this.currentInstrument === 'piano' ? 'piano' : 'orgao';
+
+        // HELPER MATEMÁTICO (CORREÇÃO DO BUG): 
+        // Garante que a terça e a quinta subam de oitava corretamente quando cruzam a nota Dó.
+        const getNote = (intervalIdx, baseOctave) => {
+            let absSemi = rootIdx + intervals[intervalIdx];
+            let noteIdx = absSemi % 12;
+            let octaveShift = Math.floor(absSemi / 12);
+            let noteName = window.musicTheory.sharpNotes[noteIdx].toLowerCase().replace('#', '_');
+            return `${prefix}_${noteName}${baseOctave + octaveShift}.ogg`;
+        };
 
         let files = {};
 
-        // Vozes 1 e 2: Baixos graves (FIXOS, mantêm a base sólida)
+        // Vozes 1 e 2: Baixos graves (FIXOS na oitava 2 e 3)
         files[1] = `${prefix}_${bassStr}2.ogg`;
         files[2] = `${prefix}_${bassStr}3.ogg`;
 
-        // Vozes 3, 4 e 5: Bloco Harmônico do Acorde
-        if (phase === 3) {
-            // Modo Cheio: Tríade completa aberta na oitava 4 (Fundamental, Terça, Quinta)
-            files[3] = `${prefix}_${n1}4.ogg`;
-            files[4] = `${prefix}_${n2}4.ogg`;
-            files[5] = `${prefix}_${n3}4.ogg`;
+        if (this.currentInstrument === 'piano') {
+            // ============================================
+            // REGRA ESPECIAL DO PIANO
+            // ============================================
+            if (phase === 3) {
+                // Modo Cheio
+                files[3] = getNote(0, 4); // Fundamental 4
+                files[4] = getNote(1, 4); // Terça 4
+                // Pianada: Tríade completa junta na Voz 5
+                files[5] = [getNote(0, 4), getNote(1, 4), getNote(2, 4)];
+            } else {
+                // Modo Normal
+                files[3] = getNote(1, 3); // Terça 3
+                files[4] = getNote(2, 3); // Quinta 3
+                // Pianada: Inversão (Terça, Quinta, Fundamental)
+                files[5] = [getNote(1, 3), getNote(2, 3), getNote(0, 4)];
+            }
         } else {
-            // Modo Normal: Terça (8ª 3), Quinta (8ª 3), Fundamental (8ª 4)
-            files[3] = `${prefix}_${n2}3.ogg`;
-            files[4] = `${prefix}_${n3}3.ogg`;
-            files[5] = `${prefix}_${n1}4.ogg`;
+            // ============================================
+            // COMPORTAMENTO PADRÃO (ÓRGÃO)
+            // ============================================
+            if (phase === 3) {
+                // Modo Cheio: Fundamental (8ª 4), Terça (8ª 4), Quinta (8ª 4)
+                files[3] = getNote(0, 4);
+                files[4] = getNote(1, 4);
+                files[5] = getNote(2, 4);
+            } else {
+                // Modo Normal: Terça (8ª 3), Quinta (8ª 3), Fundamental (8ª 4)
+                files[3] = getNote(1, 3);
+                files[4] = getNote(2, 3);
+                files[5] = getNote(0, 4);
+            }
         }
 
         return files;
