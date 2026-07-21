@@ -3,12 +3,10 @@ class RhythmEngine {
         this.toolbar = toolbar;
         this.audio = audioManager;
 
-        this.rawRhythms = {}; // Guarda o JSON bruto (orgao, piano, etc)
-        this.currentInstrument = "orgao"; // Instrumento padrão inicial
+        this.rawRhythms = {};
+        this.currentInstrument = "orgao";
 
         this.draftRhythm = this.loadDraft();
-        this.activeRhythmData = null;
-
         this.isPlayingRhythm = false;
         this.currentStep = 0;
         this.nextStepTime = 0;
@@ -21,7 +19,6 @@ class RhythmEngine {
     }
 
     async init() {
-        // Bloqueia APENAS os elementos musicais específicos durante o carregamento
         this.setMusicLoadingState(true);
 
         try {
@@ -34,16 +31,13 @@ class RhythmEngine {
             this.rawRhythms = {};
         }
 
-        // Baixa o áudio básico
         await this.audio.preloadAll();
 
-        // Libera os elementos específicos
         this.setMusicLoadingState(false);
         this.populateSelect();
         this.nextBlinkTime = this.audio.ctx.currentTime;
     }
 
-    // Método de bloqueio leve e cirúrgico dos controles
     setMusicLoadingState(isLoading) {
         const elementsToBlock = [
             document.getElementById('key-select')?.closest('.input-group'),
@@ -51,7 +45,8 @@ class RhythmEngine {
             document.getElementById('rhythm-select')?.closest('.input-group'),
             document.getElementById('btn-play'),
             document.getElementById('btn-action-toggle'),
-            document.querySelector('.piano-wrapper')
+            document.querySelector('.piano-wrapper'),
+            document.getElementById('chord-degrees-panel')
         ];
 
         elementsToBlock.forEach(el => {
@@ -62,7 +57,29 @@ class RhythmEngine {
         });
     }
 
-    // Popula o select exibindo apenas as fórmulas de compasso (ex: 1/4, 2/4, 3/4)
+    // Modal Instrument Change Event
+    async changeInstrument(inst) {
+        this.currentInstrument = inst;
+
+        const btn = document.getElementById('btn-instrument-select');
+        if (btn) btn.innerText = inst === 'piano' ? 'PIANO' : 'ÓRGÃO';
+
+        this.populateSelect();
+
+        const select = document.getElementById('rhythm-select');
+        if (select) {
+            select.value = "none";
+            select.dispatchEvent(new Event('change'));
+        }
+
+        const isPreloaded = inst === 'piano' ? this.audio.isStudioPianoPreloaded : this.audio.isStudioOrganPreloaded;
+        if (!isPreloaded) {
+            this.setMusicLoadingState(true);
+            await this.audio.preloadStudioInstrument(inst);
+            this.setMusicLoadingState(false);
+        }
+    }
+
     populateSelect() {
         const select = document.getElementById('rhythm-select');
         if (!select) return;
@@ -72,13 +89,49 @@ class RhythmEngine {
             select.innerHTML += '<option value="rascunho">📝 Meu Rascunho</option>';
         }
 
-        // Pega os compassos do instrumento ativo (ex: "orgao")
         const instrumentRhythms = this.rawRhythms[this.currentInstrument];
         if (instrumentRhythms) {
-            Object.keys(instrumentRhythms).forEach(timeSig => {
+            // Ordenação Matemática Perfeita
+            const sortedKeys = Object.keys(instrumentRhythms).sort((a, b) => {
+                const [numA, denA] = a.split('/').map(Number);
+                const [numB, denB] = b.split('/').map(Number);
+                if (denA !== denB) return denA - denB;
+                return numA - numB;
+            });
+
+            sortedKeys.forEach(timeSig => {
                 select.innerHTML += `<option value="${timeSig}">${timeSig}</option>`;
             });
         }
+    }
+
+    // Carrega do Banco JSON direto pra Grade do Usuário, impedindo Mutação de Variável
+    loadRhythmIntoDraft(val) {
+        if (val === "rascunho") {
+            this.draftRhythm = this.loadDraft();
+            return;
+        }
+
+        const rawData = this.rawRhythms[this.currentInstrument]?.[val];
+        if (rawData) {
+            this.draftRhythm = {
+                id: val,
+                name: val,
+                steps: rawData.numSteps || rawData.steps || 8,
+                // INVERTIDO PARA BATER COM A INTERFACE E O SEU JSON:
+                v5: [...(rawData.vozes ? rawData.vozes[0] : (rawData.v5 || []))],
+                v4: [...(rawData.vozes ? rawData.vozes[1] : (rawData.v4 || []))],
+                v3: [...(rawData.vozes ? rawData.vozes[2] : (rawData.v3 || []))],
+                v2: [...(rawData.vozes ? rawData.vozes[3] : (rawData.v2 || []))],
+                v1: [...(rawData.vozes ? rawData.vozes[4] : (rawData.v1 || []))]
+            };
+        }
+    }
+
+    stop() {
+        this.isPlayingRhythm = false;
+        this.clearGridHighlight(); // Remove as luzinhas perdidas
+        this.audio.stopRhythmNotes(); // Corta os áudios do ritmo com o release de 0.2s
     }
 
     // ============================================
@@ -87,34 +140,44 @@ class RhythmEngine {
     startEngineLoop() {
         const scheduler = () => {
             const now = this.audio.ctx.currentTime;
-            const beatDuration = 60.0 / this.toolbar.getBpm(); // 1 step = 1 tempo
+            const beatDuration = 60.0 / this.toolbar.getBpm(); // Mantém o pulso do metrônomo (Semínima)
+            const stepDuration = beatDuration / 2;             // Dobra a velocidade do ritmo (Colcheia)
 
-            // 1. Lógica do Metrônomo (Piscar no Play)
+            const rhythmSelect = document.getElementById('rhythm-select');
+            const hasRhythmSelected = rhythmSelect && rhythmSelect.value !== "none";
+
+            // Metrônomo (Piscar)
             if (now >= this.nextBlinkTime) {
                 this.nextBlinkTime += beatDuration;
-                const btnPlay = document.getElementById('btn-play');
-                if (btnPlay) {
-                    btnPlay.classList.add('bpm-blink');
-                    setTimeout(() => btnPlay.classList.remove('bpm-blink'), 100);
+                if (hasRhythmSelected) {
+                    const btnPlay = document.getElementById('btn-play');
+                    if (btnPlay) {
+                        btnPlay.classList.add('bpm-blink');
+                        setTimeout(() => btnPlay.classList.remove('bpm-blink'), 120);
+                    }
                 }
             }
 
-            // 2. Lógica do Sequenciador de Ritmo (Ritmo Manual / Sync-Start)
-            if (this.isPlayingRhythm && this.currentVoicesFiles && this.activeRhythmData) {
+            // Sync-Start usando Diretamente a Grade (draftRhythm)
+            if (this.isPlayingRhythm && this.currentVoicesFiles) {
                 const lookahead = 0.1;
                 while (this.nextStepTime < now + lookahead) {
                     this.scheduleStep(this.currentStep, this.nextStepTime);
 
-                    // Animação Visual na Grade (Se tiver aberta)
                     const stepToAnimate = this.currentStep;
                     const timeToAnimate = this.nextStepTime - now;
                     setTimeout(() => this.highlightGridStep(stepToAnimate), timeToAnimate * 1000);
 
-                    this.nextStepTime += beatDuration;
+                    this.nextStepTime += stepDuration;
                     this.currentStep++;
 
-                    if (this.currentStep >= this.activeRhythmData.steps) {
-                        this.isPlayingRhythm = false; // Finaliza ao fim (Sem Loop)
+                    // Substitua o IF antigo por este:
+                    if (this.currentStep >= this.draftRhythm.steps) {
+                        this.isPlayingRhythm = false;
+
+                        // Apaga a luzinha da tela no momento exato em que a última batida terminar
+                        const timeToAnimate = this.nextStepTime - now;
+                        setTimeout(() => this.clearGridHighlight(), timeToAnimate * 1000);
                         break;
                     }
                 }
@@ -125,18 +188,16 @@ class RhythmEngine {
     }
 
     scheduleStep(stepIndex, time) {
-        if (!this.activeRhythmData) return;
-
         for (let i = 1; i <= 5; i++) {
-            const track = this.activeRhythmData[`v${i}`];
+            const track = this.draftRhythm[`v${i}`];
             if (!track || track.length <= stepIndex) continue;
 
             const state = track[stepIndex];
             if (state > 0) {
                 const fileName = this.currentVoicesFiles[i];
                 if (fileName) {
-                    const vol = state === 1 ? 1.0 : 0.5; // Velocity (100% ou 50%)
-                    this.audio.playStudioNote(fileName, vol, time);
+                    const vol = state === 1 ? 1.0 : 0.5;
+                    this.audio.playStudioNote(this.currentInstrument, fileName, vol, time);
                 }
             }
         }
@@ -145,35 +206,17 @@ class RhythmEngine {
     triggerChord(chordStr, phase) {
         const selectEl = document.getElementById('rhythm-select');
         const selectedVal = selectEl ? selectEl.value : "";
+
         if (!selectedVal || selectedVal === "none") {
             this.isPlayingRhythm = false;
             return;
         }
 
-        if (selectedVal === "rascunho") {
-            this.activeRhythmData = this.draftRhythm;
-        } else {
-            // Busca o ritmo do JSON pelo instrumento e compasso selecionados
-            const rawData = this.rawRhythms[this.currentInstrument]?.[selectedVal];
-            if (rawData) {
-                this.activeRhythmData = {
-                    steps: rawData.numSteps || rawData.steps || 8,
-                    v1: rawData.vozes ? rawData.vozes[0] : (rawData.v1 || []),
-                    v2: rawData.vozes ? rawData.vozes[1] : (rawData.v2 || []),
-                    v3: rawData.vozes ? rawData.vozes[2] : (rawData.v3 || []),
-                    v4: rawData.vozes ? rawData.vozes[3] : (rawData.v4 || []),
-                    v5: rawData.vozes ? rawData.vozes[4] : (rawData.v5 || [])
-                };
-            } else {
-                this.activeRhythmData = null;
-            }
-        }
-
-        if (!this.activeRhythmData) return;
-
+        // Final da função triggerChord
         this.currentVoicesFiles = this.calculateVoicesFiles(chordStr, phase);
 
-        // Sync-Start: Zera e dispara!
+        this.audio.stopRhythmNotes(); // NOVO: Corta suavemente o ritmo do acorde anterior
+
         this.currentStep = 0;
         this.nextStepTime = this.audio.ctx.currentTime + 0.02;
         this.isPlayingRhythm = true;
@@ -184,22 +227,36 @@ class RhythmEngine {
         if (!parsed) return null;
 
         const rootIdx = window.musicTheory.getNoteIndex(parsed.root);
-        const intervals = [0, 4, 7]; // Simplificado p/ Tríade
+        const intervals = [0, 4, 7];
         if (parsed.suffix.includes('m')) intervals[1] = 3;
         if (parsed.suffix.includes('dim') || parsed.suffix.includes('°')) { intervals[1] = 3; intervals[2] = 6; }
         if (parsed.suffix.includes('aug') || parsed.suffix.includes('+')) { intervals[2] = 8; }
 
         const bassStr = this.audio.normalizeNoteForFile(parsed.bass);
-        const n1 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[0]) % 12]);
-        const n2 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[1]) % 12]);
-        const n3 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[2]) % 12]);
+        const n1 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[0]) % 12]); // Fundamental
+        const n2 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[1]) % 12]); // Terça
+        const n3 = this.audio.normalizeNoteForFile(window.musicTheory.sharpNotes[(rootIdx + intervals[2]) % 12]); // Quinta
+
+        const prefix = this.currentInstrument === 'piano' ? 'piano' : 'orgao';
 
         let files = {};
-        files[1] = `orgao_${bassStr}2.ogg`;
-        files[2] = `orgao_${bassStr}${phase === 3 ? 4 : 3}.ogg`;
-        files[3] = `orgao_${n1}${phase === 3 ? 5 : 4}.ogg`;
-        files[4] = `orgao_${n2}${phase === 3 ? 5 : 4}.ogg`;
-        files[5] = `orgao_${n3}${phase === 3 ? 5 : 4}.ogg`;
+
+        // Vozes 1 e 2: Baixos graves (FIXOS, mantêm a base sólida)
+        files[1] = `${prefix}_${bassStr}2.ogg`;
+        files[2] = `${prefix}_${bassStr}3.ogg`;
+
+        // Vozes 3, 4 e 5: Bloco Harmônico do Acorde
+        if (phase === 3) {
+            // Modo Cheio: Tríade completa aberta na oitava 4 (Fundamental, Terça, Quinta)
+            files[3] = `${prefix}_${n1}4.ogg`;
+            files[4] = `${prefix}_${n2}4.ogg`;
+            files[5] = `${prefix}_${n3}4.ogg`;
+        } else {
+            // Modo Normal: Terça (8ª 3), Quinta (8ª 3), Fundamental (8ª 4)
+            files[3] = `${prefix}_${n2}3.ogg`;
+            files[4] = `${prefix}_${n3}3.ogg`;
+            files[5] = `${prefix}_${n1}4.ogg`;
+        }
 
         return files;
     }
@@ -212,9 +269,7 @@ class RhythmEngine {
         const editorPanel = document.getElementById('rhythm-editor-panel');
         const mainDisplay = document.getElementById('main-display');
         const iframeDisplay = document.getElementById('main-iframe');
-
         const rhythmSelect = document.getElementById('rhythm-select');
-        const organBtn = document.querySelector('[data-i18n="organ"]');
 
         if (switchBtn) {
             switchBtn.addEventListener('change', (e) => {
@@ -236,18 +291,32 @@ class RhythmEngine {
             rhythmSelect.addEventListener('change', async (e) => {
                 const val = e.target.value;
 
-                if (val !== "none" && !this.audio.isStudioOrganPreloaded) {
+                if (val !== "none") {
+                    this.loadRhythmIntoDraft(val);
+                    this.drawGrid();
+                }
+
+                // Ao escolher um ritmo, carrega o instrumento (Se for a 1º Vez)
+                const isPreloaded = this.currentInstrument === 'piano' ? this.audio.isStudioPianoPreloaded : this.audio.isStudioOrganPreloaded;
+                if (val !== "none" && !isPreloaded) {
+                    const chordPanel = document.getElementById('chord-degrees-panel');
+                    const organBtn = document.getElementById('btn-instrument-select');
+
                     rhythmSelect.disabled = true;
                     if (organBtn) organBtn.disabled = true;
+
                     rhythmSelect.classList.add('music-ui-blocked');
                     if (organBtn) organBtn.classList.add('music-ui-blocked');
+                    if (chordPanel) chordPanel.classList.add('music-ui-blocked');
 
-                    await this.audio.preloadStudioOrgan();
+                    await this.audio.preloadStudioInstrument(this.currentInstrument);
 
                     rhythmSelect.disabled = false;
                     if (organBtn) organBtn.disabled = false;
+
                     rhythmSelect.classList.remove('music-ui-blocked');
                     if (organBtn) organBtn.classList.remove('music-ui-blocked');
+                    if (chordPanel) chordPanel.classList.remove('music-ui-blocked');
                 }
             });
         }
@@ -268,18 +337,17 @@ class RhythmEngine {
             alert("Rascunho de ritmo salvo localmente!");
         });
 
-        // Exporta exatamente na estrutura original do styles-melody.json
         if (btnExport) btnExport.addEventListener('click', () => {
             const exportObject = {};
             exportObject[this.currentInstrument] = {
                 "custom": {
                     "numSteps": this.draftRhythm.steps,
                     "vozes": [
-                        this.draftRhythm.v1,
-                        this.draftRhythm.v2,
-                        this.draftRhythm.v3,
+                        this.draftRhythm.v5, // Exporta de cima para baixo
                         this.draftRhythm.v4,
-                        this.draftRhythm.v5
+                        this.draftRhythm.v3,
+                        this.draftRhythm.v2,
+                        this.draftRhythm.v1
                     ]
                 }
             };
@@ -336,7 +404,7 @@ class RhythmEngine {
 
                 btn.onclick = () => {
                     let state = parseInt(btn.getAttribute('data-state'));
-                    state = (state + 1) % 3; // Ciclo: 0 (Off) -> 1 (100%) -> 2 (50%) -> 0
+                    state = (state + 1) % 3;
                     btn.setAttribute('data-state', state);
                     arr[step] = state;
                 };
@@ -352,5 +420,9 @@ class RhythmEngine {
             const btn = document.getElementById(`step-ui-v${i}-s${stepIdx}`);
             if (btn) btn.classList.add('active-step');
         }
+    }
+
+    clearGridHighlight() {
+        document.querySelectorAll('.rhythm-step').forEach(el => el.classList.remove('active-step'));
     }
 }

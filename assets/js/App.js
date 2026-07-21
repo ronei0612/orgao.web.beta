@@ -1,4 +1,3 @@
-// --- CONFIGURAÇÕES GLOBAIS DO APLICATIVO ---
 const APP_VERSION = 'v1.0.3';
 const APP_UPDATE_DATE = '20 de Julho de 2026';
 
@@ -45,7 +44,6 @@ class ViewManager {
         this.mainDisplay.classList.remove('d-none');
         this.mainDisplay.setAttribute('contenteditable', 'false');
 
-        // MUDANÇA AQUI: Passa pelo prepareContent
         this.mainDisplay.innerHTML = TextFormatter.prepareContent(content);
 
         if (this.onHydrateScores) this.onHydrateScores();
@@ -58,7 +56,6 @@ class ViewManager {
         this.mainDisplay.classList.remove('d-none');
         this.mainDisplay.setAttribute('contenteditable', 'true');
 
-        // MUDANÇA AQUI: Passa pelo prepareContent
         this.mainDisplay.innerHTML = TextFormatter.prepareContent(content);
 
         if (this.onHydrateScores) this.onHydrateScores();
@@ -140,7 +137,6 @@ class RepertoireController {
         this.hasSheetMusic = false;
         this.sheetMusicBlock = null;
 
-        // Variaveis de controle do Transpose
         this.currentSelectValue = document.getElementById('key-select')?.value || "0";
         this.isAutoAdjustingKey = false;
 
@@ -148,6 +144,7 @@ class RepertoireController {
 
         this.toolbar.onStop(() => {
             this.audio.stopAll();
+            if (window.rhythmEngine) window.rhythmEngine.stop(); // NOVO: Para o sequenciador!
         });
 
         this.toolbar.onPlay(() => {
@@ -168,11 +165,9 @@ class RepertoireController {
         sessionStorage.setItem('app_context', newContext);
         const keySelect = document.getElementById('key-select');
 
-        // Só carrega o Tom da memória se for uma das telas gerais
         if (['ACORDES', 'LITURGIA', 'MISSA', 'ORACOES'].includes(newContext)) {
             let savedKey = sessionStorage.getItem(`key_${newContext}`) || "0";
 
-            // CORREÇÃO: Se por acaso "Letra" (L) ficou no cache de testes anteriores, força voltar para "0" (Dó)
             if (savedKey === "L") {
                 savedKey = "0";
             }
@@ -203,12 +198,10 @@ class RepertoireController {
                 this.isAutoAdjustingKey = false;
             }
         } else {
-            // Garante que a interface volta ao normal caso tenha saído de uma música que era só Letra
             this.toggleMusicUI(true);
         }
     }
 
-    // NOVA FUNÇÃO: Ocultar as ferramentas musicais da tela
     toggleMusicUI(show) {
         const keyGroup = document.getElementById('key-select')?.closest('.input-group');
         const bpmGroup = document.getElementById('bpm-input')?.closest('.input-group');
@@ -234,7 +227,6 @@ class RepertoireController {
         }
     }
 
-    // NOVA FUNÇÃO: Ler o primeiro acorde da música para ajustar o Select
     autoAdjustKeySelect() {
         const firstChordEl = this.view.mainDisplay.querySelector('b');
         const keySelect = document.getElementById('key-select');
@@ -253,15 +245,12 @@ class RepertoireController {
         }
     }
 
-    // NOVA FUNÇÃO: O Motor do Transpose de Cifras e Partituras!
     transposeSongOnScreen(delta) {
-        // 1. Transpõe os textos dos Acordes
         const chords = this.view.mainDisplay.querySelectorAll('b');
         chords.forEach(b => {
             b.innerText = window.musicTheory.transposeChordString(b.innerText, delta);
         });
 
-        // 2. Transpõe as Notas das Partituras e Redesenha
         const blocks = this.view.mainDisplay.querySelectorAll('.sheet-music-block');
         blocks.forEach(block => {
             if (block.dataset.score) {
@@ -277,7 +266,6 @@ class RepertoireController {
             }
         });
 
-        // 3. Atualiza os cliques (Playbacks) pros novos acordes
         this.initHighlights();
     }
 
@@ -355,27 +343,19 @@ class RepertoireController {
             this.activateQuickReturn('ORACOES');
         });
 
-        // ============================================
-        // OUVINTE DE TRANSPOSE (SELECT DE TOM)
-        // ============================================
         document.getElementById('key-select')?.addEventListener('change', (e) => {
             const newVal = e.target.value;
 
             if (newVal === "L") {
-                // Adiciona o espaçamento no final e esconde Cifras
                 this.view.mainDisplay.classList.add('mode-lyrics-only', 'lyrics-spacing');
-
-                // Força toda a interface musical a sumir (Piano, Controles Flutuantes, etc)
                 this.toggleMusicUI(false);
 
                 if (panelAcordes) panelAcordes.classList.add('d-none');
                 if (btnPrevChord) btnPrevChord.classList.add('d-none');
                 if (btnNextChord) btnNextChord.classList.add('d-none');
             } else {
-                // Remove o espaço e exibe Cifras novamente
                 this.view.mainDisplay.classList.remove('mode-lyrics-only', 'lyrics-spacing');
 
-                // Retorna a Interface Musical se for ACORDES ou Música com Cifra
                 if (!this.currentSongId || this.currentSongId === 'ACORDES') {
                     this.toggleMusicUI(true);
                     if (panelAcordes) panelAcordes.classList.remove('d-none');
@@ -388,7 +368,6 @@ class RepertoireController {
                     if (btnNextChord) btnNextChord.classList.remove('d-none');
                 }
 
-                // Disparo matemático do Transpose na Tela!
                 if (!this.isAutoAdjustingKey && this.currentSelectValue !== "L" && newVal !== "L") {
                     const oldIdx = parseInt(this.currentSelectValue, 10);
                     const newIdx = parseInt(newVal, 10);
@@ -405,7 +384,6 @@ class RepertoireController {
             this.currentSelectValue = newVal;
         });
 
-        // Ao selecionar algo de verdade no select principal de músicas
         this.ts.on('change', (selectedId) => {
             this.cancelQuickReturn();
             this.ts.blur();
@@ -438,7 +416,6 @@ class RepertoireController {
                 this.changeContext('ACORDES');
                 this.initHighlights();
 
-                // MÁGICA: Ajusta o Tom e as interfaces automaticamente
                 this.updateMusicUIVisibility();
                 this.autoAdjustKeySelect();
 
@@ -607,7 +584,7 @@ class RepertoireController {
 
                 if (activeChord) {
                     this.audio.playChord(activeChord, this.toolbar.musicPhase);
-                    window.rhythmEngine.triggerChord(activeChord, this.toolbar.musicPhase); // NOVO
+                    if (window.rhythmEngine) window.rhythmEngine.triggerChord(activeChord, this.toolbar.musicPhase);
                 } else {
                     this.audio.stopChordLoop();
                 }
@@ -623,6 +600,7 @@ class RepertoireController {
                 if (playAudio && this.toolbar.isPlaying) {
                     const chordText = targetNode.innerText;
                     this.audio.playChord(chordText, this.toolbar.musicPhase);
+                    if (window.rhythmEngine) window.rhythmEngine.triggerChord(chordText, this.toolbar.musicPhase);
                 }
             }
         }
@@ -705,7 +683,6 @@ class RepertoireController {
             this.view.showRepertoire(savedSong ? savedSong.content : '');
             this.initHighlights();
 
-            // Depois de salvar, checa se a música possui cifras ou não!
             this.updateMusicUIVisibility();
             this.autoAdjustKeySelect();
         });
@@ -746,20 +723,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewManager = new ViewManager();
     const backupManager = new BackupManager(dbManager);
 
-    // MUDANÇA AQUI: Adicione o modalManager como o 3º parâmetro
     const toolbar = new ToolbarController(viewManager, tomSelectInstance, modalManager);
 
     const musicTheory = new MusicTheory();
-    window.musicTheory = musicTheory; // ADICIONE ESTA LINHA AQUI!
+    window.musicTheory = musicTheory;
 
     const audioManager = new AudioManager();
     window.audioManager = audioManager;
     audioManager.preloadAll();
 
-    // NOVO MOTOR! (Injeção via window pra uso global rápido)
     const rhythmEngine = new RhythmEngine(toolbar, audioManager);
     window.rhythmEngine = rhythmEngine;
-    rhythmEngine.init(); // Aqui trava a tela até terminar o downlaod
+    rhythmEngine.init();
 
     const chordManager = new ChordManager(toolbar, musicTheory, audioManager);
     const pianoManager = new PianoManager(musicTheory);
