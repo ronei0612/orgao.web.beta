@@ -3,12 +3,12 @@ class AudioManager {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContext();
 
-        this.buffers = {}; // Memória RAM
+        this.buffers = {};
 
-        // Isolamento de canais de áudio
         this.activeChordNodes = [];
         this.activeFluteNodes = [];
         this.activePianoFluteNodes = {};
+        this.activeRhythmNodes = []; // NOVO: Controla os áudios do Sequenciador
 
         this.baseURL = "https://roneicostasoares.com.br/orgao.web.beta/assets/audio/";
 
@@ -16,6 +16,8 @@ class AudioManager {
         this.enarmonics = { 'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#' };
 
         this.isPreloaded = false;
+        this.isStudioOrganPreloaded = false;
+        this.isStudioPianoPreloaded = false;
 
         this.attackTime = 0.2;
         this.releaseTime = 0.2;
@@ -36,7 +38,6 @@ class AudioManager {
 
         const urlsToFetch = [];
 
-        // Preload de Órgão e Strings
         instruments.forEach(inst => {
             octaves.forEach(oct => {
                 fileNotes.forEach(note => {
@@ -46,7 +47,6 @@ class AudioManager {
             });
         });
 
-        // Preload de Flauta (Oitavas 4, 5 e 6)
         const fluteOctaves = [4, 5, 6];
         fluteOctaves.forEach(oct => {
             fileNotes.forEach(note => {
@@ -144,8 +144,6 @@ class AudioManager {
         }
     }
 
-    // --- CONTROLE DOS CHANNELS DE ÁUDIO ---
-
     stopChordLoop() {
         this.activeChordNodes.forEach(node => {
             try {
@@ -178,13 +176,12 @@ class AudioManager {
         Object.keys(this.activePianoFluteNodes).forEach(note => {
             this.stopPianoFluteNote(note);
         });
+        this.stopRhythmNotes(); // NOVO
     }
-
-    // --- EMISSÃO DOS SONS ---
 
     async playChord(chordStr, phase) {
         await this.resumeContext();
-        this.stopChordLoop(); // Só encerra os loops do órgão e string
+        this.stopChordLoop();
 
         const playlist = this.buildPlayList(chordStr, phase);
         if (playlist.length === 0) return;
@@ -202,7 +199,7 @@ class AudioManager {
 
             const source = this.ctx.createBufferSource();
             source.buffer = buffer;
-            source.loop = true; // Órgão e strings tocam em loop contínuo!
+            source.loop = true;
 
             const gainNode = this.ctx.createGain();
             let baseVolume = 1.0;
@@ -235,7 +232,7 @@ class AudioManager {
 
         const source = this.ctx.createBufferSource();
         source.buffer = buffer;
-        source.loop = false; // Toque longo, sem loop infinito
+        source.loop = false;
 
         const gainNode = this.ctx.createGain();
         gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
@@ -249,12 +246,10 @@ class AudioManager {
         this.activeFluteNodes.push({ source, gainNode });
     }
 
-    // --- FLUTA DE TECLADO (SUSTAIN E RELEASE NATÍVEIS) ---
-
     async startPianoFluteNote(noteAndOctave) {
         await this.resumeContext();
 
-        if (this.activePianoFluteNodes[noteAndOctave]) return; // Evita loopings se já estiver ativo
+        if (this.activePianoFluteNodes[noteAndOctave]) return;
 
         const match = noteAndOctave.match(/^([CDEFGAB][#b]?)(\d)$/i);
         if (!match) return;
@@ -273,7 +268,7 @@ class AudioManager {
 
         const gainNode = this.ctx.createGain();
         gainNode.gain.setValueAtTime(0, this.ctx.currentTime);
-        gainNode.gain.linearRampToValueAtTime(1.0, this.ctx.currentTime + 0.05); // Attack rápido
+        gainNode.gain.linearRampToValueAtTime(1.0, this.ctx.currentTime + 0.05);
 
         source.connect(gainNode);
         gainNode.connect(this.ctx.destination);
@@ -290,10 +285,67 @@ class AudioManager {
                 const currentGain = node.gainNode.gain.value;
                 node.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
                 node.gainNode.gain.setValueAtTime(currentGain, this.ctx.currentTime);
-                node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + this.releaseTime); // Release suave de 0.2s
+                node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + this.releaseTime);
                 node.source.stop(this.ctx.currentTime + this.releaseTime + 0.05);
             } catch (e) { }
             delete this.activePianoFluteNodes[noteAndOctave];
         }
+    }
+
+    stopRhythmNotes() {
+        this.activeRhythmNodes.forEach(node => {
+            try {
+                const currentGain = node.gainNode.gain.value;
+                node.gainNode.gain.cancelScheduledValues(this.ctx.currentTime);
+                node.gainNode.gain.setValueAtTime(currentGain, this.ctx.currentTime);
+                node.gainNode.gain.linearRampToValueAtTime(0, this.ctx.currentTime + this.releaseTime);
+                node.source.stop(this.ctx.currentTime + this.releaseTime + 0.05);
+            } catch (e) { }
+        });
+        this.activeRhythmNodes = [];
+    }
+
+    async preloadStudioInstrument(instrumentName) {
+        const fileNotes = ['c', 'c_', 'd', 'd_', 'e', 'f', 'f_', 'g', 'g_', 'a', 'a_', 'b'];
+        const studioOctaves = [2, 3, 4, 5];
+        const urlsToFetch = [];
+
+        const instFolder = instrumentName === 'piano' ? 'Piano' : 'Orgao';
+        const prefix = instrumentName === 'piano' ? 'piano' : 'orgao';
+
+        studioOctaves.forEach(oct => {
+            fileNotes.forEach(note => {
+                urlsToFetch.push(`${this.baseURL}studio/${instFolder}/${prefix}_${note}${oct}.ogg`);
+            });
+        });
+
+        await Promise.allSettled(urlsToFetch.map(url => this.getAudioBuffer(url)));
+
+        if (instrumentName === 'orgao') this.isStudioOrganPreloaded = true;
+        if (instrumentName === 'piano') this.isStudioPianoPreloaded = true;
+    }
+
+    async playStudioNote(instrumentName, fileName, volume = 1.0, startTime = 0) {
+        if (!startTime) startTime = this.ctx.currentTime;
+        
+        const instFolder = instrumentName === 'piano' ? 'Piano' : 'Orgao';
+        const url = `${this.baseURL}studio/${instFolder}/${fileName}`;
+        
+        const buffer = await this.getAudioBuffer(url);
+        if (!buffer) return;
+
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = false;
+
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(volume, startTime); 
+
+        source.connect(gainNode);
+        gainNode.connect(this.ctx.destination);
+        source.start(startTime);
+
+        // NOVO: Adiciona na lista para podermos cortar com fade-out se o usuário apertar Stop
+        this.activeRhythmNodes.push({ source, gainNode });
     }
 }

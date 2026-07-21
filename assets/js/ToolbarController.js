@@ -250,4 +250,9 @@ class ToolbarController {
             this.hasMoved = false;
         }
     }
+
+    getBpm() {
+        const val = parseInt(this.bpmInput.value, 10);
+        return isNaN(val) ? 90 : val;
+    }
 }

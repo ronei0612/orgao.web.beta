@@ -111,7 +111,10 @@ class ChordManager {
     handleChordClick(btn) {
         const chordText = btn.innerText;
         const phase = this.toolbar.musicPhase;
+
+        // Toca Loop de Cifra + Dispara o Ritmo arranjador (Sync-Start)
         this.audio.playChord(chordText, phase);
+        if (window.rhythmEngine) window.rhythmEngine.triggerChord(chordText, phase);
 
         if (btn.classList.contains('active')) {
             btn.classList.remove('repress-anim');

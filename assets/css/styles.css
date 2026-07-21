@@ -714,3 +714,78 @@ body {
 .lyrics-spacing {
     padding-bottom: 250px !important;
 }
+
+/* ========================================= */
+/*      ESTADOS DE CARREGAMENTO & RITMO      */
+/* ========================================= */
+.music-ui-blocked {
+    opacity: 0.4;
+    pointer-events: none !important;
+    filter: grayscale(100%);
+    transition: all 0.4s ease;
+}
+
+/* Piscar do Metrônomo (BPM) */
+.bpm-blink {
+    filter: brightness(1.4) !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.9) !important;
+    transition: transform 0.08s ease, filter 0.08s ease !important;
+}
+
+.btn-play.playing.bpm-blink {
+    background-color: #ff4757 !important; /* Mantém vermelho no play */
+    box-shadow: 0 0 25px 8px rgba(255, 71, 87, 0.9) !important;
+}
+
+/* Grade do Sequenciador */
+.rhythm-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: max-content;
+}
+
+.rhythm-label {
+    width: 55px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #495057;
+    text-align: right;
+    padding-right: 5px;
+    flex-shrink: 0;
+}
+
+.rhythm-step {
+    width: 45px;
+    height: 45px;
+    border-radius: 6px;
+    background-color: #e9ecef;
+    border: 2px solid #ced4da;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s, background-color 0.1s;
+}
+
+    .rhythm-step:active {
+        transform: scale(0.9);
+    }
+
+    .rhythm-step[data-state="1"] {
+        background-color: #0b8e8e;
+        border-color: #0b8e8e;
+    }
+    /* 100% Vol */
+    .rhythm-step[data-state="2"] {
+        background-color: #72c7c7;
+        border-color: #72c7c7;
+    }
+    /* 50% Vol */
+
+    /* Indicador de reprodução (Luzinha que corre a grade) */
+    .rhythm-step.active-step {
+        border-color: #ffc107 !important;
+        transform: scale(1.1);
+        box-shadow: 0 0 12px rgba(255, 193, 7, 0.9);
+        z-index: 2;
+    }
