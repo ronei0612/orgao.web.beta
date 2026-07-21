@@ -54,6 +54,12 @@
                     🙏 Orações
                 </a>
 
+                <!-- NOVO: Chave de Edição de Ritmo -->
+                <div class="form-check form-switch mt-3 pt-3 border-top ps-2">
+                    <input class="form-check-input" type="checkbox" role="switch" id="toggle-rhythm-editor">
+                    <label class="form-check-label fw-bold text-secondary" for="toggle-rhythm-editor">Edição de Ritmo</label>
+                </div>
+
                 <a href="#" class="text-decoration-none link-primary py-1 mt-2 border-top pt-2" data-bs-toggle="modal" data-bs-target="#exportModal">
                     <i class="fas fa-download me-2"></i>Exportar Repertório
                 </a>
@@ -133,6 +139,24 @@
         <div class="position-relative flex-grow-1 d-flex flex-column mb-1 overflow-hidden" id="main-area-wrapper">
             <div class="main-display flex-grow-1" id="main-display" contenteditable="false"></div>
             <iframe class="main-iframe flex-grow-1 d-none" id="main-iframe" src=""></iframe>
+
+            <!-- NOVO: Painel do Editor de Ritmo -->
+            <div id="rhythm-editor-panel" class="d-none flex-column h-100 p-2 bg-light border-top" style="overflow-y: auto;">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h6 class="mb-0 fw-bold text-secondary"><i class="fas fa-drum me-2"></i>Sequenciador</h6>
+                    <div class="d-flex gap-2 align-items-center">
+                        <label class="fw-bold small mb-0">Steps:</label>
+                        <input type="number" id="rhythm-steps-input" class="form-control form-control-sm text-center fw-bold" value="4" min="1" max="64" style="width: 60px;">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-primary fw-bold" id="btn-save-rhythm"><i class="fas fa-save me-1"></i>Salvar Rascunho</button>
+                    <button class="btn btn-sm btn-outline-success fw-bold" id="btn-export-rhythm"><i class="fas fa-download me-1"></i>Baixar JSON</button>
+                </div>
+
+                <!-- Onde a matriz de botões vai ser desenhada pelo JS -->
+                <div id="rhythm-grid" class="d-flex flex-column gap-2 pb-3 overflow-x-auto"></div>
+            </div>
 
             <!-- Botão Flutuante (Visível apenas em edição) -->
             <button class="btn btn-teal rounded-circle shadow d-none align-items-center justify-content-center" id="btn-add-sheet-music" title="Adicionar Partitura" style="position: absolute; bottom: 15px; right: 15px; width: 50px; height: 50px; font-size: 24px; z-index: 10;">
@@ -369,6 +393,7 @@
 
     <!-- NOVO MOTOR DE AUDIO AQUI -->
     <script src="./assets/js/AudioManager.js"></script>
+    <script src="./assets/js/RhythmEngine.js"></script> <!-- ADICIONE ESTA LINHA -->
 
     <script src="./assets/js/BackupManager.js"></script>
     <script src="./assets/js/ModalManager.js"></script>

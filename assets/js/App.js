@@ -607,6 +607,7 @@ class RepertoireController {
 
                 if (activeChord) {
                     this.audio.playChord(activeChord, this.toolbar.musicPhase);
+                    window.rhythmEngine.triggerChord(activeChord, this.toolbar.musicPhase); // NOVO
                 } else {
                     this.audio.stopChordLoop();
                 }
@@ -754,6 +755,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioManager = new AudioManager();
     window.audioManager = audioManager;
     audioManager.preloadAll();
+
+    // NOVO MOTOR! (Injeção via window pra uso global rápido)
+    const rhythmEngine = new RhythmEngine(toolbar, audioManager);
+    window.rhythmEngine = rhythmEngine;
+    rhythmEngine.init(); // Aqui trava a tela até terminar o downlaod
 
     const chordManager = new ChordManager(toolbar, musicTheory, audioManager);
     const pianoManager = new PianoManager(musicTheory);

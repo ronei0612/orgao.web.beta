@@ -296,4 +296,40 @@ class AudioManager {
             delete this.activePianoFluteNodes[noteAndOctave];
         }
     }
+
+    async playStudioNote(fileName, volume = 1.0, startTime = 0) {
+        if (!startTime) startTime = this.ctx.currentTime;
+        const url = `${this.baseURL}studio/Orgao/${fileName}`;
+        const buffer = await this.getAudioBuffer(url);
+        if (!buffer) return;
+
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = false; // Batidas One-Shot
+
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(volume, startTime); // Toca do início ao fim com o volume pedido (Velocity)
+
+        source.connect(gainNode);
+        gainNode.connect(this.ctx.destination);
+        source.start(startTime);
+    }
+
+    async preloadStudioOrgan() {
+        if (this.isStudioOrganPreloaded) return;
+
+        const fileNotes = ['c', 'c_', 'd', 'd_', 'e', 'f', 'f_', 'g', 'g_', 'a', 'a_', 'b'];
+        const studioOctaves = [2, 3, 4, 5];
+        const urlsToFetch = [];
+
+        studioOctaves.forEach(oct => {
+            fileNotes.forEach(note => {
+                urlsToFetch.push(`${this.baseURL}studio/Orgao/orgao_${note}${oct}.ogg`);
+            });
+        });
+
+        // Baixa todos os áudios do Órgão Studio
+        await Promise.allSettled(urlsToFetch.map(url => this.getAudioBuffer(url)));
+        this.isStudioOrganPreloaded = true;
+    }
 }
