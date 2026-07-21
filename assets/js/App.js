@@ -1,5 +1,5 @@
 // --- CONFIGURAÇÕES GLOBAIS DO APLICATIVO ---
-const APP_VERSION = 'v1.0.2';
+const APP_VERSION = 'v1.0.3';
 const APP_UPDATE_DATE = '20 de Julho de 2026';
 
 class ViewManager {
