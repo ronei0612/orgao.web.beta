@@ -694,3 +694,23 @@ body {
 .floating-controls.is-dragging button {
     pointer-events: none !important;
 }
+
+/* ========================================= */
+/*      MODO LETRA & AUTO-OCULTAR UI         */
+/* ========================================= */
+
+/* Oculta as cifras e as partituras no Modo Letra */
+.mode-lyrics-only b,
+.mode-lyrics-only .sheet-music-block {
+    display: none !important;
+}
+
+/* Oculta os painéis musicais quando a música não tem cifras */
+.hide-music-ui {
+    display: none !important;
+}
+
+/* Espaçamento extra no final para clique no celular (Modo Letra) */
+.lyrics-spacing {
+    padding-bottom: 250px !important;
+}

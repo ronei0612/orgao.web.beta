@@ -4,7 +4,7 @@ const CACHE_NAME = `cache-${APP_VERSION}`;
 // Lista de arquivos vitais para o site abrir sem internet
 const ASSETS_TO_CACHE = [
     './index.html',
-    './assets/css/style.css',
+    './assets/css/styles.css',
     './assets/html/santamissa.html',
     './assets/js/TextFormatter.js',
     './assets/js/DatabaseManager.js',

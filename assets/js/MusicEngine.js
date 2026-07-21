@@ -1,6 +1,8 @@
 class MusicTheory {
     constructor() {
         this.notes = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+        // Para transposição, usamos os sustenidos como padrão de exibição
+        this.sharpNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         this.pianoPattern = [
             { index: 0, type: 'white' }, { index: 1, type: 'black' },
             { index: 2, type: 'white' }, { index: 3, type: 'black' },
@@ -16,8 +18,26 @@ class MusicTheory {
         return this.notes[normalizedIndex];
     }
 
+    getNoteIndex(noteStr) {
+        const enarmonics = { 'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#' };
+        let n = noteStr.toUpperCase();
+        if (enarmonics[n]) n = enarmonics[n];
+        return this.sharpNotes.indexOf(n);
+    }
+
     transposeNote(baseInterval, offset) {
         return this.getNoteByIndex(baseInterval + offset);
+    }
+
+    transposeChordString(chordStr, delta) {
+        // Encontra notas individuais (incluindo baixo invertido ex: D/F#) e transpõe
+        const regex = /([CDEFGAB][#b]?)/gi;
+        return chordStr.replace(regex, (match) => {
+            const idx = this.getNoteIndex(match);
+            if (idx === -1) return match;
+            const newIdx = ((idx + (delta % 12)) + 12) % 12;
+            return this.sharpNotes[newIdx];
+        });
     }
 
     getPianoPattern() {
@@ -51,8 +71,17 @@ class ChordManager {
             this.keySelect.addEventListener('change', (e) => {
                 const val = e.target.value;
                 const currentContext = sessionStorage.getItem('app_context') || 'ACORDES';
-                sessionStorage.setItem(`key_${currentContext}`, val);
-                this.transposeChords(parseInt(val, 10));
+
+                // CORREÇÃO: Salva a preferência do Tom APENAS nos menus gerais e NUNCA salva "Letra" (L)
+                const allowedContextsToSave = ['ACORDES', 'LITURGIA', 'MISSA', 'ORACOES'];
+                if (allowedContextsToSave.includes(currentContext) && val !== "L") {
+                    sessionStorage.setItem(`key_${currentContext}`, val);
+                }
+
+                // Só transpõe os botões de acordes se não for "Letra"
+                if (val !== "L") {
+                    this.transposeChords(parseInt(val, 10));
+                }
             });
         }
 
@@ -63,6 +92,12 @@ class ChordManager {
     populateKeySelect() {
         if (!this.keySelect) return;
         this.keySelect.innerHTML = '';
+
+        // Adiciona a Opção Especial de Letra
+        const optLetra = document.createElement('option');
+        optLetra.value = "L";
+        optLetra.textContent = "Letra";
+        this.keySelect.appendChild(optLetra);
 
         this.theory.notes.forEach((note, index) => {
             const option = document.createElement('option');
@@ -99,10 +134,14 @@ class ChordManager {
     }
 
     changeKeyStep(step) {
+        if (this.keySelect.value === "L") return; // Ignora se estiver no modo letra
+
         const currentValue = parseInt(this.keySelect.value, 10);
         const newOffset = (currentValue + step + 12) % 12;
         this.keySelect.value = newOffset;
-        this.transposeChords(newOffset);
+
+        // Dispara o evento de "change" pra avisar o resto do app
+        this.keySelect.dispatchEvent(new Event('change'));
     }
 
     transposeChords(keyOffset) {

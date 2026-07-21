@@ -62,13 +62,13 @@ class BackupManager {
 
         if (!modalEl) return;
 
-        let loadedImportSongs = [];
+        let analyzedSongs = []; // Vai guardar o status (Nova ou Substituir)
 
         modalEl.addEventListener('hidden.bs.modal', () => {
             fileInput.value = '';
             selectionArea.classList.add('d-none');
             btnConfirm.classList.add('d-none');
-            loadedImportSongs = [];
+            analyzedSongs = [];
         });
 
         fileInput.addEventListener('change', (e) => {
@@ -78,14 +78,36 @@ class BackupManager {
             const reader = new FileReader();
             reader.onload = (event) => {
                 try {
-                    loadedImportSongs = JSON.parse(event.target.result);
+                    const loadedImportSongs = JSON.parse(event.target.result);
+                    const currentSongs = this.db.getSongs();
                     importList.innerHTML = '';
+                    analyzedSongs = [];
 
-                    loadedImportSongs.forEach((song, index) => {
+                    loadedImportSongs.forEach((incomingSong, index) => {
+                        // Garante compatibilidade com seu JSON antigo
+                        const title = incomingSong.title || incomingSong.titulo || 'Sem Título';
+                        const artist = incomingSong.artist || incomingSong.artista || '';
+                        const content = incomingSong.content || incomingSong.cifra || incomingSong.chords || '';
+
+                        // Verifica se o título já existe no banco atual
+                        const existingSong = currentSongs.find(s => s.title.toLowerCase() === title.toLowerCase());
+                        const isUpdate = !!existingSong;
+                        const existingId = isUpdate ? existingSong.id : null;
+
+                        // Salva o objeto normalizado e analisado
+                        analyzedSongs.push({
+                            title, artist, content, isUpdate, existingId
+                        });
+
+                        // Cria a Tag visual (Badge)
+                        const badge = isUpdate
+                            ? `<span class="badge bg-warning text-dark ms-2"><i class="fas fa-sync-alt me-1"></i>Substituir</span>`
+                            : `<span class="badge bg-success ms-2"><i class="fas fa-plus me-1"></i>Nova</span>`;
+
                         importList.innerHTML += `
-                            <div class="form-check">
-                                <input class="form-check-input import-cb" type="checkbox" value="${index}" checked>
-                                <label class="form-check-label">${song.title}</label>
+                            <div class="form-check d-flex align-items-center mb-1">
+                                <input class="form-check-input import-cb me-2" type="checkbox" value="${index}" checked>
+                                <label class="form-check-label mb-0 flex-grow-1">${title} ${badge}</label>
                             </div>`;
                     });
 
@@ -104,20 +126,46 @@ class BackupManager {
         });
 
         btnConfirm.addEventListener('click', () => {
+            // Pega os índices marcados na tela
             const selectedIndexes = Array.from(document.querySelectorAll('.import-cb:checked')).map(cb => parseInt(cb.value, 10));
-            const songsToImport = loadedImportSongs.filter((song, index) => selectedIndexes.includes(index));
 
+            // Pega o banco atualizado
             const currentSongs = this.db.getSongs();
-            songsToImport.forEach(song => {
-                song.id = Date.now().toString() + Math.random().toString(36).substring(2, 6);
-                currentSongs.push(song);
+
+            selectedIndexes.forEach(index => {
+                const analyzed = analyzedSongs[index];
+
+                if (analyzed.isUpdate) {
+                    // Substitui a música existente
+                    const songIndex = currentSongs.findIndex(s => s.id === analyzed.existingId);
+                    if (songIndex > -1) {
+                        currentSongs[songIndex] = {
+                            ...currentSongs[songIndex],
+                            title: analyzed.title,
+                            artist: analyzed.artist,
+                            content: analyzed.content
+                        };
+                    }
+                } else {
+                    // Adiciona música nova
+                    const safeId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
+                    currentSongs.push({
+                        id: safeId,
+                        title: analyzed.title,
+                        artist: analyzed.artist,
+                        content: analyzed.content
+                    });
+                }
             });
 
+            // Salva a lista final modificada no LocalStorage
             this.db.saveSongs(currentSongs);
+
+            // Dispara o evento pra tela atualizar o combobox (TomSelect)
             if (this.onImportComplete) this.onImportComplete();
 
             bootstrap.Modal.getInstance(modalEl).hide();
-            alert(`${songsToImport.length} música(s) importada(s) com sucesso!`);
+            alert(`${selectedIndexes.length} música(s) importada(s) com sucesso!`);
         });
     }
 }

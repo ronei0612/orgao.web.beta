@@ -140,6 +140,10 @@ class RepertoireController {
         this.hasSheetMusic = false;
         this.sheetMusicBlock = null;
 
+        // Variaveis de controle do Transpose
+        this.currentSelectValue = document.getElementById('key-select')?.value || "0";
+        this.isAutoAdjustingKey = false;
+
         backupManager.onImportComplete = () => this.refreshSelectOptions();
 
         this.toolbar.onStop(() => {
@@ -162,12 +166,151 @@ class RepertoireController {
 
     changeContext(newContext) {
         sessionStorage.setItem('app_context', newContext);
-        const savedKey = sessionStorage.getItem(`key_${newContext}`) || "0";
         const keySelect = document.getElementById('key-select');
-        if (keySelect && keySelect.value !== savedKey) {
-            keySelect.value = savedKey;
-            keySelect.dispatchEvent(new Event('change'));
+
+        // Só carrega o Tom da memória se for uma das telas gerais
+        if (['ACORDES', 'LITURGIA', 'MISSA', 'ORACOES'].includes(newContext)) {
+            let savedKey = sessionStorage.getItem(`key_${newContext}`) || "0";
+
+            // CORREÇÃO: Se por acaso "Letra" (L) ficou no cache de testes anteriores, força voltar para "0" (Dó)
+            if (savedKey === "L") {
+                savedKey = "0";
+            }
+
+            if (keySelect && keySelect.value !== savedKey) {
+                this.isAutoAdjustingKey = true;
+                keySelect.value = savedKey;
+                keySelect.dispatchEvent(new Event('change'));
+                this.isAutoAdjustingKey = false;
+            }
         }
+    }
+
+    updateMusicUIVisibility() {
+        if (!this.currentSongId || this.currentSongId === 'ACORDES') {
+            this.toggleMusicUI(true);
+            return;
+        }
+
+        const hasChords = this.view.mainDisplay.querySelector('b, .sheet-music-block') !== null;
+
+        if (!hasChords) {
+            const keySelect = document.getElementById('key-select');
+            if (keySelect && keySelect.value !== "L") {
+                this.isAutoAdjustingKey = true;
+                keySelect.value = "L";
+                keySelect.dispatchEvent(new Event('change'));
+                this.isAutoAdjustingKey = false;
+            }
+        } else {
+            // Garante que a interface volta ao normal caso tenha saído de uma música que era só Letra
+            this.toggleMusicUI(true);
+        }
+    }
+
+    // NOVA FUNÇÃO: Ocultar as ferramentas musicais da tela
+    toggleMusicUI(show) {
+        const keyGroup = document.getElementById('key-select')?.closest('.input-group');
+        const bpmGroup = document.getElementById('bpm-input')?.closest('.input-group');
+        const rhythmGroup = document.getElementById('rhythm-select')?.closest('.input-group');
+        const pianoWrap = document.querySelector('.piano-wrapper');
+        const playbackPanel = document.getElementById('btn-play')?.parentElement;
+
+        const toggle = (el, forceHide) => {
+            if (el) {
+                if (forceHide) el.classList.add('hide-music-ui');
+                else el.classList.remove('hide-music-ui');
+            }
+        };
+
+        toggle(keyGroup, !show);
+        toggle(bpmGroup, !show);
+        toggle(rhythmGroup, !show);
+        toggle(pianoWrap, !show);
+        toggle(playbackPanel, !show);
+
+        if (!show && this.toolbar) {
+            this.toolbar.disableFloatingControls();
+        }
+    }
+
+    // NOVA FUNÇÃO: Ler o primeiro acorde da música para ajustar o Select
+    autoAdjustKeySelect() {
+        const firstChordEl = this.view.mainDisplay.querySelector('b');
+        const keySelect = document.getElementById('key-select');
+
+        if (firstChordEl && keySelect && keySelect.value !== "L") {
+            const match = firstChordEl.innerText.match(/^([A-G][#b]?)/i);
+            if (match) {
+                const noteIndex = window.musicTheory.getNoteIndex(match[1]);
+                if (noteIndex !== -1 && parseInt(keySelect.value, 10) !== noteIndex) {
+                    this.isAutoAdjustingKey = true;
+                    keySelect.value = noteIndex;
+                    keySelect.dispatchEvent(new Event('change'));
+                    this.isAutoAdjustingKey = false;
+                }
+            }
+        }
+    }
+
+    // NOVA FUNÇÃO: O Motor do Transpose de Cifras e Partituras!
+    transposeSongOnScreen(delta) {
+        // 1. Transpõe os textos dos Acordes
+        const chords = this.view.mainDisplay.querySelectorAll('b');
+        chords.forEach(b => {
+            b.innerText = window.musicTheory.transposeChordString(b.innerText, delta);
+        });
+
+        // 2. Transpõe as Notas das Partituras e Redesenha
+        const blocks = this.view.mainDisplay.querySelectorAll('.sheet-music-block');
+        blocks.forEach(block => {
+            if (block.dataset.score) {
+                let data = ScoreCodec.decode(block.dataset.score);
+                data = this.transposeSheetData(data, delta);
+                block.dataset.score = ScoreCodec.encode(data);
+
+                const svg = window.sheetMusicEditor.drawStandalone(data);
+                if (svg) {
+                    block.innerHTML = '';
+                    block.appendChild(svg);
+                }
+            }
+        });
+
+        // 3. Atualiza os cliques (Playbacks) pros novos acordes
+        this.initHighlights();
+    }
+
+    transposeSheetData(data, delta) {
+        data.forEach(item => {
+            if (!item.rest && !item.bar) {
+                item.notes = item.notes.map(noteStr => {
+                    const parts = noteStr.split('/');
+                    const pitch = parts[0];
+                    const octave = parseInt(parts[1], 10);
+
+                    const idx = window.musicTheory.getNoteIndex(pitch);
+                    if (idx === -1) return noteStr;
+
+                    let newIdx = idx + delta;
+                    let newOctave = octave;
+
+                    if (newIdx >= 12) {
+                        newOctave += Math.floor(newIdx / 12);
+                        newIdx = newIdx % 12;
+                    } else if (newIdx < 0) {
+                        newOctave += Math.floor(newIdx / 12);
+                        newIdx = ((newIdx % 12) + 12) % 12;
+                    }
+
+                    return window.musicTheory.sharpNotes[newIdx].toLowerCase() + '/' + newOctave;
+                });
+            }
+            if (item.chord) {
+                item.chord = window.musicTheory.transposeChordString(item.chord, delta);
+            }
+        });
+        return data;
     }
 
     initEvents() {
@@ -212,7 +355,57 @@ class RepertoireController {
             this.activateQuickReturn('ORACOES');
         });
 
-        // Ao selecionar algo de verdade no select
+        // ============================================
+        // OUVINTE DE TRANSPOSE (SELECT DE TOM)
+        // ============================================
+        document.getElementById('key-select')?.addEventListener('change', (e) => {
+            const newVal = e.target.value;
+
+            if (newVal === "L") {
+                // Adiciona o espaçamento no final e esconde Cifras
+                this.view.mainDisplay.classList.add('mode-lyrics-only', 'lyrics-spacing');
+
+                // Força toda a interface musical a sumir (Piano, Controles Flutuantes, etc)
+                this.toggleMusicUI(false);
+
+                if (panelAcordes) panelAcordes.classList.add('d-none');
+                if (btnPrevChord) btnPrevChord.classList.add('d-none');
+                if (btnNextChord) btnNextChord.classList.add('d-none');
+            } else {
+                // Remove o espaço e exibe Cifras novamente
+                this.view.mainDisplay.classList.remove('mode-lyrics-only', 'lyrics-spacing');
+
+                // Retorna a Interface Musical se for ACORDES ou Música com Cifra
+                if (!this.currentSongId || this.currentSongId === 'ACORDES') {
+                    this.toggleMusicUI(true);
+                    if (panelAcordes) panelAcordes.classList.remove('d-none');
+                } else {
+                    const hasChords = this.view.mainDisplay.querySelector('b, .sheet-music-block') !== null;
+                    if (hasChords) {
+                        this.toggleMusicUI(true);
+                    }
+                    if (btnPrevChord) btnPrevChord.classList.remove('d-none');
+                    if (btnNextChord) btnNextChord.classList.remove('d-none');
+                }
+
+                // Disparo matemático do Transpose na Tela!
+                if (!this.isAutoAdjustingKey && this.currentSelectValue !== "L" && newVal !== "L") {
+                    const oldIdx = parseInt(this.currentSelectValue, 10);
+                    const newIdx = parseInt(newVal, 10);
+                    let delta = newIdx - oldIdx;
+
+                    if (delta > 6) delta -= 12;
+                    if (delta < -6) delta += 12;
+
+                    if (delta !== 0 && this.currentSongId && this.currentSongId !== 'ACORDES') {
+                        this.transposeSongOnScreen(delta);
+                    }
+                }
+            }
+            this.currentSelectValue = newVal;
+        });
+
+        // Ao selecionar algo de verdade no select principal de músicas
         this.ts.on('change', (selectedId) => {
             this.cancelQuickReturn();
             this.ts.blur();
@@ -227,12 +420,12 @@ class RepertoireController {
                 this.changeContext('ACORDES');
                 this.ts.removeOption('ACORDES');
 
-                // Limpa, restaura o placeholder e retira o foco para exibir o texto padrão
                 this.ts.clear(true);
                 this.ts.setTextboxValue('');
                 this.ts.blur();
 
                 this.toolbar.disableFloatingControls();
+                this.updateMusicUIVisibility();
             } else {
                 panelAcordes.classList.add('d-none');
                 btnPrevChord.classList.remove('d-none');
@@ -241,10 +434,15 @@ class RepertoireController {
                 this.currentSongId = selectedId;
                 const song = this.db.getSongById(selectedId);
                 this.view.showRepertoire(song ? song.content : '');
+
                 this.changeContext('ACORDES');
                 this.initHighlights();
-                this.ts.addOption({ value: 'ACORDES', text: 'Acordes', isTop: 1 });
 
+                // MÁGICA: Ajusta o Tom e as interfaces automaticamente
+                this.updateMusicUIVisibility();
+                this.autoAdjustKeySelect();
+
+                this.ts.addOption({ value: 'ACORDES', text: 'Acordes', isTop: 1 });
                 this.toolbar.enableFloatingControls();
             }
         });
@@ -277,6 +475,8 @@ class RepertoireController {
                 this.currentMode = 'view';
                 const song = this.db.getSongById(this.currentSongId);
                 this.view.showRepertoire(song ? song.content : '');
+                this.updateMusicUIVisibility();
+                this.autoAdjustKeySelect();
             });
         });
 
@@ -328,6 +528,9 @@ class RepertoireController {
         this.view.showRepertoire(song ? song.content : '');
         this.changeContext('ACORDES');
         this.initHighlights();
+
+        this.updateMusicUIVisibility();
+        this.autoAdjustKeySelect();
 
         this.ts.blur();
     }
@@ -500,6 +703,10 @@ class RepertoireController {
             this.ts.setValue(this.currentSongId, true);
             this.view.showRepertoire(savedSong ? savedSong.content : '');
             this.initHighlights();
+
+            // Depois de salvar, checa se a música possui cifras ou não!
+            this.updateMusicUIVisibility();
+            this.autoAdjustKeySelect();
         });
     }
 }
@@ -538,9 +745,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewManager = new ViewManager();
     const backupManager = new BackupManager(dbManager);
 
-    const toolbar = new ToolbarController(viewManager, tomSelectInstance);
+    // MUDANÇA AQUI: Adicione o modalManager como o 3º parâmetro
+    const toolbar = new ToolbarController(viewManager, tomSelectInstance, modalManager);
 
     const musicTheory = new MusicTheory();
+    window.musicTheory = musicTheory; // ADICIONE ESTA LINHA AQUI!
 
     const audioManager = new AudioManager();
     window.audioManager = audioManager;
