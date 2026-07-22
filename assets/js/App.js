@@ -1,5 +1,5 @@
-const APP_VERSION = 'v1.0.3';
-const APP_UPDATE_DATE = '20 de Julho de 2026';
+const APP_VERSION = 'v1.0.4';
+const APP_UPDATE_DATE = '22 de Julho de 2026';
 
 class ViewManager {
     constructor() {
