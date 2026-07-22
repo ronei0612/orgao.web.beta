@@ -16,7 +16,7 @@ class AudioManager {
         this.activePianoFluteNodes = {};
         this.activeRhythmNodes = []; // NOVO: Controla os áudios do Sequenciador
 
-        this.baseURL = "https://roneicostasoares.com.br/orgao.web.beta/assets/audio/";
+        this.baseURL = AppConfig.audioBaseURL;
 
         this.chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         this.enarmonics = { 'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#' };

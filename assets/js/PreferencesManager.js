@@ -55,7 +55,7 @@ class PreferencesManager {
         this.iconFlag = document.getElementById('icon-flag');
 
         try {
-            const response = await fetch('https://roneicostasoares.com.br/orgao.web.beta/translations.json');
+            const response = await fetch(AppConfig.translationsURL);
             if (response.ok) {
                 this.translations = await response.json();
                 this.updateInterface();
