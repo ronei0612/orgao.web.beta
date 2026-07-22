@@ -3,6 +3,12 @@ class AudioManager {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.ctx = new AudioContext();
 
+        this.masterGain = this.ctx.createGain();
+        this.compressor = this.ctx.createDynamicsCompressor();
+
+        this.masterGain.connect(this.compressor);
+        this.compressor.connect(this.ctx.destination);
+
         this.buffers = {};
 
         this.activeChordNodes = [];
@@ -209,7 +215,7 @@ class AudioManager {
             gainNode.gain.linearRampToValueAtTime(baseVolume, startTime + this.attackTime);
 
             source.connect(gainNode);
-            gainNode.connect(this.ctx.destination);
+            gainNode.connect(this.masterGain);
 
             source.start(startTime);
 
@@ -239,7 +245,7 @@ class AudioManager {
         gainNode.gain.linearRampToValueAtTime(1.0, this.ctx.currentTime + 0.1);
 
         source.connect(gainNode);
-        gainNode.connect(this.ctx.destination);
+        gainNode.connect(this.masterGain);
 
         source.start(this.ctx.currentTime);
 
@@ -271,7 +277,7 @@ class AudioManager {
         gainNode.gain.linearRampToValueAtTime(1.0, this.ctx.currentTime + 0.05);
 
         source.connect(gainNode);
-        gainNode.connect(this.ctx.destination);
+        gainNode.connect(this.masterGain);
 
         source.start(this.ctx.currentTime);
 
@@ -327,10 +333,10 @@ class AudioManager {
 
     async playStudioNote(instrumentName, fileName, volume = 1.0, startTime = 0) {
         if (!startTime) startTime = this.ctx.currentTime;
-        
+
         const instFolder = instrumentName === 'piano' ? 'Piano' : 'Orgao';
         const url = `${this.baseURL}studio/${instFolder}/${fileName}`;
-        
+
         const buffer = await this.getAudioBuffer(url);
         if (!buffer) return;
 
@@ -339,13 +345,12 @@ class AudioManager {
         source.loop = false;
 
         const gainNode = this.ctx.createGain();
-        gainNode.gain.setValueAtTime(volume, startTime); 
+        gainNode.gain.setValueAtTime(volume, startTime);
 
         source.connect(gainNode);
-        gainNode.connect(this.ctx.destination);
+        gainNode.connect(this.masterGain);
         source.start(startTime);
 
-        // NOVO: Adiciona na lista para podermos cortar com fade-out se o usuário apertar Stop
         this.activeRhythmNodes.push({ source, gainNode });
     }
 }
