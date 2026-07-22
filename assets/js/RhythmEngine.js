@@ -22,12 +22,12 @@ class RhythmEngine {
         this.setMusicLoadingState(true);
 
         try {
-            const response = await fetch('https://roneicostasoares.com.br/orgao.web.beta/styles-melody.json');
+            const response = await fetch(AppConfig.stylesMelodyURL);
             if (response.ok) {
                 this.rawRhythms = await response.json();
             }
         } catch (err) {
-            console.warn("Nenhum ritmo oficial encontrado no servidor.", err);
+            console.warn("Nenhum ritmo oficial encontrado.", err);
             this.rawRhythms = {};
         }
 
