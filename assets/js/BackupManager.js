@@ -62,7 +62,7 @@ class BackupManager {
 
         if (!modalEl) return;
 
-        let analyzedSongs = []; // Vai guardar o status (Nova ou Substituir)
+        let analyzedSongs = [];
 
         modalEl.addEventListener('hidden.bs.modal', () => {
             fileInput.value = '';
@@ -84,22 +84,21 @@ class BackupManager {
                     analyzedSongs = [];
 
                     loadedImportSongs.forEach((incomingSong, index) => {
-                        // Garante compatibilidade com seu JSON antigo
                         const title = incomingSong.title || incomingSong.titulo || 'Sem Título';
                         const artist = incomingSong.artist || incomingSong.artista || '';
-                        const content = incomingSong.content || incomingSong.cifra || incomingSong.chords || '';
+                        const rawContent = incomingSong.content || incomingSong.cifra || incomingSong.chords || '';
 
-                        // Verifica se o título já existe no banco atual
+                        // PADRONIZAÇÃO: Converte o texto bruto do JSON em HTML formatado com cifras em 'b'
+                        const content = TextFormatter.prepareContent(rawContent);
+
                         const existingSong = currentSongs.find(s => s.title.toLowerCase() === title.toLowerCase());
                         const isUpdate = !!existingSong;
                         const existingId = isUpdate ? existingSong.id : null;
 
-                        // Salva o objeto normalizado e analisado
                         analyzedSongs.push({
                             title, artist, content, isUpdate, existingId
                         });
 
-                        // Cria a Tag visual (Badge)
                         const badge = isUpdate
                             ? `<span class="badge bg-warning text-dark ms-2"><i class="fas fa-sync-alt me-1"></i>Substituir</span>`
                             : `<span class="badge bg-success ms-2"><i class="fas fa-plus me-1"></i>Nova</span>`;
@@ -126,17 +125,13 @@ class BackupManager {
         });
 
         btnConfirm.addEventListener('click', () => {
-            // Pega os índices marcados na tela
             const selectedIndexes = Array.from(document.querySelectorAll('.import-cb:checked')).map(cb => parseInt(cb.value, 10));
-
-            // Pega o banco atualizado
             const currentSongs = this.db.getSongs();
 
             selectedIndexes.forEach(index => {
                 const analyzed = analyzedSongs[index];
 
                 if (analyzed.isUpdate) {
-                    // Substitui a música existente
                     const songIndex = currentSongs.findIndex(s => s.id === analyzed.existingId);
                     if (songIndex > -1) {
                         currentSongs[songIndex] = {
@@ -147,7 +142,6 @@ class BackupManager {
                         };
                     }
                 } else {
-                    // Adiciona música nova
                     const safeId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
                     currentSongs.push({
                         id: safeId,
@@ -158,10 +152,8 @@ class BackupManager {
                 }
             });
 
-            // Salva a lista final modificada no LocalStorage
             this.db.saveSongs(currentSongs);
 
-            // Dispara o evento pra tela atualizar o combobox (TomSelect)
             if (this.onImportComplete) this.onImportComplete();
 
             bootstrap.Modal.getInstance(modalEl).hide();
