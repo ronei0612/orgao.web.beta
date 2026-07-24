@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Santa Missa - Ordinário</title>
 
-    <!-- Bootstrap 5 CSS -->
+    <!-- Bootstrap 5 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         :root {
@@ -23,7 +24,6 @@
             line-height: 1.4;
         }
 
-        /* Tipografia de Títulos - Fonte serifada clássica nativa */
         h1, h2, h3 {
             font-weight: 700;
             text-align: center;
@@ -31,7 +31,7 @@
 
         h1 {
             font-size: 2rem;
-            margin-top: 2.5rem;
+            margin-top: 2rem;
             margin-bottom: 1.5rem;
             color: #1a1a1a;
         }
@@ -49,7 +49,6 @@
             margin-bottom: 1rem;
         }
 
-        /* Estilo para as rubricas (siglas e instruções curtas) */
         .rubrica {
             color: var(--cor-rubrica);
         }
@@ -60,7 +59,7 @@
             font-size: 0.95em;
         }
 
-        /* Utilitário para grudar a barra de pesquisa no topo ao rolar */
+        /* Barra de pesquisa grudada no topo ao rolar */
         .sticky-search {
             position: sticky;
             top: 0;
@@ -96,710 +95,728 @@
 </head>
 
 <body>
-    <div class="container py-0 px-0">
+    <main class="container py-2 px-3">
 
-        <h1>Ritos Iniciais</h1>
+        <!-- RITOS INICIAIS -->
+        <section class="mb-4">
+            <h1>Ritos Iniciais</h1>
 
-        <p><span class="rubrica fw-bold me-2">CP</span> Em nome do Pai e do Filho e do Espírito Santo.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-
-        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> A graça de nosso Senhor Jesus Cristo, o amor do Pai e a comunhão do Espírito Santo estejam convosco.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Bendito seja Deus, que nos reuniu no amor de Cristo.</p>
-
-        <p class="text-center my-3 rubrica-instrucao">— ou —</p>
-
-        <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
-
-        <hr class="text-secondary opacity-25 my-4">
-
-        <h2>Ato Penitencial</h2>
-
-        <p><span class="rubrica fw-bold me-2">CP</span> Irmãos e irmãs, reconheçamos os nossos pecados, para celebrarmos dignamente os santos mistérios.</p>
-
-        <!-- Fórmula 1 -->
-        <h3 class="text-dark">Primeira fórmula</h3>
-        <p><span class="rubrica fw-bold me-2">CP</span> Confessemos os nossos pecados:</p>
-
-        <div class="fw-bold mb-3 ps-3 border-start border-danger-subtle">
-            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Confesso a Deus todo-poderoso e a vós, irmãos e irmãs,</p>
-            <p class="mb-0">que pequei muitas vezes por pensamentos e palavras, atos e omissões,</p>
-            <p class="mb-0 rubrica-instrucao">(batendo no peito, dizem:)</p>
-            <p class="mb-1">por minha culpa, minha culpa, minha tão grande culpa.</p>
-            <p class="mb-0">E peço à Virgem Maria, aos Anjos e Santos,</p>
-            <p class="mb-0">e a vós, irmãos e irmãs, que rogueis por mim a Deus, nosso Senhor.</p>
-        </div>
-
-        <p><span class="rubrica fw-bold me-2">CP</span> Deus todo-poderoso tenha compaixão de nós, perdoe os nossos pecados e nos conduza à vida eterna.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-
-        <p class="mt-3 mb-0"><span class="rubrica fw-bold me-2">CP</span> Senhor, tende piedade de nós.</p>
-        <p class="fw-bold mb-2"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
-        <p class="mb-0"><span class="rubrica fw-bold me-2">CP</span> Cristo, tende piedade de nós.</p>
-        <p class="fw-bold mb-2"><span class="rubrica fw-bold me-2">AS</span> Cristo, tende piedade de nós.</p>
-        <p class="mb-0"><span class="rubrica fw-bold me-2">CP</span> Senhor, tende piedade de nós.</p>
-        <p class="fw-bold mb-4"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
-
-        <div class="d-grid gap-2 col-md-6 mx-auto my-4">
-            <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('gloria').scrollIntoView({ behavior: 'smooth' })">
-                <i class="bi bi-arrow-down-circle"></i> Ir para o Glória
-            </button>
-        </div>
-
-        <hr class="text-secondary opacity-25 my-4">
-
-        <!-- Fórmula 2 -->
-        <h3 class="text-dark">Segunda fórmula</h3>
-        <p><span class="rubrica fw-bold me-2">CP</span> Tende compaixão de nós, Senhor.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Porque somos pecadores.</p>
-        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Manifestai, Senhor, a vossa misericórdia.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> E dai-nos a vossa salvação.</p>
-
-        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Deus todo-poderoso tenha compaixão de nós, perdoe os nossos pecados e nos conduza à vida eterna.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-
-        <hr class="text-secondary opacity-25 my-4">
-
-        <!-- Fórmula 3 -->
-        <h3 class="text-dark">Terceira fórmula</h3>
-        <p><span class="rubrica fw-bold me-2">CP</span> Senhor, que viestes salvar os corações arrependidos, tende piedade de nós.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
-
-        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Cristo, que viestes chamar os pecadores, tende piedade de nós.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Cristo, tende piedade de nós.</p>
-
-        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Senhor, que intercedeis por nós junto do Pai, tende piedade de nós.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
-
-        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Deus todo-poderoso tenha compaixão de nós, perdoe os nossos pecados e nos conduza à vida eterna.</p>
-        <p class="fw-bold mb-5"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-
-        <div class="d-grid gap-2 col-md-6 mx-auto my-4">
-            <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('oe-search').scrollIntoView({ behavior: 'smooth' })">
-                <i class="bi bi-arrow-down-circle"></i> Ir para Oração Eucarística
-            </button>
-        </div>
-
-        <!-- Glória -->
-        <h3 id="gloria" class="text-dark">Glória</h3>
-
-        <div class="fw-bold mb-4">
-            <p class="mb-0">Glória a Deus nas alturas,</p>
-            <p class="mb-0">e paz na terra aos homens por Ele amados.</p>
-            <p class="mb-0">Senhor Deus, rei dos céus,</p>
-            <p class="mb-0">Deus Pai todo-poderoso.</p>
-            <p class="mb-0">Nós vos louvamos,</p>
-            <p class="mb-0">nós vos bendizemos,</p>
-            <p class="mb-0">nós vos adoramos,</p>
-            <p class="mb-0">nós vos glorificamos,</p>
-            <p class="mb-0">nós vos damos graças</p>
-            <p class="mb-0">por vossa imensa glória.</p>
-            <p class="mb-0">Senhor Jesus Cristo, Filho Unigênito,</p>
-            <p class="mb-0">Senhor Deus, Cordeiro de Deus,</p>
-            <p class="mb-0">Filho de Deus Pai.</p>
-            <p class="mb-0">Vós que tirais o pecado do mundo,</p>
-            <p class="mb-0">tende piedade de nós.</p>
-            <p class="mb-0">Vós que tirais o pecado do mundo,</p>
-            <p class="mb-0">acolhei a nossa súplica.</p>
-            <p class="mb-0">Vós que estais à direita do Pai,</p>
-            <p class="mb-0">tende piedade de nós.</p>
-            <p class="mb-0">Só Vós sois o Santo,</p>
-            <p class="mb-0">só vós, o Senhor,</p>
-            <p class="mb-0">só vós, o Altíssimo,</p>
-            <p class="mb-0">Jesus Cristo,</p>
-            <p class="mb-0">com o Espírito Santo,</p>
-            <p class="mb-0">na glória de Deus Pai.</p>
-            <p class="mb-0">Amém.</p>
-        </div>
-
-        <p><span class="rubrica fw-bold me-2">CP</span> Oremos... <span class="rubrica-instrucao">(proclama a Coleta)</span></p>
-        <p class="fw-bold mb-5"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-
-        <div class="d-grid gap-2 col-md-6 mx-auto my-4">
-            <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('oe-search').scrollIntoView({ behavior: 'smooth' })">
-                <i class="bi bi-arrow-down-circle"></i> Ir para Oração Eucarística
-            </button>
-        </div>
-
-        <hr class="text-secondary opacity-25 my-5">
-
-        <h1>Liturgia da Palavra</h1>
-
-        <h2 class="text-dark mt-4">Credo (Símbolo dos Apóstolos)</h2>
-        <div class="fw-bold mb-4">
-            <p class="mb-0">Creio em Deus Pai todo-poderoso,</p>
-            <p class="mb-0">Criador do céu e da terra.</p>
-            <p class="mb-0">E em Jesus Cristo, seu único Filho, nosso Senhor,</p>
-            <p class="mb-0 rubrica-instrucao">(Todos se inclinam)</p>
-            <p class="mb-0">que foi concebido pelo poder do Espírito Santo,</p>
-            <p class="mb-0">nasceu da Virgem Maria,</p>
-            <p class="mb-0 rubrica-instrucao">(Retorna-se à posição anterior)</p>
-            <p class="mb-0">padeceu sob Pôncio Pilatos,</p>
-            <p class="mb-0">foi crucificado, morto e sepultado,</p>
-            <p class="mb-0">desceu à mansão dos mortos,</p>
-            <p class="mb-0">ressuscitou ao terceiro dia,</p>
-            <p class="mb-0">subiu aos céus,</p>
-            <p class="mb-0">está sentado à direita de Deus Pai todo-poderoso,</p>
-            <p class="mb-0">donde há de vir a julgar os vivos e os mortos.</p>
-            <p class="mb-0">Creio no Espírito Santo,</p>
-            <p class="mb-0">na santa Igreja Católica,</p>
-            <p class="mb-0">na comunhão dos santos,</p>
-            <p class="mb-0">na remissão dos pecados,</p>
-            <p class="mb-0">na ressurreição da carne</p>
-            <p class="mb-0">e na vida eterna.</p>
-            <p class="mb-0">Amém.</p>
-        </div>
-
-        <div class="d-grid gap-2 col-md-6 mx-auto my-4">
-            <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('oe-search').scrollIntoView({ behavior: 'smooth' })">
-                <i class="bi bi-arrow-down-circle"></i> Ir para Oração Eucarística
-            </button>
-        </div>
-
-        <h3 class="text-dark mt-4">Niceno-Constantinopolitano</h3>
-        <div class="fw-bold mb-5">
-            <p class="mb-0">Creio em um só Deus, Pai todo-poderoso,</p>
-            <p class="mb-0">Criador do céu e da terra,</p>
-            <p class="mb-0">de todas as coisas visíveis e invisíveis.</p>
-            <p class="mb-0">Creio em um só Senhor, Jesus Cristo,</p>
-            <p class="mb-0">Filho Unigênito de Deus,</p>
-            <p class="mb-0">nascido do Pai antes de todos os séculos:</p>
-            <p class="mb-0">Deus de Deus, luz da luz,</p>
-            <p class="mb-0">Deus verdadeiro de Deus verdadeiro,</p>
-            <p class="mb-0">gerado, não criado,</p>
-            <p class="mb-0">consubstancial ao Pai.</p>
-            <p class="mb-0">Por Ele todas as coisas foram feitas.</p>
-            <p class="mb-0">E, por nós, homens, e para a nossa salvação,</p>
-            <p class="mb-0">desceu dos céus:</p>
-            <p class="mb-0 rubrica-instrucao">(Todos se inclinam)</p>
-            <p class="mb-0">e se encarnou pelo Espírito Santo,</p>
-            <p class="mb-0">no seio da Virgem Maria,</p>
-            <p class="mb-0">e se fez homem.</p>
-            <p class="mb-0 rubrica-instrucao">(Retorna-se à posição anterior)</p>
-            <p class="mb-0">Também por nós foi crucificado</p>
-            <p class="mb-0">sob Pôncio Pilatos;</p>
-            <p class="mb-0">padeceu e foi sepultado.</p>
-            <p class="mb-0">Ressuscitou ao terceiro dia,</p>
-            <p class="mb-0">conforme as escrituras;</p>
-            <p class="mb-0">E subiu aos céus,</p>
-            <p class="mb-0">onde está sentado à direita do Pai.</p>
-            <p class="mb-0">E de novo há de vir, em sua glória,</p>
-            <p class="mb-0">para julgar os vivos e os mortos;</p>
-            <p class="mb-0">e o seu reino não terá fim.</p>
-            <p class="mb-0">Creio no Espírito Santo,</p>
-            <p class="mb-0">Senhor que dá a vida,</p>
-            <p class="mb-0">e procede do Pai e do Filho;</p>
-            <p class="mb-0">e com o Pai e o Filho</p>
-            <p class="mb-0">é adorado e glorificado:</p>
-            <p class="mb-0">Ele que falou pelos profetas.</p>
-            <p class="mb-0">Creio na Igreja una, santa,</p>
-            <p class="mb-0">católica e apostólica.</p>
-            <p class="mb-0">Professo um só batismo</p>
-            <p class="mb-0">para remissão dos pecados.</p>
-            <p class="mb-0">Espero a ressurreição dos mortos;</p>
-            <p class="mb-0">E a vida do mundo que há de vir.</p>
-            <p class="mb-0">Amém.</p>
-        </div>
-
-        <hr class="text-secondary opacity-25 my-5">
-
-        <h1>Liturgia Eucarística</h1>
-
-        <p><span class="rubrica fw-bold me-2">CP</span> Bendito sejais, Senhor, Deus do universo, pelo pão que recebemos de vossa bondade, fruto da terra e do trabalho humano, que agora vos apresentamos, e para nós se vai tornar pão da vida.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Bendito seja Deus para sempre!</p>
-
-        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Bendito sejais, Senhor, Deus do universo, pelo vinho que recebemos de vossa bondade, fruto da videira e do trabalho humano, que agora vos apresentamos, e que para nós se vai tornar vinho da salvação.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Bendito seja Deus para sempre!</p>
-
-        <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Orai, irmãos e irmãs, para que o meu e o vosso sacrifício seja aceito por Deus Pai todo-poderoso.</p>
-        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Receba o Senhor por tuas mãos este sacrifício, para glória do seu nome, para nosso bem e de toda a sua santa Igreja.</p>
-
-        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> <span class="rubrica-instrucao">(proclama a Oração sobre as Oferendas)</span></p>
-        <p class="fw-bold mb-5"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-
-
-        <!-- ORAÇÕES EUCARÍSTICAS COM PESQUISA -->
-        <h2 id="oracoes" class="text-dark">Orações Eucarísticas</h2>
-
-        <div class="sticky-search shadow-sm px-2 rounded mb-3" id="oe-search">
-            <div class="input-group">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-secondary">🔍</i></span>
-                <input type="search" id="inputPesquisaOE" class="form-control border-start-0 ps-0" placeholder="Pesquisar oração...">
-            </div>
-        </div>
-
-        <div class="accordion mb-5" id="accordionOracoes">
-
-            <!-- ORAÇÃO I -->
-            <div class="accordion-item" id="item-oe1">
-                <h2 class="accordion-header" id="headingOE1">
-                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOE1">
-                        Oração Eucarística I (Cânon Romano)
-                    </button>
-                </h2>
-                <div id="collapseOE1" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
-                    <div class="accordion-body">
-                        <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade (...). Concedei-nos, também a nós, associar-nos a seus louvores cantando (dizendo) a uma só voz:</p>
-
-                        <div class="fw-bold my-3">
-                            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
-                            <p class="mb-0">Senhor, Deus do universo.</p>
-                            <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                            <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                        </div>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Pai de misericórdia, a quem sobem nossos louvores, suplicantes, vos rogamos e pedimos por Jesus Cristo, vosso Filho e Senhor nosso, que aceiteis e abençoeis ✠ estes dons, estas oferendas, este sacrifício puro e santo, que oferecemos, antes de tudo, pela vossa Igreja santa e católica: concedei-lhe paz e proteção, unindo-a num só corpo e governando-a por toda a terra, em comunhão com o vosso servo o Papa N., o nosso Bispo N., e todos os que guardam a fé católica que receberam dos Apóstolos.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Abençoai nossa oferenda, ó Senhor!</p>
-
-                        <p class="rubrica-instrucao text-center mt-3 border-bottom pb-1">“memento dos vivos”</p>
-                        <p><span class="rubrica fw-bold me-2">1C</span> Lembrai-vos, ó Pai, dos vossos filhos e filhas N. N. e de todos os que circundam este altar, dos quais conheceis a fé e a dedicação ao vosso serviço. Por eles nós vos oferecemos e também eles vos oferecem este sacrifício de louvor por si e por todos os seus, e elevam a vós as suas preces, Deus eterno, vivo e verdadeiro, para alcançar o perdão de suas faltas, a segurança em suas vidas e a salvação que esperam.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, de vossos filhos!</p>
-
-                        <p class="rubrica-instrucao text-center mt-3 border-bottom pb-1">“Infra actionem”</p>
-                        <p><span class="rubrica fw-bold me-2">2C</span> Em comunhão com toda a Igreja, celebramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria, a de seu esposo São José, e também a dos Santos Apóstolos e Mártires: Pedro e Paulo, André, (Tiago e João, Tomé, Tiago e Filipe, Bartolomeu e Mateus, Simão e Tadeu, Lino, Cleto, Clemente, Sisto, Cornélio e Cipriano, Lourenço e Crisógono, João e Paulo, Cosme e Damião), e todos os vossos Santos. Por seus méritos e preces concedei-nos sem cessar a vossa proteção. (Por Cristo, nosso Senhor. Amém).</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Em comunhão com os vossos Santos vos louvamos!</p>
-
-                        <div class="border-start border-danger-subtle ps-3 my-4">
-                            <p class="rubrica-instrucao mb-1">“Para os Domingos”</p>
-                            <p class="mb-3">Em comunhão com toda a Igreja, celebramos o glorioso dia em que o Senhor venceu a morte e nos tornou participantes de sua vida imortal. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
-
-                            <p class="rubrica-instrucao mb-1">“No Natal do Senhor e durante a Oitava”</p>
-                            <p class="mb-3">Em comunhão com toda a Igreja, celebramos (a noite santíssima) o dia santíssimo, em que Maria, intacta em sua virgindade, deu à luz o Salvador do mundo. Veneramos em primeiro lugar a memória da mesma Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
-
-                            <p class="rubrica-instrucao mb-1">“Na Epifania do Senhor”</p>
-                            <p class="mb-3">Em comunhão com toda a Igreja, celebramos o dia santíssimo, em que vosso Filho unigênito, eterno convosco na glória, se manifestou visivelmente em nossa carne. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
-
-                            <p class="rubrica-instrucao mb-1">“Da Vigília Pascal até o 2º domingo da Páscoa”</p>
-                            <p class="mb-3">Em comunhão com toda a Igreja, celebramos (a noite santíssima) o dia santíssimo da Ressurreição de nosso Senhor Jesus Cristo segundo a carne. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
-
-                            <p class="rubrica-instrucao mb-1">“Na Ascensão do Senhor”</p>
-                            <p class="mb-3">Em comunhão com toda a Igreja, celebramos o dia santíssimo em que Nosso Senhor, vosso Filho unigênito, elevou à vossa direita na glória a nossa frágil natureza humana. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
-
-                            <p class="rubrica-instrucao mb-1">“Em Pentecostes”</p>
-                            <p>Em comunhão com toda a Igreja, celebramos o dia santíssimo de Pentecostes em que o Espírito Santo, em línguas de fogo, se manifestou aos Apóstolos. Veneramos em primeiro lugar a memória da mesma Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
-                        </div>
-
-                        <p><span class="rubrica fw-bold me-2">CP</span> Aceitai, ó Pai, com bondade, a oblação dos vossos servos e de toda a vossa família; dai-nos sempre a vossa paz, livrai-nos da condenação eterna e acolhei-nos entre os vossos eleitos. (Por Cristo, Senhor nosso. Amém)</p>
-
-                        <div class="border-start border-danger-subtle ps-3 my-4">
-                            <p class="rubrica-instrucao mb-1">“Da Vigília Pascal até o 2º domingo da Páscoa”</p>
-                            <p><span class="rubrica fw-bold me-2">CP</span> Aceitai, ó Pai, com bondade, a oblação dos vossos servos e de toda a vossa família; nós a oferecemos também por aqueles que vos dignastes regenerar pela água e pelo Espírito Santo, concedendo-lhes a remissão de todos os pecados. Dai aos nossos dias a vossa paz, livrai-nos da condenação eterna e acolhei-nos entre os vossos eleitos. (Por Cristo, nosso Senhor. Amém)</p>
-                        </div>
-
-                        <p><span class="rubrica fw-bold me-2">CC</span> Dignai-vos, ó Pai, aceitar, abençoar e santificar estas oferendas, recebei-as como sacrifício espiritual perfeito, a fim de que se tornem para nós o Corpo e ✠ o Sangue de vosso amado Filho, nosso Senhor Jesus Cristo.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o vosso Espírito Santo!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Na véspera de sua paixão, ele tomou o pão...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, ao fim da Ceia, ele tomou este precioso cálice...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PRA REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando, pois, a memória da bem-aventurada paixão do vosso Filho, da sua ressurreição dentre os mortos e gloriosa ascensão aos céus, nós, vossos servos, e também vosso povo santo, vos oferecemos, ó Pai, dentre os bens que nos destes, o sacrifício puro, santo e imaculado, Pão santo da vida eterna e Cálice da perpétua salvação. Recebei, ó Pai, com olhar benigno, esta oferta, como recebestes os dons do justo Abel, o sacrifício de nosso patriarca Abraão e a oblação pura e santa do sumo sacerdote Melquisedeque.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
-
-                        <p class="mt-3">Suplicantes, vos pedimos, ó Deus onipotente, que esta nossa oferenda seja levada à vossa presença, no altar do céu, pelas mãos do vosso santo Anjo, para que todos nós, participando deste altar, pela comunhão do santíssimo Corpo e Sangue do vosso Filho, sejamos repletos de todas as graças e bênçãos do céu. (Por Cristo, nosso Senhor. Amém)</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
-
-                        <p class="rubrica-instrucao text-center mt-3 border-bottom pb-1">“memento dos mortos”</p>
-                        <p><span class="rubrica fw-bold me-2">3C</span> Lembrai-vos, ó Pai, dos vossos filhos e filhas N. N. que nos precederam com o sinal da fé e dormem o sono da paz. A eles, e a todos os que descansam no Cristo, concedei o repouso, a luz e a paz. (Por Cristo, nosso Senhor. Amém)</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Concedei-lhes, ó Senhor, a luz eterna!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">4C</span> E a todos nós pecadores, que esperamos na vossa infinita misericórdia, concedei, não por nossos méritos, mas por vossa bondade, o convívio dos Apóstolos e Mártires: João Batista e Estêvão, Matias e Barnabé, (Inácio, Alexandre, Marcelino e Pedro, Felicidade e Perpétua, Águeda e Luzia, Inês, Cecília, Anastácia) e de todos os vossos Santos. Por Cristo, nosso Senhor.</p>
-                        <p><span class="rubrica fw-bold me-2">CP</span> Por ele não cessais de criar e santificar, vivificar, abençoar estes bens e distribuí-los entre nós.</p>
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda a honra e toda a glória, por todos os séculos dos séculos.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ORAÇÃO II (ABERTA POR PADRÃO) -->
-            <div class="accordion-item" id="item-oe2">
-                <h2 class="accordion-header" id="headingOE2">
-                    <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOE2" aria-expanded="true">
-                        Oração Eucarística II
-                    </button>
-                </h2>
-                <!-- Removido 'collapsed' do botão e adicionado 'show' na div abaixo -->
-                <div id="collapseOE2" class="accordion-collapse collapse show" data-bs-parent="#accordionOracoes">
-                    <div class="accordion-body">
-                        <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade, é digno e justo, é nosso dever e salvação dar-vos graças sempre e em todo o lugar, Senhor, Pai santo, por vosso amado Filho, Jesus Cristo. Ele é a vossa Palavra, pela qual tudo criastes. Ele é o nosso Salvador e Redentor, que se encarnou pelo Espírito Santo e nasceu da Virgem Maria. Ele, para cumprir a vossa vontade e adquirir para vós um povo santo, estendeu os braços na hora da sua paixão, a fim de vencer a morte e manifestar a ressurreição. Por isso, com os Anjos e todos os Santos, proclamamos vossa glória, cantando (dizendo) a uma só voz:</p>
-
-                        <div class="fw-bold my-3">
-                            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
-                            <p class="mb-0">Senhor, Deus do universo.</p>
-                            <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                            <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                        </div>
-
-                        <p><span class="rubrica fw-bold me-2">CP</span> Na verdade, ó Pai, vós sois Santo, fonte de toda santidade.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Santificai, pois, estes dons, derramando sobre eles o vosso Espírito, a fim de que se tornem para nós o Corpo e ✠ o Sangue de nosso Senhor Jesus Cristo.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o Vosso Espírito Santo!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Estando para ser entregue...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, no fim da Ceia...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PARA A REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando, pois, o memorial da morte e ressurreição do vosso Filho, nós vos oferecemos, ó Pai, o Pão da vida e o Cálice da salvação; e vos agradecemos porque nos tornastes dignos de estar aqui na vossa presença e vos servir.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Suplicantes, vos pedimos que, participando do Corpo e Sangue de Cristo, sejamos reunidos pelo Espírito Santo num só corpo.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> Lembrai-vos, ó Pai, da vossa Igreja que se faz presente pelo mundo inteiro; que ela cresça na caridade, em comunhão com o papa N., com o nosso bispo N., os bispos do mundo inteiro, os presbíteros, os diáconos e todos os ministros do vosso povo.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
-
-                        <div class="border-start border-danger-subtle ps-3 my-3">
-                            <p class="rubrica-instrucao mb-1">aos Domingos</p>
-                            <p class="mb-0">Lembrai-vos, ó Pai, da vossa Igreja que se faz presente pelo mundo inteiro; e aqui convocada no dia em que Cristo venceu a morte e nos fez participantes de sua vida imortal;</p>
-                        </div>
-
-                        <div class="border-start border-danger-subtle ps-3 my-3">
-                            <p class="rubrica-instrucao mb-1">Missa pelos Defuntos</p>
-                            <p class="mb-0"><span class="rubrica fw-bold me-2">2C</span> Lembrai-vos do vosso filho(a) N., que (hoje) chamastes deste mundo à vossa presença. Tendo sido sepultado(a) com Cristo em sua morte, no Batismo, participe igualmente da sua ressurreição.</p>
-                        </div>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Lembrai-vos também, na vossa misericórdia, dos (outros) nossos irmãos e irmãs que adormeceram na esperança da ressurreição e de todos os que partiram desta vida; acolhei-os junto a vós na luz da vossa face.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Concedei-lhes, ó Senhor, a luz eterna!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> Enfim, nós vos pedimos, tende piedade de todos nós e dai-nos participar da vida eterna, com a Virgem Maria, Mãe de Deus, São José, seu esposo, Os Apóstolos, (São N. Santo do dia ou padroeiro) e todos os Santos que neste mundo viveram na vossa amizade, a fim de vos louvarmos e glorificarmos por Jesus Cristo, vosso Filho.</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda a honra e toda a glória, por todos os séculos dos séculos.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ORAÇÃO III -->
-            <div class="accordion-item" id="item-oe3">
-                <h2 class="accordion-header" id="headingOE3">
-                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOE3">
-                        Oração Eucarística III
-                    </button>
-                </h2>
-                <div id="collapseOE3" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
-                    <div class="accordion-body">
-                        <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Nesta alegre esperança, unidos aos Anjos e Santos, cantamos (dizendo) a uma só voz:</p>
-
-                        <div class="fw-bold my-3">
-                            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
-                            <p class="mb-0">Senhor, Deus do universo.</p>
-                            <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                            <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                        </div>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade, vós sois Santo, ó Deus do universo, e tudo o que criastes proclama o vosso louvor, porque, por Jesus Cristo, vosso Filho e Senhor nosso, e pela força do Espírito Santo, dais vida e santidade a todas as coisas e não cessais de reunir para vós um povo que vos ofereça em toda parte, do nascer ao pôr do sol, um sacrifício perfeito.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Por isso, ó Pai, nós vos suplicamos: santificai pelo Espírito Santo as oferendas que vos apresentamos para serem consagradas a fim de que se tornem o Corpo ✠ e o Sangue de vosso Filho, nosso Senhor Jesus Cristo, que nos mandou celebrar estes mistérios.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o vosso Espírito Santo!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Na noite em que ia ser entregue...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, ao fim da Ceia...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PARA A REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando agora, ó Pai, o memorial da paixão redentora do vosso Filho, da sua gloriosa ressurreição e ascensão ao céu, e enquanto esperamos sua nova vinda, nós vos oferecemos em ação de graças este sacrifício vivo e santo.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
-
-                        <p class="mt-3">Olhai com bondade a oblação da vossa Igreja e reconhecei nela o sacrifício que nos reconciliou convosco; concedei que, alimentando-nos com o Corpo e o Sangue do vosso Filho, repletos do Espírito Santo, nos tornemos em Cristo um só corpo e um só espírito.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> Que o mesmo Espírito faça de nós uma eterna oferenda para alcançarmos a herança com os vossos eleitos: a santíssima Virgem Maria, Mãe de Deus, São José, seu esposo, os vossos santos Apóstolos e gloriosos Mártires, N. (Santo do dia ou padroeiro) e todos os Santos, que não cessam de interceder por nós na vossa presença.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Fazei de nós um perfeita oferenda!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Nós vos suplicamos, Senhor, que este sacrifício da nossa reconciliação estenda a paz e a salvação ao mundo inteiro. Confirmai na fé e na caridade a vossa Igreja que caminha neste mundo com o vosso servo o Papa N., e o nosso Bispo N., com os bispos do mundo inteiro, os presbíteros e diáconos, os outros ministros e o povo por vós redimido. Atendei propício às preces desta família, que reunistes em vossa presença. Reconduzi a vós, Pai de misericórdia, todos os vossos filhos e filhas dispersos pelo mundo inteiro.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> Acolhei com bondade no vosso reino os nossos irmãos e irmãs que partiram desta vida e todos os que morreram na vossa amizade. Unidos a eles, esperamos também nós saciar-nos eternamente da vossa glória, por Cristo, Senhor nosso. Por ele dais ao mundo todo bem e toda graça</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda honra e toda glória, por todos os séculos dos séculos.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ORAÇÃO IV -->
-            <div class="accordion-item" id="item-oe4">
-                <h2 class="accordion-header" id="headingOE4">
-                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOE4">
-                        Oração Eucarística IV
-                    </button>
-                </h2>
-                <div id="collapseOE4" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
-                    <div class="accordion-body">
-                        <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade, ó Pai, é nosso dever dar-vos graças, é nossa salvação dar-vos glória. Só vós sois o Deus vivo e verdadeiro que existis antes de todo o tempo e permaneceis para sempre, habitando em luz inacessível. Mas, porque sois o Deus de bondade e a fonte da vida, fizestes todas as coisas para cobrir de bênçãos as vossas criaturas e a muitos alegrar com a vossa luz. Eis, pois, diante de vós os inumeráveis coros dos Anjos que dia e noite vos servem e, contemplando a glória de vossa face, vos louvam sem cessar. Com eles também nós e, por nossa voz, tudo o que criastes celebramos o vosso Nome, e exultantes de alegria, cantamos (dizemos) a uma só voz:</p>
-
-                        <div class="fw-bold my-3">
-                            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
-                            <p class="mb-0">Senhor, Deus do universo.</p>
-                            <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                            <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                        </div>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Nós proclamamos vossa grandeza, Pai santo, a sabedoria e o amor com que fizestes todas as coisas. Criastes o ser humano à vossa imagem e lhe confiastes todo o universo para que, servindo somente a vós, seu Criador, cuidasse de toda criatura. E quando pela desobediência perdeu a vossa amizade, não o abandonastes ao poder da morte. A todos, porém, socorrestes com misericórdia, para que, ao procurar-vos, vos encontrassem. Muitas vezes oferecestes aliança à família humana e a instruístes pelos profetas na esperança da salvação.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> A todos socorrestes com bondade!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">PR</span> E de tal modo, Pai santo, amastes o mundo que, chegada a plenitude dos tempos, nos enviastes vosso próprio Filho para ser o nosso Salvador. Encarnado pelo poder do Espírito Santo e nascido da Virgem Maria, Jesus viveu em tudo a condição humana, menos o pecado; anunciou aos pobres a salvação, aos oprimidos, a liberdade, aos tristes, a alegria. Para cumprir o vosso plano de amor, entregou-se à morte e, ressuscitando, destruiu a morte e renovou a vida.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Por amor nos enviastes vosso Filho!</p>
-
-                        <p class="mt-3">E, a fim de não mais vivermos para nós, mas para ele, que por nós morreu e ressuscitou, enviou de vós, ó Pai, como primeiro dom aos vossos fiéis, o Espírito Santo, que continua sua obra no mundo para levar à plenitude toda a santificação.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Por isso, nós vos pedimos, ó Pai, que o mesmo Espírito Santo santifique estas oferendas, a fim de que se tornem o Corpo ✠ e o Sangue de Jesus Cristo, vosso Filho e Senhor nosso, para celebrarmos este grande mistério que ele nos deixou em sinal da eterna aliança.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o vosso Espírito Santo!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Quando, pois, chegou a hora...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, ele tomou em suas mãos o cálice...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PRA REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando, agora, ó Pai, o memorial da nossa redenção, anunciamos a morte de Cristo e sua descida entre os mortos, proclamamos a sua ressurreição e ascensão à vossa direita e, esperando a sua vinda gloriosa, nós vos oferecemos o seu Corpo e Sangue, sacrifício do vosso agrado e salvação do mundo inteiro.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
-
-                        <p class="mt-3">Olhai, com bondade, a oblação que destes à vossa Igreja e concedei aos que vamos participar do mesmo pão e do mesmo cálice que, reunidos pelo Espírito Santo num só corpo, nos tornemos em Cristo uma oferenda viva para o louvor da vossa glória.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> E agora, ó Pai, lembrai-vos de todos pelos quais vos oferecemos este sacrifício: o vosso servo o Papa N., o nosso Bispo N., os bispos do mundo inteiro, os presbíteros, os diáconos, e todos os ministros da vossa Igreja, os fiéis que, ao redor deste altar, se unem à nossa oferta, o povo que vos pertence e todos aqueles que vos procuram de coração sincero.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Lembrai-vos também dos que morreram na paz do vosso Cristo e de todos os defuntos dos quais só vós conhecestes a fé.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Concedei-lhes, ó Senhor, a luz eterna!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> E a todos nós, vossos Filhos e Filhas, concedei, ó Pai de bondade, alcançar a herança eterna, com a Virgem Maria, Mãe de Deus, São José, seu esposo, os Apóstolos e todos os Santos, no vosso reino, onde, com todas as criaturas, libertas da corrupção do pecado e da morte, vos glorificaremos por Cristo, Senhor nosso, por quem dais ao mundo todo bem e toda graça.</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda a honra e toda a glória, por todos os séculos dos séculos.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ORAÇÃO V -->
-            <div class="accordion-item" id="item-oe5">
-                <h2 class="accordion-header" id="headingOE5">
-                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOE5">
-                        Oração Eucarística V
-                    </button>
-                </h2>
-                <div id="collapseOE5" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
-                    <div class="accordion-body">
-                        <p class="rubrica-instrucao text-center border-bottom pb-1">O prefácio não pode ser substituído por outro.</p>
-                        <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
-                        <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> É justo e nos faz todos ser mais santos, louvar a vós, ó Pai, no mundo inteiro, de dia e de noite, agradecendo com Cristo, vosso Filho, nosso irmão. É ele o sacerdote verdadeiro que sempre se oferece por nós todos, mandando que se faça a mesma coisa que fez naquela ceia derradeira. Por isso, aqui estamos bem unidos, louvando e agradecendo com alegria, juntando nossa voz à voz dos Anjos e dos Santos todos, para cantar (dizer):</p>
-
-                        <div class="fw-bold my-3">
-                            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
-                            <p class="mb-0">Senhor, Deus do universo.</p>
-                            <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                            <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
-                            <p class="mb-0">Hosana nas alturas!</p>
-                        </div>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Ó Pai, vós que sempre quisestes ficar muito perto de nós, vivendo conosco no Cristo, falando conosco por ele, mandai o vosso Espírito Santo, a fim de que as nossas ofertas se mudem no Corpo ✠ e no Sangue de nosso Senhor Jesus Cristo.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Mandai vosso Espírito Santo!</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Na noite em que ia ser entregue...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, no fim da Ceia...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PARA A REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Tudo isto é mistério da fé!</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Toda vez que comemos deste Pão, toda vez que bebemos deste Vinho, recordamos a paixão de Jesus Cristo e ficamos esperando sua vinda.</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Recordando, ó Pai, neste momento, a paixão de Jesus, nosso Senhor, sua ressurreição e ascensão, nós queremos a vós oferecer este Pão que alimenta e que dá vida, este Vinho que nos salva e dá coragem.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Recebei, ó Senhor, a nossa oferta!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> E quando recebermos Pão e Vinho, o Corpo e Sangue dele oferecidos, o Espírito nos una num só corpo, para sermos um só povo em seu amor.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos uma num só corpo!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> Protegei vossa Igreja que caminha nas estradas do mundo rumo ao céu, cada dia renovando a esperança de chegar junto a vós, na vossa paz.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Caminhamos na estrada de Jesus!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Dai ao vosso servo, o Papa N., ser bem firme na fé, na caridade, e a N., que é Bispo desta Igreja, muita luz para guiar o vosso povo.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> Esperamos entrar na vida eterna com Maria, Mãe de Deus e da Igreja, os Apóstolos, e todos os que na vida souberam amar Cristo e seus irmãos.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Esperamos entrar na vida eterna!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">4C</span> Abri as portas da misericórdia aos que chamastes para a outra vida; acolhei-os juntos a vós, bem felizes no reino que para todos preparastes.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> A todos dai a luz que não se apaga!</p>
-
-                        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> E a todos nós, aqui reunidos, que somos povo santo e pecador, dai-nos a graça de participar do vosso reino que também é nosso.</p>
-
-                        <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, em Cristo, a vós, Deus Pai todo poderoso, na unidade do Espírito Santo, toda honra e toda a glória, por todos os séculos dos séculos.</p>
-                        <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <hr class="text-secondary opacity-25 my-5">
-
-        <h1>Rito da Comunhão</h1>
-
-        <p><span class="rubrica fw-bold me-2">CP</span> Obedientes à palavra do Salvador e formados por seu divino ensinamento, ousamos dizer:</p>
-
-        <div id="pai" class="fw-bold my-4">
-            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Pai nosso que estais nos céus,</p>
-            <p class="mb-0">santificado seja o vosso nome;</p>
-            <p class="mb-0">venha a nós o vosso reino,</p>
-            <p class="mb-0">seja feita a vossa vontade,</p>
-            <p class="mb-0">assim na terra como no céu.</p>
-            <p class="mb-0">O pão nosso de cada dia nos dai hoje;</p>
-            <p class="mb-0">perdoai-nos as nossas ofensas,</p>
-            <p class="mb-0">assim como nós perdoamos</p>
-            <p class="mb-0">a quem nos tem ofendido;</p>
-            <p class="mb-0">e não nos deixeis cair em tentação,</p>
-            <p class="mb-0">mas livrai-nos do mal.</p>
-        </div>
-
-        <div id="vosso" class="mt-3">
-            <p><span class="rubrica fw-bold me-2">CP</span> Livrai-nos de todos os males, ó Pai, e dai-nos hoje a vossa paz. Ajudados pela vossa misericórdia, sejamos sempre livres do pecado e protegidos de todos os perigos, enquanto aguardamos a feliz esperança e a vinda do Nosso Salvador, Jesus Cristo.</p>
-            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Vosso é o reino, o poder e a glória para sempre.</p>
-        </div>
-
-        <div id="amemRezado" class="mt-4">
-            <p><span class="rubrica fw-bold me-2">CP</span> Senhor Jesus Cristo, dissestes aos vossos Apóstolos: eu vos deixo a paz, eu vos dou a minha paz. Não olheis os nossos pecados, mas a fé que anima vossa Igreja; dai-lhe, segundo o vosso desejo, a paz e a unidade. Vós, que sois Deus, com o Pai e o Espírito Santo.</p>
+            <p><span class="rubrica fw-bold me-2">CP</span> Em nome do Pai e do Filho e do Espírito Santo.</p>
             <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
-        </div>
 
-        <div id="amor" class="mt-3">
-            <p><span class="rubrica fw-bold me-2">CP</span> A paz do Senhor esteja sempre convosco.</p>
-            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O amor de Cristo nos uniu.</p>
-        </div>
+            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> A graça de nosso Senhor Jesus Cristo, o amor do Pai e a comunhão do Espírito Santo estejam convosco.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Bendito seja Deus, que nos reuniu no amor de Cristo.</p>
 
-        <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Irmãos e irmãs, saudai-vos em Cristo Jesus. <span class="rubrica-instrucao">(Momento do abraço da paz)</span></p>
+            <p class="text-center my-3 rubrica-instrucao">— ou —</p>
 
-        <div id="cordeiro" class="fw-bold my-4">
-            <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Cordeiro de Deus,</p>
-            <p class="mb-0">que tirais o pecado do mundo,</p>
-            <p class="mb-0">tende piedade de nós.</p>
-            <p class="mb-0">Cordeiro de Deus,</p>
-            <p class="mb-0">que tirais o pecado do mundo,</p>
-            <p class="mb-0">tende piedade de nós.</p>
-            <p class="mb-0">Cordeiro de Deus,</p>
-            <p class="mb-0">que tirais o pecado do mundo,</p>
-            <p class="mb-0">dai-nos a paz.</p>
-        </div>
+            <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
+        </section>
 
-        <div id="digno" class="mt-4">
-            <p><span class="rubrica fw-bold me-2">CP</span> Felizes os convidados para a Ceia do Senhor. Eis o Cordeiro de Deus, que tira o pecado do mundo.</p>
-            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Senhor, eu não sou digno(a) de que entreis em minha morada, mas dizei uma palavra e serei salvo(a).</p>
-        </div>
+        <hr class="text-secondary opacity-25 my-4">
 
-        <p class="mt-4 rubrica-instrucao"><span class="rubrica fw-bold me-2">CP</span> (Momento da Comunhão e silêncio sagrado)</p>
+        <!-- ATO PENITENCIAL -->
+        <section class="mb-4">
+            <h2>Ato Penitencial</h2>
 
-        <p class="mt-5"><span class="rubrica fw-bold me-2">CP</span> Oremos... <span class="rubrica-instrucao">(proclama a Oração depois da Comunhão)</span></p>
-        <p class="fw-bold mb-5"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+            <p><span class="rubrica fw-bold me-2">CP</span> Irmãos e irmãs, reconheçamos os nossos pecados, para celebrarmos dignamente os santos mistérios.</p>
 
-    </div>
+            <!-- Fórmula 1 -->
+            <h3 class="text-dark">Primeira fórmula</h3>
+            <p><span class="rubrica fw-bold me-2">CP</span> Confessemos os nossos pecados:</p>
 
-    <!-- Bootstrap 5 JS para o Accordion funcionar -->
+            <div class="fw-bold mb-3 ps-3 border-start border-danger-subtle">
+                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Confesso a Deus todo-poderoso e a vós, irmãos e irmãs,</p>
+                <p class="mb-0">que pequei muitas vezes por pensamentos e palavras, atos e omissões,</p>
+                <p class="mb-0 rubrica-instrucao">(batendo no peito, dizem:)</p>
+                <p class="mb-1">por minha culpa, minha culpa, minha tão grande culpa.</p>
+                <p class="mb-0">E peço à Virgem Maria, aos Anjos e Santos,</p>
+                <p class="mb-0">e a vós, irmãos e irmãs, que rogueis por mim a Deus, nosso Senhor.</p>
+            </div>
+
+            <p><span class="rubrica fw-bold me-2">CP</span> Deus todo-poderoso tenha compaixão de nós, perdoe os nossos pecados e nos conduza à vida eterna.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+
+            <p class="mt-3 mb-0"><span class="rubrica fw-bold me-2">CP</span> Senhor, tende piedade de nós.</p>
+            <p class="fw-bold mb-2"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
+            <p class="mb-0"><span class="rubrica fw-bold me-2">CP</span> Cristo, tende piedade de nós.</p>
+            <p class="fw-bold mb-2"><span class="rubrica fw-bold me-2">AS</span> Cristo, tende piedade de nós.</p>
+            <p class="mb-0"><span class="rubrica fw-bold me-2">CP</span> Senhor, tende piedade de nós.</p>
+            <p class="fw-bold mb-4"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
+
+            <div class="d-grid gap-2 col-md-6 mx-auto my-4">
+                <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('gloria').scrollIntoView({ behavior: 'smooth' })">
+                    <i class="bi bi-arrow-down-circle me-1"></i> Ir para o Glória
+                </button>
+            </div>
+
+            <hr class="text-secondary opacity-25 my-4">
+
+            <!-- Fórmula 2 -->
+            <h3 class="text-dark">Segunda fórmula</h3>
+            <p><span class="rubrica fw-bold me-2">CP</span> Tende compaixão de nós, Senhor.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Porque somos pecadores.</p>
+            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Manifestai, Senhor, a vossa misericórdia.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> E dai-nos a vossa salvação.</p>
+
+            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Deus todo-poderoso tenha compaixão de nós, perdoe os nossos pecados e nos conduza à vida eterna.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+
+            <hr class="text-secondary opacity-25 my-4">
+
+            <!-- Fórmula 3 -->
+            <h3 class="text-dark">Terceira fórmula</h3>
+            <p><span class="rubrica fw-bold me-2">CP</span> Senhor, que viestes salvar os corações arrependidos, tende piedade de nós.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
+
+            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Cristo, que viestes chamar os pecadores, tende piedade de nós.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Cristo, tende piedade de nós.</p>
+
+            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Senhor, que intercedeis por nós junto do Pai, tende piedade de nós.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Senhor, tende piedade de nós.</p>
+
+            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Deus todo-poderoso tenha compaixão de nós, perdoe os nossos pecados e nos conduza à vida eterna.</p>
+            <p class="fw-bold mb-4"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+
+            <div class="d-grid gap-2 col-md-6 mx-auto my-4">
+                <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('oe-search').scrollIntoView({ behavior: 'smooth' })">
+                    <i class="bi bi-arrow-down-circle me-1"></i> Ir para Oração Eucarística
+                </button>
+            </div>
+        </section>
+
+        <!-- GLÓRIA -->
+        <section id="gloria" class="mb-4">
+            <h3 class="text-dark">Glória</h3>
+
+            <div class="fw-bold mb-4">
+                <p class="mb-0">Glória a Deus nas alturas,</p>
+                <p class="mb-0">e paz na terra aos homens por Ele amados.</p>
+                <p class="mb-0">Senhor Deus, rei dos céus,</p>
+                <p class="mb-0">Deus Pai todo-poderoso.</p>
+                <p class="mb-0">Nós vos louvamos,</p>
+                <p class="mb-0">nós vos bendizemos,</p>
+                <p class="mb-0">nós vos adoramos,</p>
+                <p class="mb-0">nós vos glorificamos,</p>
+                <p class="mb-0">nós vos damos graças</p>
+                <p class="mb-0">por vossa imensa glória.</p>
+                <p class="mb-0">Senhor Jesus Cristo, Filho Unigênito,</p>
+                <p class="mb-0">Senhor Deus, Cordeiro de Deus,</p>
+                <p class="mb-0">Filho de Deus Pai.</p>
+                <p class="mb-0">Vós que tirais o pecado do mundo,</p>
+                <p class="mb-0">tende piedade de nós.</p>
+                <p class="mb-0">Vós que tirais o pecado do mundo,</p>
+                <p class="mb-0">acolhei a nossa súplica.</p>
+                <p class="mb-0">Vós que estais à direita do Pai,</p>
+                <p class="mb-0">tende piedade de nós.</p>
+                <p class="mb-0">Só Vós sois o Santo,</p>
+                <p class="mb-0">só vós, o Senhor,</p>
+                <p class="mb-0">só vós, o Altíssimo,</p>
+                <p class="mb-0">Jesus Cristo,</p>
+                <p class="mb-0">com o Espírito Santo,</p>
+                <p class="mb-0">na glória de Deus Pai.</p>
+                <p class="mb-0">Amém.</p>
+            </div>
+
+            <p><span class="rubrica fw-bold me-2">CP</span> Oremos... <span class="rubrica-instrucao">(proclama a Coleta)</span></p>
+            <p class="fw-bold mb-4"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+
+            <div class="d-grid gap-2 col-md-6 mx-auto my-4">
+                <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('oe-search').scrollIntoView({ behavior: 'smooth' })">
+                    <i class="bi bi-arrow-down-circle me-1"></i> Ir para Oração Eucarística
+                </button>
+            </div>
+        </section>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <!-- LITURGIA DA PALAVRA -->
+        <section class="mb-5">
+            <h1>Liturgia da Palavra</h1>
+
+            <h2 class="text-dark mt-4">Credo (Símbolo dos Apóstolos)</h2>
+            <div class="fw-bold mb-4">
+                <p class="mb-0">Creio em Deus Pai todo-poderoso,</p>
+                <p class="mb-0">Criador do céu e da terra.</p>
+                <p class="mb-0">E em Jesus Cristo, seu único Filho, nosso Senhor,</p>
+                <p class="mb-0 rubrica-instrucao">(Todos se inclinam)</p>
+                <p class="mb-0">que foi concebido pelo poder do Espírito Santo,</p>
+                <p class="mb-0">nasceu da Virgem Maria,</p>
+                <p class="mb-0 rubrica-instrucao">(Retorna-se à posição anterior)</p>
+                <p class="mb-0">padeceu sob Pôncio Pilatos,</p>
+                <p class="mb-0">foi crucificado, morto e sepultado,</p>
+                <p class="mb-0">desceu à mansão dos mortos,</p>
+                <p class="mb-0">ressuscitou ao terceiro dia,</p>
+                <p class="mb-0">subiu aos céus,</p>
+                <p class="mb-0">está sentado à direita de Deus Pai todo-poderoso,</p>
+                <p class="mb-0">donde há de vir a julgar os vivos e os mortos.</p>
+                <p class="mb-0">Creio no Espírito Santo,</p>
+                <p class="mb-0">na santa Igreja Católica,</p>
+                <p class="mb-0">na comunhão dos santos,</p>
+                <p class="mb-0">na remissão dos pecados,</p>
+                <p class="mb-0">na ressurreição da carne</p>
+                <p class="mb-0">e na vida eterna.</p>
+                <p class="mb-0">Amém.</p>
+            </div>
+
+            <div class="d-grid gap-2 col-md-6 mx-auto my-4">
+                <button type="button" class="btn btn-outline-secondary shadow-sm fw-bold" onclick="document.getElementById('oe-search').scrollIntoView({ behavior: 'smooth' })">
+                    <i class="bi bi-arrow-down-circle me-1"></i> Ir para Oração Eucarística
+                </button>
+            </div>
+
+            <h3 class="text-dark mt-4">Niceno-Constantinopolitano</h3>
+            <div class="fw-bold mb-4">
+                <p class="mb-0">Creio em um só Deus, Pai todo-poderoso,</p>
+                <p class="mb-0">Criador do céu e da terra,</p>
+                <p class="mb-0">de todas as coisas visíveis e invisíveis.</p>
+                <p class="mb-0">Creio em um só Senhor, Jesus Cristo,</p>
+                <p class="mb-0">Filho Unigênito de Deus,</p>
+                <p class="mb-0">nascido do Pai antes de todos os séculos:</p>
+                <p class="mb-0">Deus de Deus, luz da luz,</p>
+                <p class="mb-0">Deus verdadeiro de Deus verdadeiro,</p>
+                <p class="mb-0">gerado, não criado,</p>
+                <p class="mb-0">consubstancial ao Pai.</p>
+                <p class="mb-0">Por Ele todas as coisas foram feitas.</p>
+                <p class="mb-0">E, por nós, homens, e para a nossa salvação,</p>
+                <p class="mb-0">desceu dos céus:</p>
+                <p class="mb-0 rubrica-instrucao">(Todos se inclinam)</p>
+                <p class="mb-0">e se encarnou pelo Espírito Santo,</p>
+                <p class="mb-0">no seio da Virgem Maria,</p>
+                <p class="mb-0">e se fez homem.</p>
+                <p class="mb-0 rubrica-instrucao">(Retorna-se à posição anterior)</p>
+                <p class="mb-0">Também por nós foi crucificado</p>
+                <p class="mb-0">sob Pôncio Pilatos;</p>
+                <p class="mb-0">padeceu e foi sepultado.</p>
+                <p class="mb-0">Ressuscitou ao terceiro dia,</p>
+                <p class="mb-0">conforme as escrituras;</p>
+                <p class="mb-0">E subiu aos céus,</p>
+                <p class="mb-0">onde está sentado à direita do Pai.</p>
+                <p class="mb-0">E de novo há de vir, em sua glória,</p>
+                <p class="mb-0">para julgar os vivos e os mortos;</p>
+                <p class="mb-0">e o seu reino não terá fim.</p>
+                <p class="mb-0">Creio no Espírito Santo,</p>
+                <p class="mb-0">Senhor que dá a vida,</p>
+                <p class="mb-0">e procede do Pai e do Filho;</p>
+                <p class="mb-0">e com o Pai e o Filho</p>
+                <p class="mb-0">é adorado e glorificado:</p>
+                <p class="mb-0">Ele que falou pelos profetas.</p>
+                <p class="mb-0">Creio na Igreja una, santa,</p>
+                <p class="mb-0">católica e apostólica.</p>
+                <p class="mb-0">Professo um só batismo</p>
+                <p class="mb-0">para remissão dos pecados.</p>
+                <p class="mb-0">Espero a ressurreição dos mortos;</p>
+                <p class="mb-0">E a vida do mundo que há de vir.</p>
+                <p class="mb-0">Amém.</p>
+            </div>
+        </section>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <!-- LITURGIA EUCARÍSTICA -->
+        <section class="mb-5">
+            <h1>Liturgia Eucarística</h1>
+
+            <p><span class="rubrica fw-bold me-2">CP</span> Bendito sejais, Senhor, Deus do universo, pelo pão que recebemos de vossa bondade, fruto da terra e do trabalho humano, que agora vos apresentamos, e para nós se vai tornar pão da vida.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Bendito seja Deus para sempre!</p>
+
+            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Bendito sejais, Senhor, Deus do universo, pelo vinho que recebemos de vossa bondade, fruto da videira e do trabalho humano, que agora vos apresentamos, e que para nós se vai tornar vinho da salvação.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Bendito seja Deus para sempre!</p>
+
+            <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Orai, irmãos e irmãs, para que o meu e o vosso sacrifício seja aceito por Deus Pai todo-poderoso.</p>
+            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Receba o Senhor por tuas mãos este sacrifício, para glória do seu nome, para nosso bem e de toda a sua santa Igreja.</p>
+
+            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> <span class="rubrica-instrucao">(proclama a Oração sobre as Oferendas)</span></p>
+            <p class="fw-bold mb-4"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+
+            <!-- ORAÇÕES EUCARÍSTICAS COM PESQUISA -->
+            <h2 id="oracoes" class="text-dark">Orações Eucarísticas</h2>
+
+            <div class="sticky-search shadow-sm px-2 rounded mb-3" id="oe-search">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                    <input type="search" id="inputPesquisaOE" class="form-control border-start-0 ps-0" placeholder="Pesquisar oração..." aria-label="Pesquisar Oração Eucarística">
+                </div>
+            </div>
+
+            <div class="accordion mb-5" id="accordionOracoes">
+
+                <!-- ORAÇÃO I -->
+                <div class="accordion-item" id="item-oe1">
+                    <h2 class="accordion-header" id="headingOE1">
+                        <button type="button" class="accordion-button collapsed fw-bold" data-bs-toggle="collapse" data-bs-target="#collapseOE1">
+                            Oração Eucarística I (Cânon Romano)
+                        </button>
+                    </h2>
+                    <div id="collapseOE1" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
+                        <div class="accordion-body">
+                            <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade (...). Concedei-nos, também a nós, associar-nos a seus louvores cantando (dizendo) a uma só voz:</p>
+
+                            <div class="fw-bold my-3">
+                                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
+                                <p class="mb-0">Senhor, Deus do universo.</p>
+                                <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                                <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                            </div>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Pai de misericórdia, a quem sobem nossos louvores, suplicantes, vos rogamos e pedimos por Jesus Cristo, vosso Filho e Senhor nosso, que aceiteis e abençoeis ✠ estes dons, estas oferendas, este sacrifício puro e santo, que oferecemos, antes de tudo, pela vossa Igreja santa e católica: concedei-lhe paz e proteção, unindo-a num só corpo e governando-a por toda a terra, em comunhão com o vosso servo o Papa N., o nosso Bispo N., e todos os que guardam a fé católica que receberam dos Apóstolos.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Abençoai nossa oferenda, ó Senhor!</p>
+
+                            <p class="rubrica-instrucao text-center mt-3 border-bottom pb-1">“memento dos vivos”</p>
+                            <p><span class="rubrica fw-bold me-2">1C</span> Lembrai-vos, ó Pai, dos vossos filhos e filhas N. N. e de todos os que circundam este altar, dos quais conheceis a fé e a dedicação ao vosso serviço. Por eles nós vos oferecemos e também eles vos oferecem este sacrifício de louvor por si e por todos os seus, e elevam a vós as suas preces, Deus eterno, vivo e verdadeiro, para alcançar o perdão de suas faltas, a segurança em suas vidas e a salvação que esperam.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, de vossos filhos!</p>
+
+                            <p class="rubrica-instrucao text-center mt-3 border-bottom pb-1">“Infra actionem”</p>
+                            <p><span class="rubrica fw-bold me-2">2C</span> Em comunhão com toda a Igreja, celebramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria, a de seu esposo São José, e também a dos Santos Apóstolos e Mártires: Pedro e Paulo, André, (Tiago e João, Tomé, Tiago e Filipe, Bartolomeu e Mateus, Simão e Tadeu, Lino, Cleto, Clemente, Sisto, Cornélio e Cipriano, Lourenço e Crisógono, João e Paulo, Cosme e Damião), e todos os vossos Santos. Por seus méritos e preces concedei-nos sem cessar a vossa proteção. (Por Cristo, nosso Senhor. Amém).</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Em comunhão com os vossos Santos vos louvamos!</p>
+
+                            <div class="border-start border-danger-subtle ps-3 my-4">
+                                <p class="rubrica-instrucao mb-1">“Para os Domingos”</p>
+                                <p class="mb-3">Em comunhão com toda a Igreja, celebramos o glorioso dia em que o Senhor venceu a morte e nos tornou participantes de sua vida imortal. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
+
+                                <p class="rubrica-instrucao mb-1">“No Natal do Senhor e durante a Oitava”</p>
+                                <p class="mb-3">Em comunhão com toda a Igreja, celebramos (a noite santíssima) o dia santíssimo, em que Maria, intacta em sua virgindade, deu à luz o Salvador do mundo. Veneramos em primeiro lugar a memória da mesma Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
+
+                                <p class="rubrica-instrucao mb-1">“Na Epifania do Senhor”</p>
+                                <p class="mb-3">Em comunhão com toda a Igreja, celebramos o dia santíssimo, em que vosso Filho unigênito, eterno convosco na glória, se manifestou visivelmente em nossa carne. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
+
+                                <p class="rubrica-instrucao mb-1">“Da Vigília Pascal até o 2º domingo da Páscoa”</p>
+                                <p class="mb-3">Em comunhão com toda a Igreja, celebramos (a noite santíssima) o dia santíssimo da Ressurreição de nosso Senhor Jesus Cristo segundo a carne. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
+
+                                <p class="rubrica-instrucao mb-1">“Na Ascensão do Senhor”</p>
+                                <p class="mb-3">Em comunhão com toda a Igreja, celebramos o dia santíssimo em que Nosso Senhor, vosso Filho unigênito, elevou à vossa direita na glória a nossa frágil natureza humana. Veneramos em primeiro lugar a memória da Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
+
+                                <p class="rubrica-instrucao mb-1">“Em Pentecostes”</p>
+                                <p>Em comunhão com toda a Igreja, celebramos o dia santíssimo de Pentecostes em que o Espírito Santo, em línguas de fogo, se manifestou aos Apóstolos. Veneramos em primeiro lugar a memória da mesma Mãe de nosso Deus e Senhor Jesus Cristo, a gloriosa sempre Virgem Maria,</p>
+                            </div>
+
+                            <p><span class="rubrica fw-bold me-2">CP</span> Aceitai, ó Pai, com bondade, a oblação dos vossos servos e de toda a vossa família; dai-nos sempre a vossa paz, livrai-nos da condenação eterna e acolhei-nos entre os vossos eleitos. (Por Cristo, Senhor nosso. Amém)</p>
+
+                            <div class="border-start border-danger-subtle ps-3 my-4">
+                                <p class="rubrica-instrucao mb-1">“Da Vigília Pascal até o 2º domingo da Páscoa”</p>
+                                <p><span class="rubrica fw-bold me-2">CP</span> Aceitai, ó Pai, com bondade, a oblação dos vossos servos e de toda a vossa família; nós a oferecemos também por aqueles que vos dignastes regenerar pela água e pelo Espírito Santo, concedendo-lhes a remissão de todos os pecados. Dai aos nossos dias a vossa paz, livrai-nos da condenação eterna e acolhei-nos entre os vossos eleitos. (Por Cristo, nosso Senhor. Amém)</p>
+                            </div>
+
+                            <p><span class="rubrica fw-bold me-2">CC</span> Dignai-vos, ó Pai, aceitar, abençoar e santificar estas oferendas, recebei-as como sacrifício espiritual perfeito, a fim de que se tornem para nós o Corpo e ✠ o Sangue de vosso amado Filho, nosso Senhor Jesus Cristo.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o vosso Espírito Santo!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Na véspera de sua paixão, ele tomou o pão...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, ao fim da Ceia, ele tomou este precioso cálice...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PRA REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando, pois, a memória da bem-aventurada paixão do vosso Filho, da sua ressurreição dentre os mortos e gloriosa ascensão aos céus, nós, vossos servos, e também vosso povo santo, vos oferecemos, ó Pai, dentre os bens que nos destes, o sacrifício puro, santo e imaculado, Pão santo da vida eterna e Cálice da perpétua salvação. Recebei, ó Pai, com olhar benigno, esta oferta, como recebestes os dons do justo Abel, o sacrifício de nosso patriarca Abraão e a oblação pura e santa do sumo sacerdote Melquisedeque.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
+
+                            <p class="mt-3">Suplicantes, vos pedimos, ó Deus onipotente, que esta nossa oferenda seja levada à vossa presença, no altar do céu, pelas mãos do vosso santo Anjo, para que todos nós, participando deste altar, pela comunhão do santíssimo Corpo e Sangue do vosso Filho, sejamos repletos de todas as graças e bênçãos do céu. (Por Cristo, nosso Senhor. Amém)</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
+
+                            <p class="rubrica-instrucao text-center mt-3 border-bottom pb-1">“memento dos mortos”</p>
+                            <p><span class="rubrica fw-bold me-2">3C</span> Lembrai-vos, ó Pai, dos vossos filhos e filhas N. N. que nos precederam com o sinal da fé e dormem o sono da paz. A eles, e a todos os que descansam no Cristo, concedei o repouso, a luz e a paz. (Por Cristo, nosso Senhor. Amém)</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Concedei-lhes, ó Senhor, a luz eterna!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">4C</span> E a todos nós pecadores, que esperamos na vossa infinita misericórdia, concedei, não por nossos méritos, mas por vossa bondade, o convívio dos Apóstolos e Mártires: João Batista e Estêvão, Matias e Barnabé, (Inácio, Alexandre, Marcelino e Pedro, Felicidade e Perpétua, Águeda e Luzia, Inês, Cecília, Anastácia) e de todos os vossos Santos. Por Cristo, nosso Senhor.</p>
+                            <p><span class="rubrica fw-bold me-2">CP</span> Por ele não cessais de criar e santificar, vivificar, abençoar estes bens e distribuí-los entre nós.</p>
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda a honra e toda a glória, por todos os séculos dos séculos.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORAÇÃO II (ABERTA POR PADRÃO) -->
+                <div class="accordion-item" id="item-oe2">
+                    <h2 class="accordion-header" id="headingOE2">
+                        <button type="button" class="accordion-button fw-bold" data-bs-toggle="collapse" data-bs-target="#collapseOE2" aria-expanded="true">
+                            Oração Eucarística II
+                        </button>
+                    </h2>
+                    <div id="collapseOE2" class="accordion-collapse collapse show" data-bs-parent="#accordionOracoes">
+                        <div class="accordion-body">
+                            <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade, é digno e justo, é nosso dever e salvação dar-vos graças sempre e em todo o lugar, Senhor, Pai santo, por vosso amado Filho, Jesus Cristo. Ele é a vossa Palavra, pela qual tudo criastes. Ele é o nosso Salvador e Redentor, que se encarnou pelo Espírito Santo e nasceu da Virgem Maria. Ele, para cumprir a vossa vontade e adquirir para vós um povo santo, estendeu os braços na hora da sua paixão, a fim de vencer a morte e manifestar a ressurreição. Por isso, com os Anjos e todos os Santos, proclamamos vossa glória, cantando (dizendo) a uma só voz:</p>
+
+                            <div class="fw-bold my-3">
+                                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
+                                <p class="mb-0">Senhor, Deus do universo.</p>
+                                <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                                <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                            </div>
+
+                            <p><span class="rubrica fw-bold me-2">CP</span> Na verdade, ó Pai, vós sois Santo, fonte de toda santidade.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Santificai, pois, estes dons, derramando sobre eles o vosso Espírito, a fim de que se tornem para nós o Corpo e ✠ o Sangue de nosso Senhor Jesus Cristo.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o Vosso Espírito Santo!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Estando para ser entregue...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, no fim da Ceia...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PARA A REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando, pois, o memorial da morte e ressurreição do vosso Filho, nós vos oferecemos, ó Pai, o Pão da vida e o Cálice da salvação; e vos agradecemos porque nos tornastes dignos de estar aqui na vossa presença e vos servir.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Suplicantes, vos pedimos que, participando do Corpo e Sangue de Cristo, sejamos reunidos pelo Espírito Santo num só corpo.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> Lembrai-vos, ó Pai, da vossa Igreja que se faz presente pelo mundo inteiro; que ela cresça na caridade, em comunhão com o papa N., com o nosso bispo N., os bispos do mundo inteiro, os presbíteros, os diáconos e todos os ministros do vosso povo.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
+
+                            <div class="border-start border-danger-subtle ps-3 my-3">
+                                <p class="rubrica-instrucao mb-1">aos Domingos</p>
+                                <p class="mb-0">Lembrai-vos, ó Pai, da vossa Igreja que se faz presente pelo mundo inteiro; e aqui convocada no dia em que Cristo venceu a morte e nos fez participantes de sua vida imortal;</p>
+                            </div>
+
+                            <div class="border-start border-danger-subtle ps-3 my-3">
+                                <p class="rubrica-instrucao mb-1">Missa pelos Defuntos</p>
+                                <p class="mb-0"><span class="rubrica fw-bold me-2">2C</span> Lembrai-vos do vosso filho(a) N., que (hoje) chamastes deste mundo à vossa presença. Tendo sido sepultado(a) com Cristo em sua morte, no Batismo, participe igualmente da sua ressurreição.</p>
+                            </div>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Lembrai-vos também, na vossa misericórdia, dos (outros) nossos irmãos e irmãs que adormeceram na esperança da ressurreição e de todos os que partiram desta vida; acolhei-os junto a vós na luz da vossa face.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Concedei-lhes, ó Senhor, a luz eterna!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> Enfim, nós vos pedimos, tende piedade de todos nós e dai-nos participar da vida eterna, com a Virgem Maria, Mãe de Deus, São José, seu esposo, Os Apóstolos, (São N. Santo do dia ou padroeiro) e todos os Santos que neste mundo viveram na vossa amizade, a fim de vos louvarmos e glorificarmos por Jesus Cristo, vosso Filho.</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda a honra e toda a glória, por todos os séculos dos séculos.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORAÇÃO III -->
+                <div class="accordion-item" id="item-oe3">
+                    <h2 class="accordion-header" id="headingOE3">
+                        <button type="button" class="accordion-button collapsed fw-bold" data-bs-toggle="collapse" data-bs-target="#collapseOE3">
+                            Oração Eucarística III
+                        </button>
+                    </h2>
+                    <div id="collapseOE3" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
+                        <div class="accordion-body">
+                            <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Nesta alegre esperança, unidos aos Anjos e Santos, cantamos (dizendo) a uma só voz:</p>
+
+                            <div class="fw-bold my-3">
+                                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
+                                <p class="mb-0">Senhor, Deus do universo.</p>
+                                <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                                <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                            </div>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade, vós sois Santo, ó Deus do universo, e tudo o que criastes proclama o vosso louvor, porque, por Jesus Cristo, vosso Filho e Senhor nosso, e pela força do Espírito Santo, dais vida e santidade a todas as coisas e não cessais de reunir para vós um povo que vos ofereça em toda parte, do nascer ao pôr do sol, um sacrifício perfeito.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Por isso, ó Pai, nós vos suplicamos: santificai pelo Espírito Santo as oferendas que vos apresentamos para serem consagradas a fim de que se tornem o Corpo ✠ e o Sangue de vosso Filho, nosso Senhor Jesus Cristo, que nos mandou celebrar estes mistérios.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o vosso Espírito Santo!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Na noite em que ia ser entregue...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, ao fim da Ceia...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PARA A REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando agora, ó Pai, o memorial da paixão redentora do vosso Filho, da sua gloriosa ressurreição e ascensão ao céu, e enquanto esperamos sua nova vinda, nós vos oferecemos em ação de graças este sacrifício vivo e santo.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
+
+                            <p class="mt-3">Olhai com bondade a oblação da vossa Igreja e reconhecei nela o sacrifício que nos reconciliou convosco; concedei que, alimentando-nos com o Corpo e o Sangue do vosso Filho, repletos do Espírito Santo, nos tornemos em Cristo um só corpo e um só espírito.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> Que o mesmo Espírito faça de nós uma eterna oferenda para alcançarmos a herança com os vossos eleitos: a santíssima Virgem Maria, Mãe de Deus, São José, seu esposo, os vossos santos Apóstolos e gloriosos Mártires, N. (Santo do dia ou padroeiro) e todos os Santos, que não cessam de interceder por nós na vossa presença.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Fazei de nós um perfeita oferenda!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Nós vos suplicamos, Senhor, que este sacrifício da nossa reconciliação estenda a paz e a salvação ao mundo inteiro. Confirmai na fé e na caridade a vossa Igreja que caminha neste mundo com o vosso servo o Papa N., e o nosso Bispo N., com os bispos do mundo inteiro, os presbíteros e diáconos, os outros ministros e o povo por vós redimido. Atendei propício às preces desta família, que reunistes em vossa presença. Reconduzi a vós, Pai de misericórdia, todos os vossos filhos e filhas dispersos pelo mundo inteiro.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> Acolhei com bondade no vosso reino os nossos irmãos e irmãs que partiram desta vida e todos os que morreram na vossa amizade. Unidos a eles, esperamos também nós saciar-nos eternamente da vossa glória, por Cristo, Senhor nosso. Por ele dais ao mundo todo bem e toda graça</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda honra e toda glória, por todos os séculos dos séculos.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORAÇÃO IV -->
+                <div class="accordion-item" id="item-oe4">
+                    <h2 class="accordion-header" id="headingOE4">
+                        <button type="button" class="accordion-button collapsed fw-bold" data-bs-toggle="collapse" data-bs-target="#collapseOE4">
+                            Oração Eucarística IV
+                        </button>
+                    </h2>
+                    <div id="collapseOE4" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
+                        <div class="accordion-body">
+                            <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Na verdade, ó Pai, é nosso dever dar-vos graças, é nossa salvação dar-vos glória. Só vós sois o Deus vivo e verdadeiro que existis antes de todo o tempo e permaneceis para sempre, habitando em luz inacessível. Mas, porque sois o Deus de bondade e a fonte da vida, fizestes todas as coisas para cobrir de bênçãos as vossas criaturas e a muitos alegrar com a vossa luz. Eis, pois, diante de vós os inumeráveis coros dos Anjos que dia e noite vos servem e, contemplando a glória de vossa face, vos louvam sem cessar. Com eles também nós e, por nossa voz, tudo o que criastes celebramos o vosso Nome, e exultantes de alegria, cantamos (dizemos) a uma só voz:</p>
+
+                            <div class="fw-bold my-3">
+                                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
+                                <p class="mb-0">Senhor, Deus do universo.</p>
+                                <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                                <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                            </div>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Nós proclamamos vossa grandeza, Pai santo, a sabedoria e o amor com que fizestes todas as coisas. Criastes o ser humano à vossa imagem e lhe confiastes todo o universo para que, servindo somente a vós, seu Criador, cuidasse de toda criatura. E quando pela desobediência perdeu a vossa amizade, não o abandonastes ao poder da morte. A todos, porém, socorrestes com misericórdia, para que, ao procurar-vos, vos encontrassem. Muitas vezes oferecestes aliança à família humana e a instruístes pelos profetas na esperança da salvação.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> A todos socorrestes com bondade!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">PR</span> E de tal modo, Pai santo, amastes o mundo que, chegada a plenitude dos tempos, nos enviastes vosso próprio Filho para ser o nosso Salvador. Encarnado pelo poder do Espírito Santo e nascido da Virgem Maria, Jesus viveu em tudo a condição humana, menos o pecado; anunciou aos pobres a salvação, aos oprimidos, a liberdade, aos tristes, a alegria. Para cumprir o vosso plano de amor, entregou-se à morte e, ressuscitando, destruiu a morte e renovou a vida.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Por amor nos enviastes vosso Filho!</p>
+
+                            <p class="mt-3">E, a fim de não mais vivermos para nós, mas para ele, que por nós morreu e ressuscitou, enviou de vós, ó Pai, como primeiro dom aos vossos fiéis, o Espírito Santo, que continua sua obra no mundo para levar à plenitude toda a santificação.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> Por isso, nós vos pedimos, ó Pai, que o mesmo Espírito Santo santifique estas oferendas, a fim de que se tornem o Corpo ✠ e o Sangue de Jesus Cristo, vosso Filho e Senhor nosso, para celebrarmos este grande mistério que ele nos deixou em sinal da eterna aliança.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Enviai o vosso Espírito Santo!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Quando, pois, chegou a hora...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, ele tomou em suas mãos o cálice...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PRA REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Mistério da fé!</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Anunciamos, Senhor, a vossa morte e proclamamos a vossa ressurreição. Vinde, Senhor Jesus!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> Celebrando, agora, ó Pai, o memorial da nossa redenção, anunciamos a morte de Cristo e sua descida entre os mortos, proclamamos a sua ressurreição e ascensão à vossa direita e, esperando a sua vinda gloriosa, nós vos oferecemos o seu Corpo e Sangue, sacrifício do vosso agrado e salvação do mundo inteiro.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Aceitai, ó Senhor, a nossa oferta!</p>
+
+                            <p class="mt-3">Olhai, com bondade, a oblação que destes à vossa Igreja e concedei aos que vamos participar do mesmo pão e do mesmo cálice que, reunidos pelo Espírito Santo num só corpo, nos tornemos em Cristo uma oferenda viva para o louvor da vossa glória.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos una num só corpo!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> E agora, ó Pai, lembrai-vos de todos pelos quais vos oferecemos este sacrifício: o vosso servo o Papa N., o nosso Bispo N., os bispos do mundo inteiro, os presbíteros, os diáconos, e todos os ministros da vossa Igreja, os fiéis que, ao redor deste altar, se unem à nossa oferta, o povo que vos pertence e todos aqueles que vos procuram de coração sincero.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Lembrai-vos também dos que morreram na paz do vosso Cristo e de todos os defuntos dos quais só vós conhecestes a fé.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Concedei-lhes, ó Senhor, a luz eterna!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> E a todos nós, vossos Filhos e Filhas, concedei, ó Pai de bondade, alcançar a herança eterna, com a Virgem Maria, Mãe de Deus, São José, seu esposo, os Apóstolos e todos os Santos, no vosso reino, onde, com todas as criaturas, libertas da corrupção do pecado e da morte, vos glorificaremos por Cristo, Senhor nosso, por quem dais ao mundo todo bem e toda graça.</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, e em Cristo, a vós, Deus Pai todo-poderoso, na unidade do Espírito Santo, toda a honra e toda a glória, por todos os séculos dos séculos.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ORAÇÃO V -->
+                <div class="accordion-item" id="item-oe5">
+                    <h2 class="accordion-header" id="headingOE5">
+                        <button type="button" class="accordion-button collapsed fw-bold" data-bs-toggle="collapse" data-bs-target="#collapseOE5">
+                            Oração Eucarística V
+                        </button>
+                    </h2>
+                    <div id="collapseOE5" class="accordion-collapse collapse" data-bs-parent="#accordionOracoes">
+                        <div class="accordion-body">
+                            <p class="rubrica-instrucao text-center border-bottom pb-1">O prefácio não pode ser substituído por outro.</p>
+                            <p><span class="rubrica fw-bold me-2">CP</span> O Senhor esteja convosco.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Ele está no meio de nós.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Corações ao alto.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O nosso coração está em Deus.</p>
+                            <p class="mt-2"><span class="rubrica fw-bold me-2">CP</span> Demos graças ao Senhor, nosso Deus.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> É nosso dever e nossa salvação.</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> É justo e nos faz todos ser mais santos, louvar a vós, ó Pai, no mundo inteiro, de dia e de noite, agradecendo com Cristo, vosso Filho, nosso irmão. É ele o sacerdote verdadeiro que sempre se oferece por nós todos, mandando que se faça a mesma coisa que fez naquela ceia derradeira. Por isso, aqui estamos bem unidos, louvando e agradecendo com alegria, juntando nossa voz à voz dos Anjos e dos Santos todos, para cantar (dizer):</p>
+
+                            <div class="fw-bold my-3">
+                                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Santo, Santo, Santo,</p>
+                                <p class="mb-0">Senhor, Deus do universo.</p>
+                                <p class="mb-0">O céu e a terra proclamam a vossa glória.</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                                <p class="mb-0">Bendito o que vem em nome do Senhor!</p>
+                                <p class="mb-0">Hosana nas alturas!</p>
+                            </div>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Ó Pai, vós que sempre quisestes ficar muito perto de nós, vivendo conosco no Cristo, falando conosco por ele, mandai o vosso Espírito Santo, a fim de que as nossas ofertas se mudem no Corpo ✠ e no Sangue de nosso Senhor Jesus Cristo.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Mandai vosso Espírito Santo!</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Na noite em que ia ser entregue...)</span> <br> <strong>TOMAI, TODOS, E COMEI: ISTO É O MEU CORPO, QUE SERÁ ENTREGUE POR VÓS.</strong></p>
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CC</span> <span class="rubrica-instrucao">(Do mesmo modo, no fim da Ceia...)</span> <br> <strong>TOMAI, TODOS, E BEBEI: ESTE É O CÁLICE DO MEU SANGUE, O SANGUE DA NOVA E ETERNA ALIANÇA, QUE SERÁ DERRAMADO POR VÓS E POR TODOS, PARA A REMISSÃO DOS PECADOS. FAZEI ISTO EM MEMÓRIA DE MIM.</strong></p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Tudo isto é mistério da fé!</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Toda vez que comemos deste Pão, toda vez que bebemos deste Vinho, recordamos a paixão de Jesus Cristo e ficamos esperando sua vinda.</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP</span> Recordando, ó Pai, neste momento, a paixão de Jesus, nosso Senhor, sua ressurreição e ascensão, nós queremos a vós oferecer este Pão que alimenta e que dá vida, este Vinho que nos salva e dá coragem.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Recebai, ó Senhor, a nossa oferta!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> E quando recebermos Pão e Vinho, o Corpo e Sangue dele oferecidos, o Espírito nos una num só corpo, para sermos um só povo em seu amor.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O Espírito nos uma num só corpo!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">1C</span> Protegei vossa Igreja que caminha nas estradas do mundo rumo ao céu, cada dia renovando a esperança de chegar junto a vós, na vossa paz.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Caminhamos na estrada de Jesus!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">2C</span> Dai ao vosso servo, o Papa N., ser bem firme na fé, na caridade, e a N., que é Bispo desta Igreja, muita luz para guiar o vosso povo.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Lembrai-vos, ó Pai, da vossa Igreja!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">3C</span> Esperamos entrar na vida eterna com Maria, Mãe de Deus e da Igreja, os Apóstolos, e todos os que na vida souberam amar Cristo e seus irmãos.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Esperamos entrar na vida eterna!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">4C</span> Abri as portas da misericórdia aos que chamastes para a outra vida; acolhei-os juntos a vós, bem felizes no reino que para todos preparastes.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> A todos dai a luz que não se apaga!</p>
+
+                            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> E a todos nós, aqui reunidos, que somos povo santo e pecador, dai-nos a graça de participar do vosso reino que também é nosso.</p>
+
+                            <p class="mt-4"><span class="rubrica fw-bold me-2">CP/CC</span> Por Cristo, com Cristo, em Cristo, a vós, Deus Pai todo poderoso, na unidade do Espírito Santo, toda honra e toda a glória, por todos os séculos dos séculos.</p>
+                            <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém!</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <hr class="text-secondary opacity-25 my-5">
+
+        <!-- RITO DA COMUNHÃO -->
+        <section class="mb-5">
+            <h1>Rito da Comunhão</h1>
+
+            <p><span class="rubrica fw-bold me-2">CP</span> Obedientes à palavra do Salvador e formados por seu divino ensinamento, ousamos dizer:</p>
+
+            <div id="pai" class="fw-bold my-4">
+                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Pai nosso que estais nos céus,</p>
+                <p class="mb-0">santificado seja o vosso nome;</p>
+                <p class="mb-0">venha a nós o vosso reino,</p>
+                <p class="mb-0">seja feita a vossa vontade,</p>
+                <p class="mb-0">assim na terra como no céu.</p>
+                <p class="mb-0">O pão nosso de cada dia nos dai hoje;</p>
+                <p class="mb-0">perdoai-nos as nossas ofensas,</p>
+                <p class="mb-0">assim como nós perdoamos</p>
+                <p class="mb-0">a quem nos tem ofendido;</p>
+                <p class="mb-0">e não nos deixeis cair em tentação,</p>
+                <p class="mb-0">mas livrai-nos do mal.</p>
+            </div>
+
+            <div id="vosso" class="mt-3">
+                <p><span class="rubrica fw-bold me-2">CP</span> Livrai-nos de todos os males, ó Pai, e dai-nos hoje a vossa paz. Ajudados pela vossa misericórdia, sejamos sempre livres do pecado e protegidos de todos os perigos, enquanto aguardamos a feliz esperança e a vinda do Nosso Salvador, Jesus Cristo.</p>
+                <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Vosso é o reino, o poder e a glória para sempre.</p>
+            </div>
+
+            <div id="amemRezado" class="mt-4">
+                <p><span class="rubrica fw-bold me-2">CP</span> Senhor Jesus Cristo, dissestes aos vossos Apóstolos: eu vos deixo a paz, eu vos dou a minha paz. Não olheis os nossos pecados, mas a fé que anima vossa Igreja; dai-lhe, segundo o vosso desejo, a paz e a unidade. Vós, que sois Deus, com o Pai e o Espírito Santo.</p>
+                <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+            </div>
+
+            <div id="amor" class="mt-3">
+                <p><span class="rubrica fw-bold me-2">CP</span> A paz do Senhor esteja sempre convosco.</p>
+                <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> O amor de Cristo nos uniu.</p>
+            </div>
+
+            <p class="mt-3"><span class="rubrica fw-bold me-2">CP</span> Irmãos e irmãs, saudai-vos em Cristo Jesus. <span class="rubrica-instrucao">(Momento do abraço da paz)</span></p>
+
+            <div id="cordeiro" class="fw-bold my-4">
+                <p class="mb-0"><span class="rubrica fw-bold me-2">AS</span> Cordeiro de Deus,</p>
+                <p class="mb-0">que tirais o pecado do mundo,</p>
+                <p class="mb-0">tende piedade de nós.</p>
+                <p class="mb-0">Cordeiro de Deus,</p>
+                <p class="mb-0">que tirais o pecado do mundo,</p>
+                <p class="mb-0">tende piedade de nós.</p>
+                <p class="mb-0">Cordeiro de Deus,</p>
+                <p class="mb-0">que tirais o pecado do mundo,</p>
+                <p class="mb-0">dai-nos a paz.</p>
+            </div>
+
+            <div id="digno" class="mt-4">
+                <p><span class="rubrica fw-bold me-2">CP</span> Felizes os convidados para a Ceia do Senhor. Eis o Cordeiro de Deus, que tira o pecado do mundo.</p>
+                <p class="fw-bold"><span class="rubrica fw-bold me-2">AS</span> Senhor, eu não sou digno(a) de que entreis em minha morada, mas dizei uma palavra e serei salvo(a).</p>
+            </div>
+
+            <p class="mt-4 rubrica-instrucao"><span class="rubrica fw-bold me-2">CP</span> (Momento da Comunhão e silêncio sagrado)</p>
+
+            <p class="mt-5"><span class="rubrica fw-bold me-2">CP</span> Oremos... <span class="rubrica-instrucao">(proclama a Oração depois da Comunhão)</span></p>
+            <p class="fw-bold mb-4"><span class="rubrica fw-bold me-2">AS</span> Amém.</p>
+        </section>
+
+    </main>
+
+    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Script de rolagem e Pesquisa -->
+    <!-- Script de Rolagem e Pesquisa Otimizado -->
     <script>
-        // Restaura e salva o Scroll
-        window.addEventListener('scroll', () => {
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            if (scrollTop > 0) {
-                localStorage.setItem('scrollTopMissa', scrollTop);
-            }
-        });
-
-        window.addEventListener('load', () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            // Restaura posição do Scroll
             const savedScrollTop = localStorage.getItem('scrollTopMissa');
             if (savedScrollTop && !location.origin.includes('file:')) {
-                window.scrollTo({ top: parseInt(savedScrollTop), behavior: 'auto' });
+                window.scrollTo({ top: parseInt(savedScrollTop, 10), behavior: 'auto' });
             }
-        });
 
-        // Motor de Pesquisa das Orações Eucarísticas
-        document.getElementById('inputPesquisaOE').addEventListener('input', function (e) {
-            // Função para remover acentos (é -> e, á -> a) e deixar em minúsculo
-            const normalize = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-            const term = normalize(e.target.value);
-
-            const accordions = document.querySelectorAll('.accordion-item');
-
-            accordions.forEach(item => {
-                const text = normalize(item.textContent);
-                const button = item.querySelector('.accordion-button');
-                const collapse = item.querySelector('.accordion-collapse');
-
-                if (term.length > 0) {
-                    // Quando há pesquisa ativa, fecha tudo por padrão (incluindo a OE2)
-                    button.classList.add('collapsed');
-                    button.setAttribute('aria-expanded', 'false');
-                    collapse.classList.remove('show');
-
-                    // Mostra apenas os itens que contém a palavra digitada
-                    if (text.includes(term)) {
-                        item.style.display = '';
-                    } else {
-                        item.style.display = 'none';
+            // Salva posição do Scroll com debounce
+            let scrollTimer = null;
+            window.addEventListener('scroll', () => {
+                if (scrollTimer) clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(() => {
+                    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                    if (scrollTop >= 0) {
+                        localStorage.setItem('scrollTopMissa', scrollTop);
                     }
-                } else {
-                    // Se apagar a pesquisa inteira, volta tudo ao normal
-                    item.style.display = '';
-                    if (item.id === 'item-oe2') {
-                        // Deixa apenas a OE2 aberta
-                        button.classList.remove('collapsed');
-                        button.setAttribute('aria-expanded', 'true');
-                        collapse.classList.add('show');
-                    } else {
-                        button.classList.add('collapsed');
-                        button.setAttribute('aria-expanded', 'false');
-                        collapse.classList.remove('show');
-                    }
-                }
-            });
+                }, 100);
+            }, { passive: true });
+
+            // Motor de Pesquisa das Orações Eucarísticas
+            const inputSearch = document.getElementById('inputPesquisaOE');
+            if (inputSearch) {
+                const normalize = str => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                const accordions = document.querySelectorAll('.accordion-item');
+
+                inputSearch.addEventListener('input', (e) => {
+                    const term = normalize(e.target.value.trim());
+
+                    accordions.forEach(item => {
+                        const text = normalize(item.textContent);
+                        const button = item.querySelector('.accordion-button');
+                        const collapse = item.querySelector('.accordion-collapse');
+
+                        if (term.length > 0) {
+                            button.classList.add('collapsed');
+                            button.setAttribute('aria-expanded', 'false');
+                            collapse.classList.remove('show');
+
+                            if (text.includes(term)) {
+                                item.classList.remove('d-none');
+                            } else {
+                                item.classList.add('d-none');
+                            }
+                        } else {
+                            item.classList.remove('d-none');
+                            if (item.id === 'item-oe2') {
+                                button.classList.remove('collapsed');
+                                button.setAttribute('aria-expanded', 'true');
+                                collapse.classList.add('show');
+                            } else {
+                                button.classList.add('collapsed');
+                                button.setAttribute('aria-expanded', 'false');
+                                collapse.classList.remove('show');
+                            }
+                        }
+                    });
+                });
+            }
         });
     </script>
 </body>
