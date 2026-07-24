@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.0.4';
+const APP_VERSION = 'v1.0.5';
 const CACHE_NAME = `cache-${APP_VERSION}`;
 
 // Lista de arquivos vitais para o site abrir sem internet
@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
     './index.html',
     './assets/css/styles.css',
     './assets/html/santamissa.html',
+    './assets/html/oracoes.html',
     './assets/js/TextFormatter.js',
     './assets/js/DatabaseManager.js',
     './assets/js/PreferencesManager.js',
