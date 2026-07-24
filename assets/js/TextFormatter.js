@@ -1,12 +1,24 @@
 class TextFormatter {
     static processEditorData(rootElement) {
-        // Clona o elemento em memória para não bugar a tela do usuário
         const clone = rootElement.cloneNode(true);
-
         TextFormatter.autoFormatChords(clone);
         TextFormatter.cleanSheetMusicBlocks(clone);
-
         return clone.innerHTML;
+    }
+
+    static prepareContent(content) {
+        if (!content) return "";
+
+        // Se for texto puro com quebras de linha (\n), converte para <br>
+        let htmlContent = content.includes('\n') ? content.replace(/\n/g, '<br>') : content;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+
+        TextFormatter.autoFormatChords(tempDiv);
+        TextFormatter.cleanSheetMusicBlocks(tempDiv);
+
+        return tempDiv.innerHTML;
     }
 
     static autoFormatChords(root) {
@@ -70,17 +82,18 @@ class TextFormatter {
 
         const walk = (node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
+                if (['B', 'STRONG'].includes(node.tagName)) return;
+
                 const isBlock = ['DIV', 'P', 'BR', 'LI', 'UL', 'OL', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName);
 
                 if (isBlock) processLine();
 
-                // Ignora blocos de partitura para não quebrar a lógica de linha
                 if (node.classList && node.classList.contains('sheet-music-block')) {
                     currentLineText += " [PARTITURA] ";
                     return;
                 }
 
-                node.childNodes.forEach(walk);
+                Array.from(node.childNodes).forEach(walk);
                 if (isBlock) processLine();
 
             } else if (node.nodeType === Node.TEXT_NODE) {
@@ -96,36 +109,7 @@ class TextFormatter {
     static cleanSheetMusicBlocks(root) {
         const blocks = root.querySelectorAll('.sheet-music-block');
         blocks.forEach(block => {
-            block.innerHTML = ''; // Limpa o SVG, deixa só o data-score
+            block.innerHTML = '';
         });
-    }
-
-    // ==========================================
-    // NOVA FUNÇÃO: INTERPRETAÇÃO INTELIGENTE
-    // ==========================================
-    static prepareContent(content) {
-        if (!content) return "";
-
-        // Se tiver alguma tag HTML estrutural (<br>, <div>, <p>, <b>), sabemos que já é Rich Text
-        const isHTML = /<(br|div|p|b|strong)[^>]*>/i.test(content);
-
-        // Se NÃO for HTML e contiver as antigas quebras de linha (\n), é o JSON velho.
-        if (!isHTML && content.includes('\n')) {
-
-            // 1. Converte quebras de linha para HTML
-            let htmlContent = content.replace(/\n/g, '<br>');
-
-            // 2. Coloca em uma div "invisível" em memória para rodar a auto-formatação
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
-
-            // 3. Roda o motor que acha as cifras e bota em negrito
-            TextFormatter.autoFormatChords(tempDiv);
-
-            return tempDiv.innerHTML;
-        }
-
-        // Se já for HTML, só retorna como está
-        return content;
     }
 }
