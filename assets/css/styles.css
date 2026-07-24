@@ -1,6 +1,31 @@
-/* Configurações Globais p/ Suporte de Altura 100% Flexível */
+/* ==========================================================================
+   1. VARIÁVEIS E TEMAS (LIGHT / DARK)
+   ========================================================================== */
+:root {
+    --app-teal: #0b8e8e;
+    --app-teal-hover: #086b6b;
+    --app-bg-body: #ecedf1;
+    --app-bg-display: #fcf9ee;
+    --app-border-display: #adb5bd;
+    --app-bg-overlay: #fdfdfd;
+    --app-bg-floating: rgba(255, 255, 255, 0.85);
+    --app-shadow-floating: rgba(0, 0, 0, 0.15);
+}
+
+[data-bs-theme="dark"] {
+    --app-bg-body: #121212;
+    --app-bg-display: #1e1e1e;
+    --app-border-display: #333333;
+    --app-bg-overlay: #1e1e1e;
+    --app-bg-floating: rgba(43, 48, 53, 0.85);
+    --app-shadow-floating: rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   2. LAYOUT BASE E ESTRUTURA FLEXÍVEL
+   ========================================================================== */
 body {
-    background-color: #ecedf1;
+    background-color: var(--app-bg-body);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 0;
     margin: 0;
@@ -22,67 +47,74 @@ body {
     padding: 5px;
 }
 
-/* Botões Customizados */
+/* ==========================================================================
+   3. BOTÕES E COMPONENTES CUSTOMIZADOS
+   ========================================================================== */
 .btn-teal {
-    background-color: #0b8e8e;
-    color: white;
-    border: 1px solid #0b8e8e;
+    background-color: var(--app-teal);
+    color: #ffffff;
+    border: 1px solid var(--app-teal);
 }
 
-    .btn-teal:hover, .input-group .btn:focus {
-        background-color: #0b8e8e;
-        color: white;
+    .btn-teal:hover,
+    .btn-teal:focus,
+    .input-group .btn-teal:focus {
+        background-color: var(--app-teal-hover);
+        color: #ffffff;
+        border-color: var(--app-teal-hover);
     }
 
-.input-group .btn-secondary:focus {
-    background-color: #6c757d;
-    color: white;
+/* Força os cantos arredondados do lado direito no grupo de botões */
+.input-group > .btn.force-rounded-end,
+#song-control-group > .btn.force-rounded-end,
+#song-control-group > .force-rounded-end {
+    border-top-right-radius: var(--bs-border-radius);
+    border-bottom-right-radius: var(--bs-border-radius);
 }
 
-.force-rounded-end {
-    border-top-right-radius: var(--bs-border-radius) !important;
-    border-bottom-right-radius: var(--bs-border-radius) !important;
+.custom-bpm {
+    text-align: center;
+    min-width: 60px;
+    max-width: 100px;
 }
 
-.hover-teal {
-    transition: color 0.2s ease;
+.btn-bpm {
+    min-width: 48px;
 }
 
-    .hover-teal:hover {
-        color: #0b8e8e !important;
-    }
-
-/* Menus e Círculos */
 .btn-menu-icon {
     background: transparent;
     border: none;
     font-size: 1.5rem;
-    color: #495057;
+    color: var(--bs-body-color);
     padding: 0 10px;
     cursor: pointer;
-    transition: color 0.2s ease;
 }
 
-    .btn-menu-icon:hover {
-        color: #0b8e8e;
+    .btn-menu-icon .icon-menu {
+        transition: color 0.3s ease;
     }
+
+        .btn-menu-icon .icon-menu.menu-teal {
+            color: var(--app-teal);
+        }
 
 .btn-setting-circle {
     width: 45px;
     height: 45px;
     border-radius: 50%;
-    background-color: #e9ecef;
-    border: 1px solid #ced4da;
+    background-color: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease-in-out;
-    color: #495057;
+    color: var(--bs-body-color);
     padding: 0;
 }
 
     .btn-setting-circle:hover {
-        background-color: #dee2e6;
+        background-color: var(--bs-secondary-bg);
         transform: scale(1.05);
     }
 
@@ -90,7 +122,7 @@ body {
         transform: scale(0.95);
     }
 
-/* Play / Music Buttons */
+/* Botões Circulares de Play e Música */
 .btn-circle {
     width: 55px;
     height: 55px;
@@ -99,30 +131,29 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    color: white;
+    color: #ffffff;
     border: none;
     cursor: pointer;
 }
 
 .btn-play {
     background-color: #2b7af1;
-    box-shadow: 0 0 20px 5px rgba(33, 190, 232, .7);
+    box-shadow: 0 0 20px 5px rgba(33, 190, 232, 0.7);
     transition: all 0.3s ease;
 }
 
-    /* Stop (Vermelho Vibrante Moderno) */
     .btn-play.playing {
         background-color: #ff6347;
         box-shadow: 0 0 20px 5px rgba(230, 57, 70, 0.6);
     }
 
 .btn-music {
-    background-color: #0b8e8e;
+    background-color: var(--app-teal);
     transition: all 0.3s ease;
 }
 
     .btn-music.phase-3 {
-        box-shadow: 0 0 20px 5px rgba(11, 142, 142, 0.8); /* Sombra atualizada para o Teal */
+        box-shadow: 0 0 20px 5px rgba(11, 142, 142, 0.8);
     }
 
 .music-emoji {
@@ -132,7 +163,9 @@ body {
     filter: brightness(0) invert(1);
 }
 
-/* Botões de Acordes */
+/* ==========================================================================
+   4. ACORDES (PALETA DE CORES E BOTÕES)
+   ========================================================================== */
 .chord-btn {
     width: 55px;
     height: 55px;
@@ -142,7 +175,7 @@ body {
     justify-content: center;
     font-weight: bold;
     font-size: 16px;
-    color: white;
+    color: #ffffff;
     border: none;
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -160,7 +193,7 @@ body {
     }
 
 @keyframes repress-effect {
-    0% {
+    0%, 100% {
         transform: scale(0.95);
         filter: brightness(0.70);
         box-shadow: 0 0 15px 5px var(--chord-bg);
@@ -171,19 +204,12 @@ body {
         filter: brightness(0.85);
         box-shadow: 0 0 18px 6px var(--chord-bg);
     }
-
-    100% {
-        transform: scale(0.95);
-        filter: brightness(0.70);
-        box-shadow: 0 0 15px 5px var(--chord-bg);
-    }
 }
 
 .chord-btn.repress-anim {
     animation: repress-effect 0.2s ease-in-out;
 }
 
-/* Paleta de Cores Modernas dos Acordes */
 .bg-degree-gray {
     --chord-bg: #788290;
     background-color: var(--chord-bg);
@@ -229,10 +255,12 @@ body {
     background-color: var(--chord-bg);
 }
 
-/* Display Principal (Música/Partitura e Liturgia) */
+/* ==========================================================================
+   5. DISPLAY PRINCIPAL E EDITOR DE PARTITURAS (VEXFLOW)
+   ========================================================================== */
 .main-display, .main-iframe {
-    background-color: #fcf9ee;
-    border: 1px solid #adb5bd;
+    background-color: var(--app-bg-display);
+    border: 1px solid var(--app-border-display);
     border-radius: 4px;
     width: 100%;
     transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -248,61 +276,21 @@ body {
 }
 
     .main-display[contenteditable="true"] {
-        background-color: #ffffff;
-        border-color: #0d6efd;
+        background-color: var(--bs-body-bg);
+        border-color: var(--bs-primary);
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         cursor: text;
     }
 
-.main-iframe {
-    background-color: #ffffff;
+/* Inverte as cores da Liturgia no iframe durante o modo escuro */
+[data-bs-theme="dark"] .main-iframe {
+    filter: invert(1) hue-rotate(180deg);
 }
 
-/* Remove small 'x' (clear/cancel) on search inputs across browsers */
-input[type="search"]::-webkit-search-decoration,
-input[type="search"]::-webkit-search-cancel-button,
-input[type="search"]::-webkit-search-results-button,
-input[type="search"]::-webkit-search-results-decoration {
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-input[type="search"]::-ms-clear,
-input[type="search"]::-ms-reveal {
-    display: none;
-    width: 0;
-    height: 0;
-}
-
-input[type="search"] {
-    -webkit-appearance: textfield; /* fallback to avoid showing searchfield decorations */
-    appearance: textfield;
-}
-
-.custom-bpm {
-    text-align: center;
-    min-width: 60px;
-    max-width: 100px;
-}
-
-.btn-bpm {
-    min-width: 48px;
-}
-
-.form-select, .form-control {
-    border-color: #adb5bd;
-}
-
-.input-group > .btn {
-    transition: all 0.15s ease-in-out;
-}
-
-/* --- Editor de Partitura (Visual e Blocos Gerados) --- */
-
-/* Caixa (Bloco) gerada dentro do texto (Visual Limpo) */
+/* Bloco da Partitura inline */
 .sheet-music-block {
     display: inline-block;
-    cursor: pointer; /* Mantemos apenas a mãozinha para o usuário saber que dá pra clicar */
+    cursor: pointer;
     user-select: none;
     vertical-align: middle;
     max-width: 100%;
@@ -310,13 +298,43 @@ input[type="search"] {
 }
 
     .sheet-music-block svg {
-        pointer-events: none; /* Garante que o clique seja capturado corretamente para abrir a edição */
+        pointer-events: none;
     }
 
-/* Barras de Ferramentas do Editor */
+/* Modal de Edição de Partitura (Overlay) */
+#sm-editor-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--app-bg-overlay);
+    z-index: 100;
+}
+
+#btn-add-sheet-music {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    z-index: 10;
+    background: var(--app-bg-floating);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+    #btn-add-sheet-music:hover {
+        transform: scale(1.05);
+    }
+
 .sm-toolbar {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #dee2e6;
+    background: var(--app-bg-floating);
+    border: 1px solid var(--bs-border-color);
     border-radius: 12px;
     padding: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -334,11 +352,12 @@ input[type="search"] {
     font-size: 16px;
     transition: all 0.2s ease;
     cursor: pointer;
+    color: var(--bs-body-color);
 }
 
     .sm-btn:hover {
-        background: #f8f9fa;
-        border-color: #dee2e6;
+        background: var(--bs-tertiary-bg);
+        border-color: var(--bs-border-color);
         transform: scale(1.05);
     }
 
@@ -346,22 +365,38 @@ input[type="search"] {
         transform: scale(0.95);
     }
 
-.text-purple {
-    color: #8a2be2 !important;
+#sm-floating-inputs {
+    display: none;
+    pointer-events: none;
 }
 
-/* Inputs Flutuantes (Cifra/Letra) */
 .sm-floating-input {
     width: 70px;
-    border: 2px solid #0d6efd !important;
+    border: 2px solid var(--bs-primary);
     padding: 2px 4px;
     font-size: 14px;
     position: absolute;
     transform: translateX(-50%);
     z-index: 10;
+    pointer-events: auto;
 }
 
-/* 🎹 TECLADO DE PIANO COM SCROLL DINÂMICO 🎹 */
+#sm-input-chord {
+    top: 0;
+}
+
+#sm-input-lyric {
+    bottom: 0;
+}
+
+[data-bs-theme="dark"] .sheet-music-block svg,
+[data-bs-theme="dark"] #vexflow-target svg {
+    filter: invert(0.85) hue-rotate(180deg);
+}
+
+/* ==========================================================================
+   6. TECLADO DE PIANO INTERATIVO (DIV-BASED)
+   ========================================================================== */
 .piano-wrapper {
     position: relative;
     width: 100%;
@@ -403,15 +438,6 @@ input[type="search"] {
         cursor: grabbing;
     }
 
-    .piano-container::-webkit-scrollbar {
-        height: 6px;
-    }
-
-    .piano-container::-webkit-scrollbar-thumb {
-        background-color: rgba(0,0,0,0.2);
-        border-radius: 4px;
-    }
-
 .piano {
     display: flex;
     height: 95px;
@@ -451,7 +477,7 @@ input[type="search"] {
     .key.black {
         width: 28px;
         height: 55px;
-        background-color: #222;
+        background-color: #222222;
         z-index: 2;
         margin-left: -14px;
         margin-right: -14px;
@@ -468,129 +494,51 @@ input[type="search"] {
     }
 
     .key.black.pressed {
-        background-color: #000;
+        background-color: #000000;
         box-shadow: 0 1px 1px rgba(0,0,0,0.2);
         transform: translateY(2px);
     }
 
-@media (max-height: 650px) {
-    .piano-wrapper {
-        display: none !important;
-    }
-}
-
-/* ========================================= */
-/*               MODO ESCURO                 */
-/* ========================================= */
-[data-bs-theme="dark"] body {
-    background-color: #121212;
-}
-
-[data-bs-theme="dark"] .main-display,
-[data-bs-theme="dark"] .main-iframe {
-    background-color: #1e1e1e;
-    border-color: #333;
-}
-
-/* Inverte as cores da página da Liturgia da CNBB no modo escuro */
-[data-bs-theme="dark"] .main-iframe {
-    filter: invert(1) hue-rotate(180deg);
-}
-
-[data-bs-theme="dark"] .main-display[contenteditable="true"] {
-    background-color: #212529;
-    border-color: #0b8e8e;
-    box-shadow: 0 0 0 0.25rem rgba(11, 142, 142, 0.25);
-}
-
-[data-bs-theme="dark"] .btn-menu-icon {
-    color: #f8f9fa;
-}
-
-[data-bs-theme="dark"] .btn-setting-circle {
-    background-color: #2b3035;
-    border-color: #495057;
-    color: #f8f9fa;
-}
-
-    [data-bs-theme="dark"] .btn-setting-circle:hover {
-        background-color: #343a40;
-    }
-
-/* TomSelect Dark Mode Fix */
-[data-bs-theme="dark"] .ts-control,
-[data-bs-theme="dark"] .ts-dropdown {
-    background-color: #2b3035;
-    border-color: #495057;
-    color: #dee2e6;
-}
-
-    [data-bs-theme="dark"] .ts-control > input,
-    [data-bs-theme="dark"] .ts-dropdown .option,
-    [data-bs-theme="dark"] .ts-control .item {
-        color: #dee2e6;
-    }
-
-        [data-bs-theme="dark"] .ts-dropdown .option:hover,
-        [data-bs-theme="dark"] .ts-dropdown .option.active {
-            background-color: #495057;
-            color: #fff;
-        }
-
-/* Piano Modo Escuro */
 [data-bs-theme="dark"] .key.white {
     background-color: #cfd4da;
     border-color: #495057;
     color: #212529;
 }
 
-    [data-bs-theme="dark"] .key.white.pressed {
-        background-color: #adb5bd;
+@media (max-height: 650px) {
+    .piano-wrapper {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   7. CONTROLES FLUTUANTES (DRAG & DROP)
+   ========================================================================== */
+.floating-controls {
+    position: fixed;
+    z-index: 1050;
+    background-color: var(--app-bg-floating);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-shadow: 0 10px 30px var(--app-shadow-floating);
+    border-radius: 50px;
+    padding: 10px 20px;
+    cursor: move;
+    user-select: none;
+    touch-action: none;
+    transition: background-color 0.3s;
+}
+
+    .floating-controls.is-dragging button {
+        pointer-events: none;
     }
 
-[data-bs-theme="dark"] .scroll-shadow-left {
-    background: linear-gradient(to right, rgba(0,0,0,0.6), transparent);
-}
-
-[data-bs-theme="dark"] .scroll-shadow-right {
-    background: linear-gradient(to left, rgba(0,0,0,0.6), transparent);
-}
-
-/* Sheet Music (Partitura) Modo Escuro */
-[data-bs-theme="dark"] .sheet-music-block {
-    background: #2b2b2b;
-    border-color: #555;
-}
-
-    [data-bs-theme="dark"] .sheet-music-block:hover {
-        background: #333;
-        border-color: #0b8e8e;
-    }
-
-[data-bs-theme="dark"] .sm-toolbar {
-    background: rgba(43, 48, 53, 0.95);
-    border-color: #495057;
-}
-
-[data-bs-theme="dark"] .sm-btn:hover {
-    background: #343a40;
-    border-color: #495057;
-}
-
-[data-bs-theme="dark"] #sm-editor-overlay {
-    background: #1e1e1e !important;
-}
-
-/* Inverte as notas pretas para branco suave no SVG em tema escuro */
-[data-bs-theme="dark"] .sheet-music-block svg,
-[data-bs-theme="dark"] #vexflow-target svg {
-    filter: invert(0.85) hue-rotate(180deg);
-}
-
-/* Marca-texto (Highlight) da Cifra Atual */
+/* ==========================================================================
+   8. ESTADOS DE EXECUÇÃO & MODO LETRA
+   ========================================================================== */
 .chord-highlight {
     background-color: #ffeb3b;
-    color: #000;
+    color: #000000;
     border-radius: 4px;
     padding: 0 4px;
     box-shadow: 0 0 5px rgba(255, 235, 59, 0.8);
@@ -599,167 +547,39 @@ input[type="search"] {
 
 [data-bs-theme="dark"] .chord-highlight {
     background-color: #f39c12;
-    color: #fff;
+    color: #ffffff;
     box-shadow: 0 0 5px rgba(243, 156, 18, 0.8);
 }
 
-/* Efeitos do Vai-e-Vem Rápido */
-.menu-teal {
-    color: #0b8e8e !important;
-}
-
-#wrapper-song-select.ts-fake-button {
-    position: relative;
-}
-
-    /* Escudo invisível que transforma a caixa num botão de verdade */
-    #wrapper-song-select.ts-fake-button::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        z-index: 10;
-        cursor: pointer;
-    }
-
-#wrapper-song-select .ts-control {
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-}
-
-.ts-fake-button .ts-control {
-    background-color: #e9ecef;
-    border-color: #0b8e8e;
-    text-align: center;
-    font-weight: bold;
-}
-
-[data-bs-theme="dark"] .ts-fake-button .ts-control {
-    background-color: #2b3035;
-}
-
-.ts-fake-button .ts-control::after {
-    display: none !important; /* Esconde a setinha */
-}
-
-[data-bs-theme="dark"] .ts-fake-button .ts-control {
-    background-color: #2b3035;
-}
-
-.ts-fake-button .ts-control::after {
-    display: none !important; /* Esconde a setinha do select */
-}
-
-/* Esconde o item selecionado enquanto o usuário está pesquisando */
-.ts-wrapper.focus .ts-control .item {
-    display: none !important;
-}
-
-/* Garante que o input de pesquisa ocupe o espaço todo e mostre o aviso */
-.ts-wrapper.focus .ts-control input {
-    width: 100% !important;
-}
-
-/* ========================================= */
-/*       CONTROLES FLUTUANTES (DRAG)         */
-/* ========================================= */
-.floating-controls {
-    position: fixed !important;
-    z-index: 1050;
-    background-color: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    border-radius: 50px;
-    padding: 10px 20px;
-    cursor: move;
-    user-select: none;
-    touch-action: none; /* Impede a rolagem da página no celular durante o arrasto */
-    transition: background-color 0.3s;
-}
-
-[data-bs-theme="dark"] .floating-controls {
-    background-color: rgba(43, 48, 53, 0.75);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-/* ========================================= */
-/*      BOTÃO ADICIONAR PARTITURA (SM)       */
-/* ========================================= */
-#btn-add-sheet-music {
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #dee2e6;
-    border-radius: 12px;
-    padding: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 24px;
-}
-
-    #btn-add-sheet-music:hover {
-        background: #f8f9fa;
-        transform: scale(1.05);
-    }
-
-[data-bs-theme="dark"] #btn-add-sheet-music {
-    background: rgba(43, 48, 53, 0.95);
-    border-color: #495057;
-}
-
-/* Bloqueia interações indesejadas com os botões enquanto o painel estiver sendo arrastado */
-.floating-controls.is-dragging button {
-    pointer-events: none !important;
-}
-
-/* ========================================= */
-/*      MODO LETRA & AUTO-OCULTAR UI         */
-/* ========================================= */
-
-/* Oculta as cifras e as partituras no Modo Letra */
 .mode-lyrics-only b,
 .mode-lyrics-only .sheet-music-block {
-    display: none !important;
+    display: none;
 }
 
-/* Oculta os painéis musicais quando a música não tem cifras */
-.hide-music-ui {
-    display: none !important;
-}
-
-/* Espaçamento extra no final para clique no celular (Modo Letra) */
 .lyrics-spacing {
-    padding-bottom: 250px !important;
+    padding-bottom: 250px;
 }
 
-/* ========================================= */
-/*      ESTADOS DE CARREGAMENTO & RITMO      */
-/* ========================================= */
 .music-ui-blocked {
     opacity: 0.4;
-    pointer-events: none !important;
+    pointer-events: none;
     filter: grayscale(100%);
     transition: all 0.4s ease;
 }
 
-/* Piscar do Metrônomo (BPM) */
-.bpm-blink {
-    filter: brightness(1.4) !important;
-    transform: scale(1.08) !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.9) !important;
-    transition: transform 0.08s ease, filter 0.08s ease !important;
+/* Piscar do Metrônomo */
+.btn-play.bpm-blink {
+    filter: brightness(1.4);
+    transform: scale(1.08);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
 }
 
 .btn-play.playing.bpm-blink {
-    background-color: #ff4757 !important; /* Mantém vermelho no play */
-    box-shadow: 0 0 25px 8px rgba(255, 71, 87, 0.9) !important;
+    background-color: #ff4757;
+    box-shadow: 0 0 25px 8px rgba(255, 71, 87, 0.9);
 }
 
-/* Grade do Sequenciador */
+/* Sequenciador de Ritmo */
 .rhythm-row {
     display: flex;
     gap: 8px;
@@ -771,7 +591,7 @@ input[type="search"] {
     width: 55px;
     font-size: 13px;
     font-weight: bold;
-    color: #495057;
+    color: var(--bs-secondary-color);
     text-align: right;
     padding-right: 5px;
     flex-shrink: 0;
@@ -781,8 +601,8 @@ input[type="search"] {
     width: 45px;
     height: 45px;
     border-radius: 6px;
-    background-color: #e9ecef;
-    border: 2px solid #ced4da;
+    background-color: var(--bs-tertiary-bg);
+    border: 2px solid var(--bs-border-color);
     cursor: pointer;
     flex-shrink: 0;
     transition: transform 0.1s, background-color 0.1s;
@@ -793,20 +613,83 @@ input[type="search"] {
     }
 
     .rhythm-step[data-state="1"] {
-        background-color: #0b8e8e;
-        border-color: #0b8e8e;
+        background-color: var(--app-teal);
+        border-color: var(--app-teal);
     }
-    /* 100% Vol */
+
     .rhythm-step[data-state="2"] {
         background-color: #72c7c7;
         border-color: #72c7c7;
     }
-    /* 50% Vol */
 
-    /* Indicador de reprodução (Luzinha que corre a grade) */
-    .rhythm-step.active-step {
-        border-color: #ffc107 !important;
+    .rhythm-step[data-state].active-step {
+        border-color: #ffc107;
         transform: scale(1.1);
         box-shadow: 0 0 12px rgba(255, 193, 7, 0.9);
         z-index: 2;
     }
+
+/* ==========================================================================
+   9. INTEGRAÇÃO TOMSELECT (SEM CONFLITO DE ESCOPO)
+   ========================================================================== */
+#song-control-group .ts-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.ts-fake-button .ts-control {
+    background-color: var(--bs-tertiary-bg);
+    border-color: var(--app-teal);
+    text-align: center;
+    font-weight: bold;
+}
+
+    .ts-fake-button .ts-control::after {
+        display: none;
+    }
+
+.ts-wrapper.focus .ts-control .item {
+    display: none;
+}
+
+.ts-wrapper.focus .ts-control input {
+    width: 100%;
+}
+
+/* ==========================================================================
+   10. OFICINA DE RASCUNHOS (EDITAR-CIFRAS.HTML)
+   ========================================================================== */
+.editor-container {
+    max-width: 900px;
+    margin: 0 auto;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+#edit-cifra {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 15px;
+    border-radius: 6px;
+    outline: none;
+    overflow-y: auto;
+}
+
+    #edit-cifra .sheet-music-block {
+        display: block;
+        background-color: var(--bs-tertiary-bg);
+        border: 2px dashed var(--bs-border-color);
+        padding: 15px;
+        margin: 10px 0;
+        text-align: center;
+        color: var(--bs-secondary-color);
+        font-weight: bold;
+        border-radius: 8px;
+        user-select: none;
+    }
+
+        #edit-cifra .sheet-music-block::before {
+            content: "🎼 [ Bloco de Partitura Oculto - Preservado ]";
+        }

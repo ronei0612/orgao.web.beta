@@ -34,7 +34,8 @@ class ViewManager {
         this.mainDisplay.classList.add('d-none');
         this.mainIframe.classList.remove('d-none');
         const currentSrc = this.mainIframe.src;
-        if (!currentSrc || currentSrc === window.location.href) {
+        // Agora ele verifica se a URL NÃO inclui o site da cnbb
+        if (!currentSrc || !currentSrc.includes("liturgiadiaria.edicoescnbb.com.br")) {
             this.mainIframe.src = "https://liturgiadiaria.edicoescnbb.com.br/";
         }
     }

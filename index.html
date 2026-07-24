@@ -29,10 +29,10 @@
         <div class="offcanvas-body">
 
             <div class="d-flex gap-2 justify-content-center mb-4 mt-2">
-                <button class="btn btn-setting-circle" id="btn-theme-toggle" title="Alternar Tema">
+                <button type="button" class="btn btn-setting-circle" id="btn-theme-toggle" title="Alternar Tema" aria-label="Alternar Tema">
                     <i class="bi bi-moon-fill fs-5" id="icon-theme"></i>
                 </button>
-                <button class="btn btn-setting-circle" id="btn-language-toggle" title="Alternar Idioma">
+                <button type="button" class="btn btn-setting-circle" id="btn-language-toggle" title="Alternar Idioma" aria-label="Alternar Idioma">
                     <span class="fs-4" id="icon-flag">🇧🇷</span>
                 </button>
             </div>
@@ -85,43 +85,43 @@
         <div class="row g-1 align-items-center mb-1 flex-shrink-0">
             <div class="col-12 col-md-auto d-flex gap-1 align-items-center">
 
-                <button class="btn-menu-icon flex-shrink-0" id="btn-main-menu">
-                    <i class="fas fa-bars icon-menu" id="main-menu-icon" style="transition: color 0.3s;"></i>
+                <button type="button" class="btn-menu-icon flex-shrink-0" id="btn-main-menu" aria-label="Menu Principal">
+                    <i class="fas fa-bars icon-menu" id="main-menu-icon"></i>
                 </button>
 
                 <div class="input-group">
-                    <button class="btn btn-teal px-3" id="btn-key-down"><i class="fas fa-minus"></i></button>
-                    <select class="form-select text-center fw-bold" id="key-select">
-                        <!-- As options (C, C#, D...) serão geradas dinamicamente pelo JS -->
+                    <button type="button" class="btn btn-teal px-3" id="btn-key-down" aria-label="Diminuir tom"><i class="fas fa-minus"></i></button>
+                    <select class="form-select text-center fw-bold" id="key-select" aria-label="Seleção de Tom">
+                        <!-- Gerado dinamicamente pelo JS -->
                     </select>
-                    <button class="btn btn-teal px-3" id="btn-key-up"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn btn-teal px-3" id="btn-key-up" aria-label="Aumentar tom"><i class="fas fa-plus"></i></button>
                 </div>
 
                 <div class="input-group">
-                    <button class="btn btn-teal btn-bpm" id="btn-bpm-minus-5">-5</button>
-                    <button class="btn btn-teal btn-bpm border-start" id="btn-bpm-minus-1"><i class="fas fa-minus"></i></button>
-                    <input type="number" class="form-control custom-bpm fw-bold px-1" id="bpm-input" value="90" min="1" max="999">
-                    <button class="btn btn-teal btn-bpm" id="btn-bpm-plus-5">+5</button>
+                    <button type="button" class="btn btn-teal btn-bpm" id="btn-bpm-minus-5" aria-label="-5 BPM">-5</button>
+                    <button type="button" class="btn btn-teal btn-bpm border-start" id="btn-bpm-minus-1" aria-label="-1 BPM"><i class="fas fa-minus"></i></button>
+                    <input type="number" class="form-control custom-bpm text-center fw-bold px-1" id="bpm-input" value="90" min="1" max="999" aria-label="Valor de BPM">
+                    <button type="button" class="btn btn-teal btn-bpm" id="btn-bpm-plus-5" aria-label="+5 BPM">+5</button>
                 </div>
             </div>
 
             <!-- Seleção e Ações de Música -->
             <div class="col-12 col-md">
                 <div class="input-group flex-nowrap" id="song-control-group">
-                    <div id="wrapper-song-select" class="flex-grow-1" style="min-width: 0;">
-                        <select id="song-select" autocomplete="off" placeholder="Escolha a Música...">
+                    <div id="wrapper-song-select" class="flex-grow-1">
+                        <select id="song-select" autocomplete="off" placeholder="Escolha a Música..." aria-label="Escolher Música">
                             <option value=""></option>
                         </select>
                     </div>
-                    <input type="search" id="song-title-input" class="form-control d-none" data-i18n-placeholder="songTitlePlaceholder" placeholder="Título da música...">
+                    <input type="search" id="song-title-input" class="form-control d-none" data-i18n-placeholder="songTitlePlaceholder" placeholder="Título da música..." aria-label="Título da Música">
 
-                    <button class="btn btn-teal px-3 force-rounded-end" id="btn-action-toggle" title="Ações"><i class="fas fa-plus"></i></button>
-                    <button class="btn btn-success px-3 d-none" id="btn-action-add" title="Adicionar"><i class="fas fa-file-medical"></i></button>
-                    <button class="btn btn-info text-white px-3 d-none" id="btn-action-edit" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger force-rounded-end px-3 d-none" id="btn-action-delete" title="Excluir"><i class="fas fa-trash"></i></button>
+                    <button type="button" class="btn btn-teal px-3 force-rounded-end" id="btn-action-toggle" title="Ações" aria-label="Alternar Ações"><i class="fas fa-plus"></i></button>
+                    <button type="button" class="btn btn-success px-3 d-none" id="btn-action-add" title="Adicionar" aria-label="Adicionar Música"><i class="fas fa-file-medical"></i></button>
+                    <button type="button" class="btn btn-info text-white px-3 d-none" id="btn-action-edit" title="Editar" aria-label="Editar Música"><i class="fas fa-edit"></i></button>
+                    <button type="button" class="btn btn-danger force-rounded-end px-3 d-none" id="btn-action-delete" title="Excluir" aria-label="Excluir Música"><i class="fas fa-trash"></i></button>
 
-                    <button class="btn btn-primary d-none border-start border-white px-3" id="btn-action-save" title="Salvar"><i class="fas fa-save"></i></button>
-                    <button class="btn btn-danger force-rounded-end d-none border-start border-white px-3" id="btn-action-cancel" title="Cancelar"><i class="fas fa-times"></i></button>
+                    <button type="button" class="btn btn-primary d-none border-start border-white px-3" id="btn-action-save" title="Salvar" aria-label="Salvar Edição"><i class="fas fa-save"></i></button>
+                    <button type="button" class="btn btn-danger force-rounded-end d-none border-start border-white px-3" id="btn-action-cancel" title="Cancelar" aria-label="Cancelar Edição"><i class="fas fa-times"></i></button>
                 </div>
             </div>
         </div>
@@ -129,73 +129,72 @@
         <!-- Displays Principais -->
         <div class="position-relative flex-grow-1 d-flex flex-column mb-1 overflow-hidden" id="main-area-wrapper">
             <div class="main-display flex-grow-1" id="main-display" contenteditable="false"></div>
-            <iframe class="main-iframe flex-grow-1 d-none" id="main-iframe" src=""></iframe>
+            <iframe class="main-iframe flex-grow-1 d-none" id="main-iframe" src="" title="Visualizador de Conteúdo"></iframe>
 
             <!-- Painel do Editor de Ritmo -->
-            <div id="rhythm-editor-panel" class="d-none flex-column h-100 p-2 bg-light border-top" style="overflow-y: auto;">
+            <div id="rhythm-editor-panel" class="d-none flex-column h-100 p-2 bg-light border-top overflow-auto">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <h6 class="mb-0 fw-bold text-secondary"><i class="fas fa-drum me-2"></i>Sequenciador</h6>
                     <div class="d-flex gap-2 align-items-center">
-                        <label class="fw-bold small mb-0">Steps:</label>
-                        <input type="number" id="rhythm-steps-input" class="form-control form-control-sm text-center fw-bold" value="4" min="1" max="64" style="width: 60px;">
+                        <label class="fw-bold small mb-0" for="rhythm-steps-input">Steps:</label>
+                        <input type="number" id="rhythm-steps-input" class="form-control form-control-sm text-center fw-bold custom-bpm" value="4" min="1" max="64">
                     </div>
                 </div>
                 <div class="d-flex justify-content-end gap-2 mb-3">
-                    <button class="btn btn-sm btn-outline-primary fw-bold" id="btn-save-rhythm"><i class="fas fa-save me-1"></i>Salvar Rascunho</button>
-                    <button class="btn btn-sm btn-outline-success fw-bold" id="btn-export-rhythm"><i class="fas fa-download me-1"></i>Baixar JSON</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold" id="btn-save-rhythm"><i class="fas fa-save me-1"></i>Salvar Rascunho</button>
+                    <button type="button" class="btn btn-sm btn-outline-success fw-bold" id="btn-export-rhythm"><i class="fas fa-download me-1"></i>Baixar JSON</button>
                 </div>
                 <div id="rhythm-grid" class="d-flex flex-column gap-2 pb-3 overflow-x-auto"></div>
             </div>
 
             <!-- Editor de Partituras Overlay -->
-            <button class="btn btn-teal rounded-circle shadow d-none align-items-center justify-content-center" id="btn-add-sheet-music" title="Adicionar Partitura" style="position: absolute; bottom: 15px; right: 15px; width: 50px; height: 50px; font-size: 24px; z-index: 10;">
+            <button type="button" class="btn btn-teal rounded-circle shadow d-none align-items-center justify-content-center" id="btn-add-sheet-music" title="Adicionar Partitura" aria-label="Adicionar Partitura">
                 🎼
             </button>
-            <div id="sm-editor-overlay" class="d-none flex-column" style="position: absolute; top:0; left:0; right:0; bottom:0; background: #fdfdfd; z-index: 100;">
-                <div id="score-scroll-area" class="flex-grow-1 position-relative overflow-auto d-flex align-items-center justify-content-center" style="min-height: 250px;">
+            <div id="sm-editor-overlay" class="d-none flex-column">
+                <div id="score-scroll-area" class="flex-grow-1 position-relative overflow-auto d-flex align-items-center justify-content-center">
                     <div id="score-container" class="position-relative pt-5 pb-5">
                         <div id="vexflow-target"></div>
-                        <div id="sm-floating-inputs" style="display: none; pointer-events: none;">
-                            <input type="search" id="sm-input-chord" class="form-control text-center fw-bold text-dark shadow-sm sm-floating-input" placeholder="Cifra" style="pointer-events: auto; top: 0;">
-                            <input type="search" id="sm-input-lyric" class="form-control text-center fst-italic text-secondary shadow-sm sm-floating-input" placeholder="Letra" style="pointer-events: auto; bottom: 0;">
+                        <div id="sm-floating-inputs">
+                            <input type="search" id="sm-input-chord" class="form-control text-center fw-bold text-dark shadow-sm sm-floating-input" placeholder="Cifra" aria-label="Cifra da Nota">
+                            <input type="search" id="sm-input-lyric" class="form-control text-center fst-italic text-secondary shadow-sm sm-floating-input" placeholder="Letra" aria-label="Letra da Nota">
                         </div>
                     </div>
                 </div>
                 <!-- Barras do Editor SM -->
                 <div class="position-absolute top-0 start-50 translate-middle-x mt-3 d-flex gap-2 sm-toolbar">
-                    <button class="sm-btn text-success fw-bold" id="sm-btn-prev">◀</button>
-                    <button class="sm-btn text-success fw-bold" id="sm-btn-up">▲</button>
-                    <button class="sm-btn text-success fw-bold" id="sm-btn-down">▼</button>
-                    <button class="sm-btn text-success fw-bold" id="sm-btn-next">▶</button>
+                    <button type="button" class="sm-btn text-success fw-bold" id="sm-btn-prev" aria-label="Nota Anterior">◀</button>
+                    <button type="button" class="sm-btn text-success fw-bold" id="sm-btn-up" aria-label="Aumentar Tom">▲</button>
+                    <button type="button" class="sm-btn text-success fw-bold" id="sm-btn-down" aria-label="Diminuir Tom">▼</button>
+                    <button type="button" class="sm-btn text-success fw-bold" id="sm-btn-next" aria-label="Próxima Nota">▶</button>
                 </div>
                 <div class="position-absolute top-50 end-0 translate-middle-y me-2 d-flex flex-column gap-2 sm-toolbar">
-                    <button class="sm-btn fw-bold text-success fs-5" id="sm-btn-add">+♪</button>
-                    <button class="sm-btn fw-bold text-dark fs-4" id="sm-btn-rest">𝄽</button>
-                    <button class="sm-btn fw-bold text-primary fs-4" id="sm-btn-tie">‿</button>
-                    <button class="sm-btn text-danger" id="sm-btn-delete"><i class="fas fa-backspace"></i></button>
+                    <button type="button" class="sm-btn fw-bold text-success fs-5" id="sm-btn-add" aria-label="Adicionar Nota">+♪</button>
+                    <button type="button" class="sm-btn fw-bold text-dark fs-4" id="sm-btn-rest" aria-label="Adicionar Pausa">𝄽</button>
+                    <button type="button" class="sm-btn fw-bold text-primary fs-4" id="sm-btn-tie" aria-label="Alternar Ligadura">‿</button>
+                    <button type="button" class="sm-btn text-danger" id="sm-btn-delete" aria-label="Excluir Nota"><i class="fas fa-backspace"></i></button>
                 </div>
                 <div class="position-absolute bottom-0 start-50 translate-middle-x mb-3 d-flex gap-2 align-items-center sm-toolbar">
-                    <button class="sm-btn fw-bold text-purple" id="sm-btn-oct-up">↑8ª</button>
-                    <button class="sm-btn fw-bold text-purple" id="sm-btn-oct-down">↓8ª</button>
+                    <button type="button" class="sm-btn fw-bold text-purple" id="sm-btn-oct-up" aria-label="Subir Oitava">↑8ª</button>
+                    <button type="button" class="sm-btn fw-bold text-purple" id="sm-btn-oct-down" aria-label="Descer Oitava">↓8ª</button>
                     <div class="vr mx-1"></div>
-                    <button class="sm-btn fw-bold text-success fs-5" id="sm-btn-confirm">✅</button>
+                    <button type="button" class="sm-btn fw-bold text-success fs-5" id="sm-btn-confirm" aria-label="Confirmar Partitura">✅</button>
                 </div>
             </div>
         </div>
 
         <div class="input-group mb-2 flex-nowrap flex-shrink-0">
-            <select class="form-select text-secondary" id="rhythm-select">
+            <select class="form-select text-secondary" id="rhythm-select" aria-label="Seleção de Ritmo">
                 <option data-i18n="noRhythm">Sem ritmo</option>
             </select>
-            <!-- Adicionado Modal Target e ID -->
-            <button class="btn btn-secondary fw-bold px-4" id="btn-instrument-select" data-bs-toggle="modal" data-bs-target="#instrumentModal" data-i18n="organ">ÓRGÃO</button>
+            <button type="button" class="btn btn-secondary fw-bold px-4" id="btn-instrument-select" data-bs-toggle="modal" data-bs-target="#instrumentModal" data-i18n="organ">ÓRGÃO</button>
         </div>
 
         <div class="d-flex justify-content-center align-items-center gap-3 mb-2 flex-shrink-0">
-            <button class="btn btn-link text-secondary fs-4 d-none p-0" id="btn-prev-chord"><i class="fas fa-step-backward"></i></button>
-            <button class="btn-circle btn-play" id="btn-play"><i class="fas fa-play" id="icon-play"></i></button>
-            <button class="btn btn-link text-secondary fs-4 d-none p-0" id="btn-next-chord"><i class="fas fa-step-forward"></i></button>
-            <button class="btn-circle btn-music" id="btn-music"><i class="bi bi-music-note" id="icon-music"></i></button>
+            <button type="button" class="btn btn-link text-secondary fs-4 d-none p-0" id="btn-prev-chord" aria-label="Acorde Anterior"><i class="fas fa-step-backward"></i></button>
+            <button type="button" class="btn-circle btn-play" id="btn-play" aria-label="Reproduzir / Parar"><i class="fas fa-play" id="icon-play"></i></button>
+            <button type="button" class="btn btn-link text-secondary fs-4 d-none p-0" id="btn-next-chord" aria-label="Próximo Acorde"><i class="fas fa-step-forward"></i></button>
+            <button type="button" class="btn-circle btn-music" id="btn-music" aria-label="Fase Musical"><i class="bi bi-music-note" id="icon-music"></i></button>
         </div>
 
         <!-- Acordes -->
@@ -203,19 +202,19 @@
             <div class="d-flex justify-content-center gap-2">
                 <div class="d-flex flex-column align-items-center gap-2 mb-2 flex-shrink-0">
                     <div class="d-flex justify-content-center gap-2">
-                        <button class="chord-btn bg-degree-gray" data-interval="10" data-type=""></button>
-                        <button class="chord-btn bg-degree-minor-rel" data-interval="9" data-type=""></button>
-                        <button class="chord-btn bg-degree-gray" data-interval="11" data-type="°"></button>
-                        <button class="chord-btn bg-degree-3-rel" data-interval="4" data-type=""></button>
-                        <button class="chord-btn bg-degree-gray" data-interval="2" data-type=""></button>
+                        <button type="button" class="chord-btn bg-degree-gray" data-interval="10" data-type="" aria-label="Acorde Grau 10"></button>
+                        <button type="button" class="chord-btn bg-degree-minor-rel" data-interval="9" data-type="" aria-label="Acorde Grau 9"></button>
+                        <button type="button" class="chord-btn bg-degree-gray" data-interval="11" data-type="°" aria-label="Acorde Grau 11 Diminuto"></button>
+                        <button type="button" class="chord-btn bg-degree-3-rel" data-interval="4" data-type="" aria-label="Acorde Grau 4 Relativo"></button>
+                        <button type="button" class="chord-btn bg-degree-gray" data-interval="2" data-type="" aria-label="Acorde Grau 2"></button>
                     </div>
                     <div class="d-flex justify-content-center flex-wrap gap-2">
-                        <button class="chord-btn bg-degree-1" data-interval="0" data-type=""></button>
-                        <button class="chord-btn bg-degree-6" data-interval="9" data-type="m"></button>
-                        <button class="chord-btn bg-degree-4" data-interval="5" data-type=""></button>
-                        <button class="chord-btn bg-degree-2" data-interval="2" data-type="m"></button>
-                        <button class="chord-btn bg-degree-5" data-interval="7" data-type=""></button>
-                        <button class="chord-btn bg-degree-3" data-interval="4" data-type="m"></button>
+                        <button type="button" class="chord-btn bg-degree-1" data-interval="0" data-type="" aria-label="1º Grau Tônica"></button>
+                        <button type="button" class="chord-btn bg-degree-6" data-interval="9" data-type="m" aria-label="6º Grau Menor"></button>
+                        <button type="button" class="chord-btn bg-degree-4" data-interval="5" data-type="" aria-label="4º Grau Subdominante"></button>
+                        <button type="button" class="chord-btn bg-degree-2" data-interval="2" data-type="m" aria-label="2º Grau Menor"></button>
+                        <button type="button" class="chord-btn bg-degree-5" data-interval="7" data-type="" aria-label="5º Grau Dominante"></button>
+                        <button type="button" class="chord-btn bg-degree-3" data-interval="4" data-type="m" aria-label="3º Grau Menor"></button>
                     </div>
                 </div>
             </div>
@@ -230,18 +229,17 @@
         </div>
     </div>
 
-    <!-- Modais do Sistema... -->
-    <!-- NOVO: Modal de Instrumentos -->
+    <!-- Modais do Sistema -->
     <div class="modal fade" id="instrumentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
                     <h6 class="modal-title fw-bold">Escolher Instrumento</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body d-flex flex-column gap-2 py-3">
-                    <button class="btn btn-outline-primary fw-bold" onclick="window.rhythmEngine.changeInstrument('orgao')" data-bs-dismiss="modal">🎶 Órgão</button>
-                    <button class="btn btn-outline-dark fw-bold" onclick="window.rhythmEngine.changeInstrument('piano')" data-bs-dismiss="modal">🎹 Piano</button>
+                    <button type="button" class="btn btn-outline-primary fw-bold" onclick="window.rhythmEngine.changeInstrument('orgao')" data-bs-dismiss="modal">🎶 Órgão</button>
+                    <button type="button" class="btn btn-outline-dark fw-bold" onclick="window.rhythmEngine.changeInstrument('piano')" data-bs-dismiss="modal">🎹 Piano</button>
                 </div>
             </div>
         </div>
@@ -252,7 +250,7 @@
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
                     <h6 class="modal-title fw-bold" id="confirmModalTitle">Confirmar</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body py-3" id="confirmModalBody">Tem certeza?</div>
                 <div class="modal-footer border-0 pt-0">
@@ -268,14 +266,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" data-i18n="exportTitle">Exportar Repertório</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-check mb-3 border-bottom pb-2">
                         <input class="form-check-input" type="checkbox" id="export-select-all" checked>
                         <label class="form-check-label fw-bold" for="export-select-all" data-i18n="selectAll">Selecionar Tudo</label>
                     </div>
-                    <div id="export-list" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto;"></div>
+                    <div id="export-list" class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancelar</button>
@@ -290,16 +288,16 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" data-i18n="importTitle">Importar Repertório</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                    <input class="form-control mb-3" type="file" id="import-file-input" accept=".json">
+                    <input class="form-control mb-3" type="file" id="import-file-input" accept=".json" aria-label="Arquivo de Repertório">
                     <div id="import-selection-area" class="d-none">
                         <div class="form-check mb-3 border-bottom pb-2">
                             <input class="form-check-input" type="checkbox" id="import-select-all" checked>
                             <label class="form-check-label fw-bold" for="import-select-all" data-i18n="selectAll">Selecionar Tudo</label>
                         </div>
-                        <div id="import-list" class="d-flex flex-column gap-2" style="max-height: 250px; overflow-y: auto;"></div>
+                        <div id="import-list" class="d-flex flex-column gap-2 overflow-auto" style="max-height: 250px;"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -315,14 +313,14 @@
             <div class="modal-content">
                 <div class="modal-header bg-dark text-white">
                     <h5 class="modal-title fw-bold"><i class="fas fa-terminal me-2"></i>Logs do Sistema</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body bg-light">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <span id="log-version-info" class="badge bg-secondary fs-6"></span>
-                        <button class="btn btn-sm btn-danger fw-bold" id="btn-clear-logs">Limpar Logs</button>
+                        <button type="button" class="btn btn-sm btn-danger fw-bold" id="btn-clear-logs">Limpar Logs</button>
                     </div>
-                    <textarea id="system-logs-area" class="form-control font-monospace bg-dark text-success" rows="12" readonly style="font-size: 12px; resize: none;"></textarea>
+                    <textarea id="system-logs-area" class="form-control font-monospace bg-dark text-success overflow-auto" rows="12" readonly style="font-size: 12px; resize: none;" aria-label="Logs do Sistema"></textarea>
                 </div>
             </div>
         </div>
@@ -333,14 +331,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold"><i class="fas fa-info-circle me-2"></i>Sobre o Projeto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body text-center">
                     <h4 class="fw-bold mb-0">Órgão Web</h4>
                     <p class="text-muted mb-3" id="about-version-info"></p>
                     <p class="mb-1">Criado por: <strong>Ronei Costa Soares</strong></p>
                     <p class="mb-3">Ano: <strong>2024 - 2026</strong></p>
-                    <a href="https://github.com/ronei0612/orgao.web" target="_blank" class="btn btn-dark w-100 fw-bold">
+                    <a href="https://github.com/ronei0612/orgao.web" target="_blank" rel="noopener" class="btn btn-dark w-100 fw-bold">
                         <i class="fab fa-github me-2"></i>Ver código no GitHub
                     </a>
                 </div>
@@ -348,7 +346,7 @@
         </div>
     </div>
 
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
         <div id="updateToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body fw-bold" id="updateToastMessage"></div>
@@ -357,9 +355,10 @@
         </div>
     </div>
 
-    <!-- 1. Bibliotecas -->
+    <!-- Bibliotecas -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
     <script src="./assets/js/Config.js"></script>
     <script src="./assets/js/TextFormatter.js"></script>
     <script src="./assets/js/DatabaseManager.js"></script>
@@ -376,29 +375,5 @@
     <script src="./assets/js/ModalManager.js"></script>
     <script src="./assets/js/ToolbarController.js"></script>
     <script src="./assets/js/App.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Convert known search fields generated by select libraries to type="search"
-            document.querySelectorAll('.select2-search__field, .select2-search input, .ts-control input, .tom-select input, .select2-selection__rendered input').forEach(function (el) {
-                try { el.setAttribute('type', 'search'); } catch(e) {}
-            });
-
-            // Observe DOM to handle dynamically created inputs (Select2, Tom Select, etc.)
-            const observer = new MutationObserver(function (mutations) {
-                for (const m of mutations) {
-                    for (const node of m.addedNodes) {
-                        if (node.nodeType !== 1) continue;
-                        node.querySelectorAll && node.querySelectorAll('input').forEach(function (inp) {
-                            if (inp.classList.contains('select2-search__field') || inp.closest('.select2') || inp.closest('.ts-control') || inp.closest('.tom-select')) {
-                                try { inp.setAttribute('type', 'search'); } catch (e) {}
-                            }
-                        });
-                    }
-                }
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
-    </script>
 </body>
 </html>
