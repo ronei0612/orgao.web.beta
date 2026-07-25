@@ -237,16 +237,17 @@ class RepertoireController {
     }
 
     autoAdjustKeySelect() {
-        const firstChordEl = this.view.mainDisplay.querySelector('b');
+        const chordEls = Array.from(this.view.mainDisplay.querySelectorAll('b'));
         const keySelect = document.getElementById('key-select');
 
-        if (firstChordEl && keySelect && keySelect.value !== "L") {
-            const match = firstChordEl.innerText.match(/^([A-G][#b]?)/i);
-            if (match) {
-                const noteIndex = window.musicTheory.getNoteIndex(match[1]);
-                if (noteIndex !== -1 && parseInt(keySelect.value, 10) !== noteIndex) {
+        if (chordEls.length > 0 && keySelect && keySelect.value !== "L") {
+            // Executa a análise harmônica com desempate pelo 1º acorde
+            const detectedKeyIndex = window.musicTheory.detectKeyFromChords(chordEls);
+
+            if (detectedKeyIndex !== null && detectedKeyIndex !== undefined && detectedKeyIndex !== -1) {
+                if (parseInt(keySelect.value, 10) !== detectedKeyIndex) {
                     this.isAutoAdjustingKey = true;
-                    keySelect.value = noteIndex;
+                    keySelect.value = detectedKeyIndex;
                     keySelect.dispatchEvent(new Event('change'));
                     this.isAutoAdjustingKey = false;
                 }
