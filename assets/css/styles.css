@@ -276,6 +276,8 @@ body {
 }
 
     .main-display.mode-lyrics-only {
+        font-family: 'Roboto', sans-serif;
+        font-size: 15pt;
         margin-bottom: 40px;
     }
 
@@ -697,3 +699,5 @@ body {
         #edit-cifra .sheet-music-block::before {
             content: "🎼 [ Bloco de Partitura Oculto - Preservado ]";
         }
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
