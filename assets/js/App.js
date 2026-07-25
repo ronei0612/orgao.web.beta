@@ -192,13 +192,21 @@ class RepertoireController {
 
         if (!hasChords) {
             const keySelect = document.getElementById('key-select');
-            if (keySelect && keySelect.value !== "L") {
+            if (keySelect) {
                 this.isAutoAdjustingKey = true;
                 keySelect.value = "L";
                 keySelect.dispatchEvent(new Event('change'));
                 this.isAutoAdjustingKey = false;
             }
+            this.toggleMusicUI(false);
         } else {
+            const keySelect = document.getElementById('key-select');
+            if (keySelect && keySelect.value === "L") {
+                this.isAutoAdjustingKey = true;
+                keySelect.value = "0";
+                keySelect.dispatchEvent(new Event('change'));
+                this.isAutoAdjustingKey = false;
+            }
             this.toggleMusicUI(true);
         }
     }
@@ -212,8 +220,8 @@ class RepertoireController {
 
         const toggle = (el, forceHide) => {
             if (el) {
-                if (forceHide) el.classList.add('hide-music-ui');
-                else el.classList.remove('hide-music-ui');
+                if (forceHide) el.classList.add('d-none');
+                else el.classList.remove('d-none');
             }
         };
 

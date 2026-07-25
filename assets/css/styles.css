@@ -258,14 +258,6 @@ body {
 /* ==========================================================================
    5. DISPLAY PRINCIPAL E EDITOR DE PARTITURAS (VEXFLOW)
    ========================================================================== */
-.main-display, .main-iframe {
-    background-color: var(--app-bg-display);
-    border: 1px solid var(--app-border-display);
-    border-radius: 4px;
-    width: 100%;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
 .main-display {
     min-height: 80px;
     white-space: pre-wrap;
@@ -274,6 +266,18 @@ body {
     overflow-y: auto;
     font-family: 'Consolas', 'Courier New', monospace;
 }
+
+.main-display, .main-iframe {
+    background-color: var(--app-bg-display);
+    border: 1px solid var(--app-border-display);
+    border-radius: 4px;
+    width: 100%;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+    .main-display.mode-lyrics-only {
+        margin-bottom: 40px;
+    }
 
     .main-display[contenteditable="true"] {
         background-color: var(--bs-body-bg);
