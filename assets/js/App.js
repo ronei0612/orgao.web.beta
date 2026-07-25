@@ -192,13 +192,21 @@ class RepertoireController {
 
         if (!hasChords) {
             const keySelect = document.getElementById('key-select');
-            if (keySelect && keySelect.value !== "L") {
+            if (keySelect) {
                 this.isAutoAdjustingKey = true;
                 keySelect.value = "L";
                 keySelect.dispatchEvent(new Event('change'));
                 this.isAutoAdjustingKey = false;
             }
+            this.toggleMusicUI(false);
         } else {
+            const keySelect = document.getElementById('key-select');
+            if (keySelect && keySelect.value === "L") {
+                this.isAutoAdjustingKey = true;
+                keySelect.value = "0";
+                keySelect.dispatchEvent(new Event('change'));
+                this.isAutoAdjustingKey = false;
+            }
             this.toggleMusicUI(true);
         }
     }
@@ -212,8 +220,8 @@ class RepertoireController {
 
         const toggle = (el, forceHide) => {
             if (el) {
-                if (forceHide) el.classList.add('hide-music-ui');
-                else el.classList.remove('hide-music-ui');
+                if (forceHide) el.classList.add('d-none');
+                else el.classList.remove('d-none');
             }
         };
 
@@ -302,6 +310,50 @@ class RepertoireController {
         return data;
     }
 
+    resetUIState() {
+        // Elementos que devem estar VISÍVEIS (remover d-none)
+        const elementsToShow = [
+            'key-select', 'bpm-input', 'rhythm-select', 'btn-instrument-select',
+            'chord-degrees-panel', 'btn-play', 'btn-music', 'piano-wrapper'
+        ];
+
+        // Elementos que devem estar OCULTOS (adicionar d-none)
+        const elementsToHide = [
+            'song-title-input', 'btn-action-add', 'btn-action-edit',
+            'btn-action-delete', 'btn-action-save', 'btn-action-cancel',
+            'btn-add-sheet-music', 'rhythm-editor-panel', 'sm-editor-overlay',
+            'btn-prev-chord', 'btn-next-chord'
+        ];
+
+        // Mostrar elementos
+        elementsToShow.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('d-none');
+                // Se tem pai com input-group, também remover d-none do pai
+                const group = el.closest('.input-group');
+                if (group) group.classList.remove('d-none');
+            }
+        });
+
+        // Ocultar elementos
+        elementsToHide.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('d-none');
+        });
+
+        // Resetar elemento floating ao estado original
+        const floatingPanel = document.getElementById('btn-play')?.parentElement;
+        if (floatingPanel) {
+            floatingPanel.classList.remove('floating-controls', 'is-dragging');
+            floatingPanel.style.position = '';
+            floatingPanel.style.zIndex = '';
+            floatingPanel.style.left = '';
+            floatingPanel.style.top = '';
+            floatingPanel.style.margin = '';
+        }
+    }
+
     initEvents() {
         const btnMenu = document.getElementById('btn-main-menu');
         const tsWrapper = document.getElementById('wrapper-song-select');
@@ -388,6 +440,7 @@ class RepertoireController {
         this.ts.on('change', (selectedId) => {
             this.cancelQuickReturn();
             this.ts.blur();
+            this.resetUIState();
 
             if (selectedId === 'ACORDES' || !selectedId) {
                 panelAcordes.classList.remove('d-none');
@@ -474,6 +527,7 @@ class RepertoireController {
 
     forceShowTarget(target) {
         this.changeContext(target);
+        this.resetUIState();
 
         if (target === 'LITURGIA') {
             this.view.showLiturgy();
@@ -510,6 +564,7 @@ class RepertoireController {
         this.updateMusicUIVisibility();
         this.autoAdjustKeySelect();
 
+        this.resetUIState();
         this.ts.blur();
     }
 

@@ -8,7 +8,7 @@
     --app-bg-display: #fcf9ee;
     --app-border-display: #adb5bd;
     --app-bg-overlay: #fdfdfd;
-    --app-bg-floating: rgba(255, 255, 255, 0.85);
+    --app-bg-floating: rgba(255, 255, 255, 0.3);
     --app-shadow-floating: rgba(0, 0, 0, 0.15);
 }
 
@@ -17,7 +17,7 @@
     --app-bg-display: #1e1e1e;
     --app-border-display: #333333;
     --app-bg-overlay: #1e1e1e;
-    --app-bg-floating: rgba(43, 48, 53, 0.85);
+    --app-bg-floating: rgba(43, 48, 53, 0.3);
     --app-shadow-floating: rgba(0, 0, 0, 0.5);
 }
 
@@ -258,14 +258,6 @@ body {
 /* ==========================================================================
    5. DISPLAY PRINCIPAL E EDITOR DE PARTITURAS (VEXFLOW)
    ========================================================================== */
-.main-display, .main-iframe {
-    background-color: var(--app-bg-display);
-    border: 1px solid var(--app-border-display);
-    border-radius: 4px;
-    width: 100%;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
 .main-display {
     min-height: 80px;
     white-space: pre-wrap;
@@ -274,6 +266,20 @@ body {
     overflow-y: auto;
     font-family: 'Consolas', 'Courier New', monospace;
 }
+
+.main-display, .main-iframe {
+    background-color: var(--app-bg-display);
+    border: 1px solid var(--app-border-display);
+    border-radius: 4px;
+    width: 100%;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+    .main-display.mode-lyrics-only {
+        font-family: 'Roboto', sans-serif;
+        font-size: 15pt;
+        margin-bottom: 40px;
+    }
 
     .main-display[contenteditable="true"] {
         background-color: var(--bs-body-bg);
@@ -516,10 +522,10 @@ body {
    ========================================================================== */
 .floating-controls {
     position: fixed;
-    z-index: 1050;
+    z-index: 40;
     background-color: var(--app-bg-floating);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
     box-shadow: 0 10px 30px var(--app-shadow-floating);
     border-radius: 50px;
     padding: 10px 20px;
@@ -693,3 +699,5 @@ body {
         #edit-cifra .sheet-music-block::before {
             content: "🎼 [ Bloco de Partitura Oculto - Preservado ]";
         }
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
