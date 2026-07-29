@@ -43,6 +43,65 @@ class MusicTheory {
     getPianoPattern() {
         return this.pianoPattern.map(key => ({ note: this.notes[key.index], type: key.type }));
     }
+
+    detectKeyFromChords(chordElements) {
+        if (!chordElements || chordElements.length === 0) return null;
+
+        // 1. Extrai a sequência de notas fundamentais na ordem em que aparecem na música
+        const songRootsOrdered = [];
+        const uniqueRoots = new Set();
+
+        chordElements.forEach(el => {
+            const text = el.innerText.trim();
+            const match = text.match(/^([A-G][#b]?)/i);
+            if (match) {
+                const idx = this.getNoteIndex(match[1]);
+                if (idx !== -1) {
+                    songRootsOrdered.push(idx);
+                    uniqueRoots.add(idx);
+                }
+            }
+        });
+
+        if (uniqueRoots.size === 0) return null;
+
+        // Intervalos de notas que formam um Campo Harmônico Maior
+        const diatonicIntervals = [0, 2, 4, 5, 7, 9, 11];
+        const keyScores = [];
+
+        // 2. Testa a lista de acordes contra os 12 Campos Harmônicos Maiores
+        for (let key = 0; key < 12; key++) {
+            const keyNotes = diatonicIntervals.map(interval => (key + interval) % 12);
+
+            let count = 0;
+            uniqueRoots.forEach(root => {
+                if (keyNotes.includes(root)) count++;
+            });
+
+            keyScores.push({ key, count });
+        }
+
+        // 3. Encontra a pontuação máxima
+        const maxCount = Math.max(...keyScores.map(s => s.count));
+        const topCandidates = keyScores.filter(s => s.count === maxCount).map(s => s.key);
+
+        // Se houver apenas 1 candidato absoluto, retorna ele
+        if (topCandidates.length === 1) {
+            return topCandidates[0];
+        }
+
+        // 4. REGRA DE DESEMPATE INTELIGENTE:
+        // Percorre os acordes reais da música (na ordem em que aparecem)
+        // O primeiro acorde da música que estiver entre os candidatos mais pontuados vence!
+        for (let rootNote of songRootsOrdered) {
+            if (topCandidates.includes(rootNote)) {
+                return rootNote;
+            }
+        }
+
+        // Fallback de segurança
+        return topCandidates[0];
+    }
 }
 
 class ChordManager {

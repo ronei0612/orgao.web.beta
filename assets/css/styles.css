@@ -263,6 +263,7 @@ body {
     white-space: pre-wrap;
     outline: none;
     padding: 15px;
+    padding-bottom: 70vh !important;
     overflow-y: auto;
     font-family: 'Consolas', 'Courier New', monospace;
 }
