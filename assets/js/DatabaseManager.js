@@ -16,23 +16,32 @@ class DatabaseManager {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(songs));
     }
 
-    addSong(title, content, artist = '') {
+    addSong(title, content, artist = '', key = 'C', bpm = 90, instrument = 'orgao', style = 'none') {
         const songs = this.getSongs();
         const safeId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
 
-        const newSong = { id: safeId, title, artist, content };
+        const newSong = { id: safeId, title, artist, content, key, bpm, instrument, style };
         songs.push(newSong);
         this.saveSongs(songs);
 
         return newSong;
     }
 
-    updateSong(id, title, content, artist = '') {
+    updateSong(id, title, content, artist = '', key = 'C', bpm = 90, instrument = 'orgao', style = 'none') {
         const songs = this.getSongs();
         const index = songs.findIndex(s => s.id === id);
 
         if (index > -1) {
-            songs[index] = { ...songs[index], title, artist, content };
+            songs[index] = {
+                ...songs[index],
+                title,
+                artist,
+                content,
+                key,
+                bpm,
+                instrument,
+                style
+            };
             this.saveSongs(songs);
             return songs[index];
         }

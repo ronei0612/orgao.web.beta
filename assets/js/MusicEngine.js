@@ -45,9 +45,14 @@ class MusicTheory {
     }
 
     detectKeyFromChords(chordElements) {
-        if (!chordElements || chordElements.length === 0) return null;
+        if (!chordElements || chordElements.length === 0) return "L";
 
-        // 1. Extrai a sequência de notas fundamentais na ordem em que aparecem na música
+        // 1. Verifica se o 1º acorde é menor
+        const firstChordText = chordElements[0].innerText.trim();
+        const firstMatch = firstChordText.match(/^([A-G][#b]?)(m)?(?!aj)/i);
+        const isFirstChordMinor = !!(firstMatch && firstMatch[2]);
+
+        // 2. Extrai notas fundamentais únicas
         const songRootsOrdered = [];
         const uniqueRoots = new Set();
 
@@ -63,44 +68,36 @@ class MusicTheory {
             }
         });
 
-        if (uniqueRoots.size === 0) return null;
+        if (uniqueRoots.size === 0) return "L";
 
-        // Intervalos de notas que formam um Campo Harmônico Maior
+        // 3. Testa nos 12 Campos Harmônicos Maiores
         const diatonicIntervals = [0, 2, 4, 5, 7, 9, 11];
         const keyScores = [];
 
-        // 2. Testa a lista de acordes contra os 12 Campos Harmônicos Maiores
         for (let key = 0; key < 12; key++) {
             const keyNotes = diatonicIntervals.map(interval => (key + interval) % 12);
-
             let count = 0;
             uniqueRoots.forEach(root => {
                 if (keyNotes.includes(root)) count++;
             });
-
             keyScores.push({ key, count });
         }
 
-        // 3. Encontra a pontuação máxima
         const maxCount = Math.max(...keyScores.map(s => s.count));
         const topCandidates = keyScores.filter(s => s.count === maxCount).map(s => s.key);
 
-        // Se houver apenas 1 candidato absoluto, retorna ele
-        if (topCandidates.length === 1) {
-            return topCandidates[0];
-        }
+        let winningKeyIndex = topCandidates[0];
 
-        // 4. REGRA DE DESEMPATE INTELIGENTE:
-        // Percorre os acordes reais da música (na ordem em que aparecem)
-        // O primeiro acorde da música que estiver entre os candidatos mais pontuados vence!
+        // Desempate por ordem de aparição na música
         for (let rootNote of songRootsOrdered) {
             if (topCandidates.includes(rootNote)) {
-                return rootNote;
+                winningKeyIndex = rootNote;
+                break;
             }
         }
 
-        // Fallback de segurança
-        return topCandidates[0];
+        const noteName = this.sharpNotes[winningKeyIndex];
+        return isFirstChordMinor ? `${noteName}m` : noteName;
     }
 }
 
@@ -120,7 +117,12 @@ class ChordManager {
 
     init() {
         this.populateKeySelect();
-        this.transposeChords(0);
+
+        // Garante que inicia em "C" e preenche o texto dos botões
+        if (this.keySelect && (!this.keySelect.value || this.keySelect.value === "0")) {
+            this.keySelect.value = "C";
+        }
+        this.transposeChords(this.keySelect?.value || "C");
 
         this.toolbar.onStop(() => this.clearActiveChords());
 
@@ -129,17 +131,8 @@ class ChordManager {
         if (this.keySelect) {
             this.keySelect.addEventListener('change', (e) => {
                 const val = e.target.value;
-                const currentContext = sessionStorage.getItem('app_context') || 'ACORDES';
-
-                // CORREÇÃO: Salva a preferência do Tom APENAS nos menus gerais e NUNCA salva "Letra" (L)
-                const allowedContextsToSave = ['ACORDES', 'LITURGIA', 'MISSA', 'ORACOES'];
-                if (allowedContextsToSave.includes(currentContext) && val !== "L") {
-                    sessionStorage.setItem(`key_${currentContext}`, val);
-                }
-
-                // Só transpõe os botões de acordes se não for "Letra"
                 if (val !== "L") {
-                    this.transposeChords(parseInt(val, 10));
+                    this.transposeChords(val);
                 }
             });
         }
@@ -148,30 +141,84 @@ class ChordManager {
         this.btnKeyUp?.addEventListener('click', () => this.changeKeyStep(1));
     }
 
-    populateKeySelect() {
+    populateKeySelect(isMinor = false) {
         if (!this.keySelect) return;
+        const currentVal = this.keySelect.value;
         this.keySelect.innerHTML = '';
 
-        // Adiciona a Opção Especial de Letra
         const optLetra = document.createElement('option');
         optLetra.value = "L";
         optLetra.textContent = "Letra";
         this.keySelect.appendChild(optLetra);
 
-        this.theory.notes.forEach((note, index) => {
+        this.theory.notes.forEach((note) => {
+            const val = isMinor ? `${note}m` : note;
             const option = document.createElement('option');
-            option.value = index;
-            option.textContent = note;
+            option.value = val;
+            option.textContent = val;
             this.keySelect.appendChild(option);
         });
-        this.keySelect.value = "0";
+
+        this.isMinorKey = isMinor;
+        if (currentVal && currentVal !== "0") this.keySelect.value = currentVal;
+    }
+
+    changeKeyStep(step) {
+        if (!this.keySelect || this.keySelect.value === "L") return;
+
+        const currentVal = this.keySelect.value || "C";
+        const match = String(currentVal).match(/^([A-G][#b]?)(m)?(?!aj)/i);
+        const rootNote = match ? match[1] : "C";
+        const isMinor = match ? !!match[2] : false;
+
+        const currentIndex = this.theory.getNoteIndex(rootNote);
+        const newIndex = (currentIndex + step + 12) % 12;
+        const newNote = this.theory.getNoteByIndex(newIndex);
+        const newVal = isMinor ? `${newNote}m` : newNote;
+
+        this.keySelect.value = newVal;
+        this.keySelect.dispatchEvent(new Event('change'));
+    }
+
+    // Método blindado: aceita números, textos, "C", "Am" ou "0" sem dar erro
+    transposeChords(keyInput) {
+        if (keyInput === null || keyInput === undefined || keyInput === "L") return;
+
+        let rootNote = "C";
+        let isMinor = false;
+
+        if (typeof keyInput === "number") {
+            rootNote = this.theory.getNoteByIndex(keyInput) || "C";
+        } else if (typeof keyInput === "string") {
+            if (!isNaN(keyInput) && keyInput.trim() !== "") {
+                rootNote = this.theory.getNoteByIndex(parseInt(keyInput, 10)) || "C";
+            } else {
+                const match = keyInput.match(/^([A-G][#b]?)(m)?(?!aj)/i);
+                if (match) {
+                    rootNote = match[1];
+                    isMinor = !!match[2];
+                }
+            }
+        }
+
+        const keyOffset = this.theory.getNoteIndex(rootNote);
+        if (keyOffset === -1) return;
+
+        // Se for menor, calcula com a relativa maior (+3 semitonos)
+        const effectiveOffset = isMinor ? (keyOffset + 3) % 12 : keyOffset;
+
+        this.chordBtns.forEach(btn => {
+            const baseInterval = parseInt(btn.getAttribute('data-interval'), 10);
+            const chordType = btn.getAttribute('data-type') || "";
+            const newNote = this.theory.transposeNote(baseInterval, effectiveOffset);
+            btn.innerText = `${newNote}${chordType}`;
+        });
     }
 
     handleChordClick(btn) {
         const chordText = btn.innerText;
         const phase = this.toolbar.musicPhase;
 
-        // Toca Loop de Cifra + Dispara o Ritmo arranjador (Sync-Start)
         this.audio.playChord(chordText, phase);
         if (window.rhythmEngine) window.rhythmEngine.triggerChord(chordText, phase);
 
@@ -194,26 +241,6 @@ class ChordManager {
             b.classList.remove('repress-anim');
         });
     }
-
-    changeKeyStep(step) {
-        if (this.keySelect.value === "L") return; // Ignora se estiver no modo letra
-
-        const currentValue = parseInt(this.keySelect.value, 10);
-        const newOffset = (currentValue + step + 12) % 12;
-        this.keySelect.value = newOffset;
-
-        // Dispara o evento de "change" pra avisar o resto do app
-        this.keySelect.dispatchEvent(new Event('change'));
-    }
-
-    transposeChords(keyOffset) {
-        this.chordBtns.forEach(btn => {
-            const baseInterval = parseInt(btn.getAttribute('data-interval'), 10);
-            const chordType = btn.getAttribute('data-type');
-            const newNote = this.theory.transposeNote(baseInterval, keyOffset);
-            btn.innerText = `${newNote}${chordType}`;
-        });
-    }
 }
 
 class PianoManager {
@@ -228,6 +255,11 @@ class PianoManager {
         this.scrollLeft = 0;
         this.activeKey = null;
 
+        // Controle de filtro para toques rápidos (70ms)
+        this.keyTimer = null;
+        this.noteStarted = false;
+        this.tapThreshold = 70; // Tempo mínimo (em milissegundos) para emitir som
+
         this.renderKeys();
         this.initEvents();
     }
@@ -237,7 +269,6 @@ class PianoManager {
         if (!piano) return;
         piano.innerHTML = '';
 
-        // Alterado de [3, 4, 5] para [4, 5] para começar em C4
         const octaves = [4, 5];
         const pattern = this.theory.getPianoPattern();
 
@@ -250,7 +281,6 @@ class PianoManager {
             });
         });
 
-        // C6 Final
         const keyC6 = document.createElement('div');
         keyC6.className = 'key white';
         keyC6.innerHTML = '<span>C6</span>';
@@ -278,15 +308,22 @@ class PianoManager {
         this.startX = pageX - this.container.offsetLeft;
         this.scrollLeft = this.container.scrollLeft;
 
+        this.clearKeyTimer();
+
         const key = target.closest('.key');
         if (key) {
             this.activeKey = key;
             key.classList.add('pressed');
 
-            // Dispara o som de flauta com sustentação
             const noteText = key.querySelector('span')?.innerText;
-            if (noteText && window.audioManager) {
-                window.audioManager.startPianoFluteNote(noteText);
+            if (noteText) {
+                // Aguarda 70ms para garantir que não foi um toque acidental/rápido
+                this.keyTimer = setTimeout(() => {
+                    if (this.activeKey && window.audioManager) {
+                        window.audioManager.startPianoFluteNote(noteText);
+                        this.noteStarted = true;
+                    }
+                }, this.tapThreshold);
             }
         }
     }
@@ -297,13 +334,7 @@ class PianoManager {
         if (Math.abs(walk) > 5) {
             this.container.scrollLeft = this.scrollLeft - walk;
             if (this.activeKey) {
-                this.activeKey.classList.remove('pressed');
-                // Interrompe o som se o arrasto tirar o foco da tecla
-                const noteText = this.activeKey.querySelector('span')?.innerText;
-                if (noteText && window.audioManager) {
-                    window.audioManager.stopPianoFluteNote(noteText);
-                }
-                this.activeKey = null;
+                this.stopCurrentNote();
             }
         }
     }
@@ -311,13 +342,29 @@ class PianoManager {
     upAction() {
         this.isDown = false;
         if (this.activeKey) {
-            this.activeKey.classList.remove('pressed');
+            this.stopCurrentNote();
+        }
+    }
 
-            // Finaliza o som de flauta com rampa de release suave ao soltar a tecla
+    clearKeyTimer() {
+        if (this.keyTimer) {
+            clearTimeout(this.keyTimer);
+            this.keyTimer = null;
+        }
+    }
+
+    stopCurrentNote() {
+        this.clearKeyTimer();
+
+        if (this.activeKey) {
+            this.activeKey.classList.remove('pressed');
             const noteText = this.activeKey.querySelector('span')?.innerText;
-            if (noteText && window.audioManager) {
+
+            if (this.noteStarted && noteText && window.audioManager) {
                 window.audioManager.stopPianoFluteNote(noteText);
             }
+
+            this.noteStarted = false;
             this.activeKey = null;
         }
     }
