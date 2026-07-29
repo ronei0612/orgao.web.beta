@@ -1,4 +1,4 @@
-const APP_VERSION = 'v1.0.6';
+const APP_VERSION = 'v1.0.7';
 const CACHE_NAME = `cache-${APP_VERSION}`;
 
 // Lista de arquivos vitais para o site abrir sem internet
