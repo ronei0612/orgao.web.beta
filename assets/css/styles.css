@@ -701,4 +701,41 @@ body {
             content: "🎼 [ Bloco de Partitura Oculto - Preservado ]";
         }
 
+/* ==========================================================================
+   ESTILOS CUSTOMIZADOS DO SELECT DE BUSCA DE MÚSICAS
+   ========================================================================== */
+
+/* Quando estiver pesquisando (houver texto digitado), REMOVE A IMAGEM DA SETA */
+#song-control-group .ts-wrapper.is-searching .ts-control {
+    background-image: none !important;
+}
+
+    /* Esconde também caso exista algum pseudo-elemento ::after */
+    #song-control-group .ts-wrapper.is-searching .ts-control::after {
+        display: none !important;
+    }
+
+/* Garante a exibição e cursor do botão 'X' nativo de busca nos navegadores */
+#song-control-group .ts-control input::-webkit-search-cancel-button {
+    -webkit-appearance: searchfield-cancel-button;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   RETORNO RÁPIDO (QUANDO O SELECT VIRA BOTÃO DE RETORNO)
+   ========================================================================== */
+.ts-fake-button .ts-control {
+    background-color: var(--bs-tertiary-bg) !important;
+    border-color: var(--app-teal) !important;
+    text-align: center !important;
+    font-weight: bold !important;
+    background-image: none !important; /* Oculta a seta do Bootstrap */
+    cursor: pointer !important;
+}
+
+    /* Oculta o cursor e o input de digitação enquanto for botão */
+    .ts-fake-button .ts-control input {
+        display: none !important;
+    }
+
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');

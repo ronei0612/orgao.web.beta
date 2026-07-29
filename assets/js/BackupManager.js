@@ -87,6 +87,14 @@ class BackupManager {
                         const title = incomingSong.title || incomingSong.titulo || 'Sem Título';
                         const artist = incomingSong.artist || incomingSong.artista || '';
                         const rawContent = incomingSong.content || incomingSong.cifra || incomingSong.chords || '';
+                        const key = incomingSong.key || 'C';
+                        const bpm = incomingSong.bpm || 90;
+                        const instrument = incomingSong.instrument || 'orgao';
+                        const style = incomingSong.style || 'none';
+
+                        analyzedSongs.push({
+                            title, artist, content, key, bpm, instrument, style, isUpdate, existingId
+                        });
 
                         // PADRONIZAÇÃO: Converte o texto bruto do JSON em HTML formatado com cifras em 'b'
                         const content = TextFormatter.prepareContent(rawContent);
@@ -138,7 +146,11 @@ class BackupManager {
                             ...currentSongs[songIndex],
                             title: analyzed.title,
                             artist: analyzed.artist,
-                            content: analyzed.content
+                            content: analyzed.content,
+                            key: analyzed.key,
+                            bpm: analyzed.bpm,
+                            instrument: analyzed.instrument,
+                            style: analyzed.style
                         };
                     }
                 } else {
@@ -147,7 +159,11 @@ class BackupManager {
                         id: safeId,
                         title: analyzed.title,
                         artist: analyzed.artist,
-                        content: analyzed.content
+                        content: analyzed.content,
+                        key: analyzed.key,
+                        bpm: analyzed.bpm,
+                        instrument: analyzed.instrument,
+                        style: analyzed.style
                     });
                 }
             });

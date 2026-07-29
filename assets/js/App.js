@@ -129,6 +129,8 @@ class RepertoireController {
 
         this.currentMode = 'view';
         this.currentSongId = null;
+        this.isUserSetKey = false; // TRAVA: Registra se o usuário escolheu o tom manualmente
+        this.currentSongId = null;
 
         this.quickReturnTarget = null;
         this.isViewingTarget = false;
@@ -163,22 +165,15 @@ class RepertoireController {
     }
 
     changeContext(newContext) {
+        const oldContext = sessionStorage.getItem('app_context');
+        if (oldContext && oldContext !== newContext) {
+            this.saveContextSettings(oldContext);
+        }
+
         sessionStorage.setItem('app_context', newContext);
-        const keySelect = document.getElementById('key-select');
 
         if (['ACORDES', 'LITURGIA', 'MISSA', 'ORACOES'].includes(newContext)) {
-            let savedKey = sessionStorage.getItem(`key_${newContext}`) || "0";
-
-            if (savedKey === "L") {
-                savedKey = "0";
-            }
-
-            if (keySelect && keySelect.value !== savedKey) {
-                this.isAutoAdjustingKey = true;
-                keySelect.value = savedKey;
-                keySelect.dispatchEvent(new Event('change'));
-                this.isAutoAdjustingKey = false;
-            }
+            this.restoreContextSettings(newContext);
         }
     }
 
@@ -241,16 +236,19 @@ class RepertoireController {
         const keySelect = document.getElementById('key-select');
 
         if (chordEls.length > 0 && keySelect && keySelect.value !== "L") {
-            // Executa a análise harmônica com desempate pelo 1º acorde
-            const detectedKeyIndex = window.musicTheory.detectKeyFromChords(chordEls);
+            const detected = window.musicTheory.detectKeyFromChords(chordEls);
 
-            if (detectedKeyIndex !== null && detectedKeyIndex !== undefined && detectedKeyIndex !== -1) {
-                if (parseInt(keySelect.value, 10) !== detectedKeyIndex) {
-                    this.isAutoAdjustingKey = true;
-                    keySelect.value = detectedKeyIndex;
-                    keySelect.dispatchEvent(new Event('change'));
-                    this.isAutoAdjustingKey = false;
+            if (detected && detected.keyIndex !== null && detected.keyIndex !== -1) {
+                this.isAutoAdjustingKey = true;
+
+                // Atualiza o select para exibir tons Maiores ou Menores (ex: Am, Dm, Cm)
+                if (window.chordManager) {
+                    window.chordManager.populateKeySelect(detected.isMinor);
                 }
+
+                keySelect.value = detected.keyIndex;
+                keySelect.dispatchEvent(new Event('change'));
+                this.isAutoAdjustingKey = false;
             }
         }
     }
@@ -355,6 +353,63 @@ class RepertoireController {
         }
     }
 
+    // Aplica as configurações salvas da música nos controles da tela
+    applySongParameters(song) {
+        if (!song) return;
+
+        const isMinor = song.key ? song.key.endsWith('m') : false;
+        if (window.chordManager) {
+            window.chordManager.populateKeySelect(isMinor);
+        }
+
+        const keySelect = document.getElementById('key-select');
+        if (keySelect) {
+            this.isAutoAdjustingKey = true;
+            keySelect.value = song.key || "C";
+            keySelect.dispatchEvent(new Event('change'));
+            this.isAutoAdjustingKey = false;
+        }
+
+        const bpmInput = document.getElementById('bpm-input');
+        if (bpmInput) bpmInput.value = song.bpm || 90;
+
+        if (window.rhythmEngine && song.instrument) {
+            window.rhythmEngine.changeInstrument(song.instrument);
+        }
+
+        const rhythmSelect = document.getElementById('rhythm-select');
+        if (rhythmSelect) {
+            rhythmSelect.value = song.style || "none";
+            rhythmSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Salva as configurações de um Menu/Contexto ("Acordes", "Liturgia", "Santa Missa", "Orações")
+    saveContextSettings(contextName) {
+        if (!contextName) return;
+        const settings = {
+            key: document.getElementById('key-select')?.value || "C",
+            bpm: parseInt(document.getElementById('bpm-input')?.value, 10) || 90,
+            instrument: window.rhythmEngine ? window.rhythmEngine.currentInstrument : "orgao",
+            style: document.getElementById('rhythm-select')?.value || "none"
+        };
+        localStorage.setItem(`context_settings_${contextName}`, JSON.stringify(settings));
+    }
+
+    // Restaura as configurações salvas de um Menu/Contexto
+    restoreContextSettings(contextName) {
+        const saved = localStorage.getItem(`context_settings_${contextName}`);
+        const defaults = {
+            'ACORDES': { key: "C", bpm: 90, instrument: "orgao", style: "none" },
+            'LITURGIA': { key: "L", bpm: 90, instrument: "orgao", style: "none" },
+            'MISSA': { key: "C", bpm: 90, instrument: "orgao", style: "none" },
+            'ORACOES': { key: "L", bpm: 90, instrument: "orgao", style: "none" }
+        };
+
+        const settings = saved ? JSON.parse(saved) : (defaults[contextName] || defaults['ACORDES']);
+        this.applySongParameters(settings);
+    }
+
     initEvents() {
         const btnMenu = document.getElementById('btn-main-menu');
         const tsWrapper = document.getElementById('wrapper-song-select');
@@ -375,9 +430,10 @@ class RepertoireController {
             if (this.quickReturnTarget && this.isViewingTarget) {
                 e.preventDefault();
                 e.stopPropagation();
+                if (this.ts) this.ts.close();
                 this.showSongFromQuickReturn();
             }
-        });
+        }, true); // O 'true' ativa a fase de captura para interceptar antes do TomSelect
 
         document.getElementById('btn-liturgy')?.addEventListener('click', (e) => {
             e.preventDefault();
@@ -399,6 +455,15 @@ class RepertoireController {
 
         document.getElementById('key-select')?.addEventListener('change', (e) => {
             const newVal = e.target.value;
+
+            // Verifica se está criando ou editando uma música
+            const isEditingOrAdding = (this.currentMode === 'add' || this.currentMode === 'edit');
+
+            if (isEditingOrAdding) {
+                if (!this.isAutoAdjustingKey) {
+                    this.isUserSetKey = true; // Ativa a trava: usuário definiu o tom manualmente
+                }
+            }
 
             if (newVal === "L") {
                 this.view.mainDisplay.classList.add('mode-lyrics-only', 'lyrics-spacing');
@@ -422,7 +487,9 @@ class RepertoireController {
                     if (btnNextChord) btnNextChord.classList.remove('d-none');
                 }
 
-                if (!this.isAutoAdjustingKey && this.currentSelectValue !== "L" && newVal !== "L") {
+                // SÓ TRANSPÕE O TEXTO NA TELA SE ESTIVER NO MODO DE VISUALIZAÇÃO ('view')!
+                // Durante a edição ou criação, a mudança do tom apenas declara o tom sem alterar o texto digitado.
+                if (!isEditingOrAdding && !this.isAutoAdjustingKey && this.currentSelectValue !== "L" && newVal !== "L") {
                     const oldIdx = parseInt(this.currentSelectValue, 10);
                     const newIdx = parseInt(newVal, 10);
                     let delta = newIdx - oldIdx;
@@ -471,8 +538,12 @@ class RepertoireController {
                 this.changeContext('ACORDES');
                 this.initHighlights();
 
+                // Aplica os parâmetros salvos da música (Tom, BPM, Instrumento e Ritmo)
+                if (song) {
+                    this.applySongParameters(song);
+                }
+
                 this.updateMusicUIVisibility();
-                this.autoAdjustKeySelect();
 
                 this.ts.addOption({ value: 'ACORDES', text: 'Acordes', isTop: 1 });
                 this.toolbar.enableFloatingControls();
@@ -696,6 +767,8 @@ class RepertoireController {
 
     handleEditRequest(isNew) {
         this.currentMode = isNew ? 'add' : 'edit';
+        this.isUserSetKey = false; // Reseta a trava ao abrir a edição
+
         if (!isNew && !this.currentSongId) {
             alert('Selecione uma música para editar primeiro.');
             this.currentMode = 'view';
@@ -727,21 +800,37 @@ class RepertoireController {
         }
 
         this.modal.show('confirmSaveTitle', 'confirmSaveBody', () => {
+            // 1. Determina o Tom (detecta automaticamente se o usuário não escolheu manualmente)
+            let keyVal = document.getElementById('key-select')?.value || "C";
+
+            if (!this.isUserSetKey) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = TextFormatter.prepareContent(content);
+                const chordEls = Array.from(tempDiv.querySelectorAll('b'));
+                keyVal = window.musicTheory.detectKeyFromChords(chordEls);
+            }
+
+            const bpmVal = parseInt(document.getElementById('bpm-input')?.value, 10) || 90;
+            const instVal = window.rhythmEngine ? window.rhythmEngine.currentInstrument : "orgao";
+            const styleVal = document.getElementById('rhythm-select')?.value || "none";
+
+            // 2. Salva a nova música ou atualiza no localStorage
             let savedSong;
             if (this.currentMode === 'add') {
-                savedSong = this.db.addSong(title, content);
+                savedSong = this.db.addSong(title, content, '', keyVal, bpmVal, instVal, styleVal);
                 this.currentSongId = savedSong.id;
             } else {
-                savedSong = this.db.updateSong(this.currentSongId, title, content);
+                savedSong = this.db.updateSong(this.currentSongId, title, content, '', keyVal, bpmVal, instVal, styleVal);
             }
+
+            // 3. Define o modo para visualização e atualiza o dropdown
             this.currentMode = 'view';
             this.refreshSelectOptions();
-            this.ts.setValue(this.currentSongId, true);
-            this.view.showRepertoire(savedSong ? savedSong.content : '');
-            this.initHighlights();
 
-            this.updateMusicUIVisibility();
-            this.autoAdjustKeySelect();
+            // 4. DISPARA O EVENTO DE SELEÇÃO!
+            // Ao omitir o 'true', o TomSelect dispara o ts.on('change') naturalmente,
+            // executando todo o pipeline: verificação de letra/cifra, parâmetros e exibição!
+            this.ts.setValue(this.currentSongId);
         });
     }
 }
@@ -750,6 +839,9 @@ class RepertoireController {
 document.addEventListener('DOMContentLoaded', () => {
 
     const loggerManager = new LoggerManager(APP_VERSION, APP_UPDATE_DATE);
+
+    // Guardará a memória da busca ao clicar fora
+    let lastSearchQuery = "";
 
     const tomSelectInstance = new TomSelect("#song-select", {
         create: false,
@@ -769,8 +861,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `<div>${escape(data.text)}</div>`;
             }
         },
-        onDropdownOpen: function () { this.control_input.placeholder = "🔍 Digite para pesquisar..."; },
-        onDropdownClose: function () { this.control_input.placeholder = ""; }
+        onInitialize: function () {
+            // Mudar o atributo do input para search
+            if (this.control_input) {
+                this.control_input.setAttribute('type', 'search');
+
+                // Monitora a digitação para alternar entre Seta e "X"
+                this.control_input.addEventListener('input', (e) => {
+                    const val = e.target.value.trim();
+                    lastSearchQuery = val;
+
+                    if (val.length > 0) {
+                        this.wrapper.classList.add('is-searching');
+                    } else {
+                        this.wrapper.classList.remove('is-searching');
+                    }
+                });
+            }
+        },
+        onDropdownOpen: function () {
+            // Ao abrir a busca, restaura o texto salvo na memória (se houver)
+            if (lastSearchQuery) {
+                this.setTextboxValue(lastSearchQuery);
+                this.wrapper.classList.add('is-searching');
+            } else {
+                this.control_input.placeholder = "🔍 Digite para pesquisar...";
+            }
+        },
+        onDropdownClose: function () {
+            this.control_input.placeholder = "";
+            this.wrapper.classList.remove('is-searching');
+        },
+        onChange: function () {
+            // Ao selecionar uma música, limpa a memória da busca
+            lastSearchQuery = "";
+            this.wrapper.classList.remove('is-searching');
+        }
     });
 
     const dbManager = new DatabaseManager();
