@@ -255,6 +255,11 @@ class PianoManager {
         this.scrollLeft = 0;
         this.activeKey = null;
 
+        // Controle de filtro para toques rápidos (70ms)
+        this.keyTimer = null;
+        this.noteStarted = false;
+        this.tapThreshold = 70; // Tempo mínimo (em milissegundos) para emitir som
+
         this.renderKeys();
         this.initEvents();
     }
@@ -264,7 +269,6 @@ class PianoManager {
         if (!piano) return;
         piano.innerHTML = '';
 
-        // Alterado de [3, 4, 5] para [4, 5] para começar em C4
         const octaves = [4, 5];
         const pattern = this.theory.getPianoPattern();
 
@@ -277,7 +281,6 @@ class PianoManager {
             });
         });
 
-        // C6 Final
         const keyC6 = document.createElement('div');
         keyC6.className = 'key white';
         keyC6.innerHTML = '<span>C6</span>';
@@ -305,15 +308,22 @@ class PianoManager {
         this.startX = pageX - this.container.offsetLeft;
         this.scrollLeft = this.container.scrollLeft;
 
+        this.clearKeyTimer();
+
         const key = target.closest('.key');
         if (key) {
             this.activeKey = key;
             key.classList.add('pressed');
 
-            // Dispara o som de flauta com sustentação
             const noteText = key.querySelector('span')?.innerText;
-            if (noteText && window.audioManager) {
-                window.audioManager.startPianoFluteNote(noteText);
+            if (noteText) {
+                // Aguarda 70ms para garantir que não foi um toque acidental/rápido
+                this.keyTimer = setTimeout(() => {
+                    if (this.activeKey && window.audioManager) {
+                        window.audioManager.startPianoFluteNote(noteText);
+                        this.noteStarted = true;
+                    }
+                }, this.tapThreshold);
             }
         }
     }
@@ -324,13 +334,7 @@ class PianoManager {
         if (Math.abs(walk) > 5) {
             this.container.scrollLeft = this.scrollLeft - walk;
             if (this.activeKey) {
-                this.activeKey.classList.remove('pressed');
-                // Interrompe o som se o arrasto tirar o foco da tecla
-                const noteText = this.activeKey.querySelector('span')?.innerText;
-                if (noteText && window.audioManager) {
-                    window.audioManager.stopPianoFluteNote(noteText);
-                }
-                this.activeKey = null;
+                this.stopCurrentNote();
             }
         }
     }
@@ -338,13 +342,29 @@ class PianoManager {
     upAction() {
         this.isDown = false;
         if (this.activeKey) {
-            this.activeKey.classList.remove('pressed');
+            this.stopCurrentNote();
+        }
+    }
 
-            // Finaliza o som de flauta com rampa de release suave ao soltar a tecla
+    clearKeyTimer() {
+        if (this.keyTimer) {
+            clearTimeout(this.keyTimer);
+            this.keyTimer = null;
+        }
+    }
+
+    stopCurrentNote() {
+        this.clearKeyTimer();
+
+        if (this.activeKey) {
+            this.activeKey.classList.remove('pressed');
             const noteText = this.activeKey.querySelector('span')?.innerText;
-            if (noteText && window.audioManager) {
+
+            if (this.noteStarted && noteText && window.audioManager) {
                 window.audioManager.stopPianoFluteNote(noteText);
             }
+
+            this.noteStarted = false;
             this.activeKey = null;
         }
     }
